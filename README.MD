@@ -12,7 +12,6 @@
 ### Build and install EOS
 
 1. `cd eos`
-1. `git submodule update --init --recursive`
 1. `./eosio_build.sh`
 1. `cd build`
 1. `make install`
@@ -23,8 +22,11 @@
 1. Install *termcolor* by running command
 `python3 -m pip install termcolor`
 1. `cd eosfactory`
-1. `./build.sh -e ../eos -w ../peerania-contracts`
-
-
-
+1. Run command  
+`./build.sh -e <peerania-repo-path>/eos -w <peerania-repo-path>/src/contracts`  
+*peerania-repo-path* is path to directory where you cloned *peerania* repository
+1. Test that EOSFactory installed propery by running commands  
+`python3 ./tests/unittest1.py`  
+`python3 ./tests/unittest2.py`  
+`python3 ./tests/unittest3.py`  
 

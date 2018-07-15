@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -ex
+
+./cl push action peerania.dev addaccount '["user2"]' -p user2

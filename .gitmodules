@@ -1,0 +1,6 @@
+[submodule "peerania-contracts"]
+	path = peerania-contracts
+	url = git@github.com:peerania/peerania-contracts
+[submodule "peerania-app"]
+	path = peerania-app
+	url = git@github.com:peerania/peerania-app

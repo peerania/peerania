@@ -2,10 +2,10 @@
 
 ## Environment Setup
 
-### Clone all submodules
+### Clone all repository and dependencies
 
-1. cd peerania-dev
-1. Clone submodules `git submodule update --init --recursive`
+1. git clone https://github.com/peerania/peerania.git
+1. cd peerania
 1. Clone dependencies by running script `./clone`
 
 ### Build and install EOS

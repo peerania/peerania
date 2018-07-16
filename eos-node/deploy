@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 set -ex
 
-# compile contract
-./compile
-
 # deploy token contract
 ./cl set contract peerania.dev ../src/contracts/peerania -p peerania.dev

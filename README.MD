@@ -35,8 +35,8 @@ The scripts and configurations to run local node are located in *eos-node* folde
 
 * `./run` starts node
 * `./init-accounts` initiates wallet with accounts
-* `./deploy` example of deploying contract (make sure that contract is compiled using `./compile` script)
-* `./call-action` example of calling action
+* `./deploy` example of deploying contract (make sure that contract is compiled using `./compile` script in the repository root folder)
+* `./push-action` example of calling action
 
 
 ## Developing

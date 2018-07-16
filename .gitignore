@@ -2,3 +2,6 @@ eos/
 eosfactory/
 .vscode/
 eos-node/data
+*.abi
+*.wasm
+*.wast

@@ -4,7 +4,7 @@ set -ex
 #create wallet with name eosio
 ./cl wallet create
 
-#improt private key for system eosio account
+#import private key for system eosio account
 ./cl wallet import 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
 
 #loading bios contract 

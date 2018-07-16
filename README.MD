@@ -1,6 +1,5 @@
 # Peerania - Decentralized Professional Q&A Platform
 
-
 ## Environment Setup
 
 ### Clone all submodules
@@ -29,4 +28,24 @@
 `python3 ./tests/unittest1.py`  
 `python3 ./tests/unittest2.py`  
 `python3 ./tests/unittest3.py`  
+
+## Running Local Node
+
+The scripts and configurations to run local node are located in *eos-node* folder  
+
+* `./run` starts node
+* `./init-accounts` initiates wallet with accounts
+* `./deploy` example of deploying contract (make sure that contract is compiled using `./compile` script)
+* `./call-action` example of calling action
+
+
+## Developing
+
+### Smart Contracts
+
+Smart contracts location is *src/contracts*
+
+### Unit Tests
+
+Run `./test` to compile contracts and run unit tests
 

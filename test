@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Execute a commadn against a bitcoin node
+
+# compile
+./compile
+
+# run tests
+python3 ./src/unittests/contracts/test_peerania.py

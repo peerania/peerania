@@ -66,19 +66,45 @@ class PeeraniaTests(unittest.TestCase):
 
 
     def test_addaccount__new_user(self):
+        print("Test addaccount - new user")
 
         self.assertFalse(contract.push_action(
             "addaccount",
             '["{0}"]'.format(account_alice), 
             account_alice).error)
 
-        # t1 = contract.table("peeraccounts", account_alice)
+        t1 = contract.table("account", account_bob)
+        print(str(t1))
 
+    def test_addaccount__not_current_user(self):
+        print("Test addaccount - call with user name of not current user")
+
+        self.assertTrue(contract.push_action(
+            "addaccount",
+            '["{0}"]'.format(account_alice), 
+            account_bob).error)
+
+    def test_addaccount__existing_user(self):
+        print("Test addaccount - call action for existing user")
+
+        print("Register user")
+
+        self.assertFalse(contract.push_action(
+            "addaccount",
+            '["{0}"]'.format(account_bob), 
+            account_bob).error)
+
+        print("Attempt to register the same user twice. Error is expected.")
+
+        self.assertTrue(contract.push_action(
+            "addaccount",
+            '["{0}"]'.format(account_bob), 
+            account_bob).error)
     
     def tearDown(self):
         pass
 
-
+    
     @classmethod
     def tearDownClass(cls):
         node.stop()

@@ -5,7 +5,9 @@ using namespace eosio;
 
 class peerania : public eosio::contract {
   public:
-    peerania(account_name s):contract(s), _accounts(s, s)
+    peerania(account_name self)
+    :contract(self),
+     _accounts(self, self)
     {}
 
     /// @abi action
@@ -23,18 +25,19 @@ class peerania : public eosio::contract {
     }
 
   private:
-    
+
     /// @abi table
-    struct peeraccount {
+    struct account {
       account_name owner;
       uint64_t primary_key() const { return owner; }
-      EOSLIB_SERIALIZE( peeraccount, (owner) )
+      
+      EOSLIB_SERIALIZE( account, (owner) )
     };
-
-    typedef eosio::multi_index<N(peeraccounts), peeraccount> peeraccounts;
+    
+    typedef eosio::multi_index<N(peeraccounts), account> accounts_index;
 
     //local instance of accounts
-    peeraccounts _accounts;
+    accounts_index _accounts;
 };
 
 EOSIO_ABI( peerania, (addaccount) )

@@ -1,43 +1,28 @@
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/multi_index.hpp>
+#include "peerania.hpp"
 
-using namespace eosio;
+namespace eosio
+{
+    void peerania::addaccount(account_name user)
+    {
+        require_auth(user);
+        
+        print("Registring user by name ", user, ".\n");
 
-class peerania : public eosio::contract {
-  public:
-    peerania(account_name self)
-    :contract(self),
-     _accounts(self, self)
-    {}
+        auto existing = _accounts.find(user);
+        eosio_assert(existing == _accounts.end(), "Account already exists");
 
-    /// @abi action
-    void addaccount(account_name user) {
-      require_auth(user);
-
-      print("Registring user by name ", user);
-
-      _accounts.emplace(get_self(), [&](auto& a)
-      {
-        a.owner = user;
-      });
-
-      print("Registered account successfully.");
+        _accounts.emplace(_self, [&](auto &a) {
+            a.owner = user;
+        });
+        
+        for (auto i = _accounts.begin(); i != _accounts.end(); ++i)
+        {
+            print((*i).owner, " is now in table.\n");
+        }
+        
+        print("Registered account successfully.");
     }
 
-  private:
+} // namespace eosio
 
-    /// @abi table
-    struct account {
-      account_name owner;
-      uint64_t primary_key() const { return owner; }
-      
-      EOSLIB_SERIALIZE( account, (owner) )
-    };
-    
-    typedef eosio::multi_index<N(peeraccounts), account> accounts_index;
-
-    //local instance of accounts
-    accounts_index _accounts;
-};
-
-EOSIO_ABI( peerania, (addaccount) )
+EOSIO_ABI(eosio::peerania, (addaccount))

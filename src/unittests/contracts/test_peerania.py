@@ -1,12 +1,15 @@
 import setup
 import eosf
 import node
+import sess
 import unittest
+import time
 from termcolor import cprint
 
 setup.set_verbose(False)
 setup.set_json(False)
 setup.use_keosd(False)
+
 
 class PeeraniaTests(unittest.TestCase):
 
@@ -15,99 +18,78 @@ class PeeraniaTests(unittest.TestCase):
         if not result.failures:
             super().run(result)
 
-
     @classmethod
     def setUpClass(cls):
         testnet = node.reset()
         assert(not testnet.error)
 
-        wallet = eosf.Wallet()
-        assert(not wallet.error)
-
-        global account_master
-        account_master = eosf.AccountMaster()
-        wallet.import_key(account_master)
-        assert(not account_master.error)
-
-        global account_alice
-        account_alice = eosf.account(account_master)
-        wallet.import_key(account_alice)
-        assert(not account_alice.error)
-
-        global account_bob
-        account_bob = eosf.account(account_master)
-        wallet.import_key(account_bob)
-        assert(not account_bob.error)
-
-        global account_carol
-        account_carol = eosf.account(account_master)
-        wallet.import_key(account_carol)
-        assert(not account_carol.error)
-
-        account_deploy = eosf.account(account_master)
-        wallet.import_key(account_deploy)
-        assert(not account_deploy.error)
-
-        contract_eosio_bios = eosf.Contract(
-            account_master, "eosio.bios").deploy()
-        assert(not contract_eosio_bios.error)
+        sess.init()
 
         global contract
-        contract = eosf.Contract(account_deploy, "peerania")
+        contract = eosf.Contract(sess.carol, "peerania")
         assert(not contract.error)
 
         deployment = contract.deploy()
 
         assert(not deployment.error)
 
+    @classmethod
+    def tearDownClass(cls):
+        input("Press enter to close term")
+        node.stop()
 
-    def setUp(self):
-        pass
-
-
-    def test_addaccount__new_user(self):
+    def test_1_addaccount__new_user(self):
+        global contract
         print("Test addaccount - new user")
 
         self.assertFalse(contract.push_action(
             "addaccount",
-            '["{0}"]'.format(account_alice), 
-            account_alice).error)
+            '["{0}"]'.format(sess.alice),
+            sess.alice).error)
 
-        t1 = contract.table("account", account_bob)
-        print(str(t1))
+        t1 = contract.table("account", "main")
+        print(t1)
 
-    def test_addaccount__not_current_user(self):
+    def test_2_addaccount__not_current_user(self):
+        global contract
         print("Test addaccount - call with user name of not current user")
 
         self.assertTrue(contract.push_action(
             "addaccount",
-            '["{0}"]'.format(account_alice), 
-            account_bob).error)
+            '["{0}"]'.format(sess.alice),
+            sess.bob).error)
 
-    def test_addaccount__existing_user(self):
+        t1 = contract.table("account", "main")
+        print(str(t1))
+
+    def test_3_addaccount__existing_user(self):
+        global contract
         print("Test addaccount - call action for existing user")
 
         print("Register user")
 
         self.assertFalse(contract.push_action(
             "addaccount",
-            '["{0}"]'.format(account_bob), 
-            account_bob).error)
+            '["{0}"]'.format(sess.bob),
+            sess.bob).error)
+
+        time.sleep(2)
 
         print("Attempt to register the same user twice. Error is expected.")
 
         self.assertTrue(contract.push_action(
             "addaccount",
-            '["{0}"]'.format(account_bob), 
-            account_bob).error)
-    
+            '["{0}"]'.format(sess.bob),
+            sess.bob).error)
+
+        t1 = contract.table("account", "main")
+        print(str(t1))
+
     def tearDown(self):
         pass
 
-    
-    @classmethod
-    def tearDownClass(cls):
-        node.stop()
+    def setUp(self):
+        pass
 
 
 if __name__ == "__main__":

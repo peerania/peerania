@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # Execute a commadn against a bitcoin node
 
-# compile
+# compile peerania
 eosiocpp -o ./src/contracts/peerania/peerania.wast ./src/contracts/peerania/peerania.cpp
 
-# generate abi
+# generate abi peerania
 eosiocpp -g ./src/contracts/peerania/peerania.abi ./src/contracts/peerania/peerania.hpp
+
+# complie test_action
+eosiocpp -o ./src/contracts/testaction/testaction.wast ./src/contracts/testaction/testaction.cpp
+eosiocpp -g ./src/contracts/testaction/testaction.abi ./src/contracts/testaction/testaction.cpp

@@ -14,11 +14,13 @@ set -ex
 ./cl wallet import 5JUnu1jgVifdznEHpc9eVedpLXsyDPwu69xziMm9ZvbRSkVKEda
 ./cl create account eosio peerania.dev EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b
 
-#import private key for user1 account and create account
-./cl wallet import 5JV2aCujE9j5dUkFKJGtyzeTsgMAHCovQ8QhxKHd9eZpJDfMDmZ
-./cl create account eosio user1 EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b
-
-#import private key for user2 account and create account
+#import private key for bob account and create account
 ./cl wallet import 5KgZw1vCGLSvwQUPFWeBxJFeYHuhQvz6XLa5p6vupwpwhFbaLLF
-./cl create account eosio user2 EOS7KerSuDMDGVvFi7v4svgMVALQYFyoyDgPJwRW4nzENGESnD9W1 EOS7KerSuDMDGVvFi7v4svgMVALQYFyoyDgPJwRW4nzENGESnD9W1
+./cl create account eosio bob EOS7KerSuDMDGVvFi7v4svgMVALQYFyoyDgPJwRW4nzENGESnD9W1 EOS7KerSuDMDGVvFi7v4svgMVALQYFyoyDgPJwRW4nzENGESnD9W1
 
+#import private key for alice account and create account
+./cl wallet import 5JV2aCujE9j5dUkFKJGtyzeTsgMAHCovQ8QhxKHd9eZpJDfMDmZ
+./cl create account peerania.dev alice EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b
+
+#error
+./cl set account permission alice active '{"threshold":2,"keys":[],"accounts":[{"permission":{"actor":"peerania.dev","permission":"active"},"weight":1},{"permission":{"actor":"bob","permission":"active"},"weight":1}],"waits":[]}' owner -p alice@owner

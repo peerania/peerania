@@ -1,7 +1,7 @@
 version: 2
 jobs:
 
-  test-unit:
+  test:
     docker:
       - image: circleci/python:2.7
     working_directory: ~/ws
@@ -27,25 +27,16 @@ jobs:
           paths:
             - venv
       - run: # run tests
+          name: Compile Contracts
+          command: |
+            peerania/compile
+      - run: # run tests
           name: Tests
           command: |
-            ./test
+            peerania/test
       - store_artifacts:
           path: test-reports/
           destination: tr1
-
-  build:
-    docker:
-      - image: circleci/python:2.7
-    working_directory: ~/ws
-
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ~/ws
-      - run:
-          name: Package
-          command: 'echo "Yay build!"'
 
   deploy:
     docker:
@@ -65,14 +56,7 @@ workflows:
 
   test-build:
     jobs:
-      - test-unit
-      - build:
-          requires:
-            - test-unit
-          filters:
-            branches:
-              only: develop
-
+      - test
       - deploy:
           filters:
             branches:

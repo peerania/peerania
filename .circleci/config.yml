@@ -35,20 +35,12 @@ jobs:
             cd peerania
             ./clone
       - run:
-          name: Install EOSFactory
-          command: |
-            cd peerania
-            ./build_eosfactory -e peerania/eos -w peerania/src/contracts
-      - run:
-          name: EOS Factory Install
-          command: |
-            cd peerania
-            ./clone
-      - run:
           name: Tests
           command: |
-            cd peerania
-            ./test
+            . venv/bin/activate
+            cd peerania/src/unittests/
+            PYTHONPATH=../../peerania/eosfactory/pyteos \
+            python -m unittest discover --verbose
       - store_artifacts:
           path: test-reports/
           destination: tr1

@@ -35,10 +35,10 @@ jobs:
             cd peerania
             ./clone
       - run:
-          name: Compile Contracts
+          name: Install EOSFactory
           command: |
-            cd peerania/eosfactory
-            ./build.sh -e peerania/eos -w peerania/src/contracts
+            cd peerania
+            ./build_eosfactory -e peerania/eos -w peerania/src/contracts
       - run:
           name: EOS Factory Install
           command: |

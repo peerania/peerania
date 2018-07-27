@@ -4,7 +4,7 @@ jobs:
   test:
     docker:
       - image: eosio/eos-dev:v1.1.1
-    working_directory: ~/ws
+    working_directory: ~/ws/peerania
     steps:
       - attach_workspace:
           at: ~/ws

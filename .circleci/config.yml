@@ -3,7 +3,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/python:2.7
+      - image: eosio/eos-dev:v1.1.1
     working_directory: ~/ws
     steps:
       - attach_workspace:
@@ -40,7 +40,7 @@ jobs:
 
   deploy:
     docker:
-      - image: circleci/python:2.7
+      - image: eosio/eos-dev:v1.1.1
     working_directory: ~/ws
 
     steps:

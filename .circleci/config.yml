@@ -15,6 +15,7 @@ jobs:
           key: deps1-{{ .Branch }}-{{ checksum "peerania/requirements.txt" }}
       - run: # install and activate virtual environment with pip
           command: |
+            pip install virtualenv
             python -m virtualenv venv
             . venv/bin/activate
             pip install -r peerania/requirements.txt

@@ -38,7 +38,7 @@ jobs:
           name: Install EOSFactory
           command: |
             cd peerania
-            ./build_eosfactory -e peerania/eos -w peerania/src/contracts
+            ./build_eosfactory -e ./eos -w ./src/contracts
       - run:
           name: EOS Factory Install
           command: |

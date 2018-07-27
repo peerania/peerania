@@ -4,7 +4,7 @@ jobs:
   test:
     docker:
       - image: eosio/eos-dev:v1.1.1
-    working_directory: ~/ws/peerania
+    working_directory: ~/ws
     steps:
       - attach_workspace:
           at: ~/ws
@@ -32,6 +32,7 @@ jobs:
       - run: # compile contracts
           name: Compile Contracts
           command: |
+            cd peerania
             peerania/compile
       - run: # run tests
           name: Tests

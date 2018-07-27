@@ -33,11 +33,12 @@ jobs:
           name: Compile Contracts
           command: |
             cd peerania
-            peerania/compile
+            ./compile
       - run: # run tests
           name: Tests
           command: |
-            peerania/test
+            cd peerania
+            ./test
       - store_artifacts:
           path: test-reports/
           destination: tr1

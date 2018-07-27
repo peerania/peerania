@@ -29,12 +29,22 @@ jobs:
           root: .
           paths:
             - venv
-      - run: # compile contracts
-          name: Compile Contracts
+      - run:
+          name: Clone EOS and EOSFactory
           command: |
             cd peerania
-            ./compile
-      - run: # run tests
+            ./clone
+      - run:
+          name: Compile Contracts
+          command: |
+            cd peerania/eosfactory
+            ./build.sh -e peerania/eos -w peerania/src/contracts
+      - run:
+          name: EOS Factory Install
+          command: |
+            cd peerania
+            ./clone
+      - run:
           name: Tests
           command: |
             cd peerania

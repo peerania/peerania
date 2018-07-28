@@ -37,7 +37,7 @@ jobs:
       - run:
           name: Build EOS
           command: |
-            cd eos
+            cd peerania/eos
             ./eosio_build.sh
       - run:
           name: Tests

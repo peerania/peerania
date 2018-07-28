@@ -42,7 +42,7 @@ jobs:
           name: Build EOSFactory
           command: |
             cd peerania/eosfactory
-            ./build.sh
+            ./build.sh -e ~/ws/peerania/eos -w peerania/src/contracts
       - run:
           name: Tests
           command: |

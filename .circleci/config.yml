@@ -39,7 +39,7 @@ jobs:
           command: |
             . venv/bin/activate
             cd peerania/src/unittests/
-            PYTHONPATH=../../peerania/eosfactory/pyteos \
+            PYTHONPATH=peerania/eosfactory/pyteos \
             python -m unittest discover --verbose
       - store_artifacts:
           path: test-reports/

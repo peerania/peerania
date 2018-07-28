@@ -35,6 +35,10 @@ jobs:
             cd peerania
             ./clone
       - run:
+          name: Copy EOS Executables
+          command: |
+            cp -a ~/../opt/eosio/. ~/ws/peerania/eos/build
+      - run:
           name: Build EOSFactory
           command: |
             cd peerania/eosfactory

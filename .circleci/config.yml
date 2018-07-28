@@ -35,10 +35,10 @@ jobs:
             cd peerania
             ./clone
       - run:
-          name: Build EOS
+          name: Build EOSFactory
           command: |
-            cd peerania/eos
-            ./eosio_build.sh
+            cd peerania/eosfactory
+            ./build.sh
       - run:
           name: Tests
           command: |

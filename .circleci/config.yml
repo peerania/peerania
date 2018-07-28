@@ -41,7 +41,7 @@ jobs:
       - run:
           name: Build EOSFactory
           command: |
-            sudo apt-get install -y libboost-all-dev
+            sudo apt-get install -y libboost-regex-dev
             cd peerania/eosfactory
             ./build.sh -e ~/ws/peerania/eos -w peerania/src/contracts
       - run:

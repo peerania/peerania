@@ -35,6 +35,11 @@ jobs:
             cd peerania
             ./clone
       - run:
+          name: Build EOS
+          command: |
+            cd eos
+            ./eosio_build.sh
+      - run:
           name: Tests
           command: |
             . venv/bin/activate

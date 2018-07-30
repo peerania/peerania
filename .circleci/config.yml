@@ -11,49 +11,11 @@ jobs:
       - checkout:
           path:
             "peerania"
-      - restore_cache: # restores saved dependency cache if the Branch key template or requirements.txt files have not changed since the previous run
-          key: deps1-{{ .Branch }}-{{ checksum "peerania/requirements.txt" }}
-      - run: # install and activate virtual environment with pip
-          command: |
-            sudo apt-get update
-            sudo apt-get install python-pip
-            python -m pip install virtualenv
-            python -m virtualenv venv
-            . venv/bin/activate
-            pip install -r peerania/requirements.txt
-      - save_cache: # special step to save dependency cache
-          key: deps1-{{ .Branch }}-{{ checksum "peerania/requirements.txt" }}
-          paths:
-            - "venv"
-      - persist_to_workspace:
-          root: .
-          paths:
-            - venv
       - run:
-          name: Clone EOS and EOSFactory
+          name: Compile Contracts
           command: |
             cd peerania
-            ./clone
-      - run:
-          name: Copy EOS Executables
-          command: |
-            cp -a ~/../opt/eosio/. ~/ws/peerania/eos/build
-      - run:
-          name: Build EOSFactory
-          command: |
-            cd peerania/eosfactory
-            ./build.sh -e ~/ws/peerania/eos -w peerania/src/contracts
-      - run:
-          name: Tests
-          command: |
-            . venv/bin/activate
-            cd peerania/src/unittests/
-            PYTHONPATH=peerania/eosfactory/pyteos \
-            python -m unittest discover --verbose
-      - store_artifacts:
-          path: test-reports/
-          destination: tr1
-
+            ./compile
   deploy:
     docker:
       - image: eosio/eos-dev:v1.1.1

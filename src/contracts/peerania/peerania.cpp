@@ -2,43 +2,43 @@
 
 namespace eosio {
 
-void peerania::registeracc(account_name owner, std::string displayname,
-                           std::string ipfsprofile) {
+void peerania::registeracc(account_name owner, std::string display_name,
+                           std::string ipfs_profile) {
   require_auth(owner);
   eosio_assert(_accounts.find(owner) == _accounts.end(),
                "Account already exists");
-  eosio_assert(displayname.length() > MIN_DISPLAYNAME_LEN,
-               "The displayname too short.");
+  eosio_assert(display_name.length() > MIN_DISPLAY_NAME_LEN,
+               "The display name too short.");
   _accounts.emplace(_self, [&](auto &account) {
     account.owner = owner;
-    account.displayname = displayname;
-    account.ipfsprofile = ipfsprofile;
+    account.display_name = display_name;
+    account.ipfs_profile = ipfs_profile;
   });
-  add_displayname_to_map(owner, displayname);
+  add_display_name_to_map(owner, display_name);
 }
 
-void peerania::adeleteacc(account_name todelete) {
+void peerania::adeleteacc(account_name account_to_delete) {
   require_auth(_self);
-  auto itr = _accounts.find(todelete);
+  auto itr = _accounts.find(account_to_delete);
   eosio_assert(itr != _accounts.end(), "Account not found");
   _accounts.erase(itr);
   eosio_assert(itr != _accounts.end(), "Address not erased properly");
 }
 
 void peerania::set_account_parameter(account_name owner,
-                                     const prop_key_value &keyvalue) {
+                                     const prop_key_value &key_value) {
   require_for_an_account(owner);
-  eosio_assert(keyvalue.key < SYSTEM_PROP_START, "Incorrect key");
-  userproperty_index uptable(_self, owner);
-  auto itr = uptable.find(prop_mkprimary(owner, keyvalue.key));
-  if (itr == uptable.end()) {
-    uptable.emplace(_self, [&](auto &prop) {
+  eosio_assert(key_value.key < SYSTEM_PROP_START, "Incorrect key");
+  user_property_index user_property_table(_self, owner);
+  auto itr = user_property_table.find(prop_mkprimary(owner, key_value.key));
+  if (itr == user_property_table.end()) {
+    user_property_table.emplace(_self, [&](auto &prop) {
       prop.owner = owner;
-      prop.kv = keyvalue;
+      prop.key_value = key_value;
     });
   } else {
-    uptable.modify(itr, _self,
-                   [&](auto &prop) { prop.kv.value = keyvalue.value; });
+    user_property_table.modify(itr, _self,
+                   [&](auto &prop) { prop.key_value.value = key_value.value; });
   }
 }
 
@@ -53,47 +53,47 @@ void peerania::asetaccparam(account_name owner, prop_key_value property) {
 }
 
 void peerania::set_account_ipfs_profile(account_name owner,
-                                        const std::string &ipfsprofile) {
+                                        const std::string &ipfs_profile) {
   auto itr = _accounts.find(owner);
   eosio_assert(itr != _accounts.end(), "Account not found");
   _accounts.modify(itr, _self,
-                   [&](auto &account) { account.ipfsprofile = ipfsprofile; });
+                   [&](auto &account) { account.ipfs_profile = ipfs_profile; });
 }
 
-void peerania::setipfspro(account_name owner, std::string ipfsprofile) {
+void peerania::setipfspro(account_name owner, std::string ipfs_profile) {
   require_auth(owner);
-  set_account_ipfs_profile(owner, ipfsprofile);
+  set_account_ipfs_profile(owner, ipfs_profile);
 }
 
-void peerania::asetipfspro(account_name owner, std::string ipfsprofile) {
+void peerania::asetipfspro(account_name owner, std::string ipfs_profile) {
   require_auth(_self);
-  set_account_ipfs_profile(owner, ipfsprofile);
+  set_account_ipfs_profile(owner, ipfs_profile);
 }
 
-void peerania::setdispname(account_name owner, std::string displayname) {
+void peerania::setdispname(account_name owner, std::string display_name) {
   require_auth(owner);
   auto itraccs = _accounts.find(owner);
   eosio_assert(itraccs != _accounts.end(), "Account not found");
-  remove_display_name_from_map(owner, itraccs->displayname);
+  remove_display_name_from_map(owner, itraccs->display_name);
   _accounts.modify(itraccs, _self,
-                   [&](auto &acc) { acc.displayname = displayname; });
-  add_displayname_to_map(owner, displayname);
+                   [&](auto &acc) { acc.display_name = display_name; });
+  add_display_name_to_map(owner, display_name);
 }
 
-void peerania::add_displayname_to_map(account_name owner,
-                                      const std::string &displayname) {
-  disptoacc_index table(_self, hash_display_name(displayname));
+void peerania::add_display_name_to_map(account_name owner,
+                                       const std::string &display_name) {
+  disptoacc_index table(_self, hash_display_name(display_name));
   table.emplace(_self, [&](auto &item) {
     item.owner = owner;
-    item.displayname = displayname;
+    item.display_name = display_name;
   });
 }
 
 void peerania::remove_display_name_from_map(account_name owner,
-                                            const std::string &displayname) {
-  disptoacc_index dtatable(_self, hash_display_name(displayname));
+                                            const std::string &display_name) {
+  disptoacc_index dtatable(_self, hash_display_name(display_name));
   auto itr_disptoacc = dtatable.find(owner);
-  eosio_assert(itr_disptoacc != dtatable.end(), "Displayname not found");
+  eosio_assert(itr_disptoacc != dtatable.end(), "display_name not found");
   dtatable.erase(itr_disptoacc);
   eosio_assert(itr_disptoacc != dtatable.end(), "Address not erased properly");
 }

@@ -23,13 +23,13 @@ struct prop_key_value {
 };
 
 ///@abi table
-struct userproperty {
+struct user_property {
   account_name owner;
-  prop_key_value kv;
-  uint64_t primary_key() const { return prop_mkprimary(owner, kv.key); }
-  EOSLIB_SERIALIZE(userproperty, (owner)(kv))
+  prop_key_value key_value;
+  uint64_t primary_key() const { return prop_mkprimary(owner, key_value.key); }
+  EOSLIB_SERIALIZE(user_property, (owner)(key_value))
 };
 
-typedef multi_index<N(userproperty), userproperty> userproperty_index;
+typedef multi_index<N(userproperty), user_property> user_property_index;
 
 };  // namespace eosio

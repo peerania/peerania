@@ -10,11 +10,11 @@ setup.set_json(False)
 setup.use_keosd(False)
 
 
-def hash_display_name(displayname):
+def hash_display_name(display_name):
     charmap = "abcdefghijklmnopqrstuvwxyz"
     hash = ''
-    for i in range(min(12, len(displayname))):
-        hash += charmap[ord(displayname[i]) % 26]
+    for i in range(min(12, len(display_name))):
+        hash += charmap[ord(display_name[i]) % 26]
     return hash
 
 
@@ -44,7 +44,7 @@ class PeeraniaTests(unittest.TestCase):
         cprint("Register Alice", end='', color='yellow')
         action = contract.push_action(
             "registeracc",
-            '{{"owner":"{}", "displayname":"{}", "ipfsprofile":"{}"}}'.format(
+            '{{"owner":"{}", "display_name":"{}", "ipfs_profile":"{}"}}'.format(
                 str(sess.alice), str(sess.alice) + 'DisplName', str(sess.alice) + 'Ipfs'),
             sess.alice)
         self.assertFalse(action.error)
@@ -54,7 +54,7 @@ class PeeraniaTests(unittest.TestCase):
         cprint("Register Bob", end='', color='yellow')
         action = contract.push_action(
             "registeracc",
-            '{{"owner":"{}", "displayname":"{}", "ipfsprofile":"{}"}}'.format(
+            '{{"owner":"{}", "display_name":"{}", "ipfs_profile":"{}"}}'.format(
                 str(sess.bob), str(sess.bob) + 'DisplName', str(sess.bob) + 'Ipfs'),
             sess.bob)
         self.assertFalse(action.error)
@@ -88,7 +88,7 @@ class PeeraniaTests(unittest.TestCase):
         cprint("Register Alice with bob auth(error expected)", color='yellow')
         action = contract.push_action(
             "registeracc",
-            '{{"owner":"{}", "displayname":"{}", "ipfsprofile":"{}"}}'.format(
+            '{{"owner":"{}", "display_name":"{}", "ipfs_profile":"{}"}}'.format(
                 str(sess.alice), str(sess.alice) + 'DisplName', str(sess.alice) + 'Ipfs'),
             sess.bob)
         self.assertTrue(action.error)
@@ -102,7 +102,7 @@ class PeeraniaTests(unittest.TestCase):
         cprint("Register Alice for the second time(error expected)", color='yellow')
         action = contract.push_action(
             "registeracc",
-            '{{"owner":"{}", "displayname":"{}", "ipfsprofile":"{}"}}'.format(
+            '{{"owner":"{}", "display_name":"{}", "ipfs_profile":"{}"}}'.format(
                 str(sess.alice), str(sess.alice) + 'DisplName', str(sess.alice) + 'Ipfs'),
             sess.alice)
         self.assertTrue(action.error)
@@ -150,24 +150,24 @@ class PeeraniaTests(unittest.TestCase):
 
     def test_account_management(self):
         cprint(
-            "\n\nTesting functions for changing ipfs profile and displayname\n", color='cyan')
+            "\n\nTesting functions for changing ipfs profile and display_name\n", color='cyan')
         self.init_accounts()
         cprint("Changing Alice ipfs profile", end='', color='yellow')
         action = contract.push_action(
             "setipfspro",
-            '{{"owner":"{}", "ipfsprofile":"{}"}}'.format(
+            '{{"owner":"{}", "ipfs_profile":"{}"}}'.format(
                 str(sess.alice), str(sess.alice) + 'updated IPFS profile'),
             sess.alice)
         self.assertFalse(action.error)
         if verbose:
             print(action)
         cprint("  OK", color='green')
-        cprint("Changing Alice displayname to 'aliceUbpdeatedDisplayName'",
+        cprint("Changing Alice display_name to 'aliceUbpdeateddisplay_name'",
                end='', color='yellow')
         action = contract.push_action(
             "setdispname",
-            '{{"owner":"{}", "displayname":"{}"}}'.format(
-                str(sess.alice), 'aliceUbpdeatedDisplayName'),
+            '{{"owner":"{}", "display_name":"{}"}}'.format(
+                str(sess.alice), 'aliceUbpdeateddisplay_name'),
             sess.alice)
         self.assertFalse(action.error)
         if verbose:
@@ -179,15 +179,15 @@ class PeeraniaTests(unittest.TestCase):
         cprint("Test ", end='', color='cyan')
         cprint("OK\n\n", color='green')
 
-    def test_displayname_mapper(self):
-        cprint("\n\nTesting displayname mapper functionality\n", color='cyan')
+    def test_display_name_mapper(self):
+        cprint("\n\nTesting display_name mapper functionality\n", color='cyan')
         self.init_accounts()
-        displaynames = ['aliceDisplName', 'bobDisplName', 'nonexistent']
-        for displayname in displaynames:
-            cprint('Table of users with displayname={}'.format(
-                displayname), color='blue')
+        display_names = ['aliceDisplName', 'bobDisplName', 'nonexistent']
+        for display_name in display_names:
+            cprint('Table of users with display_name={}'.format(
+                display_name), color='blue')
             print(contract.table("disptoacc",
-                                 hash_display_name(displayname)), end='\n\n')
+                                 hash_display_name(display_name)), end='\n\n')
         cprint("Test ", end='', color='cyan')
         cprint("OK\n\n", color='green')
 
@@ -206,22 +206,22 @@ class PeeraniaTests(unittest.TestCase):
         cprint("OK\n\n", color='green')
 
     def test_management_for_non_existent_account_failed(self):
-        cprint("\n\nTesting account changing IPFS profile and displayname for non-existing account(errors expected)\n", color='cyan')
+        cprint("\n\nTesting account changing IPFS profile and display_name for non-existing account(errors expected)\n", color='cyan')
         cprint("Changing Alice ipfs profile(error expected)", color='yellow')
         action = contract.push_action(
             "setipfspro",
-            '{{"owner":"{}", "ipfsprofile":"{}"}}'.format(
+            '{{"owner":"{}", "ipfs_profile":"{}"}}'.format(
                 str(sess.alice), str(sess.alice) + 'updated IPFS profile'),
             sess.alice)
         self.assertTrue(action.error)
         if verbose:
             print(action)
 
-        cprint("Changing Alice displayname(error expected)", color='yellow')
+        cprint("Changing Alice display_name(error expected)", color='yellow')
         action = contract.push_action(
             "setdispname",
-            '{{"owner":"{}", "displayname":"{}"}}'.format(
-                str(sess.alice), 'aliceUbpdeatedDisplayName'),
+            '{{"owner":"{}", "display_name":"{}"}}'.format(
+                str(sess.alice), 'aliceUbpdeateddisplay_name'),
             sess.alice)
         self.assertTrue(action.error)
         if verbose:
@@ -245,22 +245,22 @@ class PeeraniaTests(unittest.TestCase):
         cprint("OK\n\n", color='green')
 
     def test_management_another_owner_failed(self):
-        cprint("\n\nTesting account changing IPFS profile and displayname with another account(errors expected)\n", color='cyan')
+        cprint("\n\nTesting account changing IPFS profile and display_name with another account(errors expected)\n", color='cyan')
         cprint("Changing Alice ipfs profile with bob auth(error expected)", color='yellow')
         action = contract.push_action(
             "setipfspro",
-            '{{"owner":"{}", "ipfsprofile":"{}"}}'.format(
+            '{{"owner":"{}", "ipfs_profile":"{}"}}'.format(
                 str(sess.alice), str(sess.alice) + 'updated IPFS profile'),
             sess.bob)
         self.assertTrue(action.error)
         if verbose:
             print(action)
 
-        cprint("Changing Alice displayname with bob auth(error expected)", color='yellow')
+        cprint("Changing Alice display_name with bob auth(error expected)", color='yellow')
         action = contract.push_action(
             "setdispname",
-            '{{"owner":"{}", "displayname":"{}"}}'.format(
-                str(sess.alice), 'aliceUbpdeatedDisplayName'),
+            '{{"owner":"{}", "display_name":"{}"}}'.format(
+                str(sess.alice), 'aliceUbpdeateddisplay_name'),
             sess.bob)
         self.assertTrue(action.error)
         if verbose:

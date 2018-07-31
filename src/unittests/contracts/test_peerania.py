@@ -125,10 +125,10 @@ class PeeraniaTests(unittest.TestCase):
         self.register_property_action(
             sess.bob, 3, str(sess.bob) + 'Property3')
         cprint('Table userprop after acton for Alice account:', color='blue')
-        print(contract.table("userproperty",
+        print(contract.table("userprop",
                              sess.alice).json['rows'], end='\n\n')
         cprint('Table userprop after acton for Bob account:', color='blue')
-        print(contract.table("userproperty",
+        print(contract.table("userprop",
                              sess.bob).json['rows'], end='\n\n')
 
         cprint("\nUpdate Bob property 1", end='', color='yellow')
@@ -142,7 +142,7 @@ class PeeraniaTests(unittest.TestCase):
             print(action)
         cprint("  OK", color='green')
         cprint('Table userprop after acton for Bob account:', color='blue')
-        print(contract.table("userproperty",
+        print(contract.table("userprop",
                              sess.bob).json['rows'], end='\n\n')
 
         cprint("Test ", end='', color='cyan')
@@ -186,7 +186,7 @@ class PeeraniaTests(unittest.TestCase):
         for display_name in display_names:
             cprint('Table of users with display_name={}'.format(
                 display_name), color='blue')
-            print(contract.table("disptoacc",
+            print(contract.table("dnametoacc",
                                  hash_display_name(display_name)), end='\n\n')
         cprint("Test ", end='', color='cyan')
         cprint("OK\n\n", color='green')

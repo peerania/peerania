@@ -82,8 +82,8 @@ void peerania::setdispname(account_name owner, std::string display_name) {
 
 void peerania::add_display_name_to_map(account_name owner,
                                        const std::string &display_name) {
-  disptoacc_index table(_self, hash_display_name(display_name));
-  table.emplace(_self, [&](auto &item) {
+  d_name_to_acc_index dtatable(_self, hash_display_name(display_name));
+  dtatable.emplace(_self, [&](auto &item) {
     item.owner = owner;
     item.display_name = display_name;
   });
@@ -91,7 +91,7 @@ void peerania::add_display_name_to_map(account_name owner,
 
 void peerania::remove_display_name_from_map(account_name owner,
                                             const std::string &display_name) {
-  disptoacc_index dtatable(_self, hash_display_name(display_name));
+  d_name_to_acc_index dtatable(_self, hash_display_name(display_name));
   auto itr_disptoacc = dtatable.find(owner);
   eosio_assert(itr_disptoacc != dtatable.end(), "display_name not found");
   dtatable.erase(itr_disptoacc);

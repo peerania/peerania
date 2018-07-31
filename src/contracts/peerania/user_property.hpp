@@ -22,7 +22,7 @@ struct prop_key_value {
   EOSLIB_SERIALIZE(prop_key_value, (key)(value))
 };
 
-///@abi table
+///@abi table userprop
 struct user_property {
   account_name owner;
   prop_key_value key_value;
@@ -30,6 +30,6 @@ struct user_property {
   EOSLIB_SERIALIZE(user_property, (owner)(key_value))
 };
 
-typedef multi_index<N(userproperty), user_property> user_property_index;
+typedef multi_index<N(userprop), user_property> user_property_index;
 
 };  // namespace eosio

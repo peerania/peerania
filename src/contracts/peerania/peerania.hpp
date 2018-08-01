@@ -10,7 +10,7 @@ namespace eosio {
 
 class peerania : public contract {
  public:
-  peerania(account_name self) : contract(self), _accounts(self, all_accounts) {}
+  peerania(account_name self) : contract(self), account_table(self, all_accounts) {}
 
   // Register new user
   ///@abi action
@@ -51,11 +51,12 @@ class peerania : public contract {
     // mandatory fields
     std::string display_name;
     std::string ipfs_profile;
+    uint32_t registration_time;
     uint64_t primary_key() const { return owner; }
-    EOSLIB_SERIALIZE(account, (owner)(display_name)(ipfs_profile))
+    EOSLIB_SERIALIZE(account, (owner)(display_name)(ipfs_profile)(registration_time))
   };
 
-  multi_index<N(account), account> _accounts;
+  multi_index<N(account), account> account_table;
 
   void set_account_parameter(account_name owner,
                              const prop_key_value &key_value);

@@ -12,21 +12,22 @@ namespace eosio {
 // performance
 uint64_t hash_display_name(const std::string &display_name) {
   char s[13];
-  int len = 12;
-  if (display_name.length() < 12) len = display_name.length();
-
-  for (int i = 0; i < len; ++i) s[i] = 97 + (display_name[i] % 26);
-  s[len] = 0;
+  int len = len = (display_name.length() < 12) ? display_name.length() : 12;
+  for (int i = 0; i < len; ++i) {
+    s[i] = 97 + (display_name[i] % 26);
+  }
+  s[len] = '\0';
   return ::eosio::string_to_name(s);
 }
 
-/// @abi table dnametoacc
-struct d_name_to_acc{
-  uint64_t owner;
+//display name to account
+/// @abi table disptoacc
+struct disp_to_acc{
+  account_name owner;
   std::string display_name;
   uint64_t primary_key() const { return owner; }
-  EOSLIB_SERIALIZE(d_name_to_acc, (owner)(display_name))
+  EOSLIB_SERIALIZE(disp_to_acc, (owner)(display_name))
 };
 
-typedef multi_index<N(dnametoacc), d_name_to_acc> d_name_to_acc_index;
+typedef multi_index<N(disptoacc), disp_to_acc> disp_to_acc_index;
 };  // namespace eosio

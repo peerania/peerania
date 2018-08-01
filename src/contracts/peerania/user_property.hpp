@@ -12,7 +12,9 @@ namespace eosio {
 // system constants
 #define SYSTEM_PROP_START 250
 
-uint64_t prop_mkprimary(account_name owner, uint8_t prop) {
+inline uint64_t user_property_make_pk(account_name owner, uint8_t prop) {
+  //10000007 is simple constant to achive better collision resistance
+  //on this place could be any constant
   return owner + 1000007L * prop;
 }
 
@@ -26,7 +28,7 @@ struct prop_key_value {
 struct user_property {
   account_name owner;
   prop_key_value key_value;
-  uint64_t primary_key() const { return prop_mkprimary(owner, key_value.key); }
+  uint64_t primary_key() const { return user_property_make_pk(owner, key_value.key); }
   EOSLIB_SERIALIZE(user_property, (owner)(key_value))
 };
 

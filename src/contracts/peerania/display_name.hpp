@@ -22,7 +22,7 @@ uint64_t hash_display_name(const std::string &display_name) {
 
 //display name to account
 /// @abi table disptoacc
-struct disp_to_acc{
+struct disp_to_acc {
   account_name owner;
   std::string display_name;
   uint64_t primary_key() const { return owner; }

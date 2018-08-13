@@ -5,4 +5,8 @@
 ./compile
 
 # run tests
-python3 ./src/unittests/contracts/test_peerania.py
+python3 ./src/unittests/contracts/test_account_management.py
+python3 ./src/unittests/contracts/test_forum_question.py
+python3 ./src/unittests/contracts/test_forum_answer.py
+python3 ./src/unittests/contracts/test_forum_comment.py
+python3 ./src/unittests/contracts/test_forum_global.py

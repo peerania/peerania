@@ -40,7 +40,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         e[1]['answers'][1]['comments'].append(
             {'id': '#var aq_ba_ac', 'registration_time': '#ignore', 'user': 'alice', 'ipfs_link': 'Alice comment to Bob answer'})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t))
+        self.assertTrue(compare(e, t, ignore_excess=True))
         info("Table after action", t)
         end()
 
@@ -58,7 +58,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         e[1]['answers'][0]['comments'].append(
             {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.action('modcomment', cbody(
             bob, var['aq'], ipfs='updated Bob comment to Alice question', c_id=var['aq_bc']), bob, "Update bob comment to Alice question")
         self.action('modcomment', cbody(
@@ -66,7 +66,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         e[1]['comments'][0]['ipfs_link'] = 'updated Bob comment to Alice question'
         e[1]['answers'][0]['comments'][0]['ipfs_link'] = 'updated Bob comment to Alice answer'
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         info("Table after action", t)
         end()
 
@@ -93,7 +93,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         e[1]['answers'][1]['comments'].append(
             {'id': '#var aq_ba_ac', 'registration_time': '#ignore', 'user': 'alice', 'ipfs_link': 'Alice comment to Bob answer'})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         setvar(e, var)
         self.action('delcomment', cbody(
             bob, var['aq'], c_id=var['aq_bc']), bob, "Delete bob comment to Alice question")
@@ -102,7 +102,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         e[1]['comments'] = []
         del e[1]['answers'][0]['comments'][1]
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         info("Table after action", t)
         end()
 
@@ -143,7 +143,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         e[1]['answers'][0]['comments'].append(
             {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('modcomment', cbody(
             bob, var['aq'], ipfs='test', c_id=var['aq_bc']), alice,
             'Attempt to modify comment to question with another owner auth', 'auth')
@@ -166,7 +166,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         e[1]['answers'][0]['comments'].append(
             {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('delcomment', cbody(
             bob, var['aq'], c_id=var['aq_bc']), alice,
             'Attempt to delete comment to question with another owner auth', 'auth')
@@ -190,7 +190,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         e[1]['answers'][0]['comments'].append(
             {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('modcomment', cbody(
             carol, var['aq'], ipfs='test', c_id=var['aq_bc']), carol,
             'Attempt to modify comment to question from another account', 'assert')
@@ -215,7 +215,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         e[1]['answers'][0]['comments'].append(
             {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('delcomment', cbody(
             carol, var['aq'], c_id=var['aq_bc']), carol,
             'Attempt to delete comment to question from another account', 'assert')
@@ -238,7 +238,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         e[1]['answers'][0]['comments'].append(
             {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('modcomment', cbody(
                             bob, var['aq'], ipfs = 'test', c_id=var['aq_bc']+1), bob,
                             'Attempt to modify non-existent comment to question', 'assert')
@@ -262,7 +262,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         e[1]['answers'][0]['comments'].append(
             {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('delcomment', cbody(
             bob, var['aq'], c_id=var['aq_bc']+1), bob,
             'Attempt to delete non-existent comment to question', 'assert')
@@ -298,7 +298,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         e[1]['answers'][0]['comments'].append(
             {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('modcomment', cbody(
                             bob, var['aq']+10, ipfs = 'test', c_id=var['aq_bc']), bob,
                             'Attempt to modify comment to non-existent question', 'assert')
@@ -321,7 +321,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         e[1]['answers'][0]['comments'].append(
             {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('delcomment', cbody(
                             bob, var['aq']+10, c_id=var['aq_bc']), bob,
                             'Attempt to delete comment to non-existent question', 'assert')
@@ -344,11 +344,11 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
 
         t = self.table("question", "allquestions")
         var = {}
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.action('reganswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'Alice answer to herself'},
-                    alice, ' -->Answer to alice from alice: "Alice answer to herself"')
+                    alice, '  |-->Answer to alice from alice: "Alice answer to herself"')
         self.action('reganswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'Bob answer to alice'},
-                    bob, ' -->Answer to alice from bob: "Bob answer to alice"')
+                    bob, '  `->Answer to alice from bob: "Bob answer to alice"')
         e[1]['answers'].append({
             'id': '#var aq_aa',
             'user': 'alice',
@@ -371,9 +371,9 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
             "answers": [],
             "comments": []})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.action('reganswer', {'user': 'alice', 'question_id': var['bq'], 'ipfs_link': 'Alice answer to bob'},
-                    alice, ' -->Answer to bob from alice: "Alice answer to bob"')
+                    alice, '  `->Answer to bob from alice: "Alice answer to bob"')
         e[2]['answers'].append({
             'id': '#var bq_aa',
             'user': 'alice',
@@ -382,7 +382,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
             "comments": []})
         t = self.table("question", "allquestions")
         setvar(e, var)
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         return e, var
 
 

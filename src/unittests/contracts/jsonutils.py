@@ -1,13 +1,17 @@
-def setvar(source, var):
+def setvar(source, var, except_var=None):
     if isinstance(source, dict):
         for key, value in source.items():
             if isinstance(value, str) and (value[:5] == '#var ') and (value[5:] in var):
+                if isinstance(except_var, list) and (value[5:] in except_var):
+                    continue
+                elif isinstance(except_var, str) and (except_var in value[5:]):
+                    continue
                 source[key] = var[value[5:]]
             else:
-                setvar(source[key], var)
+                setvar(source[key], var, except_var)
     if isinstance(source, list):
         for item in source:
-            setvar(item, var)
+            setvar(item, var, except_var)
         
 
 

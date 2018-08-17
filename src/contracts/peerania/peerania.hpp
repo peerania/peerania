@@ -1,7 +1,6 @@
 #pragma once
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/types.hpp>
-#include <map>
 #include <string>
 #include "access.hpp"
 #include "account.hpp"
@@ -9,6 +8,7 @@
 #include "peerania_utils.hpp"
 #include "question_container.hpp"
 #include "user_property.hpp"
+#include "history.hpp"
 
 namespace eosio {
 
@@ -65,7 +65,7 @@ class peerania : public contract {
   void delanswer(account_name user, uint64_t question_id, uint16_t answer_id);
 
   // Delete comment
-  //@abi action
+  ///@abi action
   void delcomment(account_name user, uint64_t question_id, uint16_t answer_id,
                   uint16_t comment_id);
 
@@ -80,9 +80,21 @@ class peerania : public contract {
                  const std::string &ipfs_link);
 
   // Modify comment
-  //@abi action
+  ///@abi action
   void modcomment(account_name user, uint64_t question_id, uint16_t answer_id,
                   uint16_t comment_id, const std::string &ipfs_link);
+
+  // Upvote question/answer
+  ///@abi action
+  void upvote(account_name user, uint64_t question_id, uint16_t answer_id);
+
+  // Downvote question/answer
+  ///@abi action
+  void downvote(account_name user, uint64_t question_id, uint16_t answer_id);
+
+  // Mark answer as correct
+  ///@abi action
+  void mrkascorrect(account_name user, uint64_t question_id, uint16_t answer_id);
 
  private:
   static const scope_name all_questions = N(allquestions);
@@ -135,6 +147,10 @@ class peerania : public contract {
   void modify_comment(uint64_t question_id, uint16_t answer_id,
                       uint16_t comment_id, const std::string &ipfs_link,
                       const access &action_access);
+
+  void vote(uint64_t question_id, uint16_t answer_id, const access &action_access, bool);
+
+  void mark_answer_as_correct(uint64_t question_id, uint16_t answer_id, const access &action_access);
 };
 
 }  // namespace eosio

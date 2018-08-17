@@ -4,7 +4,6 @@
 #include <string>
 #include "user_property.hpp"
 
-namespace eosio {
 const scope_name all_accounts = N(allaccounts);
 ///@abi table
 struct account {
@@ -21,4 +20,3 @@ struct account {
                    (owner)(display_name)(ipfs_profile)(registration_time)(
                        string_properties)(integer_properties))
 };
-}  // namespace eosio

@@ -2,7 +2,6 @@
 #include <eosiolib/types.hpp> 
 #include <iterator>  
 
-
 namespace std{
 template<class Iter, typename Functor>
 Iter binary_find(Iter begin, Iter end, int id, Functor element_id)
@@ -37,8 +36,7 @@ Iter linear_find(Iter begin, Iter end, int key, Functor element_key){
 }
 }
 
-namespace eosio{
 inline time current_time_in_sec(){
     return current_time() / 1000000;
-}
+
 }

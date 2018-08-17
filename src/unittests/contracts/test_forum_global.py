@@ -32,8 +32,7 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
         }]
         t = self.table("question", "allquestions")
         var = {}
-        self.assertTrue(compare(e, t, var))
-
+        self.assertTrue(compare(e, t, var, True))
         self.action('reganswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'Alice answer to herself'},
                     alice, 'Register Alice answer to Alice')
         self.action('reganswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'Bob answer to Alice'},
@@ -67,7 +66,7 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
             'registration_time': '#ignore',
             "comments": []})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.action('regcomment', {'user': 'bob', 'question_id': var['aq'], 'answer_id': var['aq_aa'],
                                    'ipfs_link': 'AQ->AA->BC1'}, bob, 'Register Bob 1 comment to Alice question->Alice answer')
         self.action('regcomment', {'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_aa'],
@@ -126,7 +125,7 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
         e[2]['comments'].append(
             {'id': '#var bq_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'BQ->BC'})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         info('\nnow hierarchy look like')
         info('Alice question')
         info('  |-->Alice answer to herself')
@@ -168,7 +167,7 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
         e[2]['answers'][0]['comments'].append(
             {'id': '#var bq_ca_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'BQ->CA->BC new'})
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         info('\nnow hierarchy look like')
         info('Alice question')
         info('  |-->Alice answer to herself')
@@ -205,7 +204,7 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
         del e[1]['answers'][2]
         del e[1]['answers'][0]
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         info('\nnow hierarchy look like')
         info('Alice question')
         info('  |-->Bob answer to Alice')
@@ -235,7 +234,7 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
         self.action('delquestion', {'user':'bob', 'question_id':var['bq']}, bob, 'Delete bob question(cascade operation)')
         del e[2]
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         info('\nnow hierarchy look like')
         info('Alice question')
         info('  |-->Bob answer to Alice')
@@ -256,7 +255,7 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
                             'ipfs_link': 'AQ->BA updated'}, bob, 'Update Bob answer to Alice question')
         e[1]['answers'][0]['ipfs_link'] = 'AQ->BA updated'
         t = self.table("question", "allquestions")
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         info('\nnow hierarchy look like')
         info('Alice question')
         info('  |-->Bob answer to Alice(updated)')

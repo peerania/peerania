@@ -12,7 +12,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         e = [self._register_question_action(alice, 'Alice question 1')]
         t = self.table("question", "allquestions")
         info('Table question: ', t)
-        self.assertTrue(compare(e, t))
+        self.assertTrue(compare(e, t, ignore_excess=True))
         end()
 
     def test_modify_question(self):
@@ -21,12 +21,12 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table("question", "allquestions")
         var = {}
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.action('modquestion', {
                     'user': 'alice', 'question_id': var['q1'], 'ipfs_link': 'updated IPFS'}, alice, 'Update IPFS link of Alice question')
         t = self.table("question", "allquestions")
         e[0]['ipfs_link'] = 'updated IPFS'
-        self.assertTrue(compare(e, t))
+        self.assertTrue(compare(e, t, ignore_excess=True))
         info('Table question: ', t)
         end()
 
@@ -36,12 +36,12 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table("question", "allquestions")
         var = {}
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.action('delquestion', {
                     'user': 'alice', 'question_id': var['q1']}, alice, 'Delete Alice question')
         t = self.table("question", "allquestions")
         e = []
-        self.assertTrue(compare(e, t))
+        self.assertTrue(compare(e, t, ignore_excess=True))
         info('Table question: ', t)
         end()
 
@@ -67,7 +67,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table("question", "allquestions")
         var = {}
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('modquestion', {
             'user': 'alice', 'question_id': var['q1'], 'ipfs_link': 'test'}, bob, 'Attempt to modify Alice question with bob auth', 'auth')
         end()
@@ -79,7 +79,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table("question", "allquestions")
         var = {}
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('delquestion', {
             'user': 'alice', 'question_id': var['q1']}, bob, 'Attempt to delete Alice question with bob auth', 'auth')
         end()
@@ -91,7 +91,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table("question", "allquestions")
         var = {}
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('modquestion', {
             'user': 'bob', 'question_id': var['q1'], 'ipfs_link': 'test'}, bob, 'Attempt to modify alice question from bob account', 'assert')
         end()
@@ -103,7 +103,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table("question", "allquestions")
         var = {}
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('delquestion', {
             'user': 'bob', 'question_id': var['q1']}, bob, 'Attempt to delete alice question from bob account', 'assert')
         end()
@@ -115,7 +115,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table("question", "allquestions")
         var = {}
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('modquestion', {
             'user': 'bob', 'question_id': var['q1'] + 1, 'ipfs_link': 'test'}, bob, 'Modify non-existent question', 'assert')
         end()
@@ -126,7 +126,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table("question", "allquestions")
         var = {}
-        self.assertTrue(compare(e, t, var))
+        self.assertTrue(compare(e, t, var, True))
         self.failed_action('delquestion', {
             'user': 'alice', 'question_id': var['q1'] + 1}, alice, 'Delete non-existent question', 'assert')
         end()

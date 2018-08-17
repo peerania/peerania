@@ -11,7 +11,6 @@
 // system constants
 #define SYSTEM_PROP_START 200
 
-
 struct str_key_value {
   uint8_t key;
   std::string value;

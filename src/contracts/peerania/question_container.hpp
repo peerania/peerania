@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-namespace eosio {
 #define COMMENT_TO_QUESTION 0
 
 struct comment {
@@ -21,6 +20,8 @@ struct answer {
   account_name user;
   std::string ipfs_link;
   std::vector<comment> comments;
+  // additional info
+  int16_t rating = 0;
 };
 
 /// @abi table
@@ -32,9 +33,10 @@ struct question {
   std::vector<answer> answers;
   std::vector<comment> comments;
   // additionl info
+  uint16_t correct_answer_id = 0;
+  int16_t rating = 0;
   uint64_t primary_key() const { return id; }
-  EOSLIB_SERIALIZE(question, (id)(registration_time)(user)(ipfs_link)(answers)(comments))
+  EOSLIB_SERIALIZE(question, (id)(registration_time)(user)(ipfs_link)(answers)(comments)(correct_answer_id)(rating))
 };
 
-typedef multi_index<N(question), question> question_index;
-};  // namespace eosio
+typedef eosio::multi_index<N(question), question> question_index;

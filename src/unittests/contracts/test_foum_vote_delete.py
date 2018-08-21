@@ -6,7 +6,7 @@ from unittest import main
 from time import sleep
 
 
-class ForumVoteTests(peeraniatest.PeeraniaTest):
+class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
     def test_vote_question(self):
         begin('Test vote question')
         alice = self.register_alice_account()

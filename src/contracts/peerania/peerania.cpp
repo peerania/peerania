@@ -21,12 +21,24 @@ void peerania::registeracc(account_name owner, std::string display_name,
 void peerania::setaccstrprp(account_name owner, uint8_t key,
                             std::string value) {
   require_auth(owner);
-  set_account_string_property(owner, key, value);
+  auto itr = account_table.find(owner);
+  eosio_assert(itr != account_table.end(), "Account not found");
+  access action_access(*itr, access::ACTION::SET_ACCOUNT_PROPERTY);
+  eosio_assert(action_access.is_allowed(owner, key), "Action not allowed");
+  account_table.modify(itr, _self, [&](auto &account) {
+    set_property(account.string_properties, key, value);
+  });
 }
 
 void peerania::setaccintprp(account_name owner, uint8_t key, int32_t value) {
   require_auth(owner);
-  set_account_integer_property(owner, key, value);
+  auto itr = account_table.find(owner);
+  eosio_assert(itr != account_table.end(), "Account not found");
+  access action_access(*itr, access::ACTION::SET_ACCOUNT_PROPERTY);
+  eosio_assert(action_access.is_allowed(owner, key), "Action not allowed");
+  account_table.modify(itr, _self, [&](auto &account) {
+    set_property(account.integer_properties, key, value);
+  });
 }
 
 void peerania::setipfspro(account_name owner, std::string ipfs_profile) {
@@ -144,40 +156,24 @@ void peerania::mrkascorrect(account_name user, uint64_t question_id,
   mark_answer_as_correct(question_id, answer_id, action_access);
 }
 
-void peerania::set_account_string_property(account_name owner, uint8_t key,
-                                           const std::string &value) {
-  auto itr = account_table.find(owner);
-  eosio_assert(itr != account_table.end(), "Account not found");
-  account_table.modify(itr, _self, [&](auto &account) {
-    auto property_iter = linear_find(
-        account.string_properties.begin(), account.string_properties.end(), key,
-        [](const str_key_value &skv) { return skv.key; });
-    if (property_iter == account.string_properties.end()) {
-      str_key_value skv;
-      skv.key = key;
-      skv.value = value;
-      account.string_properties.push_back(skv);
-    } else
-      property_iter->value = value;
-  });
+void peerania::votedelete(account_name user, uint64_t question_id,
+                          uint16_t answer_id, uint16_t comment_id,
+                          uint8_t reason) {
+  require_auth(user);
+  auto itr = account_table.find(user);
+  eosio_assert(itr != account_table.end(), "Account not registered");
+  access action_access(*itr, access::ACTION::VOTE_FOR_DELETION);
+  vote_for_deletion(question_id, answer_id, comment_id, reason, action_access);
 }
 
-void peerania::set_account_integer_property(account_name owner, uint8_t key,
-                                            int32_t value) {
-  auto itr = account_table.find(owner);
+void peerania::votemoderate(account_name user, uint64_t question_id,
+                            uint16_t answer_id, uint16_t comment_id) {}
+
+void peerania::setaccrating(account_name user, uint16_t rating) {
+  auto itr = account_table.find(user);
   eosio_assert(itr != account_table.end(), "Account not found");
-  account_table.modify(itr, _self, [&](auto &account) {
-    auto property_iter = linear_find(
-        account.integer_properties.begin(), account.integer_properties.end(),
-        key, [](const int_key_value &skv) { return skv.key; });
-    if (property_iter == account.integer_properties.end()) {
-      int_key_value ikv;
-      ikv.key = key;
-      ikv.value = value;
-      account.integer_properties.push_back(ikv);
-    } else
-      property_iter->value = value;
-  });
+  account_table.modify(
+      itr, _self, [&](auto &account) { account.rating = rating; });
 }
 
 void peerania::set_account_ipfs_profile(account_name owner,
@@ -225,22 +221,10 @@ void peerania::register_answer(account_name user, uint64_t question_id,
                                const std::string &ipfs_link) {
   auto iter = question_table.find(question_id);
   eosio_assert(iter != question_table.end(), "Question not found");
-  // Linear check
-  // eosio_assert(none_of(iter->answers.begin(), iter->answers.end(),
-  //                     [user](const answer &a) { return a.user == user; }),
-  //             "Answer with this username alredy registered");
-  history history_table(_self, user);
-  auto itr_history =
-      history_table.find(hash_history(question_id, COMMENT_TO_QUESTION));
-  if (itr_history != history_table.end()) {
-    eosio_assert(!(itr_history->is_flag_set(HISTORY_ALREADY_ANSWERED)),
-                 "Answer with this username alredy registered");
-  } else {
-    history_table.emplace(_self, [question_id](auto &history_item) {
-      history_item.hash_id = hash_history(question_id, COMMENT_TO_QUESTION);
-      history_item.set_flag(HISTORY_ALREADY_ANSWERED);
-    });
-  }
+  eosio_assert(none_of(iter->answers.begin(), iter->answers.end(),
+                       [user](const answer &a) { return a.user == user; }),
+               "Answer with this username alredy registered");
+
   answer new_answer;
   new_answer.user = user;
   new_answer.ipfs_link = ipfs_link;
@@ -265,16 +249,15 @@ void peerania::register_comment(account_name user, uint64_t question_id,
   new_comment.ipfs_link = ipfs_link;
   new_comment.registration_time = current_time_in_sec();
   question_table.modify(iter, _self, [&](auto &question) {
-    if (answer_id == COMMENT_TO_QUESTION) {
+    if (answer_id == APPLY_TO_QUESTION) {
       if (question.comments.empty())
         new_comment.id = 1;
       else
         new_comment.id = question.comments.back().id + 1;
       question.comments.push_back(new_comment);
     } else {
-      auto iter_answer =
-          binary_find(question.answers.begin(), question.answers.end(),
-                      answer_id, [](const answer &a) { return a.id; });
+      auto iter_answer = binary_find(question.answers.begin(),
+                                     question.answers.end(), answer_id);
       eosio_assert(iter_answer != question.answers.end(), "Answer not found");
       if (iter_answer->comments.empty())
         new_comment.id = 1;
@@ -299,21 +282,16 @@ void peerania::delete_answer(uint64_t question_id, uint16_t answer_id,
   auto iter = question_table.find(question_id);
   eosio_assert(iter != question_table.end(), "Question not found");
   account_name owner;
-  question_table.modify(iter, _self, [&owner, answer_id, &action_access](auto &question) {
-    auto iter_answer =
-        binary_find(question.answers.begin(), question.answers.end(), answer_id,
-                    [](const answer &a) { return a.id; });
-    owner = iter_answer->user;
-    eosio_assert(iter_answer != question.answers.end(), "Answer not found");
-    eosio_assert(action_access.is_allowed(iter_answer->user),
-                 "Action not allowed");
-    question.answers.erase(iter_answer);
-  });
-  history history_table(_self, owner);
-  auto itr_history =  history_table.find(hash_history(question_id, COMMENT_TO_QUESTION));
-  eosio_assert(itr_history != history_table.end(), "History error");
-  history_table.erase(itr_history);
-  eosio_assert(itr_history != history_table.end(), "Address not erased properly");
+  question_table.modify(
+      iter, _self, [&owner, answer_id, &action_access](auto &question) {
+        auto iter_answer = binary_find(question.answers.begin(),
+                                       question.answers.end(), answer_id);
+        owner = iter_answer->user;
+        eosio_assert(iter_answer != question.answers.end(), "Answer not found");
+        eosio_assert(action_access.is_allowed(iter_answer->user),
+                     "Action not allowed");
+        question.answers.erase(iter_answer);
+      });
 }
 
 void peerania::delete_comment(uint64_t question_id, uint16_t answer_id,
@@ -322,23 +300,20 @@ void peerania::delete_comment(uint64_t question_id, uint16_t answer_id,
   auto iter = question_table.find(question_id);
   eosio_assert(iter != question_table.end(), "Question not found");
   question_table.modify(iter, _self, [&](auto &question) {
-    if (answer_id == COMMENT_TO_QUESTION) {
-      auto iter_comment =
-          binary_find(question.comments.begin(), question.comments.end(),
-                      comment_id, [](const comment &c) { return c.id; });
+    if (answer_id == APPLY_TO_QUESTION) {
+      auto iter_comment = binary_find(question.comments.begin(),
+                                      question.comments.end(), comment_id);
       eosio_assert(iter_comment != question.comments.end(),
                    "Comment not found");
       eosio_assert(action_access.is_allowed(iter_comment->user),
                    "Action not allowed");
       question.comments.erase(iter_comment);
     } else {
-      auto iter_answer =
-          binary_find(question.answers.begin(), question.answers.end(),
-                      answer_id, [](const answer &a) { return a.id; });
+      auto iter_answer = binary_find(question.answers.begin(),
+                                     question.answers.end(), answer_id);
       eosio_assert(iter_answer != question.answers.end(), "Answer not found");
       auto iter_comment = binary_find(iter_answer->comments.begin(),
-                                      iter_answer->comments.end(), comment_id,
-                                      [](const comment &c) { return c.id; });
+                                      iter_answer->comments.end(), comment_id);
       eosio_assert(iter_comment != question.comments.end(),
                    "Comment not found");
       eosio_assert(action_access.is_allowed(iter_comment->user),
@@ -365,9 +340,8 @@ void peerania::modify_answer(uint64_t question_id, uint16_t answer_id,
   auto iter = question_table.find(question_id);
   eosio_assert(iter != question_table.end(), "Question not found");
   question_table.modify(iter, _self, [&](auto &question) {
-    auto iter_answer =
-        binary_find(question.answers.begin(), question.answers.end(), answer_id,
-                    [](const answer &a) { return a.id; });
+    auto iter_answer = binary_find(question.answers.begin(),
+                                   question.answers.end(), answer_id);
     eosio_assert(iter_answer != question.answers.end(), "Answer not found");
     eosio_assert(action_access.is_allowed(iter_answer->user),
                  "Action not allowed");
@@ -381,23 +355,20 @@ void peerania::modify_comment(uint64_t question_id, uint16_t answer_id,
   auto iter = question_table.find(question_id);
   eosio_assert(iter != question_table.end(), "Question not found");
   question_table.modify(iter, _self, [&](auto &question) {
-    if (answer_id == COMMENT_TO_QUESTION) {
-      auto iter_comment =
-          binary_find(question.comments.begin(), question.comments.end(),
-                      comment_id, [](const comment &c) { return c.id; });
+    if (answer_id == APPLY_TO_QUESTION) {
+      auto iter_comment = binary_find(question.comments.begin(),
+                                      question.comments.end(), comment_id);
       eosio_assert(iter_comment != question.comments.end(),
                    "Comment not found");
       eosio_assert(action_access.is_allowed(iter_comment->user),
                    "Action not allowed");
       iter_comment->ipfs_link = ipfs_link;
     } else {
-      auto iter_answer =
-          binary_find(question.answers.begin(), question.answers.end(),
-                      answer_id, [](const answer &a) { return a.id; });
+      auto iter_answer = binary_find(question.answers.begin(),
+                                     question.answers.end(), answer_id);
       eosio_assert(iter_answer != question.answers.end(), "Answer not found");
       auto iter_comment = binary_find(iter_answer->comments.begin(),
-                                      iter_answer->comments.end(), comment_id,
-                                      [](const comment &c) { return c.id; });
+                                      iter_answer->comments.end(), comment_id);
       eosio_assert(iter_comment != question.comments.end(),
                    "Comment not found");
       eosio_assert(action_access.is_allowed(iter_comment->user),
@@ -410,28 +381,28 @@ void peerania::modify_comment(uint64_t question_id, uint16_t answer_id,
 int8_t modify_vote_history(history_item &item, bool is_upvote) {
   int8_t rating_change;
   if (is_upvote) {
-    if (item.is_flag_set(HISTORY_UPVOTED)) {
+    if (item.is_flag_set(HISTORY_UPVOTED_FLG)) {
       rating_change = -1;
-      item.remove_flag(HISTORY_UPVOTED);
+      item.remove_flag(HISTORY_UPVOTED_FLG);
     } else {
-      if (item.is_flag_set(HISTORY_DOWNVOTED)) {
+      if (item.is_flag_set(HISTORY_DOWNVOTED_FLG)) {
         rating_change = 2;
-        item.remove_flag(HISTORY_DOWNVOTED);
+        item.remove_flag(HISTORY_DOWNVOTED_FLG);
       } else
         rating_change = 1;
-      item.set_flag(HISTORY_UPVOTED);
+      item.set_flag(HISTORY_UPVOTED_FLG);
     }
   } else {
-    if (item.is_flag_set(HISTORY_DOWNVOTED)) {
+    if (item.is_flag_set(HISTORY_DOWNVOTED_FLG)) {
       rating_change = 1;
-      item.remove_flag(HISTORY_DOWNVOTED);
+      item.remove_flag(HISTORY_DOWNVOTED_FLG);
     } else {
-      if (item.is_flag_set(HISTORY_UPVOTED)) {
+      if (item.is_flag_set(HISTORY_UPVOTED_FLG)) {
         rating_change = -2;
-        item.remove_flag(HISTORY_UPVOTED);
+        item.remove_flag(HISTORY_UPVOTED_FLG);
       } else
         rating_change = -1;
-      item.set_flag(HISTORY_DOWNVOTED);
+      item.set_flag(HISTORY_DOWNVOTED_FLG);
     }
   }
   return rating_change;
@@ -439,10 +410,9 @@ int8_t modify_vote_history(history_item &item, bool is_upvote) {
 
 template <typename T>
 void check_answer_exist(T itr_question, uint16_t answer_id) {
-  if (answer_id != COMMENT_TO_QUESTION) {
-    auto iter_answer =
-        binary_find(itr_question->answers.begin(), itr_question->answers.end(),
-                    answer_id, [](const answer &a) { return a.id; });
+  if (answer_id != APPLY_TO_QUESTION) {
+    auto iter_answer = binary_find(itr_question->answers.begin(),
+                                   itr_question->answers.end(), answer_id);
     eosio_assert(iter_answer != itr_question->answers.end(),
                  "Answer not found");  // vulnerability
   }
@@ -453,37 +423,47 @@ void peerania::vote(uint64_t question_id, uint16_t answer_id,
   eosio_assert(action_access.is_allowed(), "Action not allowed");
   auto itr_question = question_table.find(question_id);
   eosio_assert(itr_question != question_table.end(), "Question not found");
-  check_answer_exist(itr_question, answer_id);
-  history history_table(_self, action_access.get_account_name());
-  auto itr_history = history_table.find(hash_history(question_id, answer_id));
-  int8_t rating_change;
-  if (itr_history != history_table.end()) {
-    history_table.modify(itr_history, _self,
-                         [&rating_change, is_upvote](auto &item) {
-                           rating_change = modify_vote_history(item, is_upvote);
-                         });
-  } else {
-    history_table.emplace(_self, [is_upvote, question_id, answer_id,
-                                  &rating_change](auto &history_item) {
-      history_item.hash_id = hash_history(question_id, answer_id);
-      if (is_upvote) {
-        history_item.set_flag(HISTORY_UPVOTED);
-        rating_change = 1;
-      } else {
-        history_item.set_flag(HISTORY_DOWNVOTED);
-        rating_change = -1;
-      }
-    });
-  }
+  account_name user = action_access.get_account_name();
   question_table.modify(
-      itr_question, _self, [rating_change, answer_id](auto &question) {
-        if (answer_id == COMMENT_TO_QUESTION) {
-          question.rating += rating_change;
+      itr_question, _self, [answer_id, is_upvote, user](auto &question) {
+        if (answer_id == APPLY_TO_QUESTION) {
+          auto itr_history = linear_find(question.history.begin(),
+                                         question.history.end(), user);
+          if (itr_history == question.history.end()) {
+            history_item hst_item;
+            hst_item.user = user;
+            if (is_upvote) {
+              hst_item.set_flag(HISTORY_UPVOTED_FLG);
+              question.rating += 1;
+            } else {
+              hst_item.set_flag(HISTORY_DOWNVOTED_FLG);
+              question.rating -= 1;
+            }
+            question.history.push_back(hst_item);
+          } else {
+            question.rating += modify_vote_history(*itr_history, is_upvote);
+          }
         } else {
-          auto itr_answer =
-              binary_find(question.answers.begin(), question.answers.end(),
-                          answer_id, [](answer &a) { return a.id; });
-          (itr_answer->rating) += rating_change;
+          auto itr_answer = binary_find(question.answers.begin(),
+                                        question.answers.end(), answer_id);
+          eosio_assert(itr_answer != question.answers.end(),
+                       "Answer not found");
+          auto itr_history = linear_find(itr_answer->history.begin(),
+                                         itr_answer->history.end(), user);
+          if (itr_history == itr_answer->history.end()) {
+            history_item hst_item;
+            hst_item.user = user;
+            if (is_upvote) {
+              hst_item.set_flag(HISTORY_UPVOTED_FLG);
+              itr_answer->rating += 1;
+            } else {
+              hst_item.set_flag(HISTORY_DOWNVOTED_FLG);
+              itr_answer->rating -= 1;
+            }
+            itr_answer->history.push_back(hst_item);
+          } else {
+            itr_answer->rating += modify_vote_history(*itr_history, is_upvote);
+          }
         }
       });
 }
@@ -496,15 +476,143 @@ void peerania::mark_answer_as_correct(uint64_t question_id, uint16_t answer_id,
                "Action not allowed");
   check_answer_exist(itr_question, answer_id);
   question_table.modify(itr_question, _self, [answer_id](auto &question) {
-    question.correct_answer_id =
-        (question.correct_answer_id == answer_id)
-            ? COMMENT_TO_QUESTION : answer_id;
+    question.correct_answer_id = (question.correct_answer_id == answer_id)
+                                     ? APPLY_TO_QUESTION
+                                     : answer_id;
   });
 }
 
+bool vote_for_delete_history(std::vector<history_item> &history, uint8_t reason,
+                             const access &action_access,
+                             uint16_t &deletion_votes,
+                             std::vector<uint16_t> del_economy) {
+  auto itr_history = linear_find(history.begin(), history.end(),
+                                 action_access.get_account_name());
+  if (itr_history == history.end()) {
+    history_item hst_item;
+    hst_item.user = action_access.get_account_name();
+    hst_item.set_code(HISTORY_DELETION_CODE, reason);
+    history.push_back(hst_item);
+    deletion_votes += action_access.get_account_rating();
+  } else {
+    uint8_t code = itr_history->get_code(HISTORY_DELETION_CODE);
+    eosio_assert(code != reason, "Already voted");
+    if (reason)
+      if(!code)
+        deletion_votes += action_access.get_account_rating();
+    else
+      deletion_votes -= action_access.get_account_rating();
+    itr_history->set_code(HISTORY_DELETION_CODE, reason);
+    if (itr_history->is_empty()) history.erase(itr_history);
+  }
+  if (!reason) {
+    if (deletion_votes > del_economy[1]) return true;
+    if (deletion_votes > del_economy[0]) {
+      std::vector<int> vote_map(get_count_of_codes(HISTORY_DELETION_CODE) - 1);
+      for_each(history.begin(), history.end(),
+               [&vote_map](const auto &history) {
+                 uint8_t code = history.get_code(HISTORY_DELETION_CODE);
+                 if (code) ++vote_map[code - 1];
+               });
+      return any_of(vote_map.begin(), vote_map.end(),
+                    [del_economy, deletion_votes](int vote_count) {
+                      return 100. * vote_count / deletion_votes >
+                             del_economy[2];
+                    });
+    }
+  }
+  return false;
+}
+
+void peerania::vote_for_deletion(uint64_t question_id, uint16_t answer_id,
+                                 uint16_t comment_id, uint8_t reason,
+                                 const access &action_access) {
+  auto itr_question = question_table.find(question_id);
+  eosio_assert(itr_question != question_table.end(), "Question not found");
+  eosio_assert(reason < get_count_of_codes(HISTORY_DELETION_CODE),
+               "Incorrect reason");
+  bool bad_question = false;
+  question_table.modify(
+      itr_question, _self,
+      [answer_id, comment_id, reason, &action_access,
+       &bad_question](auto &question) {
+        if (answer_id == APPLY_TO_QUESTION) {
+          if (comment_id == APPLY_TO_ANSWER) {
+            // Delete question by vote (answer_id == 0 and comment_id = 0)
+            uint16_t deletion_votes =
+                get_property(question.properties, PROPERTY_DELETION_VOTES);
+            bad_question = vote_for_delete_history(
+                question.history, reason, action_access, deletion_votes,
+                deletion_votes_question);
+            if (bad_question) return;
+            set_property(question.properties, PROPERTY_DELETION_VOTES,
+                         deletion_votes);
+          } else {
+            // Delete comment to question by vote (answer_id == 0)
+            auto iter_comment = binary_find(
+                question.comments.begin(), question.comments.end(), comment_id);
+            eosio_assert(iter_comment != question.comments.end(),
+                         "Comment to question not found");
+            uint16_t deletion_votes =
+                get_property(iter_comment->properties, PROPERTY_DELETION_VOTES);
+            bool bad_item = vote_for_delete_history(
+                iter_comment->history, reason, action_access, deletion_votes,
+                deletion_votes_comment);
+            if (bad_item) {
+              question.comments.erase(iter_comment);
+              return;
+            }
+            set_property(iter_comment->properties, PROPERTY_DELETION_VOTES,
+                         deletion_votes);
+          }
+          return;
+        }
+        auto iter_answer = binary_find(question.answers.begin(),
+                                       question.answers.end(), answer_id);
+        eosio_assert(iter_answer != question.answers.end(), "Answer not found");
+        if (comment_id == APPLY_TO_ANSWER) {
+          // Delete answer to question by vote (comment_id == 0)
+          uint16_t deletion_votes =
+              get_property(iter_answer->properties, PROPERTY_DELETION_VOTES);
+          bool bad_item = vote_for_delete_history(iter_answer->history, reason,
+                                                  action_access, deletion_votes,
+                                                  deletion_votes_answer);
+          if (bad_item) {
+            question.answers.erase(iter_answer);
+            return;
+          }
+          set_property(iter_answer->properties, PROPERTY_DELETION_VOTES,
+                       deletion_votes);
+        } else {
+          // Delete comment to answer
+          auto iter_comment =
+              binary_find(iter_answer->comments.begin(),
+                          iter_answer->comments.end(), comment_id);
+          eosio_assert(iter_comment != iter_answer->comments.end(),
+                       "Comment to answer not found");
+          uint16_t deletion_votes =
+              get_property(iter_comment->properties, PROPERTY_DELETION_VOTES);
+          bool bad_item = vote_for_delete_history(iter_comment->history, reason,
+                                                  action_access, deletion_votes,
+                                                  deletion_votes_comment);
+          if (bad_item) {
+            iter_answer->comments.erase(iter_comment);
+            return;
+          }
+          set_property(iter_comment->properties, PROPERTY_DELETION_VOTES,
+                       deletion_votes);
+        }
+      });
+  if (bad_question) {
+    question_table.erase(itr_question);
+    eosio_assert(itr_question != question_table.end(),
+                 "Address not erased properly");
+  }
+}
+
 }  // namespace eosio
-EOSIO_ABI(
-    eosio::peerania,
-    (registeracc)(setaccintprp)(setaccstrprp)(setipfspro)(setdispname)(
-        regquestion)(reganswer)(regcomment)(delquestion)(delanswer)(delcomment)(
-        modanswer)(modquestion)(modcomment)(upvote)(downvote)(mrkascorrect))
+EOSIO_ABI(eosio::peerania,
+          (registeracc)(setaccintprp)(setaccstrprp)(setipfspro)(setdispname)(
+              regquestion)(reganswer)(regcomment)(delquestion)(delanswer)(
+              delcomment)(modanswer)(modquestion)(modcomment)(upvote)(downvote)(
+              mrkascorrect)(votedelete)(votemoderate)(setaccrating))

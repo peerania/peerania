@@ -2,7 +2,7 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/types.hpp>
 #include <string>
-#include "user_property.hpp"
+#include "property.hpp"
 
 const scope_name all_accounts = N(allaccounts);
 ///@abi table
@@ -14,9 +14,10 @@ struct account {
   time registration_time;
   std::vector<str_key_value> string_properties;
   std::vector<int_key_value> integer_properties;
-
+  uint16_t rating = 0;
+  uint16_t moderation_points = 0;
   uint64_t primary_key() const { return owner; }
   EOSLIB_SERIALIZE(account,
                    (owner)(display_name)(ipfs_profile)(registration_time)(
-                       string_properties)(integer_properties))
+                       string_properties)(integer_properties)(rating)(moderation_points))
 };

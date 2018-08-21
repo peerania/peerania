@@ -3,7 +3,6 @@
 #include <eosiolib/types.hpp>
 #include "account.hpp"
 
-
 class access {
  public:
   enum ACTION {
@@ -21,7 +20,9 @@ class access {
     SET_ACCOUNT_DISPLAYNAME,
     UPVOTE,
     DOWNVOTE,
-    MARK_ANSWER_AS_CORRECT
+    MARK_ANSWER_AS_CORRECT,
+    VOTE_FOR_DELETION,
+    VOTE_FOR_MODERATION
   };
 
   access(const account &owner, ACTION action) {
@@ -31,14 +32,21 @@ class access {
 
   account_name get_account_name() const { return access_owner.owner; }
 
+  uint16_t get_account_rating() const { return access_owner.rating; };
+
   bool is_allowed(account_name data_owner) const {
     if (data_owner == access_owner.owner) return true;
     return false;
   }
 
-  bool is_allowed() const {
-    return true;
+  bool is_allowed(account_name data_owner, int key) const {
+    if ((access_action == ACTION::SET_ACCOUNT_PROPERTY)
+      && (data_owner == access_owner.owner)) return true;
+    return false;
   }
+
+  bool is_allowed() const { return true; }
+
  private:
   account access_owner;
   ACTION access_action;

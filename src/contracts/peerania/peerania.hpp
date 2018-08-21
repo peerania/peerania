@@ -5,10 +5,11 @@
 #include "access.hpp"
 #include "account.hpp"
 #include "display_name.hpp"
-#include "peerania_utils.hpp"
-#include "question_container.hpp"
-#include "user_property.hpp"
 #include "history.hpp"
+#include "peerania_utils.hpp"
+#include "property.hpp"
+#include "question_container.hpp"
+#include "economy.h"
 
 namespace eosio {
 
@@ -92,9 +93,33 @@ class peerania : public contract {
   ///@abi action
   void downvote(account_name user, uint64_t question_id, uint16_t answer_id);
 
+  // Vote for deletion
+  // reason - code
+  // if (answer_id == 0) delete question(by question_id)
+  // elif (comment_id == 0) delete answer question(question_id)->answer(by
+  // answer_id) elif delete comment
+  // question(question_id)->answer(answer_id)->comment(by comment_id)
+  ///@abi action
+  void votedelete(account_name user, uint64_t question_id, uint16_t answer_id,
+                  uint16_t comment_id, uint8_t reason);
+
+  // Vote for moderation
+  // reason - code
+  // if (answer_id == 0) delete question(by question_id)
+  // elif (comment_id == 0) delete answer question(question_id)->answer(by
+  // answer_id) elif delete comment
+  // question(question_id)->answer(answer_id)->comment(by comment_id)
+  ///@abi action
+  void votemoderate(account_name user, uint64_t question_id, uint16_t answer_id,
+                    uint16_t comment_id);
+
   // Mark answer as correct
   ///@abi action
-  void mrkascorrect(account_name user, uint64_t question_id, uint16_t answer_id);
+  void mrkascorrect(account_name user, uint64_t question_id,
+                    uint16_t answer_id);
+
+  //Debug methods
+  void setaccrating(account_name user, uint16_t rating);
 
  private:
   static const scope_name all_questions = N(allquestions);
@@ -148,9 +173,15 @@ class peerania : public contract {
                       uint16_t comment_id, const std::string &ipfs_link,
                       const access &action_access);
 
-  void vote(uint64_t question_id, uint16_t answer_id, const access &action_access, bool);
+  void vote(uint64_t question_id, uint16_t answer_id,
+            const access &action_access, bool);
 
-  void mark_answer_as_correct(uint64_t question_id, uint16_t answer_id, const access &action_access);
+  void mark_answer_as_correct(uint64_t question_id, uint16_t answer_id,
+                              const access &action_access);
+
+  void vote_for_deletion(uint64_t question_id, uint16_t answer_id,
+                         uint16_t comment_id, uint8_t reason,
+                         const access &action_access);
 };
 
 }  // namespace eosio

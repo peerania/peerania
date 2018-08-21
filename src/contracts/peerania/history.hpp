@@ -1,26 +1,28 @@
+#pragma once
+
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/types.hpp>
 
 //Flags
-#define HISTORY_UPVOTED 1
-#define HISTORY_DOWNVOTED 2
-#define HISTORY_ALREADY_ANSWERED 4
+#define HISTORY_UPVOTED_FLG 1        //0b0000000000000001
+#define HISTORY_DOWNVOTED_FLG 2      //0b0000000000000010
 
-//Macros
-#define setFlag(var, flg) var |= flg
-#define rmFalg(var, flg) var &= ~flg
-#define isFlagSet(var, flg) (var & flg)
+//Codes
+#define HISTORY_DELETION_CODE 60, 2 //0b0000000000111100
 
-typedef uint32_t flag_type;
+/**
+ * Bit description
+ * |  15-6  |       5-2      |    1    |   0   |
+ * |Reserved|DELETE_VOTE_CODE|DOWNVOTED|UPVOTED|
+ */
 
-//Is id generated one by one? If true we have uint_48 questions it is 2.8e14
-uint64_t hash_history(uint64_t question_id, uint16_t answer_id){
-    return (question_id << 16) + answer_id;
-}
+typedef uint16_t flag_type;
+uint8_t get_count_of_codes(flag_type mask, uint8_t offset){
+    return (mask >> offset) + 1;
+} 
 
-///@abi table history
 struct history_item{
-    uint64_t hash_id;
+    account_name user;
     flag_type flag = 0;
     void set_flag(flag_type flg){
         flag |= flg;
@@ -33,9 +35,21 @@ struct history_item{
     bool is_flag_set(flag_type flg) const {
         return flag & flg;
     }
+    
+    uint8_t get_code(flag_type mask, uint8_t offset) const {
+        return (flag & mask) >> offset;
+    }
 
-    uint64_t primary_key() const { return hash_id; }
-    EOSLIB_SERIALIZE(history_item, (hash_id)(flag))
+    void set_code(flag_type mask, uint8_t offset, uint8_t code){
+        flag &= ~mask;
+        flag |= code << offset;
+    }
+
+    bool is_empty() const {
+        return flag == 0;
+    }
+
+    account_name lkey() const {
+        return user;
+    }
 };
-
-typedef eosio::multi_index<N(history), history_item> history;

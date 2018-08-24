@@ -4,7 +4,6 @@
 #include <string>
 #include "property.hpp"
 
-const scope_name all_accounts = N(allaccounts);
 ///@abi table
 struct account {
   table_name owner;
@@ -21,3 +20,6 @@ struct account {
                    (owner)(display_name)(ipfs_profile)(registration_time)(
                        string_properties)(integer_properties)(rating)(moderation_points))
 };
+
+const scope_name all_accounts = N(allaccounts);
+typedef eosio::multi_index<N(account), account> account_index;

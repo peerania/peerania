@@ -3,51 +3,43 @@
 #include <eosiolib/types.hpp>
 #include "account.hpp"
 
-class access {
- public:
-  enum ACTION {
-    MODIFY_QUESTION,
-    DELETE_QUESTION,
-    REGISTER_QUESTION,
-    MODIFY_ANSWER,
-    DELETE_ANSWER,
-    REGISTER_ANSWER,
-    MODIFY_COMMENT,
-    DELETE_COMMENT,
-    REGISTER_COMMENT,
-    SET_ACCOUNT_PROPERTY,
-    SET_ACCOUNT_IPFS_PROFILE,
-    SET_ACCOUNT_DISPLAYNAME,
-    UPVOTE,
-    DOWNVOTE,
-    MARK_ANSWER_AS_CORRECT,
-    VOTE_FOR_DELETION,
-    VOTE_FOR_MODERATION
-  };
-
-  access(const account &owner, ACTION action) {
-    access_owner = owner;
-    access_action = action;
-  }
-
-  account_name get_account_name() const { return access_owner.owner; }
-
-  uint16_t get_account_rating() const { return access_owner.rating; };
-
-  bool is_allowed(account_name data_owner) const {
-    if (data_owner == access_owner.owner) return true;
-    return false;
-  }
-
-  bool is_allowed(account_name data_owner, int key) const {
-    if ((access_action == ACTION::SET_ACCOUNT_PROPERTY)
-      && (data_owner == access_owner.owner)) return true;
-    return false;
-  }
-
-  bool is_allowed() const { return true; }
-
- private:
-  account access_owner;
-  ACTION access_action;
+enum Action {
+  MODIFY_QUESTION,
+  DELETE_QUESTION,
+  POST_QUESTION,
+  MODIFY_ANSWER,
+  DELETE_ANSWER,
+  POST_ANSWER,
+  MODIFY_COMMENT,
+  DELETE_COMMENT,
+  POST_COMMENT,
+  SET_ACCOUNT_PROPERTY,
+  SET_ACCOUNT_IPFS_PROFILE,
+  SET_ACCOUNT_DISPLAYNAME,
+  VOTE,
+  MARK_ANSWER_AS_CORRECT,
+  VOTE_FOR_DELETION,
+  VOTE_FOR_MODERATION
 };
+
+void assert_allowed(const account &action_caller, const account &data_owner,
+                    Action action) {}
+
+void assert_allowed(const account &action_caller, Action action) {}
+
+void assert_allowed(const account &action_caller, account_name data_owner,
+                    Action action) {
+  switch (action) {
+    case VOTE_FOR_DELETION:
+      eosio_assert(action_caller.owner != data_owner, "Action not allowed");
+      break;
+    default:
+      eosio_assert(action_caller.owner == data_owner, "Action not allowed");
+      break;
+  }
+}
+
+void assert_allowed(account_name action_caller, account_name data_owner,
+                    Action action) {
+  eosio_assert(action_caller == data_owner, "Action not allowed");
+}

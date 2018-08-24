@@ -16,10 +16,6 @@ def setvar(source, var, except_var=None):
 
 
 def compare(expected, source, mp = {}, ignore_excess = False):
-#    print("\n\nException")
-#    print(expected)
-#    print("Reality:")
-#    print(source)
     if isinstance(source, dict) and isinstance(expected, dict):
         if not ignore_excess and (len(expected) != len (source)):
             return False
@@ -34,7 +30,7 @@ def compare(expected, source, mp = {}, ignore_excess = False):
         return False
     
     if isinstance(source, list) and isinstance(expected, list):
-        if(len(expected) > 0 and expected[0]=="#ignoreorder"):
+        if(len(expected) > 0 and expected[0]=='#ignoreorder'):
             if(len(expected) - 1 != len (source)):
                 return False
             else:
@@ -61,10 +57,10 @@ def compare(expected, source, mp = {}, ignore_excess = False):
                 return True
             return False
 
-    if isinstance(expected, str) and ("#var " in expected) :
+    if isinstance(expected, str) and ('#var ' in expected) :
         mp[expected[5:]] = source
         return True
-
-    if (isinstance(expected, str) and ("#ignore" in expected)) or (expected == source):
+    
+    if (isinstance(expected, str) and ('#ignore' in expected)) or (expected == source):
         return True
     return False

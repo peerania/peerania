@@ -1,4 +1,3 @@
-
 import peeraniatest
 from peeraniatest import *
 from jsonutils import *
@@ -19,130 +18,130 @@ def cbody(owner, question_id, a_id=0, ipfs='', c_id=-1):
 class ForumCommentTests(peeraniatest.PeeraniaTest):
 
     def test_register_comment(self):
-        begin("Register comment")
+        begin('Register comment')
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.action('regcomment', cbody(
-            alice, var['aq'], ipfs='Comment to Alice question'), alice, "Register alice comment to Alice question")
-        self.action('regcomment', cbody(
-            alice, var['aq'], var['aq_aa'], 'Alice comment to Alice answer'), alice, "Register alice comment to Alice question->Alice answer")
-        self.action('regcomment', cbody(
-            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, "Register bob comment to Alice question->Alice answer")
-        self.action('regcomment', cbody(
-            alice, var['aq'], var['aq_ba'], 'Alice comment to Bob answer'), alice, "Register alice comment to Alice question->Bob answer")
-        e[1]['comments'].append({'id': '#var aq_ac', 'registration_time': '#ignore',
+        self.action('postcomment', cbody(
+            alice, var['aq'], ipfs='Comment to Alice question'), alice, 'Register alice comment to Alice question')
+        self.action('postcomment', cbody(
+            alice, var['aq'], var['aq_aa'], 'Alice comment to Alice answer'), alice, 'Register alice comment to Alice question->Alice answer')
+        self.action('postcomment', cbody(
+            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, 'Register bob comment to Alice question->Alice answer')
+        self.action('postcomment', cbody(
+            alice, var['aq'], var['aq_ba'], 'Alice comment to Bob answer'), alice, 'Register alice comment to Alice question->Bob answer')
+        e[1]['comments'].append({'id': '#var aq_ac', 'post_time': '#ignore',
                                  'user': 'alice', 'ipfs_link': 'Comment to Alice question'})
         e[1]['answers'][0]['comments'].append(
-            {'id': '#var aq_aa_ac', 'registration_time': '#ignore', 'user': 'alice', 'ipfs_link': 'Alice comment to Alice answer'})
+            {'id': '#var aq_aa_ac', 'post_time': '#ignore', 'user': 'alice', 'ipfs_link': 'Alice comment to Alice answer'})
         e[1]['answers'][0]['comments'].append(
-            {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
+            {'id': '#var aq_aa_bc', 'post_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
         e[1]['answers'][1]['comments'].append(
-            {'id': '#var aq_ba_ac', 'registration_time': '#ignore', 'user': 'alice', 'ipfs_link': 'Alice comment to Bob answer'})
-        t = self.table("question", "allquestions")
+            {'id': '#var aq_ba_ac', 'post_time': '#ignore', 'user': 'alice', 'ipfs_link': 'Alice comment to Bob answer'})
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, ignore_excess=True))
-        info("Table after action", t)
+        info('Table after action', t)
         end()
 
     def test_modify_comment(self):
-        begin("Modify comment")
+        begin('Modify comment')
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.action('regcomment', cbody(
-            bob, var['aq'], ipfs='Comment to Alice question'), bob, "Register bob comment to Alice question")
-        self.action('regcomment', cbody(
-            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, "Register bob comment to Alice question->Alice answer")
-        e[1]['comments'].append({'id': '#var aq_bc', 'registration_time': '#ignore',
+        self.action('postcomment', cbody(
+            bob, var['aq'], ipfs='Comment to Alice question'), bob, 'Register bob comment to Alice question')
+        self.action('postcomment', cbody(
+            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, 'Register bob comment to Alice question->Alice answer')
+        e[1]['comments'].append({'id': '#var aq_bc', 'post_time': '#ignore',
                                  'user': 'bob', 'ipfs_link': 'Comment to Alice question'})
         e[1]['answers'][0]['comments'].append(
-            {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
-        t = self.table("question", "allquestions")
+            {'id': '#var aq_aa_bc', 'post_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.action('modcomment', cbody(
-            bob, var['aq'], ipfs='updated Bob comment to Alice question', c_id=var['aq_bc']), bob, "Update bob comment to Alice question")
+            bob, var['aq'], ipfs='updated Bob comment to Alice question', c_id=var['aq_bc']), bob, 'Update bob comment to Alice question')
         self.action('modcomment', cbody(
-            bob, var['aq'], var['aq_aa'], 'updated Bob comment to Alice answer', c_id=var['aq_aa_bc']), bob, "Update bob comment to Alice question->Alice answer")
+            bob, var['aq'], var['aq_aa'], 'updated Bob comment to Alice answer', c_id=var['aq_aa_bc']), bob, 'Update bob comment to Alice question->Alice answer')
         e[1]['comments'][0]['ipfs_link'] = 'updated Bob comment to Alice question'
         e[1]['answers'][0]['comments'][0]['ipfs_link'] = 'updated Bob comment to Alice answer'
-        t = self.table("question", "allquestions")
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
-        info("Table after action", t)
+        info('Table after action', t)
         end()
 
     def test_delete_comment(self):
-        begin("Delete comment")
-        begin("Register comment")
+        begin('Delete comment')
+        begin('Register comment')
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.action('regcomment', cbody(
-            bob, var['aq'], ipfs='Comment to Alice question'), bob, "Register bob comment: Alice question")
-        self.action('regcomment', cbody(
-            alice, var['aq'], var['aq_aa'], 'Alice comment to Alice answer'), alice, "Register alice comment: Alice question->Alice answer")
-        self.action('regcomment', cbody(
-            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, "Register bob comment: Alice question->Alice answer")
-        self.action('regcomment', cbody(
-            alice, var['aq'], var['aq_ba'], 'Alice comment to Bob answer'), alice, "Register alice comment to Alice question->Bob answer")
-        e[1]['comments'].append({'id': '#var aq_bc', 'registration_time': '#ignore',
+        self.action('postcomment', cbody(
+            bob, var['aq'], ipfs='Comment to Alice question'), bob, 'Register bob comment: Alice question')
+        self.action('postcomment', cbody(
+            alice, var['aq'], var['aq_aa'], 'Alice comment to Alice answer'), alice, 'Register alice comment: Alice question->Alice answer')
+        self.action('postcomment', cbody(
+            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, 'Register bob comment: Alice question->Alice answer')
+        self.action('postcomment', cbody(
+            alice, var['aq'], var['aq_ba'], 'Alice comment to Bob answer'), alice, 'Register alice comment to Alice question->Bob answer')
+        e[1]['comments'].append({'id': '#var aq_bc', 'post_time': '#ignore',
                                  'user': 'bob', 'ipfs_link': 'Comment to Alice question'})
         e[1]['answers'][0]['comments'].append(
-            {'id': '#var aq_aa_ac', 'registration_time': '#ignore', 'user': 'alice', 'ipfs_link': 'Alice comment to Alice answer'})
+            {'id': '#var aq_aa_ac', 'post_time': '#ignore', 'user': 'alice', 'ipfs_link': 'Alice comment to Alice answer'})
         e[1]['answers'][0]['comments'].append(
-            {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
+            {'id': '#var aq_aa_bc', 'post_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
         e[1]['answers'][1]['comments'].append(
-            {'id': '#var aq_ba_ac', 'registration_time': '#ignore', 'user': 'alice', 'ipfs_link': 'Alice comment to Bob answer'})
-        t = self.table("question", "allquestions")
+            {'id': '#var aq_ba_ac', 'post_time': '#ignore', 'user': 'alice', 'ipfs_link': 'Alice comment to Bob answer'})
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         setvar(e, var)
         self.action('delcomment', cbody(
-            bob, var['aq'], c_id=var['aq_bc']), bob, "Delete bob comment to Alice question")
+            bob, var['aq'], c_id=var['aq_bc']), bob, 'Delete bob comment to Alice question')
         self.action('delcomment', cbody(
-            bob, var['aq'], var['aq_aa'], c_id=var['aq_aa_bc']), bob, "Dlete bob comment to Alice question->Alice answer")
+            bob, var['aq'], var['aq_aa'], c_id=var['aq_aa_bc']), bob, 'Dlete bob comment to Alice question->Alice answer')
         e[1]['comments'] = []
         del e[1]['answers'][0]['comments'][1]
-        t = self.table("question", "allquestions")
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
-        info("Table after action", t)
+        info('Table after action', t)
         end()
 
     def test_register_comment_from_non_existent_account_failed(self):
-        begin("Register comment from non-regidtered account", True)
+        begin('Register comment from non-regidtered account', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.get_non_registered_carol()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.failed_action('regcomment', cbody(carol, var['aq'], ipfs='test'), carol,
+        self.failed_action('postcomment', cbody(carol, var['aq'], ipfs='test'), carol,
                            'Attempt to register comment to question from non-registered account', 'assert')
-        self.failed_action('regcomment', cbody(carol, var['aq'], var['aq_ba'], 'test'), carol,
+        self.failed_action('postcomment', cbody(carol, var['aq'], var['aq_ba'], 'test'), carol,
                            'Attempt to register comment to answer from non-registered account' 'assert')
         end()
 
     def test_register_comment_another_auth_failed(self):
-        begin("Register comment using another auth", True)
+        begin('Register comment using another auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.failed_action('regcomment', cbody(bob, var['aq'], ipfs='test'), alice,
+        self.failed_action('postcomment', cbody(bob, var['aq'], ipfs='test'), alice,
                            'Attempt to register comment to question with another owner auth', 'auth')
-        self.failed_action('regcomment', cbody(bob, var['aq'], var['aq_ba'], 'test'), alice,
+        self.failed_action('postcomment', cbody(bob, var['aq'], var['aq_ba'], 'test'), alice,
                            'Attempt to register comment to answer with another owner auth' 'auth')
         end()
 
     def test_modify_comment_another_auth_failed(self):
-        begin("Call modify comment with another owner auth", True)
+        begin('Call modify comment with another owner auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.action('regcomment', cbody(
-            bob, var['aq'], ipfs='Comment to Alice question'), bob, "Register bob comment to Alice question")
-        self.action('regcomment', cbody(
-            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, "Register bob comment to Alice question->Alice answer")
-        e[1]['comments'].append({'id': '#var aq_bc', 'registration_time': '#ignore',
+        self.action('postcomment', cbody(
+            bob, var['aq'], ipfs='Comment to Alice question'), bob, 'Register bob comment to Alice question')
+        self.action('postcomment', cbody(
+            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, 'Register bob comment to Alice question->Alice answer')
+        e[1]['comments'].append({'id': '#var aq_bc', 'post_time': '#ignore',
                                  'user': 'bob', 'ipfs_link': 'Comment to Alice question'})
         e[1]['answers'][0]['comments'].append(
-            {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
-        t = self.table("question", "allquestions")
+            {'id': '#var aq_aa_bc', 'post_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('modcomment', cbody(
             bob, var['aq'], ipfs='test', c_id=var['aq_bc']), alice,
@@ -153,19 +152,19 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_delete_comment_another_auth_failed(self):
-        begin("Call modify comment with another owner auth", True)
+        begin('Call modify comment with another owner auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.action('regcomment', cbody(
-            bob, var['aq'], ipfs='Comment to Alice question'), bob, "Register bob comment to Alice question")
-        self.action('regcomment', cbody(
-            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, "Register bob comment to Alice question->Alice answer")
-        e[1]['comments'].append({'id': '#var aq_bc', 'registration_time': '#ignore',
+        self.action('postcomment', cbody(
+            bob, var['aq'], ipfs='Comment to Alice question'), bob, 'Register bob comment to Alice question')
+        self.action('postcomment', cbody(
+            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, 'Register bob comment to Alice question->Alice answer')
+        e[1]['comments'].append({'id': '#var aq_bc', 'post_time': '#ignore',
                                  'user': 'bob', 'ipfs_link': 'Comment to Alice question'})
         e[1]['answers'][0]['comments'].append(
-            {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
-        t = self.table("question", "allquestions")
+            {'id': '#var aq_aa_bc', 'post_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('delcomment', cbody(
             bob, var['aq'], c_id=var['aq_bc']), alice,
@@ -176,20 +175,20 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_modify_comment_of_another_owner_failed(self):
-        begin("Modify comment of another owner", True)
+        begin('Modify comment of another owner', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.action('regcomment', cbody(
-            bob, var['aq'], ipfs='Comment to Alice question'), bob, "Register bob comment to Alice question")
-        self.action('regcomment', cbody(
-            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, "Register bob comment to Alice question->Alice answer")
-        e[1]['comments'].append({'id': '#var aq_bc', 'registration_time': '#ignore',
+        self.action('postcomment', cbody(
+            bob, var['aq'], ipfs='Comment to Alice question'), bob, 'Register bob comment to Alice question')
+        self.action('postcomment', cbody(
+            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, 'Register bob comment to Alice question->Alice answer')
+        e[1]['comments'].append({'id': '#var aq_bc', 'post_time': '#ignore',
                                  'user': 'bob', 'ipfs_link': 'Comment to Alice question'})
         e[1]['answers'][0]['comments'].append(
-            {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
-        t = self.table("question", "allquestions")
+            {'id': '#var aq_aa_bc', 'post_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('modcomment', cbody(
             carol, var['aq'], ipfs='test', c_id=var['aq_bc']), carol,
@@ -201,20 +200,20 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
 
 
     def test_delete_comment_of_another_owner_failed(self):
-        begin("Delete comment of another owner", True)
+        begin('Delete comment of another owner', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.action('regcomment', cbody(
-            bob, var['aq'], ipfs='Comment to Alice question'), bob, "Register bob comment to Alice question")
-        self.action('regcomment', cbody(
-            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, "Register bob comment to Alice question->Alice answer")
-        e[1]['comments'].append({'id': '#var aq_bc', 'registration_time': '#ignore',
+        self.action('postcomment', cbody(
+            bob, var['aq'], ipfs='Comment to Alice question'), bob, 'Register bob comment to Alice question')
+        self.action('postcomment', cbody(
+            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, 'Register bob comment to Alice question->Alice answer')
+        e[1]['comments'].append({'id': '#var aq_bc', 'post_time': '#ignore',
                                  'user': 'bob', 'ipfs_link': 'Comment to Alice question'})
         e[1]['answers'][0]['comments'].append(
-            {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
-        t = self.table("question", "allquestions")
+            {'id': '#var aq_aa_bc', 'post_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('delcomment', cbody(
             carol, var['aq'], c_id=var['aq_bc']), carol,
@@ -225,166 +224,166 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_modify_non_existent_comment_failed(self):
-        begin("Test modify non existent comment", True)
+        begin('Test modify non existent comment', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.action('regcomment', cbody(
-            bob, var['aq'], ipfs='Comment to Alice question'), bob, "Register bob comment to Alice question")
-        self.action('regcomment', cbody(
-            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, "Register bob comment to Alice question->Alice answer")
-        e[1]['comments'].append({'id': '#var aq_bc', 'registration_time': '#ignore',
+        self.action('postcomment', cbody(
+            bob, var['aq'], ipfs='Comment to Alice question'), bob, 'Register bob comment to Alice question')
+        self.action('postcomment', cbody(
+            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, 'Register bob comment to Alice question->Alice answer')
+        e[1]['comments'].append({'id': '#var aq_bc', 'post_time': '#ignore',
                                  'user': 'bob', 'ipfs_link': 'Comment to Alice question'})
         e[1]['answers'][0]['comments'].append(
-            {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
-        t = self.table("question", "allquestions")
+            {'id': '#var aq_aa_bc', 'post_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('modcomment', cbody(
-                            bob, var['aq'], ipfs = 'test', c_id=var['aq_bc']+1), bob,
+                            bob, var['aq'], ipfs = 'test', c_id=var['aq_bc'] + 1), bob,
                             'Attempt to modify non-existent comment to question', 'assert')
         self.failed_action('modcomment', cbody(
-                            bob, var['aq'], var['aq_aa'], ipfs = 'test', c_id=var['aq_aa_bc']+1),  bob,
+                            bob, var['aq'], var['aq_aa'], ipfs = 'test', c_id=var['aq_aa_bc'] + 1),  bob,
                             'Attempt to modify non-existent comment to answer' 'assert')
         end()
 
 
     def test_delete_non_existent_comment_failed(self):
-        begin("Test delete non existent comment", True)
+        begin('Test delete non existent comment', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.action('regcomment', cbody(
-            bob, var['aq'], ipfs='Comment to Alice question'), bob, "Register bob comment to Alice question")
-        self.action('regcomment', cbody(
-            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, "Register bob comment to Alice question->Alice answer")
-        e[1]['comments'].append({'id': '#var aq_bc', 'registration_time': '#ignore',
+        self.action('postcomment', cbody(
+            bob, var['aq'], ipfs='Comment to Alice question'), bob, 'Register bob comment to Alice question')
+        self.action('postcomment', cbody(
+            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, 'Register bob comment to Alice question->Alice answer')
+        e[1]['comments'].append({'id': '#var aq_bc', 'post_time': '#ignore',
                                  'user': 'bob', 'ipfs_link': 'Comment to Alice question'})
         e[1]['answers'][0]['comments'].append(
-            {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
-        t = self.table("question", "allquestions")
+            {'id': '#var aq_aa_bc', 'post_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('delcomment', cbody(
-            bob, var['aq'], c_id=var['aq_bc']+1), bob,
+            bob, var['aq'], c_id=var['aq_bc'] + 1), bob,
             'Attempt to delete non-existent comment to question', 'assert')
         self.failed_action('delcomment', cbody(
-            bob, var['aq'], var['aq_aa'], c_id=var['aq_aa_bc']+1),  bob,
+            bob, var['aq'], var['aq_aa'], c_id=var['aq_aa_bc'] + 1),  bob,
             'Attempt to delete non-existent comment to answer' 'assert')
         end()
 
     def test_register_comment_to_non_existent_question_and_answer_failed(self):
-        begin("Register comment to non existent question and answer failed", True)
+        begin('Register comment to non existent question and answer failed', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.get_non_registered_carol()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.failed_action('regcomment', cbody(carol, var['aq']+10, ipfs='test'), carol,
+        self.failed_action('postcomment', cbody(carol, var['aq'] + 10, ipfs='test'), carol,
                            'Attempt to register comment to non-existent question', 'assert')
-        self.failed_action('regcomment', cbody(carol, var['aq'], var['aq_ba']+10, 'test'), carol,
+        self.failed_action('postcomment', cbody(carol, var['aq'], var['aq_ba'] + 10, 'test'), carol,
                            'Attempt to register comment to non-existent answer' 'assert')
         end()
 
 
     def test_modify_comment_to_non_existent_question_and_answer_failed(self):
-        begin("Test modify comment to non-existent question or answer", True)
+        begin('Test modify comment to non-existent question or answer', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.action('regcomment', cbody(
-            bob, var['aq'], ipfs='Comment to Alice question'), bob, "Register bob comment to Alice question")
-        self.action('regcomment', cbody(
-            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, "Register bob comment to Alice question->Alice answer")
-        e[1]['comments'].append({'id': '#var aq_bc', 'registration_time': '#ignore',
+        self.action('postcomment', cbody(
+            bob, var['aq'], ipfs='Comment to Alice question'), bob, 'Register bob comment to Alice question')
+        self.action('postcomment', cbody(
+            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, 'Register bob comment to Alice question->Alice answer')
+        e[1]['comments'].append({'id': '#var aq_bc', 'post_time': '#ignore',
                                  'user': 'bob', 'ipfs_link': 'Comment to Alice question'})
         e[1]['answers'][0]['comments'].append(
-            {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
-        t = self.table("question", "allquestions")
+            {'id': '#var aq_aa_bc', 'post_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('modcomment', cbody(
-                            bob, var['aq']+10, ipfs = 'test', c_id=var['aq_bc']), bob,
+                            bob, var['aq'] + 10, ipfs = 'test', c_id=var['aq_bc']), bob,
                             'Attempt to modify comment to non-existent question', 'assert')
         self.failed_action('modcomment', cbody(
-                            bob, var['aq'], var['aq_aa']+10, ipfs = 'test', c_id=var['aq_aa_bc']),  bob,
+                            bob, var['aq'], var['aq_aa'] + 10, ipfs = 'test', c_id=var['aq_aa_bc']),  bob,
                             'Attempt to modify comment to non-existent answer' 'assert')
         end()
 
     def test_delete_comment_to_non_existent_question_and_answer_failed(self):
-        begin("Test delete comment to non-existent question or answer", True)
+        begin('Test delete comment to non-existent question or answer', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.action('regcomment', cbody(
-            bob, var['aq'], ipfs='Comment to Alice question'), bob, "Register bob comment to Alice question")
-        self.action('regcomment', cbody(
-            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, "Register bob comment to Alice question->Alice answer")
-        e[1]['comments'].append({'id': '#var aq_bc', 'registration_time': '#ignore',
+        self.action('postcomment', cbody(
+            bob, var['aq'], ipfs='Comment to Alice question'), bob, 'Register bob comment to Alice question')
+        self.action('postcomment', cbody(
+            bob, var['aq'], var['aq_aa'], 'Bob comment to Alice answer'), bob, 'Register bob comment to Alice question->Alice answer')
+        e[1]['comments'].append({'id': '#var aq_bc', 'post_time': '#ignore',
                                  'user': 'bob', 'ipfs_link': 'Comment to Alice question'})
         e[1]['answers'][0]['comments'].append(
-            {'id': '#var aq_aa_bc', 'registration_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
-        t = self.table("question", "allquestions")
+            {'id': '#var aq_aa_bc', 'post_time': '#ignore', 'user': 'bob', 'ipfs_link': 'Bob comment to Alice answer'})
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('delcomment', cbody(
-                            bob, var['aq']+10, c_id=var['aq_bc']), bob,
+                            bob, var['aq'] + 10, c_id=var['aq_bc']), bob,
                             'Attempt to delete comment to non-existent question', 'assert')
         self.failed_action('delcomment', cbody(
-                            bob, var['aq'], var['aq_aa']+10, c_id=var['aq_aa_bc']),  bob,
+                            bob, var['aq'], var['aq_aa'] + 10, c_id=var['aq_aa_bc']),  bob,
                             'Attempt to delte comment to non-existent answer' 'assert')
         end()
 
     def _create_basic_hierarchy(self, alice, bob):
-        self.action('regquestion', {'user': 'alice', 'ipfs_link': 'Alice question'}, alice,
+        self.action('postquestion', {'user': 'alice', 'ipfs_link': 'Alice question'}, alice,
                     'Asking question from alice with text "Alice question"')
         e = ['#ignoreorder', {
             'id': '#var aq',
             'user': 'alice',
                     'ipfs_link': 'Alice question',
-                    'registration_time': '#ignore',
-                    "answers": [],
-                    "comments": []
+                    'post_time': '#ignore',
+                    'answers': [],
+                    'comments': []
         }]
 
-        t = self.table("question", "allquestions")
+        t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
-        self.action('reganswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'Alice answer to herself'},
+        self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'Alice answer to herself'},
                     alice, '  |-->Answer to alice from alice: "Alice answer to herself"')
-        self.action('reganswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'Bob answer to alice'},
+        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'Bob answer to alice'},
                     bob, '  `->Answer to alice from bob: "Bob answer to alice"')
         e[1]['answers'].append({
             'id': '#var aq_aa',
             'user': 'alice',
             'ipfs_link': 'Alice answer to herself',
-            'registration_time': '#ignore',
-            "comments": []})
+            'post_time': '#ignore',
+            'comments': []})
         e[1]['answers'].append({
             'id': '#var aq_ba',
             'user': 'bob',
             'ipfs_link': 'Bob answer to alice',
-            'registration_time': '#ignore',
-            "comments": []})
-        self.action('regquestion', {'user': 'bob', 'ipfs_link': 'Bob question'}, bob,
+            'post_time': '#ignore',
+            'comments': []})
+        self.action('postquestion', {'user': 'bob', 'ipfs_link': 'Bob question'}, bob,
                     'Asking question from bob with text "Bob question"')
         e.append({
             'id': '#var bq',
             'user': 'bob',
             'ipfs_link': 'Bob question',
-            'registration_time': '#ignore',
-            "answers": [],
-            "comments": []})
-        t = self.table("question", "allquestions")
+            'post_time': '#ignore',
+            'answers': [],
+            'comments': []})
+        t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
-        self.action('reganswer', {'user': 'alice', 'question_id': var['bq'], 'ipfs_link': 'Alice answer to bob'},
+        self.action('postanswer', {'user': 'alice', 'question_id': var['bq'], 'ipfs_link': 'Alice answer to bob'},
                     alice, '  `->Answer to bob from alice: "Alice answer to bob"')
         e[2]['answers'].append({
             'id': '#var bq_aa',
             'user': 'alice',
             'ipfs_link': 'Alice answer to bob',
-            'registration_time': '#ignore',
-            "comments": []})
-        t = self.table("question", "allquestions")
+            'post_time': '#ignore',
+            'comments': []})
+        t = self.table('question', 'allquestions')
         setvar(e, var)
         self.assertTrue(compare(e, t, var, True))
         return e, var
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

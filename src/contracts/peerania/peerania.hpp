@@ -5,11 +5,13 @@
 #include "access.hpp"
 #include "account.hpp"
 #include "display_name.hpp"
+#include "economy.h"
 #include "history.hpp"
-#include "peerania_utils.hpp"
 #include "property.hpp"
 #include "question_container.hpp"
-#include "economy.h"
+#include "utils.hpp"
+
+#define DEBUG
 
 namespace eosio {
 
@@ -41,20 +43,20 @@ class peerania : public contract {
   ///@abi action
   void setdispname(account_name owner, std::string display_name);
 
-  // Register question
+  // Post question
   ///@abi action
-  void regquestion(account_name user, std::string ipfs_link);
+  void postquestion(account_name user, std::string ipfs_link);
 
-  // Register answer(answer question)
+  // Post answer(answer question)
   ///@abi action
-  void reganswer(account_name user, uint64_t question_id,
+  void postanswer(account_name user, uint64_t question_id,
                  std::string ipfs_link);
 
-  // Register comment
+  // Post comment
   // If the answer_id set to 0 comment question, otherwise comment question with
   // passed answer_id
   ///@abi action
-  void regcomment(account_name user, uint64_t question_id, uint16_t answer_id,
+  void postcomment(account_name user, uint64_t question_id, uint16_t answer_id,
                   const std::string &ipfs_link);
 
   // Delete question
@@ -94,17 +96,15 @@ class peerania : public contract {
   void downvote(account_name user, uint64_t question_id, uint16_t answer_id);
 
   // Vote for deletion
-  // reason - code
   // if (answer_id == 0) delete question(by question_id)
   // elif (comment_id == 0) delete answer question(question_id)->answer(by
   // answer_id) elif delete comment
   // question(question_id)->answer(answer_id)->comment(by comment_id)
   ///@abi action
   void votedelete(account_name user, uint64_t question_id, uint16_t answer_id,
-                  uint16_t comment_id, uint8_t reason);
+                  uint16_t comment_id);
 
   // Vote for moderation
-  // reason - code
   // if (answer_id == 0) delete question(by question_id)
   // elif (comment_id == 0) delete answer question(question_id)->answer(by
   // answer_id) elif delete comment
@@ -118,15 +118,27 @@ class peerania : public contract {
   void mrkascorrect(account_name user, uint64_t question_id,
                     uint16_t answer_id);
 
-  //Debug methods
-  void setaccrating(account_name user, uint16_t rating);
+  // Debug methoods
+#ifdef DEBUG
+  // Set account rating and moderation points count
+  ///@abi action
+  void setaccrtmpc(account_name user, uint16_t rating,
+                   uint16_t moderation_points);
+#endif
 
  private:
-  static const scope_name all_questions = N(allquestions);
-
-  multi_index<N(account), account> account_table;
-
   question_index question_table;
+
+  account_index account_table;
+
+  void register_account(account_name owner, std::string display_name,
+                        const std::string &ipfs_profile);
+
+  void set_account_ipfs_profile(account_name owner,
+                                const std::string &ipfs_profile);
+
+  void set_account_display_name(account_name owner,
+                                const std::string &display_name);
 
   void set_account_string_property(account_name owner, uint8_t key,
                                    const std::string &value);
@@ -134,54 +146,51 @@ class peerania : public contract {
   void set_account_integer_property(account_name owner, uint8_t key,
                                     int32_t value);
 
-  inline void set_account_ipfs_profile(account_name owner,
-                                       const std::string &ipfs_profile);
-
   inline void add_display_name_to_map(account_name owner,
                                       const std::string &display_name);
 
   inline void remove_display_name_from_map(account_name owner,
                                            const std::string &display_name);
 
-  // Checking that the account does exist
-  inline void require_for_an_account(account_name owner);
+  inline account_index::const_iterator find_account(account_name owner);
 
-  inline void register_question(account_name user,
+  inline question_index::const_iterator find_question(uint64_t question_id);
+
+  inline void post_question(account_name user,
                                 const std::string &ipfs_link);
 
-  void register_answer(account_name user, uint64_t question_id,
+  void post_answer(account_name user, uint64_t question_id,
                        const std::string &ipfs_link);
 
-  void register_comment(account_name user, uint64_t question_id,
+  void post_comment(account_name user, uint64_t question_id,
                         uint16_t answer_id, const std::string &ipfs_link);
 
-  void delete_question(uint64_t question_id, const access &action_access);
+  void delete_question(account_name user, uint64_t question_id);
 
-  void delete_answer(uint64_t question_id, uint16_t answer_id,
-                     const access &action_access);
+  void delete_answer(account_name user, uint64_t question_id,
+                     uint16_t answer_id);
 
-  void delete_comment(uint64_t question_id, uint16_t answer_id,
-                      uint64_t comment_id, const access &action_access);
+  void delete_comment(account_name user, uint64_t question_id,
+                      uint16_t answer_id, uint64_t comment_id);
 
-  void modify_question(uint64_t question_id, const std::string &ipfs_link,
-                       const access &action_access);
+  void modify_question(account_name user, uint64_t question_id,
+                       const std::string &ipfs_link);
 
-  void modify_answer(uint64_t question_id, uint16_t answer_id,
-                     const std::string &ipfs_link, const access &action_access);
+  void modify_answer(account_name user, uint64_t question_id,
+                     uint16_t answer_id, const std::string &ipfs_link);
 
-  void modify_comment(uint64_t question_id, uint16_t answer_id,
-                      uint16_t comment_id, const std::string &ipfs_link,
-                      const access &action_access);
+  void modify_comment(account_name user, uint64_t question_id,
+                      uint16_t answer_id, uint16_t comment_id,
+                      const std::string &ipfs_link);
 
-  void vote(uint64_t question_id, uint16_t answer_id,
-            const access &action_access, bool);
+  void vote(account_name user, uint64_t question_id, uint16_t answer_id,
+            bool is_upvote);
 
-  void mark_answer_as_correct(uint64_t question_id, uint16_t answer_id,
-                              const access &action_access);
+  void mark_answer_as_correct(account_name user, uint64_t question_id,
+                              uint16_t answer_id);
 
-  void vote_for_deletion(uint64_t question_id, uint16_t answer_id,
-                         uint16_t comment_id, uint8_t reason,
-                         const access &action_access);
+  void vote_for_deletion(account_name user, uint64_t question_id,
+                         uint16_t answer_id, uint16_t comment_id);
 };
 
 }  // namespace eosio

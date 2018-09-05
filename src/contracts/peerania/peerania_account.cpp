@@ -18,7 +18,7 @@ void peerania::register_account(account_name owner, std::string display_name,
 }
 
 void peerania::set_account_string_property(account_name owner, uint8_t key,
-                                            const std::string &value) {
+                                           const std::string &value) {
   // Check is key user-changeble
   auto iter_account = find_account(owner);
   assert_allowed(*iter_account, Action::SET_ACCOUNT_PROPERTY);
@@ -46,14 +46,16 @@ void peerania::set_account_ipfs_profile(account_name owner,
   });
 }
 
-void peerania::set_account_display_name(account_name owner, const std::string &display_name){
+void peerania::set_account_display_name(account_name owner,
+                                        const std::string &display_name) {
   eosio_assert(display_name.length() >= MIN_DISPLAY_NAME_LEN,
                "The display name too short.");
   auto iter_account = find_account(owner);
   assert_allowed(*iter_account, Action::SET_ACCOUNT_DISPLAYNAME);
   remove_display_name_from_map(owner, iter_account->display_name);
-  account_table.modify(iter_account, _self,
-                       [display_name](auto &account) { account.display_name = display_name; });
+  account_table.modify(iter_account, _self, [display_name](auto &account) {
+    account.display_name = display_name;
+  });
   add_display_name_to_map(owner, display_name);
 }
 
@@ -73,6 +75,22 @@ void peerania::remove_display_name_from_map(account_name owner,
   eosio_assert(itr_disptoacc != dtatable.end(), "display_name not found");
   dtatable.erase(itr_disptoacc);
   eosio_assert(itr_disptoacc != dtatable.end(), "Address not erased properly");
+}
+
+void peerania::update_rating(account_index::const_iterator iter_account, int rating_change) {
+  if(rating_change == 0)
+    return;
+  account_table.modify(iter_account, _self, [rating_change](auto &account) {
+    account.rating += rating_change;
+  });
+}
+
+void peerania::update_rating(account_name user, int rating_change) {
+  if(rating_change == 0)
+    return;
+  account_table.modify(find_account(user), _self, [rating_change](auto &account) {
+    account.rating += rating_change;
+  });
 }
 
 multi_index<N(account), account>::const_iterator peerania::find_account(

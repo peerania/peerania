@@ -16,6 +16,17 @@
 // the action will applied to the answer
 #define APPLY_TO_ANSWER 0
 
+#define ANSWER_INDEX_START 1
+#define COMMENT_INDEX_START 1
+
+#ifndef DEBUG
+  #define MAX_ANSWER_COUNT 200
+  #define MAX_COMMENT_COUNT 200
+#else
+  #define MAX_ANSWER_COUNT 4
+  #define MAX_COMMENT_COUNT 4
+#endif
+
 #define PROPERTY_DELETION_VOTES 0
 #define PROPERTY_MODERATION_VOTES 1
 

@@ -2,6 +2,7 @@
 #include "peerania_account.cpp"
 #include "peerania_forum.cpp"
 #include "peerania_vote.cpp"
+
 namespace eosio {
 
 void peerania::registeracc(account_name owner, std::string display_name,
@@ -37,13 +38,13 @@ void peerania::postquestion(account_name user, std::string ipfs_link) {
 }
 
 void peerania::postanswer(account_name user, uint64_t question_id,
-                         std::string ipfs_link) {
+                          std::string ipfs_link) {
   require_auth(user);
   post_answer(user, question_id, ipfs_link);
 }
 
 void peerania::postcomment(account_name user, uint64_t question_id,
-                          uint16_t answer_id, const std::string &ipfs_link) {
+                           uint16_t answer_id, const std::string &ipfs_link) {
   require_auth(user);
   post_comment(user, question_id, answer_id, ipfs_link);
 }
@@ -52,6 +53,7 @@ void peerania::delquestion(account_name user, uint64_t question_id) {
   require_auth(user);
   delete_question(user, question_id);
 }
+
 void peerania::delanswer(account_name user, uint64_t question_id,
                          uint16_t answer_id) {
   require_auth(user);
@@ -63,6 +65,7 @@ void peerania::delcomment(account_name user, uint64_t question_id,
   require_auth(user);
   delete_comment(user, question_id, answer_id, comment_id);
 }
+
 void peerania::modquestion(account_name user, uint64_t question_id,
                            const std::string &ipfs_link) {
   require_auth(user);
@@ -119,6 +122,7 @@ void peerania::setaccrtmpc(account_name user, uint16_t rating,
   });
 }
 #endif
+
 }  // namespace eosio
 
 #ifndef DEBUG

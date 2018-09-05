@@ -11,10 +11,7 @@
 #include "question_container.hpp"
 #include "utils.hpp"
 
-#define DEBUG
-
 namespace eosio {
-
 class peerania : public contract {
  public:
   peerania(account_name self)
@@ -191,6 +188,12 @@ class peerania : public contract {
 
   void vote_for_deletion(account_name user, uint64_t question_id,
                          uint16_t answer_id, uint16_t comment_id);
-};
 
+  inline void update_rating(account_index::const_iterator iter_account, int rating_change);
+
+  inline void update_rating(account_name user, int rating_change);
+
+};
 }  // namespace eosio
+
+

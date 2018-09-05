@@ -6,14 +6,14 @@
 
 ///@abi table
 struct account {
-  table_name owner;
+  account_name owner;
   // mandatory fields
   std::string display_name;
   std::string ipfs_profile;
   time registration_time;
   std::vector<str_key_value> string_properties;
   std::vector<int_key_value> integer_properties;
-  uint16_t rating = 0;
+  int16_t rating = 0;
   uint16_t moderation_points = 0;
   uint64_t primary_key() const { return owner; }
   EOSLIB_SERIALIZE(account,

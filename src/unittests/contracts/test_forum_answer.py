@@ -175,7 +175,7 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
                                   'question_id': var['q1_id'],
                                   'answer_id': var['q1_a1_id'],
                                   'ipfs_link': 'test'},
-                    carol, 'Attempt to modify bob answer with carol auth', 'assert')
+                    carol, 'Attempt to modify bob answer with carol account', 'assert')
         end()
 
     def test_delete_answer_of_another_owner_failed(self):

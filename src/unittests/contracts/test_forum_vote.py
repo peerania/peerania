@@ -17,25 +17,26 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
                 self.assertTrue(value == 0)
         setvar(e, var, 'aq_rating')
         self.action('upvote', {
-                    'user': 'alice', 'question_id': var['aq'], 'answer_id': 0}, alice, 'Alice upvote for Alice question')
+                    'user': 'bob', 'question_id': var['aq'], 'answer_id': 0}, bob, 'Bob upvote Alice question')
         self.action('upvote', {
-                    'user': 'carol', 'question_id': var['aq'], 'answer_id': 0}, carol, 'Carol upvote for Alice question')
+                    'user': 'carol', 'question_id': var['aq'], 'answer_id': 0}, carol, 'Carol upvote Alice question')
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_rating'] == 2)
         info('Now Alice question rating is 2')
         self.action('downvote', {
-                    'user': 'alice', 'question_id': var['aq'], 'answer_id': 0}, alice, 'Alice downvote for Alice question')
+                    'user': 'bob', 'question_id': var['aq'], 'answer_id': 0}, bob, 'Bob downvote Alice question')
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_rating'] == 0)
         info('Now Alice question rating is 0')
         self.action('downvote', {
-                    'user': 'carol', 'question_id': var['aq'], 'answer_id': 0}, carol, 'Carol downvote for Alice question')
+                    'user': 'carol', 'question_id': var['aq'], 'answer_id': 0}, carol, 'Carol downvote Alice question')
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_rating'] == -2)
         info('Now Alice question rating is -2')
+        end()
 
     def test_vote_answer(self):
         begin('Test vote answer')
@@ -68,6 +69,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_ba_rating'] == -2)
         info('Now Alice question->Bob answer rating is -2')
+        end()
 
     def test_remove_vote_answer(self):
         begin('Test remove vote answer')
@@ -105,6 +107,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_ba_rating'] == 0)
         info('Now Alice question->Bob answer rating is 0')
+        end()
 
     def test_remove_vote_question(self):
         begin('Test remove vote question')
@@ -142,6 +145,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_rating'] == 0)
         info('Now Alice question rating is 0')
+        end()
 
     def test_mark_answer_as_correct(self):
         begin('Test mark answer as correct')
@@ -163,12 +167,26 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_caid'] == var['aq_aa'])
-        self.wait()
         self.action('mrkascorrect', {
-                    'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_aa']}, alice, 'Alice unmark herself answer as correct')
+                    'user': 'alice', 'question_id': var['aq'], 'answer_id': 0}, alice, 'Alice remove correct answer mark')
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_caid'] == 0)
+        end()
+
+    def vote_for_own_item_failed(self):
+        begin("Vote for own item", True)
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        (e, var) = self._create_basic_hierarchy(alice, bob)
+        self.failed_action('upvote', {'user': 'alice', 'question_id': var['aq'], 'answer_id': 0},
+                           alice, 'Attempt to upvote own question', 'assert')
+        self.failed_action('downvote', {'user': 'alice', 'question_id': var['aq'], 'answer_id': 0},
+                           alice, 'Attempt to downvote own question', 'assert')
+        self.failed_action('upvote', {'user': 'bob', 'question_id': var['aq'], 'answer_id': var[
+                           'aq_ba']}, bob, 'Attempt to upvote own answer', 'assert')
+        self.failed_action('downvote', {'user': 'bob', 'question_id': var['aq'], 'answer_id': var[
+                           'aq_ba']}, bob, 'Attempt to downvote own answer', 'assert')
         end()
 
     def test_vote_from_non_existent_account_failed(self):
@@ -209,7 +227,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
         self.failed_action('mrkascorrect', {
-                    'user': 'bob', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, bob, 'Bob attempt to mark bob answer as correct for Alice question', 'assert')
+            'user': 'bob', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, bob, 'Bob attempt to mark bob answer as correct for Alice question', 'assert')
         end()
 
     def test_mark_answer_as_correct_another_auth(self):
@@ -218,7 +236,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
         self.failed_action('mrkascorrect', {
-                    'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, bob, 'Attempt to mark bob answer as correct for Alice question with bob auth', 'auth')
+            'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, bob, 'Attempt to mark bob answer as correct for Alice question with bob auth', 'auth')
         end()
 
     def test_vote_non_existent_item(self):
@@ -242,7 +260,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
         self.failed_action('mrkascorrect', {
-                    'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba'] + 10}, alice, 'Attempt to mark non-existent answer as correct', 'assert')
+            'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba'] + 10}, alice, 'Attempt to mark non-existent answer as correct', 'assert')
         end()
 
     def _create_basic_hierarchy(self, alice, bob):
@@ -306,6 +324,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         return e, var
+
 
 if __name__ == '__main__':
     main()

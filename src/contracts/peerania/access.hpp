@@ -16,7 +16,8 @@ enum Action {
   SET_ACCOUNT_PROPERTY,
   SET_ACCOUNT_IPFS_PROFILE,
   SET_ACCOUNT_DISPLAYNAME,
-  VOTE,
+  UPVOTE,
+  DOWNVOTE,
   MARK_ANSWER_AS_CORRECT,
   VOTE_FOR_DELETION,
   VOTE_FOR_MODERATION
@@ -30,8 +31,14 @@ void assert_allowed(const account &action_caller, Action action) {}
 void assert_allowed(const account &action_caller, account_name data_owner,
                     Action action) {
   switch (action) {
+    case UPVOTE:
+      eosio_assert(action_caller.owner != data_owner, "You cant vote for your own items");
+      break;
+    case DOWNVOTE:
+      eosio_assert(action_caller.owner != data_owner, "You cant vote for your own items");
+      break;
     case VOTE_FOR_DELETION:
-      eosio_assert(action_caller.owner != data_owner, "Action not allowed");
+      eosio_assert(action_caller.owner != data_owner, "You cant vote for deletion of your own items");
       break;
     default:
       eosio_assert(action_caller.owner == data_owner, "Action not allowed");

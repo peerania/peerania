@@ -56,7 +56,6 @@ def compare(expected, source, mp = {}, ignore_excess = False):
             else:
                 return True
             return False
-
     if isinstance(expected, str) and ('#var ' in expected) :
         mp[expected[5:]] = source
         return True
@@ -64,3 +63,19 @@ def compare(expected, source, mp = {}, ignore_excess = False):
     if (isinstance(expected, str) and ('#ignore' in expected)) or (expected == source):
         return True
     return False
+
+
+def find_by_field(e, field, value):
+    if isinstance(e, dict):
+        for key, val in e.items():
+            if key == field and val == value:
+                return e
+            fitem = find_by_field(val, field, value)
+            if fitem != None:
+                return fitem
+    if isinstance(e, list):
+        for item in e:
+            fitem = find_by_field(item, field, value)
+            if fitem != None:
+                return fitem
+        return None

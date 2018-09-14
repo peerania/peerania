@@ -168,7 +168,10 @@ class PeeraniaTest(unittest.TestCase):
             for line in ins:
                 spl = line.split(' ')
                 if len(spl) > 2 and spl[0]=='#define':
-                    defs[spl[1]] = int(spl[2])
+                    try:
+                        defs[spl[1]] = int(spl[2])
+                    except:
+                        continue
         return defs
 
 

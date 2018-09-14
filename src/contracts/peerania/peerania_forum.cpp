@@ -38,11 +38,7 @@ void peerania::post_answer(account_name user, uint64_t question_id,
   new_answer.ipfs_link = ipfs_link;
   new_answer.post_time = current_time_in_sec();
   question_table.modify(iter_question, _self, [&new_answer](auto &question) {
-    if (question.answers.empty())
-      new_answer.id = ANSWER_INDEX_START;
-    else
-      new_answer.id = question.answers.back().id + 1;
-    question.answers.push_back(new_answer);
+    push_new_forum_item(question.answers, new_answer);
   });
   update_rating(iter_account, POST_ANSWER_REWARD);
 }
@@ -59,23 +55,15 @@ void peerania::post_comment(account_name user, uint64_t question_id,
   new_comment.post_time = current_time_in_sec();
   question_table.modify(
       iter_question, _self, [answer_id, &new_comment](auto &question) {
-        if (answer_id == APPLY_TO_QUESTION) {
+        if (apply_to_question(answer_id)) {
           eosio_assert(question.comments.size() < MAX_ANSWER_COUNT,
                        "For this question reached comment count limit");
-          if (question.comments.empty())
-            new_comment.id = COMMENT_INDEX_START;
-          else
-            new_comment.id = question.comments.back().id + 1;
-          question.comments.push_back(new_comment);
+          push_new_forum_item(question.comments, new_comment);
         } else {
           auto iter_answer = find_answer(question, answer_id);
-          eosio_assert(iter_answer->comments.size() < MAX_ANSWER_COUNT,
+          eosio_assert(iter_answer->comments.size() < MAX_COMMENT_COUNT,
                        "For this answer reached comment count limit");
-          if (iter_answer->comments.empty())
-            new_comment.id = COMMENT_INDEX_START;
-          else
-            new_comment.id = iter_answer->comments.back().id + 1;
-          iter_answer->comments.push_back(new_comment);
+          push_new_forum_item(iter_answer->comments, new_comment);
         }
       });
   update_rating(iter_account, POST_COMMENT_REWARD);
@@ -85,7 +73,8 @@ void peerania::delete_question(account_name user, uint64_t question_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
   assert_allowed(*iter_account, iter_question->user, Action::DELETE_QUESTION);
-  eosio_assert(iter_question->answers.empty(), "You can't delete not empty question");
+  eosio_assert(iter_question->answers.empty(),
+               "You can't delete not empty question");
   question_table.erase(iter_question);
   eosio_assert(iter_question != question_table.end(),
                "Address not erased properly");
@@ -96,7 +85,8 @@ void peerania::delete_answer(account_name user, uint64_t question_id,
                              uint16_t answer_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
-  eosio_assert(iter_question->correct_answer_id != answer_id, "You can't delete this answer");
+  eosio_assert(iter_question->correct_answer_id != answer_id,
+               "You can't delete this answer");
   question_table.modify(
       iter_question, _self, [iter_account, answer_id](auto &question) {
         auto iter_answer = find_answer(question, answer_id);
@@ -113,7 +103,7 @@ void peerania::delete_comment(account_name user, uint64_t question_id,
   question_table.modify(
       iter_question, _self,
       [iter_account, answer_id, comment_id](auto &question) {
-        if (answer_id == APPLY_TO_QUESTION) {
+        if (apply_to_question(answer_id)) {
           auto iter_comment = find_comment(question, comment_id);
           assert_allowed(*iter_account, iter_comment->user,
                          Action::DELETE_COMMENT);
@@ -163,7 +153,7 @@ void peerania::modify_comment(account_name user, uint64_t question_id,
   question_table.modify(
       iter_question, _self,
       [iter_account, answer_id, comment_id, &ipfs_link](auto &question) {
-        if (answer_id == APPLY_TO_QUESTION) {
+        if (apply_to_question(answer_id)) {
           auto iter_comment = find_comment(question, comment_id);
           assert_allowed(*iter_account, iter_comment->user,
                          Action::MODIFY_COMMENT);
@@ -184,44 +174,41 @@ void peerania::mark_answer_as_correct(account_name user, uint64_t question_id,
   auto iter_question = find_question(question_id);
   assert_allowed(*iter_account, iter_question->user,
                  Action::MARK_ANSWER_AS_CORRECT);
-  if (answer_id != APPLY_TO_QUESTION) {
+  if (answer_id != EMPTY_ANSWER_ID) {
     eosio_assert(iter_question->correct_answer_id != answer_id,
                  "This answer already marked as correct");
-    // Using const iterator; probably better rewrrite find_answer as template
     auto iter_answer = binary_find(iter_question->answers.begin(),
                                    iter_question->answers.end(), answer_id);
     eosio_assert(iter_answer != iter_question->answers.end(),
                  "Answer not found");
-    if (iter_question->correct_answer_id == APPLY_TO_QUESTION) {
+    if (iter_question->correct_answer_id == EMPTY_ANSWER_ID) {
+      //No one answer has not been marked as correct yet
       update_rating(iter_account, ACCEPT_ANSWER_AS_CORRECT_REWARD);
-      update_rating(iter_answer->user,
-                    ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+      update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD);
     } else {
+      //One of answers is marked as correct. Find this one, 
+      //pick up the reward of past owner and give it to new
       auto iter_old_answer = binary_find(iter_question->answers.begin(),
                                          iter_question->answers.end(),
                                          iter_question->correct_answer_id);
-      // check internal error iter_old_answer
-      update_rating(iter_old_answer->user,
-                    -ANSWER_ACCEPTED_AS_CORRECT_REWARD);
-      update_rating(iter_answer->user,
-                    ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+      update_rating(iter_old_answer->user, -ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+      update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD);
     }
   } else {
+    //Set question to "without answer"
     eosio_assert(
-        iter_question->correct_answer_id != APPLY_TO_QUESTION,
+        iter_question->correct_answer_id != EMPTY_ANSWER_ID,
         "You can\'t reset correct answer for question without correct answer");
     auto iter_old_answer = binary_find(iter_question->answers.begin(),
-                                         iter_question->answers.end(),
-                                         iter_question->correct_answer_id);
-    // check internal error iter_old_answer
+                                       iter_question->answers.end(),
+                                       iter_question->correct_answer_id);
+    //pick up reward
     update_rating(iter_account, -ACCEPT_ANSWER_AS_CORRECT_REWARD);
-    update_rating(iter_old_answer->user,
-                    -ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+    update_rating(iter_old_answer->user, -ANSWER_ACCEPTED_AS_CORRECT_REWARD);
   }
+
   question_table.modify(iter_question, _self, [answer_id](auto &question) {
-    question.correct_answer_id = (question.correct_answer_id == answer_id)
-                                     ? APPLY_TO_QUESTION
-                                     : answer_id;
+    question.correct_answer_id = answer_id;
   });
 }
 

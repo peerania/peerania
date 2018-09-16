@@ -2,7 +2,7 @@
 # Execute a commadn against a bitcoin node
 
 # compile
-eosiocpp -o /media/nikita/main/peerania/src/contracts/peerania/peerania.wast /media/nikita/main/peerania/src/contracts/peerania/peerania.cpp
+eosiocpp -o ./src/contracts/peerania/peerania.wast ./src/contracts/peerania/peerania.cpp
 
 # generate abi
-eosiocpp -g /media/nikita/main/peerania/src/contracts/peerania/peerania.abi /media/nikita/main/peerania/src/contracts/peerania/peerania.hpp
+eosiocpp -g ./src/contracts/peerania/peerania.abi ./src/contracts/peerania/peerania.hpp

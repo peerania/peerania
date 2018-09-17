@@ -25,10 +25,10 @@ void peerania::post_answer(account_name user, uint64_t question_id,
                            const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
-  assert_allowed(*iter_account, Action::POST_ANSWER);
   auto iter_question = find_question(question_id);
   eosio_assert(iter_question->answers.size() < MAX_ANSWER_COUNT,
                "For this question reached answer count limit");
+  assert_allowed(*iter_account, iter_question->user, Action::POST_ANSWER);
   eosio_assert(
       none_of(iter_question->answers.begin(), iter_question->answers.end(),
               [user](const answer &a) { return a.user == user; }),
@@ -47,15 +47,15 @@ void peerania::post_comment(account_name user, uint64_t question_id,
                             uint16_t answer_id, const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
-  assert_allowed(*iter_account, Action::POST_COMMENT);
   auto iter_question = find_question(question_id);
   comment new_comment;
   new_comment.user = user;
   new_comment.ipfs_link = ipfs_link;
   new_comment.post_time = current_time_in_sec();
   question_table.modify(
-      iter_question, _self, [answer_id, &new_comment](auto &question) {
+      iter_question, _self, [iter_account, answer_id, &new_comment](auto &question) {
         if (apply_to_question(answer_id)) {
+          assert_allowed(*iter_account, question.user, Action::POST_COMMENT);
           eosio_assert(question.comments.size() < MAX_ANSWER_COUNT,
                        "For this question reached comment count limit");
           push_new_forum_item(question.comments, new_comment);
@@ -63,6 +63,11 @@ void peerania::post_comment(account_name user, uint64_t question_id,
           auto iter_answer = find_answer(question, answer_id);
           eosio_assert(iter_answer->comments.size() < MAX_COMMENT_COUNT,
                        "For this answer reached comment count limit");
+          assert_allowed(*iter_account,
+                         question.user == iter_account->owner
+                             ? question.user
+                             : iter_answer->user,
+                         Action::POST_COMMENT);
           push_new_forum_item(iter_answer->comments, new_comment);
         }
       });
@@ -182,27 +187,29 @@ void peerania::mark_answer_as_correct(account_name user, uint64_t question_id,
     eosio_assert(iter_answer != iter_question->answers.end(),
                  "Answer not found");
     if (iter_question->correct_answer_id == EMPTY_ANSWER_ID) {
-      //No one answer has not been marked as correct yet
+      // No one answer has not been marked as correct yet
       update_rating(iter_account, ACCEPT_ANSWER_AS_CORRECT_REWARD);
       update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD);
     } else {
-      //One of answers is marked as correct. Find this one, 
-      //pick up the reward of past owner and give it to new
+      // One of answers is marked as correct. Find this one,
+      // pick up the reward of past owner and give it to new
       auto iter_old_answer = binary_find(iter_question->answers.begin(),
                                          iter_question->answers.end(),
                                          iter_question->correct_answer_id);
+      // check internal error iter_old_answer
       update_rating(iter_old_answer->user, -ANSWER_ACCEPTED_AS_CORRECT_REWARD);
       update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD);
     }
   } else {
-    //Set question to "without answer"
+    // Set question to "without answer"
     eosio_assert(
         iter_question->correct_answer_id != EMPTY_ANSWER_ID,
         "You can\'t reset correct answer for question without correct answer");
     auto iter_old_answer = binary_find(iter_question->answers.begin(),
                                        iter_question->answers.end(),
                                        iter_question->correct_answer_id);
-    //pick up reward
+    // pick up reward
+    // check internal error iter_old_answer
     update_rating(iter_account, -ACCEPT_ANSWER_AS_CORRECT_REWARD);
     update_rating(iter_old_answer->user, -ANSWER_ACCEPTED_AS_CORRECT_REWARD);
   }

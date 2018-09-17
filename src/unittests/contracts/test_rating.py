@@ -6,10 +6,20 @@ from unittest import main
 
 class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
 
+    def test_account_create_rating(self):
+        begin('Test rating value for new account')
+        defs = self.load_defines('./src/contracts/peerania/economy.h')
+        alice = self.get_non_registered_alice()
+        self.action('registeracc', {'owner': 'alice', 'display_name': 'test', 
+        'ipfs_profile': 'test'}, alice, 'Register alice account')
+        self.assertTrue(self.table(
+            'account', 'allaccounts')[0]['rating'] == defs['RATING_ON_CREATE'])
+        end()
+
     def test_vote_question(self):
         begin('Test vote for question')
         (alice, bob, carol) = self._create_basic_hierarchy()
-        ted = self.register_ted_account(110, 1)
+        ted = self.register_ted_account()
         self.account_e.append(
             {'owner': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
         self.assertTrue(compare(self.account_e, self.table(
@@ -61,7 +71,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
     def test_vote_answer(self):
         begin('Test vote for answer')
         (alice, bob, carol) = self._create_basic_hierarchy()
-        ted = self.register_ted_account(110, 1)
+        ted = self.register_ted_account()
         self.account_e.append(
             {'owner': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
         self.assertTrue(compare(self.account_e, self.table(
@@ -167,7 +177,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
         ted = self.register_ted_account(3000, 3) # man who will delte
         self.account_e.append(
             {'owner': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
-        dan = self.register_dan_account(10, 0)
+        dan = self.register_dan_account()
         self.account_e.append(
             {'owner': 'dan', 'moderation_points': '#var dan_mdp', 'rating': '#var dan_rating'})
         self.assertTrue(compare(self.account_e, self.table(
@@ -200,7 +210,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
         ted = self.register_ted_account(3000, 3) # man who will delte
         self.account_e.append(
             {'owner': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
-        dan = self.register_dan_account(10, 0)
+        dan = self.register_dan_account()
         self.account_e.append(
             {'owner': 'dan', 'moderation_points': '#var dan_mdp', 'rating': '#var dan_rating'})
         self.assertTrue(compare(self.account_e, self.table(
@@ -224,9 +234,9 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
         end()
 
     def _create_basic_hierarchy(self):
-        alice = self.register_alice_account(100, 3)
-        bob = self.register_bob_account(90, 3)
-        carol = self.register_carol_account(80, 3)
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        carol = self.register_carol_account()
         self.action('postquestion', {'user': 'alice', 'ipfs_link': 'AQ'}, alice,
                     'Alice asking question')
         self.action('postquestion', {'user': 'bob', 'ipfs_link': 'BQ'}, bob,

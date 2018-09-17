@@ -9,6 +9,10 @@ from time import sleep
 
 
 class PeeraniaTest(unittest.TestCase):
+    DEFAULT_RATING = 200
+    DEFAULT_MDP = 2
+    WAIT_FOR_NEW_BLOCK = 1.5
+
     def run(self, result=None):
         """ Stop after first error """
         if not result.failures:
@@ -29,16 +33,16 @@ class PeeraniaTest(unittest.TestCase):
 
         eosio = eosf.AccountMaster()
         wallet.import_key(eosio)
-        
+
         deployer = eosf.account(eosio, "deployer")
         wallet.import_key(deployer)
 
         self.alice = eosf.account(eosio, "alice")
         wallet.import_key(self.alice)
-        
+
         self.bob = eosf.account(eosio, "bob")
         wallet.import_key(self.bob)
-        
+
         self.carol = eosf.account(eosio, "carol")
         wallet.import_key(self.carol)
 
@@ -53,7 +57,6 @@ class PeeraniaTest(unittest.TestCase):
 
         eosf.Contract(eosio, "eosio.bios").deploy()
 
-
         self.contract = eosf.Contract(deployer, 'peerania')
         assert(not self.contract.error)
         deployment = self.contract.deploy()
@@ -66,31 +69,34 @@ class PeeraniaTest(unittest.TestCase):
     def tearDown(self):
         node.stop()
 
-    def _register_account(self, user, rating=0, moderation_points=0):
+    def _register_account(self, user, rating, moderation_points):
         self.action('registeracc', {'owner': str(user), 'display_name': str(
             user) + 'DispName', 'ipfs_profile': str(user) + '_IPFS'},
             user, 'Register {} account'.format(user))
-        if not (rating == 0 and moderation_points == 0):
-            self.action('setaccrtmpc', {'user': str(user), 'rating': rating, 'moderation_points': moderation_points},
-                        user, 'Set {} rating to {} and give {} moderation points'.format(str(user), rating, moderation_points))
+        if rating is None:
+            rating = self.DEFAULT_RATING
+        if moderation_points is None:
+            moderation_points = self.DEFAULT_MDP
+        self.action('setaccrtmpc', {'user': str(user), 'rating': rating, 'moderation_points': moderation_points},
+                    user, 'Set {} rating to {} and give {} moderation points'.format(str(user), rating, moderation_points))
         return user
 
-    def register_alice_account(self, rating=0, moderation_points=0):
+    def register_alice_account(self, rating=None, moderation_points=None):
         return self._register_account(self.alice, rating, moderation_points)
 
-    def register_bob_account(self, rating=0, moderation_points=0):
+    def register_bob_account(self, rating=None, moderation_points=None):
         return self._register_account(self.bob, rating, moderation_points)
 
-    def register_carol_account(self, rating=0, moderation_points=0):
+    def register_carol_account(self, rating=None, moderation_points=None):
         return self._register_account(self.carol, rating, moderation_points)
 
-    def register_ted_account(self, rating=0, moderation_points=0):
+    def register_ted_account(self, rating=None, moderation_points=None):
         return self._register_account(self.ted, rating, moderation_points)
 
-    def register_dan_account(self, rating=0, moderation_points=0):
+    def register_dan_account(self, rating=None, moderation_points=None):
         return self._register_account(self.dan, rating, moderation_points)
 
-    def register_frank_account(self, rating=0, moderation_points=0):
+    def register_frank_account(self, rating=None, moderation_points=None):
         return self._register_account(self.frank, rating, moderation_points)
 
     def action(self, action_name, action_body, action_auth, action_text, wait=False):
@@ -129,8 +135,8 @@ class PeeraniaTest(unittest.TestCase):
         return t.json['rows']
 
     def wait(self):
-        info('Wait 2 sec until new block is generated')
-        sleep(2)
+        info('Wait {} sec until new block is generated'.format(self.WAIT_FOR_NEW_BLOCK))
+        sleep(self.WAIT_FOR_NEW_BLOCK)
 
     def get_non_registered_alice(self):
         return self.alice
@@ -149,7 +155,7 @@ class PeeraniaTest(unittest.TestCase):
 
     def get_non_registered_frank(self):
         return self.frank
-        
+
     @staticmethod
     def get_expected_account_body(owner):
         return {

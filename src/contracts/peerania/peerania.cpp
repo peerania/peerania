@@ -112,7 +112,7 @@ void peerania::votemoderate(account_name user, uint64_t question_id,
                             uint16_t answer_id, uint16_t comment_id) {}
 
 #ifdef DEBUG
-void peerania::setaccrtmpc(account_name user, uint16_t rating,
+void peerania::setaccrtmpc(account_name user, int16_t rating,
                            uint16_t moderation_points) {
   auto itr = account_table.find(user);
   eosio_assert(itr != account_table.end(), "Account not found");

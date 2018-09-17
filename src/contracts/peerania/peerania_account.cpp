@@ -12,6 +12,7 @@ void peerania::register_account(account_name owner, std::string display_name,
     account.owner = owner;
     account.display_name = display_name;
     account.ipfs_profile = ipfs_profile;
+    account.rating = RATING_ON_CREATE;
     account.registration_time = current_time_in_sec();
   });
   add_display_name_to_map(owner, display_name);

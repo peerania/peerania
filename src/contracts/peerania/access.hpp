@@ -2,6 +2,7 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/types.hpp>
 #include "account.hpp"
+#include "economy.h"
 
 enum Action {
   MODIFY_QUESTION,
@@ -26,19 +27,53 @@ enum Action {
 void assert_allowed(const account &action_caller, const account &data_owner,
                     Action action) {}
 
-void assert_allowed(const account &action_caller, Action action) {}
+void assert_allowed(const account &action_caller, Action action) {
+  switch (action) {
+    case POST_QUESTION:
+      eosio_assert(action_caller.rating >= POST_QUESTION_ALLOWED,
+                     "You can't post question!");
+      break;
+    default:
+      break;
+  }
+}
 
 void assert_allowed(const account &action_caller, account_name data_owner,
                     Action action) {
   switch (action) {
+    case POST_ANSWER:
+      if (action_caller.owner == data_owner)
+        eosio_assert(action_caller.rating >= POST_ANSWER_OWN_ALLOWED,
+                     "You can't post answer to your question");
+      else
+        eosio_assert(action_caller.rating >= POST_ANSWER_ALLOWED,
+                     "You can't post answer to this question");
+      break;
+    case POST_COMMENT:
+      if (action_caller.owner == data_owner)
+        eosio_assert(action_caller.rating >= POST_COMMENT_OWN_ALLOWED,
+                     "You can't post comment for your item");
+      else
+        eosio_assert(action_caller.rating >= POST_COMMENT_ALLOWED,
+                     "You can't post comment for this item");
+      break;
     case UPVOTE:
-      eosio_assert(action_caller.owner != data_owner, "You cant vote for your own items");
+      eosio_assert(action_caller.owner != data_owner,
+                   "You cant upvote for your own items");
+      eosio_assert(action_caller.rating >= UPVOTE_ALLOWED,
+                   "Your rating is too small to upvote");
       break;
     case DOWNVOTE:
-      eosio_assert(action_caller.owner != data_owner, "You cant vote for your own items");
+      eosio_assert(action_caller.owner != data_owner,
+                   "You cant downvote for your own items");
+      eosio_assert(action_caller.rating >= DOWNVOTE_ALLOWED,
+                   "Your rating is too small to downvote");
       break;
     case VOTE_FOR_DELETION:
-      eosio_assert(action_caller.owner != data_owner, "You cant vote for deletion of your own items");
+      eosio_assert(action_caller.owner != data_owner,
+                   "You cant vote for deletion of your own items");
+      eosio_assert(action_caller.rating >= VOTE_FOR_DELETION_ALLOWED,
+                   "Your rating is too small to put deletion flag");
       break;
     default:
       eosio_assert(action_caller.owner == data_owner, "Action not allowed");

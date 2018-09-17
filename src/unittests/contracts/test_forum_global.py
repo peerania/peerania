@@ -281,7 +281,6 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
         carol = self.register_carol_account()
         ted = self.register_ted_account()
         frank = self.register_frank_account()
-        dan = self.register_dan_account()
         self.action('postquestion', {'user': 'alice', 'ipfs_link': 'AQ'}, alice,
                     'Register question from alice')
         e = [{

@@ -119,7 +119,7 @@ class peerania : public contract {
 #ifdef DEBUG
   // Set account rating and moderation points count
   ///@abi action
-  void setaccrtmpc(account_name user, uint16_t rating,
+  void setaccrtmpc(account_name user, int16_t rating,
                    uint16_t moderation_points);
 #endif
 

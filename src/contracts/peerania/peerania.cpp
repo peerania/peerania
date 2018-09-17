@@ -1,42 +1,25 @@
 #include "peerania.hpp"
+#include "peerania_account.cpp"
+#include "peerania_forum.cpp"
+#include "peerania_vote.cpp"
 
 namespace eosio {
 
 void peerania::registeracc(account_name owner, std::string display_name,
                            std::string ipfs_profile) {
   require_auth(owner);
-  print(current_time());
-  eosio_assert(account_table.find(owner) == account_table.end(),
-               "Account already exists");
-  eosio_assert(display_name.length() >= MIN_DISPLAY_NAME_LEN,
-               "The display name too short.");
-  account_table.emplace(_self, [&](auto &account) {
-    account.owner = owner;
-    account.display_name = display_name;
-    account.ipfs_profile = ipfs_profile;
-    // current_time() returns time in micros, divided by 10^6 set time in
-    // seconds
-    account.registration_time = current_time() / 1000000;
-  });
-  add_display_name_to_map(owner, display_name);
+  register_account(owner, display_name, ipfs_profile);
 }
 
-void peerania::adeleteacc(account_name account_to_delete) {
-  require_auth(_self);
-  auto itr = account_table.find(account_to_delete);
-  eosio_assert(itr != account_table.end(), "Account not found");
-  account_table.erase(itr);
-  eosio_assert(itr != account_table.end(), "Address not erased properly");
-}
-
-void peerania::setaccparam(account_name owner, prop_key_value property) {
+void peerania::setaccstrprp(account_name owner, uint8_t key,
+                            std::string value) {
   require_auth(owner);
-  set_account_parameter(owner, property);
+  set_account_string_property(owner, key, value);
 }
 
-void peerania::asetaccparam(account_name owner, prop_key_value property) {
-  require_auth(_self);
-  set_account_parameter(owner, property);
+void peerania::setaccintprp(account_name owner, uint8_t key, int32_t value) {
+  require_auth(owner);
+  set_account_integer_property(owner, key, value);
 }
 
 void peerania::setipfspro(account_name owner, std::string ipfs_profile) {
@@ -44,71 +27,114 @@ void peerania::setipfspro(account_name owner, std::string ipfs_profile) {
   set_account_ipfs_profile(owner, ipfs_profile);
 }
 
-void peerania::asetipfspro(account_name owner, std::string ipfs_profile) {
-  require_auth(_self);
-  set_account_ipfs_profile(owner, ipfs_profile);
-}
-
 void peerania::setdispname(account_name owner, std::string display_name) {
   require_auth(owner);
-  eosio_assert(display_name.length() >= MIN_DISPLAY_NAME_LEN,
-               "The display name too short.");
-  auto itraccs = account_table.find(owner);
-  eosio_assert(itraccs != account_table.end(), "Account not found");
-  remove_display_name_from_map(owner, itraccs->display_name);
-  account_table.modify(itraccs, _self,
-                   [&](auto &acc) { acc.display_name = display_name; });
-  add_display_name_to_map(owner, display_name);
+  set_account_display_name(owner, display_name);
 }
 
-void peerania::set_account_parameter(account_name owner,
-                                     const prop_key_value &key_value) {
-  require_for_an_account(owner);
-  eosio_assert(key_value.key < SYSTEM_PROP_START, "Incorrect key");
-  user_property_index user_property_table(_self, owner);
-  auto itr = user_property_table.find(user_property_make_pk(owner, key_value.key));
-  if (itr == user_property_table.end()) {
-    user_property_table.emplace(_self, [&](auto &prop) {
-      prop.owner = owner;
-      prop.key_value = key_value;
-    });
-  } else {
-    user_property_table.modify(itr, _self, [&](auto &prop) {
-      prop.key_value.value = key_value.value;
-    });
-  }
+void peerania::postquestion(account_name user, std::string ipfs_link) {
+  require_auth(user);
+  post_question(user, ipfs_link);
 }
 
-void peerania::set_account_ipfs_profile(account_name owner,
-                                        const std::string &ipfs_profile) {
-  auto itr = account_table.find(owner);
+void peerania::postanswer(account_name user, uint64_t question_id,
+                          std::string ipfs_link) {
+  require_auth(user);
+  post_answer(user, question_id, ipfs_link);
+}
+
+void peerania::postcomment(account_name user, uint64_t question_id,
+                           uint16_t answer_id, const std::string &ipfs_link) {
+  require_auth(user);
+  post_comment(user, question_id, answer_id, ipfs_link);
+}
+
+void peerania::delquestion(account_name user, uint64_t question_id) {
+  require_auth(user);
+  delete_question(user, question_id);
+}
+
+void peerania::delanswer(account_name user, uint64_t question_id,
+                         uint16_t answer_id) {
+  require_auth(user);
+  delete_answer(user, question_id, answer_id);
+}
+
+void peerania::delcomment(account_name user, uint64_t question_id,
+                          uint16_t answer_id, uint16_t comment_id) {
+  require_auth(user);
+  delete_comment(user, question_id, answer_id, comment_id);
+}
+
+void peerania::modquestion(account_name user, uint64_t question_id,
+                           const std::string &ipfs_link) {
+  require_auth(user);
+  modify_question(user, question_id, ipfs_link);
+}
+
+void peerania::modanswer(account_name user, uint64_t question_id,
+                         uint16_t answer_id, const std::string &ipfs_link) {
+  require_auth(user);
+  modify_answer(user, question_id, answer_id, ipfs_link);
+}
+void peerania::modcomment(account_name user, uint64_t question_id,
+                          uint16_t answer_id, uint16_t comment_id,
+                          const std::string &ipfs_link) {
+  require_auth(user);
+  modify_comment(user, question_id, answer_id, comment_id, ipfs_link);
+}
+
+void peerania::upvote(account_name user, uint64_t question_id,
+                      uint16_t answer_id) {
+  require_auth(user);
+  vote(user, question_id, answer_id, true);
+}
+
+void peerania::downvote(account_name user, uint64_t question_id,
+                        uint16_t answer_id) {
+  require_auth(user);
+  vote(user, question_id, answer_id, false);
+}
+
+void peerania::mrkascorrect(account_name user, uint64_t question_id,
+                            uint16_t answer_id) {
+  require_auth(user);
+  mark_answer_as_correct(user, question_id, answer_id);
+}
+
+void peerania::votedelete(account_name user, uint64_t question_id,
+                          uint16_t answer_id, uint16_t comment_id) {
+  require_auth(user);
+  vote_for_deletion(user, question_id, answer_id, comment_id);
+}
+
+void peerania::votemoderate(account_name user, uint64_t question_id,
+                            uint16_t answer_id, uint16_t comment_id) {}
+
+#ifdef DEBUG
+void peerania::setaccrtmpc(account_name user, uint16_t rating,
+                           uint16_t moderation_points) {
+  auto itr = account_table.find(user);
   eosio_assert(itr != account_table.end(), "Account not found");
-  account_table.modify(itr, _self,
-                   [&](auto &account) { account.ipfs_profile = ipfs_profile; });
-}
-
-void peerania::add_display_name_to_map(account_name owner,
-                                       const std::string &display_name) {
-  disp_to_acc_index table(_self, hash_display_name(display_name));
-  table.emplace(_self, [&](auto &item) {
-    item.owner = owner;
-    item.display_name = display_name;
+  account_table.modify(itr, _self, [&](auto &account) {
+    account.rating = rating;
+    account.moderation_points = moderation_points;
   });
 }
+#endif
 
-void peerania::remove_display_name_from_map(account_name owner,
-                                            const std::string &display_name) {
-  disp_to_acc_index dtatable(_self, hash_display_name(display_name));
-  auto itr_disptoacc = dtatable.find(owner);
-  eosio_assert(itr_disptoacc != dtatable.end(), "display_name not found");
-  dtatable.erase(itr_disptoacc);
-  eosio_assert(itr_disptoacc != dtatable.end(), "Address not erased properly");
-}
+}  // namespace eosio
 
-void peerania::require_for_an_account(account_name owner) {
-  eosio_assert(account_table.find(owner) != account_table.end(),
-               "Account not registered");
-}
-};  // namespace eosio
-EOSIO_ABI(eosio::peerania, (adeleteacc)(registeracc)(setaccparam)(asetaccparam)(
-                               asetipfspro)(setipfspro)(setdispname))
+#ifndef DEBUG
+EOSIO_ABI(eosio::peerania,
+          (registeracc)(setaccintprp)(setaccstrprp)(setipfspro)(setdispname)(
+              postquestion)(postanswer)(postcomment)(delquestion)(delanswer)(
+              delcomment)(modanswer)(modquestion)(modcomment)(upvote)(downvote)(
+              mrkascorrect)(votedelete)(votemoderate))
+#else
+EOSIO_ABI(eosio::peerania,
+          (registeracc)(setaccintprp)(setaccstrprp)(setipfspro)(setdispname)(
+              postquestion)(postanswer)(postcomment)(delquestion)(delanswer)(
+              delcomment)(modanswer)(modquestion)(modcomment)(upvote)(downvote)(
+              mrkascorrect)(votedelete)(votemoderate)(setaccrtmpc))
+#endif

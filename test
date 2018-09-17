@@ -1,8 +1,42 @@
 #!/usr/bin/env bash
 # Execute a commadn against a bitcoin node
 
-# compile
-./compile
-
 # run tests
-python3 ./src/unittests/contracts/test_peerania.py
+path='./src/unittests/contracts/'
+files='test_*.py'
+if [ $# = 0 ]
+then
+    ./compile.new debug
+    python3 -m unittest discover -s $path -p $files
+else
+    if [ "$2" != 'no-compile' ]
+    then
+        ./compile.new debug
+    fi
+    if [ "$1" = 'debug' ]
+    then
+        echo "Enter debug mode!"
+        stop=false
+        for file in $path/$files; do
+            while : ; do
+                python3 $file
+                ret=$? 
+                if [ $ret -eq 0 ]
+                then
+                    break
+                fi
+                read -p "$file test failed! Repeat it? [n - abort] " response
+                if [ "$response" = "n" ]
+                then
+                    stop=true
+                    break
+                fi
+            done
+            if $stop; then
+                break
+            fi
+        done
+    else
+        echo "Urecognized option \"$1\""
+    fi
+fi

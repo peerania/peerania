@@ -5,7 +5,6 @@
 #include <eosiolib/types.hpp>
 #include <string>
 
-namespace eosio {
 #define MIN_DISPLAY_NAME_LEN 3
 // this function must be translated to JS
 // rewirite it using implementation string_to_name(char*) to achive better
@@ -22,12 +21,11 @@ uint64_t hash_display_name(const std::string &display_name) {
 
 //display name to account
 /// @abi table disptoacc
-struct disp_to_acc{
+struct disp_to_acc {
   account_name owner;
   std::string display_name;
   uint64_t primary_key() const { return owner; }
   EOSLIB_SERIALIZE(disp_to_acc, (owner)(display_name))
 };
 
-typedef multi_index<N(disptoacc), disp_to_acc> disp_to_acc_index;
-};  // namespace eosio
+typedef eosio::multi_index<N(disptoacc), disp_to_acc> disp_to_acc_index;

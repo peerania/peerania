@@ -24,19 +24,6 @@ enum Action {
   VOTE_FOR_MODERATION
 };
 
-void assert_allowed(const account &action_caller, const account &data_owner,
-                    Action action) {}
-
-void assert_allowed(const account &action_caller, Action action) {
-  switch (action) {
-    case POST_QUESTION:
-      eosio_assert(action_caller.rating >= POST_QUESTION_ALLOWED,
-                     "You can't post question!");
-      break;
-    default:
-      break;
-  }
-}
 
 void assert_allowed(const account &action_caller, account_name data_owner,
                     Action action) {
@@ -75,13 +62,18 @@ void assert_allowed(const account &action_caller, account_name data_owner,
       eosio_assert(action_caller.rating >= VOTE_FOR_DELETION_ALLOWED,
                    "Your rating is too small to put deletion flag");
       break;
+    case POST_QUESTION:
+        eosio_assert(action_caller.owner != data_owner, "Internal function call error");
+        eosio_assert(action_caller.rating >= POST_QUESTION_ALLOWED,
+                    "You can't post question!");
     default:
       eosio_assert(action_caller.owner == data_owner, "Action not allowed");
       break;
   }
 }
-
+/*
 void assert_allowed(account_name action_caller, account_name data_owner,
                     Action action) {
   eosio_assert(action_caller == data_owner, "Action not allowed");
 }
+*/

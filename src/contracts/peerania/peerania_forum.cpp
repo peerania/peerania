@@ -11,7 +11,7 @@ question_index::const_iterator peerania::find_question(uint64_t question_id) {
 void peerania::post_question(account_name user, const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
-  assert_allowed(*iter_account, Action::POST_QUESTION);
+  assert_allowed(*iter_account, user, Action::POST_QUESTION);
   question_table.emplace(_self, [&](auto &question) {
     question.id = question_table.available_primary_key();
     question.user = user;

@@ -71,9 +71,3 @@ void assert_allowed(const account &action_caller, account_name data_owner,
       break;
   }
 }
-/*
-void assert_allowed(account_name action_caller, account_name data_owner,
-                    Action action) {
-  eosio_assert(action_caller == data_owner, "Action not allowed");
-}
-*/

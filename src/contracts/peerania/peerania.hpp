@@ -1,4 +1,5 @@
 #pragma once
+#define DEBUG
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/types.hpp>
 #include <string>

@@ -12,8 +12,7 @@
 
 1. `cd eos`
 1. `./eosio_build.sh`
-1. `cd build`
-1. `sudo make install`
+1. `./eosio_install.sh`
 
 ### Build EOSFactory
 

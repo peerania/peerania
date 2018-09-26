@@ -64,7 +64,7 @@ void downvote_item(T &item, T_iter_acc iter_account, account_name &item_owner,
                    const int8_t downvote_cost_owner,
                    const int8_t downvote_cost_caller) {
   item_owner = item.user;
-  assert_allowed(*iter_account, item_owner, Action::UPVOTE);
+  assert_allowed(*iter_account, item_owner, Action::DOWNVOTE);
   bool is_new;
   auto itr_history =
       get_history_item_iter(item.history, iter_account->owner, is_new);

@@ -2,4 +2,4 @@
 set -ex
 
 # deploy token contract
-./cl set contract peerania.dev ../src/contracts/peerania -p peerania.dev
+cleos set contract peerania.dev ../src/contracts/peerania -p peerania.dev

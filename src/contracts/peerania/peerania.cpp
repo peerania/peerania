@@ -111,8 +111,13 @@ void peerania::votedelete(account_name user, uint64_t question_id,
 void peerania::votemoderate(account_name user, uint64_t question_id,
                             uint16_t answer_id, uint16_t comment_id) {}
 
+void peerania::updateacc(account_name user){
+  require_auth(user);
+  update_account(user);
+}
+
 #ifdef DEBUG
-void peerania::setaccrtmpc(account_name user, uint16_t rating,
+void peerania::setaccrtmpc(account_name user, int16_t rating,
                            uint16_t moderation_points) {
   auto itr = account_table.find(user);
   eosio_assert(itr != account_table.end(), "Account not found");
@@ -130,11 +135,11 @@ EOSIO_ABI(eosio::peerania,
           (registeracc)(setaccintprp)(setaccstrprp)(setipfspro)(setdispname)(
               postquestion)(postanswer)(postcomment)(delquestion)(delanswer)(
               delcomment)(modanswer)(modquestion)(modcomment)(upvote)(downvote)(
-              mrkascorrect)(votedelete)(votemoderate))
+              mrkascorrect)(votedelete)(votemoderate)(updateacc))
 #else
 EOSIO_ABI(eosio::peerania,
           (registeracc)(setaccintprp)(setaccstrprp)(setipfspro)(setdispname)(
               postquestion)(postanswer)(postcomment)(delquestion)(delanswer)(
               delcomment)(modanswer)(modquestion)(modcomment)(upvote)(downvote)(
-              mrkascorrect)(votedelete)(votemoderate)(setaccrtmpc))
+              mrkascorrect)(votedelete)(votemoderate)(setaccrtmpc)(updateacc))
 #endif

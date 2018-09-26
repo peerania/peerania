@@ -1,4 +1,5 @@
 #pragma once
+#define DEBUG
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/types.hpp>
 #include <string>
@@ -115,11 +116,15 @@ class peerania : public contract {
   void mrkascorrect(account_name user, uint64_t question_id,
                     uint16_t answer_id);
 
+  // Handle timers function
+  ///@abi action
+  void updateacc(account_name user);
+
   // Debug methoods
 #ifdef DEBUG
   // Set account rating and moderation points count
   ///@abi action
-  void setaccrtmpc(account_name user, uint16_t rating,
+  void setaccrtmpc(account_name user, int16_t rating,
                    uint16_t moderation_points);
 #endif
 
@@ -193,6 +198,7 @@ class peerania : public contract {
 
   inline void update_rating(account_name user, int rating_change);
 
+  void update_account(account_name user);
 };
 }  // namespace eosio
 

@@ -7,12 +7,12 @@ path=$(realpath $path)
 files='test_*.py'
 if [ $# = 0 ]
 then
-    ./compile
+    ./compile debug
     python3 -m unittest discover -s $path -p $files
 else
     if [ "$2" != 'no-compile' ]
     then
-        ./compile
+        ./compile debug
     fi
     if [ "$1" = 'debug' ]
     then

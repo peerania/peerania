@@ -1,5 +1,6 @@
+#include "account_timer.hpp"
+#include "eosiolib/transaction.hpp"
 #include "peerania.hpp"
-
 namespace eosio {
 
 void peerania::register_account(account_name owner, std::string display_name,
@@ -8,14 +9,26 @@ void peerania::register_account(account_name owner, std::string display_name,
                "Account already exists");
   eosio_assert(display_name.length() >= MIN_DISPLAY_NAME_LEN,
                "The display name too short.");
-  account_table.emplace(_self, [&](auto &account) {
+  time current_time = current_time_in_sec();
+  account_timer mdp;
+  mdp.last_update = current_time;
+  mdp.timer = TIMER1_MDP;
+  account_table.emplace(_self, [owner, &display_name, &ipfs_profile,
+                                current_time, mdp](auto &account) {
     account.owner = owner;
     account.display_name = display_name;
     account.ipfs_profile = ipfs_profile;
     account.rating = RATING_ON_CREATE;
-    account.registration_time = current_time_in_sec();
+    account.registration_time = current_time;
+    account.timers.push_back(mdp);
   });
+
   add_display_name_to_map(owner, display_name);
+  transaction t{};
+  t.actions.emplace_back(permission_level(owner, N(active)), _self,
+                         N(updateacc), std::make_tuple(owner));
+  t.delay_sec = get_interval(mdp);
+  t.send(((uint128_t)owner << 32) + current_time, owner);
 }
 
 void peerania::set_account_string_property(account_name owner, uint8_t key,
@@ -91,6 +104,57 @@ void peerania::update_rating(account_name user, int rating_change) {
   account_table.modify(
       find_account(user), _self,
       [rating_change](auto &account) { account.rating += rating_change; });
+}
+
+void peerania::update_account(account_name user) {
+  //print("Call update\n");
+  auto iter_account = find_account(user);
+
+  bool create_deferred = false;
+  time current_time = current_time_in_sec();
+
+  account_table.modify(iter_account, _self,
+                       [&create_deferred, current_time](auto &account) {
+                         auto iter_timer = account.timers.begin();
+                         while (iter_timer != account.timers.end()) {
+                           if (current_time - iter_timer->last_update >=
+                               get_interval(*iter_timer)) {
+                             create_deferred = true;
+                             if (on_tick(*iter_timer, account)) {
+                               iter_timer->last_update = current_time;
+                               iter_timer++;
+                             } else {
+                               iter_timer = account.timers.erase(iter_timer);
+                             }
+                           } else
+                             iter_timer++;
+                         }
+                       });
+  if (create_deferred) {
+    time min_update = INFINITY;
+    for (auto iter_timer = iter_account->timers.begin();
+         iter_timer != iter_account->timers.end(); iter_timer++) {
+      if (current_time - iter_timer->last_update == 0) {
+        if (min_update > get_interval(*iter_timer))
+          min_update = get_interval(*iter_timer);
+      } else {
+        if (min_update > get_interval(*iter_timer) - current_time + iter_timer->last_update)
+          min_update = get_interval(*iter_timer) - current_time + iter_timer->last_update;
+      }
+    }
+    if (min_update != INFINITY) {
+      eosio::transaction t{};
+      t.actions.emplace_back(
+          eosio::permission_level(user,
+                                  N(active)),  // with `from@active` permission
+          _self,                   // You're sending this to `eosio.token`
+          N(updateacc),            // to their `transfer` action
+          std::make_tuple(user));  // with the appropriate args
+      t.delay_sec = min_update;    // Set the delay
+      t.send(((uint128_t)user << 32) + current_time,
+             user);  // Send the transaction with some ID derived from the memo
+    }
+  }
 }
 
 multi_index<N(account), account>::const_iterator peerania::find_account(

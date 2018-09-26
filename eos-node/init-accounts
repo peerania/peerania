@@ -2,23 +2,23 @@
 set -ex
 
 #create wallet with name eosio
-./cl wallet create
+cleos wallet create --name default --to-console
 
 #import private key for system eosio account
-./cl wallet import 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
+cleos wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
 
 #loading bios contract 
-./cl set contract eosio ../eos/build/contracts/eosio.bios -p eosio
+cleos set contract eosio ../eos/build/contracts/eosio.bios -p eosio
 
 #import private key for code account and create account
-./cl wallet import 5JUnu1jgVifdznEHpc9eVedpLXsyDPwu69xziMm9ZvbRSkVKEda
-./cl create account eosio peerania.dev EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b
+cleos wallet import --private-key 5JUnu1jgVifdznEHpc9eVedpLXsyDPwu69xziMm9ZvbRSkVKEda
+cleos create account eosio peerania.dev EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b
 
 #import private key for user1 account and create account
-./cl wallet import 5JV2aCujE9j5dUkFKJGtyzeTsgMAHCovQ8QhxKHd9eZpJDfMDmZ
-./cl create account eosio user1 EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b
+cleos wallet import --private-key 5JV2aCujE9j5dUkFKJGtyzeTsgMAHCovQ8QhxKHd9eZpJDfMDmZ
+cleos create account eosio user1 EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b
 
 #import private key for user2 account and create account
-./cl wallet import 5KgZw1vCGLSvwQUPFWeBxJFeYHuhQvz6XLa5p6vupwpwhFbaLLF
-./cl create account eosio user2 EOS7KerSuDMDGVvFi7v4svgMVALQYFyoyDgPJwRW4nzENGESnD9W1 EOS7KerSuDMDGVvFi7v4svgMVALQYFyoyDgPJwRW4nzENGESnD9W1
+cleos wallet import --private-key 5KgZw1vCGLSvwQUPFWeBxJFeYHuhQvz6XLa5p6vupwpwhFbaLLF
+cleos create account eosio user2 EOS7KerSuDMDGVvFi7v4svgMVALQYFyoyDgPJwRW4nzENGESnD9W1 EOS7KerSuDMDGVvFi7v4svgMVALQYFyoyDgPJwRW4nzENGESnD9W1
 

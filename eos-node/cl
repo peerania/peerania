@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-# Execute a commadn against a bitcoin node
-
-cleos --wallet-url="http://localhost:8888/" $*

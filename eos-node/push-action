@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -ex
 
-./cl push action peerania.dev addaccount '["user2"]' -p user2
+cleos push action peerania.dev registeracc '{"owner": "user1", "display_name": "user1DispName", "ipfs_profile": "user1_IPFS"}' -p user1

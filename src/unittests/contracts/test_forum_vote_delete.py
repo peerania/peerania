@@ -85,11 +85,6 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         del(find_by_field(e, 'ipfs_link',  'AQ->AA')['comments'][0])
         info('Alice question->Alice answer->Bob comment1 now removed by vote')
         t = self.table('question', 'allquestions')
-        print(self.table(
-            'account', 'allaccounts'))
-        print(self.bob_rating)
-        print(json.dumps(t, sort_keys=True, indent=2))
-        print(json.dumps(e, sort_keys=True, indent=2))
         self.assertTrue(compare(e, t, ignore_excess=True))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
@@ -231,12 +226,9 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
 
     def test_vote_delete_answer_marked_as_correct(self):
         begin('Test delte correct answer(check rest correct answer id after action)')
-        alice = self.register_alice_account(
-            10, 1)
-        bob = self.register_bob_account(
-            10, 1)
-        carol = self.register_carol_account(
-            3000, 1)
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        carol = self.register_carol_account(3000, 1)
         (e, var) = self._create_simple_hierarchy(alice, bob)
 
         self.action('mrkascorrect', {
@@ -254,8 +246,8 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
 
     def test_vote_delete_twice_failed(self):
         begin('Test vote for deletion twice', True)
-        alice = self.register_alice_account(700, 2)
-        bob = self.register_bob_account(700, 2)
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
         (e, var) = self._create_simple_hierarchy(alice, bob)
         self.action('votedelete', {'user': 'bob', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0},
                     bob, 'Bob vote for deletion Alice question')
@@ -284,8 +276,8 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
 
     def test_vote_from_non_existent_account_failed(self):
         begin('Test vote from non existent account', True)
-        alice = self.register_alice_account(700, 2)
-        bob = self.register_bob_account(700, 2)
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
         carol = self.get_non_registered_carol()
         (e, var) = self._create_simple_hierarchy(alice, bob)
         self.failed_action('votedelete', {'user': 'carol', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0},
@@ -300,8 +292,8 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
 
     def test_vote_with_another_auth_failed(self):
         begin('Vote with another owner auth', True)
-        alice = self.register_alice_account(700, 2)
-        bob = self.register_bob_account(700, 2)
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
         (e, var) = self._create_simple_hierarchy(alice, bob)
         self.failed_action('votedelete', {'user': 'bob', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0},
                            alice, 'Attempt tovote for deletion Alice question with another owner auth', 'auth')
@@ -315,9 +307,9 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
 
     def test_vote_non_existent_item(self):
         begin('Vote for non-existent question, answer or comment', True)
-        alice = self.register_alice_account(700, 2)
-        bob = self.register_bob_account(700, 2)
-        carol = self.register_carol_account(700, 2)
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        carol = self.register_carol_account()
         (e, var) = self._create_simple_hierarchy(alice, bob)
         self.failed_action('votedelete', {'user': 'carol', 'question_id': var['aq'] + 2, 'answer_id': 0, 'comment_id': 0},
                            carol, 'Carol attempt to vote for deletion non-existent question', 'assert')

@@ -17,7 +17,7 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
             alice, 'Register Alice account')
         t = self.table('account', 'allaccounts')
         self.assertTrue(compare(['#ignoreorder',
-                                 self.get_expected_account_body(alice)], t, ignore_excess=True))
+                                 get_expected_account_body(alice)], t, ignore_excess=True))
         info('Table accounts: ', t)
         end()
 
@@ -34,8 +34,7 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
     def test_register_account_twice_failed(self):
         begin('Register alice account twice', True)
         alice = self.register_alice_account()
-        info('Wait 2 sec untill new block is generated')
-        sleep(2)
+        self.wait()
         self.failed_action('registeracc', {
             'owner': 'alice',
             'display_name': 'aliceDispName',
@@ -62,8 +61,8 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
                         'Set {} string property, {{key = {}, value = "{}" }}'.format(str(owner),
                                                                                      key, value))
         e = ['#ignoreorder',
-             self.get_expected_account_body(alice),
-             self.get_expected_account_body(bob)]
+             get_expected_account_body(alice),
+             get_expected_account_body(bob)]
         for i in range(3):
             regInt(alice, i + 5, i * i * i)
             e[1]['integer_properties'].append(
@@ -95,8 +94,8 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         e = ['#ignoreorder',
-             self.get_expected_account_body(alice),
-             self.get_expected_account_body(bob)]
+             get_expected_account_body(alice),
+             get_expected_account_body(bob)]
         self.action('setipfspro', {'owner': 'alice', 'ipfs_profile': 'updated IPFS'},
                     alice, 'Set Alice IPFS profile to \'updated IPFS\'')
         self.action('setdispname', {'owner': 'alice', 'display_name': 'updated display name'},

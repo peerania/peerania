@@ -54,8 +54,7 @@ struct answer {
   uint16_t bkey() const { return id; }
 };
 
-/// @abi table
-struct question {
+struct [[eosio::table("question")]] question {
   uint64_t id;
   time post_time;
   account_name user;

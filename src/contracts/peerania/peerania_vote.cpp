@@ -1,8 +1,6 @@
 #include "peerania.hpp"
 #include "peerania_vote_hlp.hpp"
 
-namespace eosio {
-
 void peerania::vote(account_name user, uint64_t question_id, uint16_t answer_id,
                     bool is_upvote) {
   auto iter_account = find_account(user);
@@ -140,5 +138,3 @@ void peerania::vote_for_deletion(account_name user, uint64_t question_id,
   account_table.modify(iter_account, _self,
                        [](auto &account) { account.moderation_points -= 1; });
 }
-
-}  // namespace eosio

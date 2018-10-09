@@ -8,7 +8,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
 
     def test_account_create_rating(self):
         begin('Test rating value for new account')
-        defs = self.load_defines('./src/contracts/peerania/economy.h')
+        defs = load_defines('./src/contracts/peerania/economy.h')
         alice = self.get_non_registered_alice()
         self.action('registeracc', {'owner': 'alice', 'display_name': 'test', 
         'ipfs_profile': 'test'}, alice, 'Register alice account')
@@ -307,8 +307,8 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(self.forum_e, t, self.var, True))
 
-        self.defs = {**self.load_defines('./src/contracts/peerania/economy.h'),
-                     **self.load_defines('./src/contracts/peerania/question_container.hpp')}
+        self.defs = {**load_defines('./src/contracts/peerania/economy.h'),
+                     **load_defines('./src/contracts/peerania/question_container.hpp')}
         self.account_e = ['#ignoreorder',
                           {'owner': 'alice', 'moderation_points': '#var alice_mdp',
                            'rating': '#var alice_rating'},

@@ -5,13 +5,12 @@
 #include <string>
 #include "property.hpp"
 
-struct account_timer{
-    uint8_t timer;
-    time last_update;
+struct account_timer {
+  uint8_t timer;
+  time last_update;
 };
 
-///@abi table
-struct account {
+struct [[eosio::table("account")]] account {
   account_name owner;
   // mandatory fields
   std::string display_name;
@@ -23,9 +22,10 @@ struct account {
   uint16_t moderation_points = 0;
   std::vector<account_timer> timers;
   uint64_t primary_key() const { return owner; }
-  EOSLIB_SERIALIZE(account,
-                   (owner)(display_name)(ipfs_profile)(registration_time)(
-                       string_properties)(integer_properties)(rating)(moderation_points)(timers))
+  EOSLIB_SERIALIZE(
+      account,
+      (owner)(display_name)(ipfs_profile)(registration_time)(string_properties)(
+          integer_properties)(rating)(moderation_points)(timers))
 };
 
 const scope_name all_accounts = N(allaccounts);

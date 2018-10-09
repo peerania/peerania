@@ -31,7 +31,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_delete_question(self):
-        begin('Test modify question')
+        begin('Test delete question')
         alice = self.register_alice_account()
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')

@@ -1,8 +1,8 @@
 eos/
 eosfactory/
+eosio.cdt/
 .vscode/
 eos-node/data
-*.abi
 *.wasm
 *.wast
 *.pyc

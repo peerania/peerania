@@ -3,8 +3,6 @@
 #include "peerania_forum.cpp"
 #include "peerania_vote.cpp"
 
-namespace eosio {
-
 void peerania::registeracc(account_name owner, std::string display_name,
                            std::string ipfs_profile) {
   require_auth(owner);
@@ -126,20 +124,29 @@ void peerania::setaccrtmpc(account_name user, int16_t rating,
     account.moderation_points = moderation_points;
   });
 }
+
+void peerania::resettables(){
+  auto iter_acc = account_table.begin();
+  while(iter_acc != account_table.end()){
+    remove_display_name_from_map(iter_acc->owner, iter_acc->display_name);
+    iter_acc = account_table.erase(iter_acc);
+  }
+  auto iter_question = question_table.begin();
+  while(iter_question != question_table.end())
+    iter_question = question_table.erase(iter_question);
+}
 #endif
 
-}  // namespace eosio
-
 #ifndef DEBUG
-EOSIO_ABI(eosio::peerania,
+EOSIO_ABI(peerania,
           (registeracc)(setaccintprp)(setaccstrprp)(setipfspro)(setdispname)(
               postquestion)(postanswer)(postcomment)(delquestion)(delanswer)(
               delcomment)(modanswer)(modquestion)(modcomment)(upvote)(downvote)(
               mrkascorrect)(votedelete)(votemoderate)(updateacc))
 #else
-EOSIO_ABI(eosio::peerania,
+EOSIO_ABI(peerania,
           (registeracc)(setaccintprp)(setaccstrprp)(setipfspro)(setdispname)(
               postquestion)(postanswer)(postcomment)(delquestion)(delanswer)(
               delcomment)(modanswer)(modquestion)(modcomment)(upvote)(downvote)(
-              mrkascorrect)(votedelete)(votemoderate)(setaccrtmpc)(updateacc))
+              mrkascorrect)(votedelete)(votemoderate)(updateacc)(setaccrtmpc)(resettables))
 #endif

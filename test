@@ -7,12 +7,12 @@ path=$(realpath $path)
 files='test_*.py'
 if [ $# = 0 ]
 then
-    ./compile debug
+    eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania.cpp -DDEBUG
     python3 -m unittest discover -s $path -p $files
 else
     if [ "$2" != 'no-compile' ]
     then
-        ./compile debug
+        eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania.cpp -DDEBUG
     fi
     if [ "$1" = 'debug' ]
     then

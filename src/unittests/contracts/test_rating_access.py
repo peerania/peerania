@@ -8,7 +8,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
     
     def test_post_question(self):
         begin('Testing assertion rating for question post')
-        defs = self.load_defines('./src/contracts/peerania/economy.h')
+        defs = load_defines('./src/contracts/peerania/economy.h')
         alice = self.register_alice_account(defs['POST_QUESTION_ALLOWED'], 1)
         self.action('postquestion', {'user': 'alice', 'ipfs_link': 'AQ'}, alice,
                     'Register question from alice')
@@ -19,7 +19,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
     
     def test_post_answer(self):
         begin('Testing assertion rating for posting answer')
-        defs = self.load_defines('./src/contracts/peerania/economy.h')
+        defs = load_defines('./src/contracts/peerania/economy.h')
         alice = self.register_alice_account(defs['POST_QUESTION_ALLOWED'], 1)
         bob = self.register_bob_account(defs['POST_ANSWER_ALLOWED'], 1)
         carol = self.register_carol_account(defs['POST_ANSWER_ALLOWED'] - 1, 1)
@@ -37,7 +37,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
 
     def test_post_comment(self):
         begin('Testing assertion rating for posting comment')
-        defs = self.load_defines('./src/contracts/peerania/economy.h')
+        defs = load_defines('./src/contracts/peerania/economy.h')
         alice = self.register_alice_account(defs['POST_QUESTION_ALLOWED'], 1)
         bob = self.register_bob_account(defs['POST_ANSWER_ALLOWED'], 1)
         carol = self.register_carol_account(defs['POST_COMMENT_ALLOWED'] - 1, 1)
@@ -62,7 +62,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
 
     def test_upvote(self):
         begin('Testing assertion for upvote')
-        defs = self.load_defines('./src/contracts/peerania/economy.h')
+        defs = load_defines('./src/contracts/peerania/economy.h')
         alice = self.register_alice_account(defs['POST_QUESTION_ALLOWED'], 1)
         bob = self.register_bob_account(defs['POST_ANSWER_ALLOWED'], 1)
         carol = self.register_carol_account(defs['UPVOTE_ALLOWED'] - 1, 1)
@@ -77,7 +77,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
 
     def test_downvote(self):
         begin('Testing assertion for downvote')
-        defs = self.load_defines('./src/contracts/peerania/economy.h')
+        defs = load_defines('./src/contracts/peerania/economy.h')
         alice = self.register_alice_account(defs['POST_QUESTION_ALLOWED'], 1)
         bob = self.register_bob_account(defs['POST_ANSWER_ALLOWED'], 1)
         carol = self.register_carol_account(defs['DOWNVOTE_ALLOWED'] - 1, 1)

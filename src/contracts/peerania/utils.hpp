@@ -32,8 +32,6 @@ Iter linear_find(Iter begin, Iter end, t_key key) {
 }
 }  // namespace std
 
-inline time current_time_in_sec() { return current_time() / 1000000; }
-
 inline void assert_ipfs(const std::string ipfs_link){
   eosio_assert(!(ipfs_link.empty()), "Incorrect ipfs");
 }

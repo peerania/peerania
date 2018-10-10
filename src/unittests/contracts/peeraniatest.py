@@ -140,6 +140,7 @@ class PeeraniaTest(unittest.TestCase):
         info('Wait {} sec until new block is generated'.format(secs))
         sleep(secs)
 
+
     def get_non_registered_alice(self):
         return self.alice
 

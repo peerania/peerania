@@ -3,6 +3,7 @@
 
 # run tests
 path='./src/unittests/contracts/'
+path=$(realpath $path)
 files='test_*.py'
 if [ $# = 0 ]
 then

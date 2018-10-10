@@ -21,6 +21,7 @@ void peerania::register_account(account_name owner, std::string display_name,
     account.rating = RATING_ON_CREATE;
     account.registration_time = current_time;
     account.timers.push_back(mdp);
+
   });
 
   add_display_name_to_map(owner, display_name);
@@ -104,6 +105,7 @@ void peerania::update_rating(account_name user, int rating_change) {
   account_table.modify(
       find_account(user), _self,
       [rating_change](auto &account) { account.rating += rating_change; });
+
 }
 
 void peerania::update_account(account_name user) {

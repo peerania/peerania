@@ -2,4 +2,4 @@
 # Execute a commadn against a bitcoin node
 
 #compile
-eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania.cpp -DDEBUG
+eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania.cpp

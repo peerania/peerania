@@ -116,6 +116,10 @@ class peerania : public contract {
   void mrkascorrect(account_name user, uint64_t question_id,
                     uint16_t answer_id);
 
+  // Handle timers function
+  ///@abi action
+  void updateacc(account_name user);
+
   // Debug methoods
 #ifdef DEBUG
   // Set account rating and moderation points count
@@ -194,6 +198,7 @@ class peerania : public contract {
 
   inline void update_rating(account_name user, int rating_change);
 
+  void update_account(account_name user);
 };
 }  // namespace eosio
 

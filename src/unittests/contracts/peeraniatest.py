@@ -11,7 +11,7 @@ from time import sleep
 class PeeraniaTest(unittest.TestCase):
     DEFAULT_RATING = 200
     DEFAULT_MDP = 2
-    WAIT_FOR_NEW_BLOCK = 1.5
+    WAIT_FOR_NEW_BLOCK = 0.51
 
     def run(self, result=None):
         """ Stop after first error """
@@ -34,7 +34,7 @@ class PeeraniaTest(unittest.TestCase):
         eosio = eosf.AccountMaster()
         wallet.import_key(eosio)
 
-        deployer = eosf.account(eosio, "deployer")
+        deployer = eosf.account(eosio, "peerania.dev")
         wallet.import_key(deployer)
 
         self.alice = eosf.account(eosio, "alice")
@@ -134,9 +134,12 @@ class PeeraniaTest(unittest.TestCase):
         self.assertFalse(t.json['more'])
         return t.json['rows']
 
-    def wait(self):
-        info('Wait {} sec until new block is generated'.format(self.WAIT_FOR_NEW_BLOCK))
-        sleep(self.WAIT_FOR_NEW_BLOCK)
+    def wait(self, secs = None):
+        if secs is None:
+            secs = self.WAIT_FOR_NEW_BLOCK
+        info('Wait {} sec until new block is generated'.format(secs))
+        sleep(secs)
+
 
     def get_non_registered_alice(self):
         return self.alice
@@ -163,6 +166,8 @@ class PeeraniaTest(unittest.TestCase):
             'display_name': str(owner) + 'DispName',
             'ipfs_profile': str(owner) + '_IPFS',
             'registration_time': '#ignore',
+            'moderation_points': '#var ' + str(owner) + '_mdp',
+            'rating': '#var ' + str(owner) + '_rating',
             'string_properties': [],
             'integer_properties': []
         }

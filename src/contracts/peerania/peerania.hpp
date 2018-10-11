@@ -131,6 +131,10 @@ class peerania : public eosio::contract {
   [[eosio::action]] 
   void updateacc(account_name user);
 
+  // Handle timers function
+  ///@abi action
+  void updateacc(account_name user);
+
   // Debug methoods
 #ifdef DEBUG
   // Set account rating and moderation points count

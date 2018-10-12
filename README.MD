@@ -16,12 +16,11 @@
 
 ### Install Python 3.6 or higher
 
-You find the latest version on https://www.python.org/downloads/
-Install *termcolor* by running command
-`python3 -m pip install termcolor`
+1. You could find the latest version on https://www.python.org/downloads/
+1. Install *termcolor* by running command `python3 -m pip install termcolor`
 
 ### Install eosio.cdt
-Follow instructions on https://github.com/EOSIO/eosio.cdt
+Follow the instructions on https://github.com/EOSIO/eosio.cdt
 
 ## Smart Contracts
 

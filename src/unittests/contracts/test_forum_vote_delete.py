@@ -557,8 +557,8 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         self.alice_moderation_points = 3
         self.bob_moderation_points = 3
         self.carol_moderation_points = 3
-        self.defs = {**self.load_defines('./src/contracts/peerania/economy.h'),
-                     **self.load_defines('./src/contracts/peerania/question_container.hpp')}
+        self.defs = {**load_defines('./src/contracts/peerania/economy.h'),
+                     **load_defines('./src/contracts/peerania/question_container.hpp')}
 
         alice = self.register_alice_account(
             self.alice_rating, self.alice_moderation_points)

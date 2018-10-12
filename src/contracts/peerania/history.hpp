@@ -17,7 +17,7 @@
 
 typedef uint16_t flag_type;
 
-struct history_item {
+struct  [[eosio::table]] history_item {
   account_name user;
   flag_type flag = 0;
   void set_flag(flag_type flg) { flag |= flg; }

@@ -11,8 +11,8 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account(1, 0)
         bob = self.register_bob_account(1, 1)
         e = ['#ignoreorder',
-             self.get_expected_account_body(alice),
-             self.get_expected_account_body(bob)
+             get_expected_account_body(alice),
+             get_expected_account_body(bob)
             ]
         var = {}
         self.assertTrue(compare(e, self.table('account', 'allaccounts'), var, True))
@@ -34,7 +34,7 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
     def test_broke_timer_failed(self):
         begin('Attempt to broke timer(DDOS)')
         alice = self.register_alice_account()
-        e = [self.get_expected_account_body(alice)]
+        e = [get_expected_account_body(alice)]
         var = {}
         self.assertTrue(compare(e, self.table('account', 'allaccounts'), var, True))
         info('Call update acc in all possible blocks')
@@ -57,7 +57,7 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
     def test_no_rating_no_moderation_points(self):
         begin('Test rating equal zero timer do nothing')
         alice = self.register_alice_account(0, 0)
-        e = [self.get_expected_account_body(alice)]
+        e = [get_expected_account_body(alice)]
         var = {}
         self.assertTrue(compare(e, self.table('account', 'allaccounts'), var, True))
         info('Wait 6 second untill the timer tick')

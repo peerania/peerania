@@ -48,7 +48,7 @@ bool get_property(const std::vector<prop> &properties, uint8_t key,
 
 template <typename prop_t, typename val_t>
 void set_property_d(std::vector<prop_t> &properties, uint8_t key,
-                  const val_t &value, val_t default_value) {
+                    const val_t &value, val_t default_value) {
   auto itr_property = linear_find(properties.begin(), properties.end(), key);
   if (itr_property == properties.end()) {
     if (value == default_value) return;
@@ -66,7 +66,7 @@ void set_property_d(std::vector<prop_t> &properties, uint8_t key,
 
 template <typename prop, typename val_t>
 val_t get_property_d(const std::vector<prop> &properties, uint8_t key,
-                   val_t default_value) {
+                     val_t default_value) {
   auto itr_property = linear_find(properties.begin(), properties.end(), key);
   if (itr_property == properties.end()) return default_value;
   return itr_property->value;

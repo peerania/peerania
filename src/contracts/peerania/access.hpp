@@ -28,6 +28,10 @@ enum Action {
 void assert_allowed(const account &action_caller, account_name data_owner,
                     Action action) {
   switch (action) {
+    case POST_QUESTION:
+        eosio_assert(action_caller.owner == data_owner, "Internal function call error");
+        eosio_assert(action_caller.rating >= POST_QUESTION_ALLOWED,
+                    "You can't post question!");
     case POST_ANSWER:
       if (action_caller.owner == data_owner)
         eosio_assert(action_caller.rating >= POST_ANSWER_OWN_ALLOWED,
@@ -62,10 +66,6 @@ void assert_allowed(const account &action_caller, account_name data_owner,
       eosio_assert(action_caller.rating >= VOTE_FOR_DELETION_ALLOWED,
                    "Your rating is too small to put deletion flag");
       break;
-    case POST_QUESTION:
-        eosio_assert(action_caller.owner != data_owner, "Internal function call error");
-        eosio_assert(action_caller.rating >= POST_QUESTION_ALLOWED,
-                    "You can't post question!");
     default:
       eosio_assert(action_caller.owner == data_owner, "Action not allowed");
       break;

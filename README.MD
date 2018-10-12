@@ -14,26 +14,21 @@
 1. `./eosio_build.sh`
 1. `./eosio_install.sh`
 
-### Build EOSFactory
+### Install Python 3.6 or higher
 
-1. Install Python 3
-1. Install *termcolor* by running command
+You find the latest version on https://www.python.org/downloads/
+Install *termcolor* by running command
 `python3 -m pip install termcolor`
-1. `cd eosfactory`
-1. Run command  
-`./build.sh -e <peerania-repo-path>/eos -w <peerania-repo-path>/src/contracts`  
-*peerania-repo-path* is path to directory where you cloned *peerania* repository
-1. Test that EOSFactory installed propery by running commands  
-`python3 ./tests/unittest1.py`  
-`python3 ./tests/unittest2.py`  
-`python3 ./tests/unittest3.py`  
+
+### Install eosio.cdt
+Follow instructions on https://github.com/EOSIO/eosio.cdt
 
 ## Smart Contracts
 
 Smart contracts are located in folder *src/contracts/peerania*  
 
 Run `./compile` script to compile the contracts  
-Run `./test` to execute unit tests
+Run `./test` script to compile and execute unit tests
 
 ## Running Local Node
 

@@ -1,0 +1,6 @@
+{
+    "eos-node":"./eos-node/",
+    "terminal": false,
+    "deployer": "peerania.dev",
+    "contract": "./src/contracts/peerania"
+}

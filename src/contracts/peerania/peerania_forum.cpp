@@ -1,7 +1,5 @@
 #include "peerania.hpp"
 
-namespace eosio {
-
 question_index::const_iterator peerania::find_question(uint64_t question_id) {
   auto iter_question = question_table.find(question_id);
   eosio_assert(iter_question != question_table.end(), "Question not found!");
@@ -16,7 +14,7 @@ void peerania::post_question(account_name user, const std::string &ipfs_link) {
     question.id = question_table.available_primary_key();
     question.user = user;
     question.ipfs_link = ipfs_link;
-    question.post_time = current_time_in_sec();
+    question.post_time = now();
   });
   update_rating(iter_account, POST_QUESTION_REWARD);
 }
@@ -36,7 +34,7 @@ void peerania::post_answer(account_name user, uint64_t question_id,
   answer new_answer;
   new_answer.user = user;
   new_answer.ipfs_link = ipfs_link;
-  new_answer.post_time = current_time_in_sec();
+  new_answer.post_time = now();
   question_table.modify(iter_question, _self, [&new_answer](auto &question) {
     push_new_forum_item(question.answers, new_answer);
   });
@@ -51,7 +49,7 @@ void peerania::post_comment(account_name user, uint64_t question_id,
   comment new_comment;
   new_comment.user = user;
   new_comment.ipfs_link = ipfs_link;
-  new_comment.post_time = current_time_in_sec();
+  new_comment.post_time = now();
   question_table.modify(
       iter_question, _self, [iter_account, answer_id, &new_comment](auto &question) {
         if (apply_to_question(answer_id)) {
@@ -218,5 +216,3 @@ void peerania::mark_answer_as_correct(account_name user, uint64_t question_id,
     question.correct_answer_id = answer_id;
   });
 }
-
-}  // namespace eosio

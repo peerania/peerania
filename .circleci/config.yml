@@ -11,6 +11,11 @@ jobs:
       - checkout:
           path:
             "peerania"
+      - run:
+          name: Package
+          command: |
+          cd peerania
+          ./test
   deploy:
     docker:
       - image: eosio/eos-dev:v1.1.1

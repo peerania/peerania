@@ -3,7 +3,7 @@ jobs:
 
   test:
     docker:
-      - image: eosio/eosio-dev:latest
+      - image: eosio/eos-dev:latest
     working_directory: ~/ws
     steps:
       - attach_workspace:

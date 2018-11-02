@@ -3,7 +3,7 @@ jobs:
 
   test:
     docker:
-      - image: sergeyi/eosio-cdt:v1.3.0
+      - image: eosio/cdt:latest
     working_directory: ~/ws
     steps:
       - attach_workspace:

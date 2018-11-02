@@ -1,6 +1,4 @@
 #pragma once
-
-#include <eosiolib/asset.hpp>
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/types.hpp>
 #include <string>
@@ -12,7 +10,7 @@
 // performance
 uint64_t hash_display_name(const std::string &display_name) {
   char s[13];
-  int len = len = (display_name.length() < 12) ? display_name.length() : 12;
+  int len = (display_name.length() < 12) ? display_name.length() : 12;
   for (int i = 0; i < len; ++i) {
     s[i] = 97 + (display_name[i] % 26);
   }

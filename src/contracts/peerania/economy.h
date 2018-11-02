@@ -43,3 +43,13 @@ const int DELETION_VOTES_COMMENT = 1000;
 #define UPVOTE_ALLOWED 35
 #define DOWNVOTE_ALLOWED 100
 #define VOTE_FOR_DELETION_ALLOWED 100
+
+#ifdef DEBUG
+struct [[eosio::table("constants")]] constants {
+  uint64_t id;
+  time start_period_time;
+  uint64_t primary_key() const { return id; }
+};
+typedef eosio::multi_index<N(constants), constants> constants_index;
+const scope_name all_constants = N(allconstants);
+#endif

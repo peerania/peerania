@@ -126,14 +126,41 @@ void peerania::setaccrtmpc(account_name user, int16_t rating,
 }
 
 void peerania::resettables(){
-  auto iter_acc = account_table.begin();
-  while(iter_acc != account_table.end()){
-    remove_display_name_from_map(iter_acc->owner, iter_acc->display_name);
-    iter_acc = account_table.erase(iter_acc);
+  auto iter_account = account_table.begin();
+  while(iter_account != account_table.end()){
+    remove_display_name_from_map(iter_account->owner, iter_account->display_name);
+    //clean reward tables for user
+    auto period_rating_table = period_rating_index(_self, iter_account->owner);
+    auto iter_period_rating = period_rating_table.begin();
+    while(iter_period_rating != period_rating_table.end()){
+      iter_period_rating = period_rating_table.erase(iter_period_rating);
+    }
+
+    //remove user
+    iter_account = account_table.erase(iter_account);
   }
+
+  //clean reward total
+  auto iter_total_rating = total_rating_table.begin();
+  while(iter_total_rating != total_rating_table.end()){
+    iter_total_rating = total_rating_table.erase(iter_total_rating);
+  }
+
+  //clean constants
+  constants_index all_constants_table(_self, all_constants);
+  auto iter_constants = all_constants_table.begin();
+  while(iter_constants != all_constants_table.end()){
+    iter_constants = all_constants_table.erase(iter_constants);
+  }
+
+  //clean forum
   auto iter_question = question_table.begin();
   while(iter_question != question_table.end())
     iter_question = question_table.erase(iter_question);
+}
+
+void peerania::chngrating(account_name user, int16_t rating_change){
+  update_rating(user, rating_change);
 }
 #endif
 
@@ -148,5 +175,6 @@ EOSIO_ABI(peerania,
           (registeracc)(setaccintprp)(setaccstrprp)(setipfspro)(setdispname)(
               postquestion)(postanswer)(postcomment)(delquestion)(delanswer)(
               delcomment)(modanswer)(modquestion)(modcomment)(upvote)(downvote)(
-              mrkascorrect)(votedelete)(votemoderate)(updateacc)(setaccrtmpc)(resettables))
+              mrkascorrect)(votedelete)(votemoderate)(updateacc)(setaccrtmpc)(
+                resettables)(chngrating))
 #endif

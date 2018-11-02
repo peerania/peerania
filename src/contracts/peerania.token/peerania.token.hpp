@@ -6,78 +6,87 @@
 
 #include <eosiolib/asset.hpp>
 #include <eosiolib/eosio.hpp>
-
 #include <string>
-
+#include "../peerania/account.hpp"  //replace with -I
+#include "token_controller.h"
 namespace eosiosystem {
-   class system_contract;
+class system_contract;
 }
 
 namespace eosio {
 
-   using std::string;
+using std::string;
 
-   class token : public contract {
-      public:
-         token( account_name self ):contract(self){}
+class token : public contract {
+ public:
+  token(account_name self)
+      : contract(self),
+        main_account_table(main_contract_owner, all_accounts),
+        main_total_rating_table(self, all_periods){}
 
-         void create( account_name issuer,
-                      asset        maximum_supply);
+  const account_name main_contract_owner = N(peerania.dev);
 
-         void issue( account_name to, asset quantity, string memo );
+  void printanother();
 
-         void transfer( account_name from,
-                        account_name to,
-                        asset        quantity,
-                        string       memo );
-      
-      
-         inline asset get_supply( symbol_name sym )const;
-         
-         inline asset get_balance( account_name owner, symbol_name sym )const;
+  void create(account_name issuer, asset maximum_supply);
 
-      private:
-         struct account {
-            asset    balance;
+  void issue(account_name to, asset quantity, string memo);
 
-            uint64_t primary_key()const { return balance.symbol.name(); }
-         };
+  void transfer(account_name from, account_name to, asset quantity,
+                string memo);
 
-         struct currency_stats {
-            asset          supply;
-            asset          max_supply;
-            account_name   issuer;
+/*
+  void createreward(account_name user, uint16_t period);
 
-            uint64_t primary_key()const { return supply.symbol.name(); }
-         };
+  void pickupreward(account_name user, uint16_t period);
+*/
+  inline asset get_supply(symbol_name sym) const;
 
-         typedef eosio::multi_index<N(accounts), account> accounts;
-         typedef eosio::multi_index<N(stat), currency_stats> stats;
+  inline asset get_balance(account_name owner, symbol_name sym) const;
 
-         void sub_balance( account_name owner, asset value );
-         void add_balance( account_name owner, asset value, account_name ram_payer );
+ private:
+  account_index main_account_table;
+  total_rating_index main_total_rating_table;
 
-      public:
-         struct transfer_args {
-            account_name  from;
-            account_name  to;
-            asset         quantity;
-            string        memo;
-         };
-   };
+  struct account {
+    asset balance;
 
-   asset token::get_supply( symbol_name sym )const
-   {
-      stats statstable( _self, sym );
-      const auto& st = statstable.get( sym );
-      return st.supply;
-   }
+    uint64_t primary_key() const { return balance.symbol.name(); }
+  };
 
-   asset token::get_balance( account_name owner, symbol_name sym )const
-   {
-      accounts accountstable( _self, owner );
-      const auto& ac = accountstable.get( sym );
-      return ac.balance;
-   }
+  struct currency_stats {
+    asset supply;
+    asset max_supply;
+    account_name issuer;
 
-} /// namespace eosio
+    uint64_t primary_key() const { return supply.symbol.name(); }
+  };
+
+  typedef eosio::multi_index<N(accounts), account> accounts;
+  typedef eosio::multi_index<N(stat), currency_stats> stats;
+
+  void sub_balance(account_name owner, asset value);
+  void add_balance(account_name owner, asset value, account_name ram_payer);
+
+ public:
+  struct transfer_args {
+    account_name from;
+    account_name to;
+    asset quantity;
+    string memo;
+  };
+};
+
+asset token::get_supply(symbol_name sym) const {
+  stats statstable(_self, sym);
+  const auto& st = statstable.get(sym);
+  return st.supply;
+}
+
+asset token::get_balance(account_name owner, symbol_name sym) const {
+  accounts accountstable(_self, owner);
+  const auto& ac = accountstable.get(sym);
+  return ac.balance;
+}
+
+}  // namespace eosio

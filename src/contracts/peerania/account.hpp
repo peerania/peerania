@@ -20,12 +20,13 @@ struct [[eosio::table("account")]] account {
   std::vector<int_key_value> integer_properties;
   int16_t rating = 0;
   uint16_t moderation_points = 0;
-  std::vector<account_timer> timers;
+  std::vector<account_timer> timers;//excluded from abi
+  int16_t pay_out_rating = 0;
   uint64_t primary_key() const { return owner; }
   EOSLIB_SERIALIZE(
       account,
       (owner)(display_name)(ipfs_profile)(registration_time)(string_properties)(
-          integer_properties)(rating)(moderation_points)(timers))
+          integer_properties)(rating)(moderation_points)(timers)(pay_out_rating))
 };
 
 const scope_name all_accounts = N(allaccounts);

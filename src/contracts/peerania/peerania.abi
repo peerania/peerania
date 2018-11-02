@@ -41,6 +41,20 @@
       ]
     },
     {
+      "name": "account_timer",
+      "base": "",
+      "fields": [
+        {
+          "name": "timer",
+          "type": "uint8"
+        },
+        {
+          "name": "last_update",
+          "type": "time"
+        }
+      ]
+    }
+    {
       "name": "account",
       "base": "",
       "fields": [
@@ -75,6 +89,14 @@
         {
           "name": "moderation_points",
           "type": "uint16"
+        },
+        {
+          "name": "timers",
+          "type": "account_timer[]"
+        }
+        {
+          "name": "paid_out_rating",
+          "type": "int16"
         }
       ]
     },
@@ -606,6 +628,52 @@
       "name": "resettables",
       "base": "",
       "fields": []
+    },
+    {
+      "name": "chngrating",
+      "base": "",
+      "fields": [
+        {
+          "name": "user",
+          "type": "name"
+        },
+        {
+          "name": "rating_change",
+          "type": "int16"
+        }
+      ]
+    },
+    {
+      "name": "periodrating",
+      "base": "",
+      "fields": [
+        {
+          "name": "period",
+          "type": "uint16"
+        }, 
+        {
+          "name": "rating",
+          "type": "int16"
+        },
+        {
+          "name": "rating_to_award",
+          "type": "uint16"
+        }
+      ]
+    },
+    {
+      "name": "totalrating",
+      "base": "",
+      "fields": [
+        {
+          "name": "period",
+          "type": "uint16"
+        }, 
+        {
+          "name": "total_rating_to_reward",
+          "type": "uint32"
+        }
+      ]
     }
   ],
   "actions": [
@@ -717,6 +785,11 @@
       "name": "resettables",
       "type": "resettables",
       "ricardian_contract": ""
+    },
+    {
+      "name": "chngrating",
+      "type": "chngrating",
+      "ricardian_contract": ""
     }
   ],
   "tables": [
@@ -752,6 +825,28 @@
         "uint64"
       ],
       "type": "question"
+    },
+    {
+      "name": "periodrating",
+      "index_type": "i64",
+      "key_names": [
+        "period"
+      ],
+      "key_types": [
+        "uint16"
+      ],
+      "type": "periodrating"
+    },
+    {
+      "name": "totalrating",
+      "index_type": "i64",
+      "key_names": [
+        "period"
+      ],
+      "key_types": [
+        "uint16"
+      ],
+      "type": "totalrating"
     }
   ],
   "ricardian_clauses": [],

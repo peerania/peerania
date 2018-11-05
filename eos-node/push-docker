@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+docker build . -t sergeyi/eosio-cdt:v1.3.0
+
+docker login
+
+docker push sergeyi/eosio-cdt:v1.3.0

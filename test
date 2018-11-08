@@ -7,16 +7,16 @@ path=$(realpath $path)
 files='test_*.py'
 if [ $# = 0 ]
 then
-    eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania.cpp -DDEBUG
+    ./compile debug
     python3 -m unittest discover -s $path -p $files
 else
     if [ "$2" != 'no-compile' ]
     then
-        eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania.cpp -DDEBUG
+        ./compile debug
     fi
     if [ "$1" = 'debug' ]
     then
-        echo "Enter debug mode!"
+        echo "Enter debug mode(for test developer)!"
         stop=false
         for file in $path/$files; do
             while : ; do

@@ -134,7 +134,9 @@ void peerania::vote_for_deletion(account_name user, uint64_t question_id,
     eosio_assert(iter_question != question_table.end(),
                  "Address not erased properly");
   }
-  update_rating(item_owner, owner_rating_change);
+  //owner_rating_change = 0 also means that item_owner was not found
+  if(owner_rating_change != 0)
+    update_rating(item_owner, owner_rating_change);
   account_table.modify(iter_account, _self,
                        [](auto &account) { account.moderation_points -= 1; });
 }

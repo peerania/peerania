@@ -5,4 +5,4 @@
 rm -rf data
 rm ~/eosio-wallet/default.wallet
 
-nodeos -e -p eosio --config-dir config --data-dir data --plugin eosio::chain_api_plugin --plugin eosio::history_api_plugin --delete-all-blocks --contracts-console --http-validate-host false
+nodeos -e -p eosio --config-dir config --data-dir data --plugin eosio::chain_api_plugin --plugin eosio::history_api_plugin --delete-all-blocks --contracts-console --http-validate-host false --access-control-allow-origin "*" --access-control-allow-headers "*" --access-control-allow-credentials true

@@ -6,13 +6,17 @@ question_index::const_iterator peerania::find_question(uint64_t question_id) {
   return iter_question;
 }
 
-void peerania::post_question(account_name user, const std::string &ipfs_link) {
+void peerania::post_question(account_name user, const std::string &title,
+                             const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
+  // Title shroter than 128
+  eosio_assert(title.length() < 129, "Title too long");
   auto iter_account = find_account(user);
   assert_allowed(*iter_account, user, Action::POST_QUESTION);
   question_table.emplace(_self, [&](auto &question) {
     question.id = question_table.available_primary_key();
     question.user = user;
+    question.title = title;
     question.ipfs_link = ipfs_link;
     question.post_time = now();
   });
@@ -51,7 +55,8 @@ void peerania::post_comment(account_name user, uint64_t question_id,
   new_comment.ipfs_link = ipfs_link;
   new_comment.post_time = now();
   question_table.modify(
-      iter_question, _self, [iter_account, answer_id, &new_comment](auto &question) {
+      iter_question, _self,
+      [iter_account, answer_id, &new_comment](auto &question) {
         if (apply_to_question(answer_id)) {
           assert_allowed(*iter_account, question.user, Action::POST_COMMENT);
           eosio_assert(question.comments.size() < MAX_ANSWER_COUNT,
@@ -123,6 +128,7 @@ void peerania::delete_comment(account_name user, uint64_t question_id,
 }
 
 void peerania::modify_question(account_name user, uint64_t question_id,
+                               const std::string &title,
                                const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);

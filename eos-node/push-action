@@ -1,4 +1,18 @@
 #!/usr/bin/env bash
 set -ex
 
-cleos push action peerania.dev registeracc '{"owner": "user1", "display_name": "user1DispName", "ipfs_profile": "user1_IPFS"}' -p user1
+cleos push action peerania.dev registeracc '{"owner": "alice", "display_name": "Alice", "ipfs_profile": "QmXJ16tS8RUzB82HGdKFw8YQKysnqyNaM9dxrzUZb9KZsp"}' -p alice
+cleos push action peerania.dev registeracc '{"owner": "bob", "display_name": "Bobby", "ipfs_profile": "QmR76vd3Wpjz2pAjso5v4tTrESa5heXzDvLtjq5cPgScUN"}' -p bob
+cleos push action peerania.dev registeracc '{"owner": "carol", "display_name": "Carol", "ipfs_profile": "QmXs7cPgUsMSo7jLs3ft4HoSCFCdfB8mfNWk7ZLc2LWf4e"}' -p carol
+cleos push action peerania.dev registeracc '{"owner": "user1", "display_name": "Roman", "ipfs_profile": "QmR5gQiRqQT9EbQbSa38xhqnUdDbVLXCf1A3juHVz5EuEc"}' -p user1
+
+cleos push action peerania.dev setaccrtmpc '{"user": "alice", "rating": 100, "moderation_points": 10}' -p alice
+cleos push action peerania.dev setaccrtmpc '{"user": "bob", "rating": 200, "moderation_points": 10}' -p bob
+cleos push action peerania.dev setaccrtmpc '{"user": "carol", "rating": 150, "moderation_points": 10}' -p carol
+
+cleos push action peerania.dev postquestion '{"user":"alice", "title":"Alice question about life", "ipfs_link":"QmQtgrRFXpLrzfDSVDzMsVHN7NgMJ3MhNYgbTUXSg8NYJb"}' -p alice
+cleos push action peerania.dev postanswer '{"user":"bob", "question_id":0, "ipfs_link":"QmYwd7TPMJEP1vtgVdhQiGjSjjuhUrDVGccQAWvAJgRPe9"}' -p bob
+cleos push action peerania.dev postcomment '{"user":"carol", "question_id":0, "answer_id": 0, "ipfs_link":"QmTMZCVQKui85eB6osHwjknSFsgpEP7L8J4rCss7S8PdNR"}' -p carol
+cleos push action peerania.dev postcomment '{"user":"carol", "question_id":0, "answer_id": 1, "ipfs_link":"QmNUusxFKjGNst57nXDGuBEXgkn7osQv2ZM4J9GG3EXr73"}' -p carol
+
+cleos push action peerania.dev setaccrtmpc '{"user": "user1", "rating": 400, "moderation_points": 10}' -p alice

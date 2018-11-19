@@ -81,7 +81,7 @@ class TestTokenIntegration(peeraniatest.PeeraniaTest):
         return None
 
     def _update_rating(self, user, rating_change):
-        self.action('chngrating', {
+        self.action('chnguserrt', {
             'user': user, 'rating_change': rating_change}, user, user + ' rating change ' + str(rating_change))
 
     def _run_scenario(self, rating_change_scenario):

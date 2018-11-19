@@ -30,9 +30,9 @@ void peerania::setdispname(account_name owner, std::string display_name) {
   set_account_display_name(owner, display_name);
 }
 
-void peerania::postquestion(account_name user, std::string ipfs_link) {
+void peerania::postquestion(account_name user, std::string title, std::string ipfs_link) {
   require_auth(user);
-  post_question(user, ipfs_link);
+  post_question(user, title, ipfs_link);
 }
 
 void peerania::postanswer(account_name user, uint64_t question_id,
@@ -64,10 +64,10 @@ void peerania::delcomment(account_name user, uint64_t question_id,
   delete_comment(user, question_id, answer_id, comment_id);
 }
 
-void peerania::modquestion(account_name user, uint64_t question_id,
+void peerania::modquestion(account_name user, uint64_t question_id, const std::string &title, 
                            const std::string &ipfs_link) {
   require_auth(user);
-  modify_question(user, question_id, ipfs_link);
+  modify_question(user, question_id, title, ipfs_link);
 }
 
 void peerania::modanswer(account_name user, uint64_t question_id,
@@ -159,9 +159,17 @@ void peerania::resettables(){
     iter_question = question_table.erase(iter_question);
 }
 
-void peerania::chngrating(account_name user, int16_t rating_change){
+void peerania::chnguserrt(account_name user, int16_t rating_change){
   update_rating(user, rating_change);
 }
+
+void peerania::setquestrt(uint64_t question_id, int16_t rating){
+  auto iter_question = find_question(question_id);
+  question_table.modify(iter_question, _self, [rating](auto &question){
+    question.rating = rating;
+  });
+}
+
 #endif
 
 #ifndef DEBUG
@@ -176,5 +184,5 @@ EOSIO_ABI(peerania,
               postquestion)(postanswer)(postcomment)(delquestion)(delanswer)(
               delcomment)(modanswer)(modquestion)(modcomment)(upvote)(downvote)(
               mrkascorrect)(votedelete)(votemoderate)(updateacc)(setaccrtmpc)(
-                resettables)(chngrating))
+                resettables)(chnguserrt)(setquestrt))
 #endif

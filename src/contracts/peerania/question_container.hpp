@@ -9,13 +9,13 @@
 #define EMPTY_ANSWER_ID 0
 
 // Return true if the action must be applied to question
-#define apply_to_question(answer_id) ((answer_id)==EMPTY_ANSWER_ID)
+#define apply_to_question(answer_id) ((answer_id) == EMPTY_ANSWER_ID)
 
 // Comment id starts from FORUM_INDEX_START
 #define EMPTY_COMMENT_ID 0
 
 // Return true if the action must be applied to answer
-#define apply_to_answer(comment_id) ((comment_id)==EMPTY_COMMENT_ID)
+#define apply_to_answer(comment_id) ((comment_id) == EMPTY_COMMENT_ID)
 
 #define FORUM_INDEX_START 1
 
@@ -57,6 +57,7 @@ struct [[eosio::table("question")]] question {
   uint64_t id;
   time post_time;
   account_name user;
+  std::string title;
   std::string ipfs_link;
   std::vector<answer> answers;
   std::vector<comment> comments;
@@ -66,13 +67,27 @@ struct [[eosio::table("question")]] question {
   std::vector<int_key_value> properties;
   std::vector<history_item> history;
   uint64_t primary_key() const { return id; }
+  uint64_t date_rkey() const { return (1ULL << 33) - post_time; }
+  uint64_t rating_rkey() const { return (1 << 17) - rating; }
+  uint128_t user_and_id_key() const { return ((uint128_t)user << 64) + id; }
   EOSLIB_SERIALIZE(question,
-                   (id)(post_time)(user)(ipfs_link)(answers)(comments)(
+                   (id)(post_time)(user)(title)(ipfs_link)(answers)(comments)(
                        correct_answer_id)(rating)(properties)(history))
 };
 
 const scope_name all_questions = N(allquestions);
-typedef eosio::multi_index<N(question), question> question_index;
+typedef eosio::multi_index<
+    N(question), question,
+    eosio::indexed_by<
+        N(byposttime),
+        eosio::const_mem_fun<question, uint64_t, &question::date_rkey>>,
+    eosio::indexed_by<
+        N(byrating),
+        eosio::const_mem_fun<question, uint64_t, &question::rating_rkey>>,
+    eosio::indexed_by<
+        N(byowner),
+        eosio::const_mem_fun<question, uint128_t, &question::user_and_id_key>>>
+    question_index;
 
 template <typename T>
 void push_new_forum_item(std::vector<T> &container, T &item) {

@@ -24,8 +24,8 @@ class peerania : public eosio::contract {
         question_table(self, all_questions),
         total_rating_table(self, all_periods) {
 #ifdef DEBUG
-    //Initializte some constants for debug
-    //could be moved to a separate method
+    // Initializte some constants for debug
+    // could be moved to a separate method
     constants_index all_constants_table(self, all_constants);
     auto settings = all_constants_table.rbegin();
     if (settings != all_constants_table.rend()) {
@@ -33,10 +33,11 @@ class peerania : public eosio::contract {
     } else {
       time current_time = now();
       START_PERIOD_TIME = current_time;
-      all_constants_table.emplace(_self, [&all_constants_table, current_time](auto &constants) {
-        constants.id = all_constants_table.available_primary_key();
-        constants.start_period_time = current_time;
-      });
+      all_constants_table.emplace(
+          _self, [&all_constants_table, current_time](auto &constants) {
+            constants.id = all_constants_table.available_primary_key();
+            constants.start_period_time = current_time;
+          });
     }
 #endif
   };
@@ -63,7 +64,8 @@ class peerania : public eosio::contract {
                                      std::string display_name);
 
   // Post question
-  [[eosio::action]] void postquestion(account_name user, std::string ipfs_link);
+  [[eosio::action]] void postquestion(account_name user, std::string title,
+                                      std::string ipfs_link);
 
   // Post answer(answer question)
   [[eosio::action]] void postanswer(account_name user, uint64_t question_id,
@@ -89,6 +91,7 @@ class peerania : public eosio::contract {
 
   // Modify question
   [[eosio::action]] void modquestion(account_name user, uint64_t question_id,
+                                     const std::string &title,
                                      const std::string &ipfs_link);
 
   // Modify answer
@@ -140,7 +143,9 @@ class peerania : public eosio::contract {
 
   [[eosio::action]] void resettables();
 
-  [[eosio::action]] void chngrating(account_name user, int16_t rating_change);
+  [[eosio::action]] void chnguserrt(account_name user, int16_t rating_change);
+
+  [[eosio::action]] void setquestrt(uint64_t question_id, int16_t rating);
 
   [[eosio::action]] void putsettings(time start_period_time);
 #endif
@@ -174,7 +179,8 @@ class peerania : public eosio::contract {
 
   question_index::const_iterator find_question(uint64_t question_id);
 
-  void post_question(account_name user, const std::string &ipfs_link);
+  void post_question(account_name user, const std::string &title,
+                     const std::string &ipfs_link);
 
   void post_answer(account_name user, uint64_t question_id,
                    const std::string &ipfs_link);
@@ -191,7 +197,7 @@ class peerania : public eosio::contract {
                       uint16_t answer_id, uint64_t comment_id);
 
   void modify_question(account_name user, uint64_t question_id,
-                       const std::string &ipfs_link);
+                       const std::string &title, const std::string &ipfs_link);
 
   void modify_answer(account_name user, uint64_t question_id,
                      uint16_t answer_id, const std::string &ipfs_link);

@@ -48,7 +48,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
     def test_register_question_from_non_existent_account_failed(self):
         begin('Register question from non-regidtered account', True)
         alice = self.get_non_registered_alice()
-        self.failed_action('postquestion', {'user': 'alice', 'ipfs_link': 'test'}, alice,
+        self.failed_action('postquestion', {'user': 'alice', 'title': 'Title alice question','ipfs_link': 'test'}, alice,
                            'Asking question from not registered Alice account', 'assert')
         end()
 
@@ -56,7 +56,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         begin('Call register question with another owner auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.failed_action('postquestion', {'user': 'alice', 'ipfs_link': 'test'}, bob,
+        self.failed_action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'test'}, bob,
                            'Attempt to register alice question with bob auth', 'auth')
         end()
 
@@ -132,10 +132,11 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         end()
 
     def _register_question_action(self, owner, ipfs_link, id_var=''):
-        self.action('postquestion', {'user': str(owner), 'ipfs_link': ipfs_link}, owner,
+        self.action('postquestion', {'user': str(owner), 'title': 'Title ' + ipfs_link,'ipfs_link': ipfs_link}, owner,
                     'Asking question from {} with text "{}"'.format(str(owner), ipfs_link))
         return {'id': '#ignore' if id_var == '' else '#var ' + id_var,
                 'user': str(owner),
+                'title': 'Title ' + ipfs_link,
                 'ipfs_link': ipfs_link,
                 'post_time': '#ignore',
                 'answers': [],

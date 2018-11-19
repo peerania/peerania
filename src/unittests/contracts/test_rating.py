@@ -237,14 +237,15 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
-        self.action('postquestion', {'user': 'alice', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                     'Alice asking question')
-        self.action('postquestion', {'user': 'bob', 'ipfs_link': 'BQ'}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'BQ'}, bob,
                     'Bob asking question')
         self.forum_e = ['#ignoreorder',
                         {
                             'id': '#var aq',
                             'user': 'alice',
+                            'title': 'Title alice question', 
                             'ipfs_link': 'AQ',
                             'correct_answer_id': '#var aq_caid',
                             'rating': '#var aq_rating',
@@ -253,6 +254,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
                         }, {
                             'id': '#var bq',
                             'user': 'bob',
+                            'title': 'Title bob question', 
                             'ipfs_link': 'BQ',
                             'correct_answer_id': '#var bq_caid',
                             'rating': '#var bq_rating',

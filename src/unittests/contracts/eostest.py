@@ -6,7 +6,6 @@ from termcolor import cprint
 import os
 import signal
 from time import sleep
-import requests
 
 verbose = False
 
@@ -145,18 +144,30 @@ class EOSTest(unittest.TestCase):
         info('Wait {} sec until new block is generated'.format(secs))
         sleep(secs)
 
-    def table(self, table, scope, contract=None, limit=10):
+    def table(self, table, scope, upperBound=None, lowerBound=None, limit=10, indexPosition=None, keyType=None, contract=None, ignoreMore=False):
         if contract is None:
             contract = self.config['default-contract']
-        data = {'table': table, 'scope': scope,
-                'code': self.contracts[contract], 'limit': limit, 'json': True}
+        data = {'table': table,
+                'scope': scope,
+                'code': self.contracts[contract],
+                'limit': limit,
+                'json': True}
+        if (upperBound != None):
+            data['upper_bound'] = upperBound
+        if (lowerBound != None):
+            data['lower_bound'] = lowerBound
+        if (indexPosition != None):
+            data['index_position'] = indexPosition
+        if (keyType != None):
+            data['key_type'] = keyType
         with requests.post('http://127.0.0.1:8888/v1/chain/get_table_rows', json.dumps(data)) as t:
             if t.status_code == 200:
                 if verbose:
                     cprint('Fetch from "{}" with scope "{}":\n{}'.format(
                         table, scope, t.json()), color='yellow')
                 tb = t.json()
-                self.assertFalse(tb['more'])
+                if not ignoreMore:
+                    self.assertFalse(tb['more'])
                 return tb['rows']
             else:
                 cprint('Error fetching table data:\n' + str(t))

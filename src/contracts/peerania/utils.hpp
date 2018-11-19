@@ -33,5 +33,5 @@ Iter linear_find(Iter begin, Iter end, t_key key) {
 }  // namespace std
 
 inline void assert_ipfs(const std::string ipfs_link){
-  eosio_assert(!(ipfs_link.empty()), "Incorrect ipfs");
+  eosio_assert(ipfs_link.size() > 2 && ipfs_link.size() < 64, "Incorrect ipfs");
 }

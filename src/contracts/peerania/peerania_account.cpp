@@ -258,7 +258,7 @@ void peerania::update_account(account_name user) {
   }
 }
 
-eosio::multi_index<N(account), account>::const_iterator peerania::find_account(
+account_index::const_iterator peerania::find_account(
     account_name owner) {
   auto iter_user = account_table.find(owner);
   eosio_assert(iter_user != account_table.end(), "Account not registered");

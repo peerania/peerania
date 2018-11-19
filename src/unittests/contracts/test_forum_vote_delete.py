@@ -339,13 +339,14 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         end()
 
     def _create_basic_hierarchy(self, alice, bob, carol):
-        self.action('postquestion', {'user': 'alice', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                     'Register question from alice')
-        self.action('postquestion', {'user': 'bob', 'ipfs_link': 'BQ'}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question' ,'ipfs_link': 'BQ'}, bob,
                     'Register question from bob')
         e = ['#ignoreorder', {
             'id': '#var aq',
             'user': 'alice',
+            'title': 'Title alice question',
             'ipfs_link': 'AQ',
             'post_time': '#ignore',
             'properties': '#var aq_prop',
@@ -355,6 +356,7 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         }, {
             'id': '#var bq',
             'user': 'bob',
+            'title': 'Title bob question',
             'ipfs_link': 'BQ',
             'post_time': '#ignore',
             'properties': '#var bq_prop',
@@ -507,11 +509,12 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         return (e, var)
 
     def _create_simple_hierarchy(self, alice, bob):
-        self.action('postquestion', {'user': 'alice', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                     'Register question from alice')
         e = [{
             'id': '#var aq',
             'user': 'alice',
+            'title': 'Title alice question',
             'ipfs_link': 'AQ',
             'properties': '#var aq_prop',
             'history': '#var aq_hst',

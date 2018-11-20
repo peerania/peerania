@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+docker build . -t sergeyi/peerania:latest
+
+docker login
+
+docker push sergeyi/peerania:latest

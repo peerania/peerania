@@ -29,6 +29,7 @@
 
 #define PROPERTY_DELETION_VOTES 0
 #define PROPERTY_MODERATION_VOTES 1
+#define PROPERTY_LAST_MODIFIED 3
 
 struct comment {
   uint16_t id;

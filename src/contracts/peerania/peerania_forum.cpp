@@ -9,8 +9,7 @@ question_index::const_iterator peerania::find_question(uint64_t question_id) {
 void peerania::post_question(account_name user, const std::string &title,
                              const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
-  // Title shroter than 128
-  eosio_assert(title.length() < 129, "Title too long");
+  assert_title(title);
   auto iter_account = find_account(user);
   assert_allowed(*iter_account, user, Action::POST_QUESTION);
   question_table.emplace(_self, [&](auto &question) {
@@ -131,11 +130,14 @@ void peerania::modify_question(account_name user, uint64_t question_id,
                                const std::string &title,
                                const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
+  assert_title(title);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
   assert_allowed(*iter_account, iter_question->user, Action::MODIFY_QUESTION);
-  question_table.modify(iter_question, _self, [&ipfs_link](auto &question) {
+  question_table.modify(iter_question, _self, [&ipfs_link, &title](auto &question) {
     question.ipfs_link = ipfs_link;
+    question.title = title;
+    set_property(question.properties,PROPERTY_LAST_MODIFIED, now());
   });
 }
 
@@ -150,6 +152,7 @@ void peerania::modify_answer(account_name user, uint64_t question_id,
                           assert_allowed(*iter_account, iter_answer->user,
                                          Action::MODIFY_ANSWER);
                           iter_answer->ipfs_link = ipfs_link;
+                          set_property(iter_answer->properties,PROPERTY_LAST_MODIFIED, now());
                         });
 }
 
@@ -167,12 +170,14 @@ void peerania::modify_comment(account_name user, uint64_t question_id,
           assert_allowed(*iter_account, iter_comment->user,
                          Action::MODIFY_COMMENT);
           iter_comment->ipfs_link = ipfs_link;
+          set_property(iter_comment->properties,PROPERTY_LAST_MODIFIED, now());
         } else {
           auto iter_answer = find_answer(question, answer_id);
           auto iter_comment = find_comment(*iter_answer, comment_id);
           assert_allowed(*iter_account, iter_comment->user,
                          Action::MODIFY_COMMENT);
           iter_comment->ipfs_link = ipfs_link;
+          set_property(iter_comment->properties,PROPERTY_LAST_MODIFIED, now());
         }
       });
 }

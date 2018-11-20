@@ -427,6 +427,10 @@
 					"type": "uint64"
 				},
 				{
+					"name": "title",
+					"type": "string"
+				}
+				{
 					"name": "ipfs_link",
 					"type": "string"
 				}

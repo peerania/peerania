@@ -22,6 +22,7 @@ struct [[eosio::table("account")]] account {
   uint16_t moderation_points = 0;
   std::vector<account_timer> timers;  // excluded from abi
   int16_t pay_out_rating = 0;
+  time last_seen;
   uint64_t primary_key() const { return owner; }
   uint64_t rating_rkey() const { return (1 << 17) - pay_out_rating; }
   uint128_t display_name_key() const {

@@ -32,6 +32,10 @@ Iter linear_find(Iter begin, Iter end, t_key key) {
 }
 }  // namespace std
 
-inline void assert_ipfs(const std::string ipfs_link){
-  eosio_assert(ipfs_link.size() > 2 && ipfs_link.size() < 64, "Incorrect ipfs");
+inline void assert_ipfs(const std::string &ipfs_link){
+  eosio_assert(ipfs_link.size() > 2 && ipfs_link.size() < 65, "Incorrect ipfs");
+}
+
+inline void assert_title(const std::string &title){
+  eosio_assert(title.size() > 2 && title.size() < 129, "Invalid title length");
 }

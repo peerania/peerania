@@ -1,6 +1,6 @@
 #pragma once
 #include <eosiolib/eosio.hpp>
-#include <eosiolib/types.hpp>
+#include <eosiolib/name.hpp>
 #include <string>
 #include <vector>
 #include "history.hpp"
@@ -34,7 +34,7 @@
 struct comment {
   uint16_t id;
   time post_time;
-  account_name user;
+  eosio::name user;
   std::string ipfs_link;
   std::vector<int_key_value> properties;
   std::vector<history_item> history;
@@ -44,7 +44,7 @@ struct comment {
 struct answer {
   uint16_t id;
   time post_time;
-  account_name user;
+  eosio::name user;
   std::string ipfs_link;
   std::vector<comment> comments;
   // additional info
@@ -57,7 +57,7 @@ struct answer {
 struct [[eosio::table("question")]] question {
   uint64_t id;
   time post_time;
-  account_name user;
+  eosio::name user;
   std::string title;
   std::string ipfs_link;
   std::vector<answer> answers;
@@ -68,26 +68,14 @@ struct [[eosio::table("question")]] question {
   std::vector<int_key_value> properties;
   std::vector<history_item> history;
   uint64_t primary_key() const { return id; }
-  uint64_t date_rkey() const { return (1ULL << 33) - post_time; }
-  uint64_t rating_rkey() const { return (1 << 17) - rating; }
-  uint128_t user_and_id_key() const { return ((uint128_t)user << 64) + id; }
   EOSLIB_SERIALIZE(question,
                    (id)(post_time)(user)(title)(ipfs_link)(answers)(comments)(
                        correct_answer_id)(rating)(properties)(history))
 };
 
-const scope_name all_questions = N(allquestions);
+const uint64_t scope_all_questions = "allquestions"_n.value;
 typedef eosio::multi_index<
-    N(question), question,
-    eosio::indexed_by<
-        N(byposttime),
-        eosio::const_mem_fun<question, uint64_t, &question::date_rkey>>,
-    eosio::indexed_by<
-        N(byrating),
-        eosio::const_mem_fun<question, uint64_t, &question::rating_rkey>>,
-    eosio::indexed_by<
-        N(byowner),
-        eosio::const_mem_fun<question, uint128_t, &question::user_and_id_key>>>
+    "question"_n, question>
     question_index;
 
 template <typename T>

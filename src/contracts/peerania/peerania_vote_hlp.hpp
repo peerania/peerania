@@ -1,11 +1,11 @@
-#include <eosiolib/types.hpp>
+#include <eosiolib/name.hpp>
 #include <vector>
 #include "history.hpp"
 #include "account.hpp"
 #include "utils.hpp"
 
 template <typename T, typename T_iter_acc>
-void upvote_item(T &item, T_iter_acc iter_account, account_name &item_owner,
+void upvote_item(T &item, T_iter_acc iter_account, eosio::name &item_owner,
                  int8_t &owner_rating_change, int8_t &caller_rating_change,
                  const int8_t upvote_cost_owner,
                  const int8_t upvote_cost_caller,
@@ -57,7 +57,7 @@ void upvote_item(T &item, T_iter_acc iter_account, account_name &item_owner,
 }
 
 template <typename T, typename T_iter_acc>
-void downvote_item(T &item, T_iter_acc iter_account, account_name &item_owner,
+void downvote_item(T &item, T_iter_acc iter_account, eosio::name &item_owner,
                    int8_t &owner_rating_change, int8_t &caller_rating_change,
                    const int8_t upvote_cost_owner,
                    const int8_t upvote_cost_caller,

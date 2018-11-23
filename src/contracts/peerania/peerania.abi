@@ -37,19 +37,6 @@
 			]
 		},
 		{
-			"name": "account_timer",
-			"base": "",
-			"fields": [{
-					"name": "timer",
-					"type": "uint8"
-				},
-				{
-					"name": "last_update",
-					"type": "time"
-				}
-			]
-		},
-		{
 			"name": "account",
 			"base": "",
 			"fields": [{
@@ -85,13 +72,17 @@
 					"type": "uint16"
 				},
 				{
-					"name": "timers",
-					"type": "account_timer[]"
-				},
-				{
 					"name": "paid_out_rating",
 					"type": "int16"
-				}
+				},
+				{
+					"name": "last_seen",
+					"type": "uint8"
+				},
+				{
+					"name": "questions_left",
+					"type": "uint8"
+				},
 			]
 		},
 		{
@@ -559,14 +550,6 @@
 			]
 		},
 		{
-			"name": "updateacc",
-			"base": "",
-			"fields": [{
-				"name": "user",
-				"type": "name"
-			}]
-		},
-		{
 			"name": "mrkascorrect",
 			"base": "",
 			"fields": [{
@@ -755,11 +738,6 @@
 		{
 			"name": "mrkascorrect",
 			"type": "mrkascorrect",
-			"ricardian_contract": ""
-		},
-		{
-			"name": "updateacc",
-			"type": "updateacc",
 			"ricardian_contract": ""
 		},
 		{

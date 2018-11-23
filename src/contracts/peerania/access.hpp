@@ -1,6 +1,6 @@
 #pragma once
 #include <eosiolib/eosio.hpp>
-#include <eosiolib/types.hpp>
+#include <eosiolib/name.hpp>
 #include "account.hpp"
 #include "economy.h"
 
@@ -25,7 +25,7 @@ enum Action {
 };
 
 
-void assert_allowed(const account &action_caller, account_name data_owner,
+void assert_allowed(const account &action_caller, eosio::name data_owner,
                     Action action) {
   switch (action) {
     case POST_QUESTION:

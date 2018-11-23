@@ -1,4 +1,5 @@
-#include <eosiolib/types.hpp>
+#pragma once
+#include <eosiolib/name.hpp>
 /*
 1 - Stranger - 0
 100 - Newbie - 1
@@ -56,7 +57,7 @@ Comments are limited only for commenting other users questions. Limits are withi
 5000 - Hero Resident - 26
 10000 - Legendary Resident - 30
 */
-uint8_t status_question_limit(int16_t rating) {
+uint8_t status_comments_limit(int16_t rating) {
   if (rating < 0) return 0;
   switch (rating) {
     case 0 ... 99:

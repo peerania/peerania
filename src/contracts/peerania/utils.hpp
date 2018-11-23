@@ -1,6 +1,6 @@
 #pragma once
 #include <eosiolib/eosio.hpp>
-#include <eosiolib/types.hpp>
+#include <eosiolib/name.hpp>
 #include <iterator>
 
 namespace std {
@@ -32,8 +32,9 @@ Iter linear_find(Iter begin, Iter end, t_key key) {
 }
 }  // namespace std
 
+//Replace with more strict
 inline void assert_ipfs(const std::string &ipfs_link){
-  eosio_assert(ipfs_link.size() > 2 && ipfs_link.size() < 65, "Incorrect ipfs");
+  eosio_assert(ipfs_link.size() >= 2 && ipfs_link.size() < 65, "Incorrect ipfs");
 }
 
 inline void assert_title(const std::string &title){

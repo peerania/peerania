@@ -1,11 +1,11 @@
 #include "peerania.hpp"
 #include "peerania_vote_hlp.hpp"
 
-void peerania::vote(account_name user, uint64_t question_id, uint16_t answer_id,
+void peerania::vote(eosio::name user, uint64_t question_id, uint16_t answer_id,
                     bool is_upvote) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
-  account_name item_owner;
+  eosio::name item_owner;
   int8_t owner_rating_change;
   int8_t caller_rating_change;
   question_table.modify(
@@ -41,7 +41,7 @@ void peerania::vote(account_name user, uint64_t question_id, uint16_t answer_id,
   update_rating(item_owner, owner_rating_change);
 }
 
-void peerania::vote_for_deletion(account_name user, uint64_t question_id,
+void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
                                  uint16_t answer_id, uint16_t comment_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
@@ -51,7 +51,7 @@ void peerania::vote_for_deletion(account_name user, uint64_t question_id,
   int owner_rating_change = 0;
   // Remember old correct_answer_id to detect correct answer_deletion
   uint16_t old_correct_answer_id = iter_question->correct_answer_id;
-  account_name item_owner;
+  eosio::name item_owner;
   // If this flag == true the question will erased
   bool delete_question = false;
   question_table.modify(

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <eosiolib/eosio.hpp>
-#include <eosiolib/types.hpp>
+#include <eosiolib/name.hpp>
 #include <vector>
 
 // Flags
@@ -17,8 +17,8 @@
 
 typedef uint16_t flag_type;
 
-struct  [[eosio::table]] history_item {
-  account_name user;
+struct history_item {
+  eosio::name user;
   flag_type flag = 0;
   void set_flag(flag_type flg) { flag |= flg; }
 
@@ -28,7 +28,7 @@ struct  [[eosio::table]] history_item {
 
   bool is_empty() const { return flag == 0; }
 
-  account_name lkey() const { return user; }
+  eosio::name lkey() const { return user; }
 };
 
 /*
@@ -38,7 +38,7 @@ insert history item into history, return the iterator to
 new element(is_new = true).
 */
 std::vector<history_item>::iterator get_history_item_iter(
-    std::vector<history_item> &history, account_name user, bool &is_new) {
+    std::vector<history_item> &history, eosio::name user, bool &is_new) {
   auto itr_history = linear_find(history.begin(), history.end(), user);
   if (itr_history == history.end()) {
     history_item hst_item;

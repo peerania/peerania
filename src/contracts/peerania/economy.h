@@ -1,6 +1,6 @@
 #pragma once
-#include <eosiolib/types.hpp>
-
+#include <eosiolib/name.hpp>
+#include "peerania_types.h"
 // Limit to delte
 namespace DeletionVotes {
 const int DELETION_VOTES_QUESTION = 1700;
@@ -50,6 +50,6 @@ struct [[eosio::table("constants")]] constants {
   time start_period_time;
   uint64_t primary_key() const { return id; }
 };
-typedef eosio::multi_index<N(constants), constants> constants_index;
-const scope_name all_constants = N(allconstants);
+typedef eosio::multi_index<"constants"_n, constants> constants_index;
+const uint64_t scope_all_constants = "allconstants"_n.value;
 #endif

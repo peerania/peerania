@@ -23,7 +23,10 @@ class TT(peeraniatest.PeeraniaTest):
         self.action('registeracc', {'owner': bob, 'display_name': 'aab', 'ipfs_profile': 'ofrjfjfnfrjnljnfpljk'}, bob, 'reg alice')
         self.action('registeracc', {'owner': carol, 'display_name': 'aaaaa', 'ipfs_profile': 'ofrjfjfnfrjnljnfpljk'}, carol, 'reg alice')
 
-        self.table('account', 'allaccounts', upperBound=self.key_func('aaaaa'), indexPosition = 3, keyType = 'i128')
+        for i in range(100):
+            self.action('postquestion', {'user': alice, 'title': 'Hey you' + str(i), 'ipfs_link': 'cuysph' + str(i)}, alice,'Reg question ' + str(i))
+        input()
+        #self.table('account', 'allaccounts', upperBound=self.key_func('aaaaa'), indexPosition = 3, keyType = 'i128')
 
 if __name__ == '__main__':
     main()

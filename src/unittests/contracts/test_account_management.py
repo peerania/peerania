@@ -106,6 +106,7 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         self.assertTrue(compare(e, t, ignore_excess=True))
         end()
 
+    '''
     def test_display_name_mapper(self):
         begin('Testing display_name mapper functionality')
         self.register_alice_account()
@@ -120,7 +121,7 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
             info('Table of users with display name={}:'.format(display_name), t)
         self.assertTrue(compare(e, r, ignore_excess=True))
         end()
-
+    '''
     def test_properties_for_non_existent_account_failed(self):
         begin('Testing register property for non-existing account', True)
         alice = self.get_non_registered_alice()
@@ -133,7 +134,7 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
                                alice), 'key': 1, 'value': '1'}, alice,
                            'Set Alice(not registered) integer property', 'assert')
         end()
-
+    
     def test_change_display_name_and_ipfs_profile_for_non_existent_account_failed(self):
         begin('Testing changing account IPFS profile and display_name for non-existing account', True)
         alice = self.get_non_registered_alice()

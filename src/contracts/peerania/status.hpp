@@ -48,22 +48,27 @@ uint8_t status_question_limit(int16_t rating) {
 }
 
 /*
-Comments are limited only for commenting other users questions. Limits are within one a single question.
-1 - Stranger - 6
-100 - Newbie - 10
-500 - Junior Resident - 14
-1000 - Resident - 18
-2500 - Senior Resident - 22
-5000 - Hero Resident - 26
-10000 - Legendary Resident - 30
+Comments are limited only for commenting other users questions. Limits are
+within one a single question. 1 - Stranger - 6 100 - Newbie - 10 500 - Junior
+Resident - 14 1000 - Resident - 18 2500 - Senior Resident - 22 5000 - Hero
+Resident - 26 10000 - Legendary Resident - 30
 */
 uint8_t status_comments_limit(int16_t rating) {
   if (rating < 0) return 0;
   switch (rating) {
     case 0 ... 99:
+#ifndef DEBUG
       return 6;
+#else
+      return 2;
+#endif
+
     case 100 ... 499:
+#ifndef DEBUG
       return 10;
+#else
+      return 3;
+#endif
     case 500 ... 999:
       return 14;
     case 1000 ... 2499:

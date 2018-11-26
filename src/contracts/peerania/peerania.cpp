@@ -117,6 +117,7 @@ void peerania::setaccrtmpc(eosio::name user, int16_t rating,
   auto itr = find_account(user);
   account_table.modify(itr, _self, [&](auto &account) {
     account.rating = rating;
+    account.pay_out_rating = rating;
     account.moderation_points = moderation_points;
   });
 }
@@ -158,12 +159,6 @@ void peerania::chnguserrt(eosio::name user, int16_t rating_change) {
   update_rating(user, rating_change);
 }
 
-void peerania::setquestrt(uint64_t question_id, int16_t rating) {
-  auto iter_question = find_question(question_id);
-  question_table.modify(iter_question, _self,
-                        [rating](auto &question) { question.rating = rating; });
-}
-
 #endif
 
 #ifndef DEBUG
@@ -178,5 +173,5 @@ EOSIO_DISPATCH(peerania,
               postquestion)(postanswer)(postcomment)(delquestion)(delanswer)(
               delcomment)(modanswer)(modquestion)(modcomment)(upvote)(downvote)(
               mrkascorrect)(votedelete)(votemoderate)(setaccrtmpc)(resettables)(
-              chnguserrt)(setquestrt))
+              chnguserrt))
 #endif

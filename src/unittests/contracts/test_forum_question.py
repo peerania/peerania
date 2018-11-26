@@ -27,6 +27,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         e[0]['ipfs_link'] = 'updated IPFS'
         e[0]['title'] = 'updated Title'
+        e[0]['properties'] = [{'key': 3, 'value': '#ignore'}]
         self.assertTrue(compare(e, t, ignore_excess=True))
         info('Table question: ', t)
         end()
@@ -135,7 +136,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         var = {}
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('modquestion', {
-            'user': 'bob', 'question_id': var['q1'] + 1, 'title': 'test', 'ipfs_link': 'test'}, bob, 'Modify non-existent question', 'assert')
+            'user': 'bob', 'question_id': int(var['q1']) + 1, 'title': 'test', 'ipfs_link': 'test'}, bob, 'Modify non-existent question', 'assert')
         end()
 
     def test_delete_non_existent_question_failed(self):
@@ -146,7 +147,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         var = {}
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('delquestion', {
-            'user': 'alice', 'question_id': var['q1'] + 1}, alice, 'Delete non-existent question', 'assert')
+            'user': 'alice', 'question_id': int(var['q1']) + 1}, alice, 'Delete non-existent question', 'assert')
         end()
 
     def _register_question_action(self, owner, ipfs_link, id_var=''):

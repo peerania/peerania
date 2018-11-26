@@ -8,7 +8,7 @@ cleos wallet create --name default --to-console
 cleos wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
 
 #loading bios contract 
-cleos set contract eosio $EOSIO_SOURCE_DIR/build/contracts/eosio.bios -p eosio
+cleos set contract eosio $EOSIO_BUILD_DIR/contracts/eosio.bios -p eosio
 
 #import private key for code account and create account
 cleos wallet import --private-key 5JUnu1jgVifdznEHpc9eVedpLXsyDPwu69xziMm9ZvbRSkVKEda

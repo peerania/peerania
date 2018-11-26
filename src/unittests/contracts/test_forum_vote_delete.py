@@ -311,7 +311,7 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         bob = self.register_bob_account()
         carol = self.register_carol_account()
         (e, var) = self._create_simple_hierarchy(alice, bob)
-        self.failed_action('votedelete', {'user': 'carol', 'question_id': var['aq'] + 2, 'answer_id': 0, 'comment_id': 0},
+        self.failed_action('votedelete', {'user': 'carol', 'question_id': int(var['aq']) + 2, 'answer_id': 0, 'comment_id': 0},
                            carol, 'Carol attempt to vote for deletion non-existent question', 'assert')
         self.failed_action('votedelete', {'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba'] + 2, 'comment_id': 0},
                            carol, 'Carol attempt to vote for deletion Alice question->non-existent answer', 'assert')

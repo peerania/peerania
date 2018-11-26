@@ -3,15 +3,16 @@ FROM eosio/eos
 ADD eos-node peerania/eos-node
 ADD src peerania/src
 ADD compile peerania/compile
+ADD test peerania/test
+ADD config.json peerania/config.json
 
-RUN mkdir build
-RUN mkdir build/contracts
-#RUN cp -a contracts/eosio.bios build/contracts/eosio.bios
 RUN apt update
 RUN apt install wget -y
-RUN apt install sudo -y
-RUN apt install git -y
-RUN git clone --recursive https://github.com/eosio/eosio.cdt
-RUN 'cd eosio.cdt; yes 1 | ./build.sh'
-RUN 'cd eosio.cdt; sudo ./install.sh'
+RUN wget https://github.com/eosio/eosio.cdt/releases/download/v1.4.1/eosio.cdt-1.4.1.x86_64.deb
+RUN apt install ./eosio.cdt-1.4.1.x86_64.deb
+RUN apt install python3 -y
+RUN apt install python3-pip -y
+RUN pip3 install termcolor
+RUN pip3 install requests
+
 CMD ["bin/bash"]

@@ -16,7 +16,7 @@
 extern time START_PERIOD_TIME;
 #endif
 
-CONTRACT peerania : public eosio::contract {
+class [[eosio::contract]] peerania : public eosio::contract {
  public:
   peerania(eosio::name receiver, eosio::name code, eosio::datastream<const char *> ds)
       : contract(receiver, code, ds),
@@ -141,9 +141,6 @@ CONTRACT peerania : public eosio::contract {
 
   [[eosio::action]] void chnguserrt(eosio::name user, int16_t rating_change);
 
-  [[eosio::action]] void setquestrt(uint64_t question_id, int16_t rating);
-
-  [[eosio::action]] void putsettings(time start_period_time);
 #endif
 
  private:

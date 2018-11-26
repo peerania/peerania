@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "history.hpp"
+#include "status.hpp"
 
 // Answer id starts from FORUM_INDEX_START
 #define EMPTY_ANSWER_ID 0
@@ -30,6 +31,8 @@
 #define PROPERTY_DELETION_VOTES 0
 #define PROPERTY_MODERATION_VOTES 1
 #define PROPERTY_LAST_MODIFIED 3
+
+#define PROPERTY_MAX_QUESTION_ID 0x7FFFFFFFFFFFFFFFULL
 
 struct comment {
   uint16_t id;
@@ -74,9 +77,7 @@ struct [[eosio::table("question")]] question {
 };
 
 const uint64_t scope_all_questions = "allquestions"_n.value;
-typedef eosio::multi_index<
-    "question"_n, question>
-    question_index;
+typedef eosio::multi_index<"question"_n, question> question_index;
 
 template <typename T>
 void push_new_forum_item(std::vector<T> &container, T &item) {
@@ -99,6 +100,30 @@ std::vector<comment>::iterator find_comment(T &item, uint16_t comment_id) {
       binary_find(item.comments.begin(), item.comments.end(), comment_id);
   eosio_assert(iter_comment != item.comments.end(), "Comment not found");
   return iter_comment;
+}
+
+void assert_comment_limit(const account &action_caller, eosio::name item_owner,
+                          const std::vector<comment> &comments) {
+  if (item_owner != action_caller.owner) {
+    int comment_count = 0;
+    for (auto iter_comment = comments.begin(); iter_comment != comments.end();
+         ++iter_comment) {
+      if (iter_comment->user == action_caller.owner) comment_count++;
+    }
+    eosio_assert(
+        comment_count < status_comments_limit(action_caller.pay_out_rating),
+        "Your status doesn't allow you to post more comment");
+  }
+}
+
+uint64_t get_quiestion_pk(const question_index &question_table) {
+  if (question_table.begin() == question_table.end()) {
+    return PROPERTY_MAX_QUESTION_ID;
+  } else {
+    auto pk = question_table.begin()
+                  ->primary_key();  // largest primary key currently in table
+    return --pk;
+  }
 }
 
 /*

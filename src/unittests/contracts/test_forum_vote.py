@@ -244,9 +244,9 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.failed_action('upvote', {'user': 'alice', 'question_id': var['aq'] + 5, 'answer_id': 0},
+        self.failed_action('upvote', {'user': 'alice', 'question_id': int(var['aq']) + 5, 'answer_id': 0},
                            alice, 'Attempt to upvote non-existent  question', 'assert')
-        self.failed_action('downvote', {'user': 'alice', 'question_id': var['aq'] + 5, 'answer_id': 0},
+        self.failed_action('downvote', {'user': 'alice', 'question_id': int(var['aq']) + 5, 'answer_id': 0},
                            alice, 'Attempt to downvote non-existent  question', 'assert')
         self.failed_action('upvote', {'user': 'alice', 'question_id': var['aq'], 'answer_id': var[
                            'aq_ba'] + 5}, alice, 'Attempt to upvote non-existent answer', 'assert')

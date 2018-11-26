@@ -29,7 +29,7 @@ class EOSTest(unittest.TestCase):
         to_execute = [
             'cleos wallet create --name default --to-console',
             'cleos wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3',
-            'cleos set contract eosio eos/build/contracts/eosio.bios -p eosio'
+            'cleos set contract eosio $EOSIO_BUILD_DIR/contracts/eosio.bios -p eosio'
         ]
         for contract in cls.config['contracts']:
             cls.contracts[contract['name']] = contract['deployer']

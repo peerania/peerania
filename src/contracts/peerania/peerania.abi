@@ -76,7 +76,7 @@
 					"type": "int16"
 				},
 				{
-					"name": "last_seen",
+					"name": "last_update_period",
 					"type": "uint8"
 				},
 				{
@@ -630,19 +630,6 @@
 					"type": "int16"
 				}
 			]
-		},
-		{
-			"name": "setquestrt",
-			"base": "",
-			"fields": [{
-					"name": "question_id",
-					"type": "uint64"
-				},
-				{
-					"name": "rating",
-					"type": "int16"
-				}
-			]
 		}
 	],
 	"actions": [{
@@ -753,11 +740,6 @@
 		{
 			"name": "chnguserrt",
 			"type": "chnguserrt",
-			"ricardian_contract": ""
-		},
-		{
-			"name": "setquestrt",
-			"type": "setquestrt",
 			"ricardian_contract": ""
 		}
 	],

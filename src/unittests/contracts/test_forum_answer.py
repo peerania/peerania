@@ -45,6 +45,7 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         setvar(q, var)
         t = self.table('question', 'allquestions')
         q[0]['answers'][0]['ipfs_link'] = 'updated IPFS'
+        q[0]['answers'][0]['properties'] = [{'key': 3, 'value': '#ignore'}]
         self.assertTrue(compare(q, t, ignore_excess=True))
         info('Table question after actions', t)
         end()
@@ -252,7 +253,7 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(q, t, var, True))
-        self.failed_action('postanswer', {'user': 'bob', 'question_id': var['q1_id'] + 1, 'ipfs_link': 'test'}, bob,
+        self.failed_action('postanswer', {'user': 'bob', 'question_id': int(var['q1_id']) + 1, 'ipfs_link': 'test'}, bob,
                            'Attempt to register answer to non existent question', 'assert')
         end()
 
@@ -271,7 +272,7 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(q, t, var, True))
         self.failed_action('modanswer', {'user': 'bob',
-                                         'question_id': var['q1_id'] + 1,
+                                         'question_id': int(var['q1_id']) + 1,
                                          'answer_id': var['q1_a1_id'],
                                          'ipfs_link': 'updated IPFS'},
                            bob, 'Attempt to modify answer of non-existent question', 'assert')
@@ -292,7 +293,7 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(q, t, var, True))
         self.failed_action('delanswer', {'user': 'bob',
-                                         'question_id': var['q1_id'] + 1,
+                                         'question_id': int(var['q1_id']) + 1,
                                          'answer_id': var['q1_a1_id']},
                            bob, 'Attempt to delete answer of non-existent question', 'assert')
         end()

@@ -45,8 +45,13 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
                                  uint16_t answer_id, uint16_t comment_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
-  eosio_assert(iter_account->moderation_points > 0,
-               "Not enought moderation points");
+
+  //How to move it to the end?
+  account_table.modify(iter_account, _self, [](auto &account) {
+    account.update();
+    eosio_assert(account.moderation_points > 0, "Not enought moderation point");
+    account.moderation_points -= 1;
+  });
 
   int owner_rating_change = 0;
   // Remember old correct_answer_id to detect correct answer_deletion
@@ -137,6 +142,4 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
   //owner_rating_change = 0 also means that item_owner was not found
   if(owner_rating_change != 0)
     update_rating(item_owner, owner_rating_change);
-  account_table.modify(iter_account, _self,
-                       [](auto &account) { account.moderation_points -= 1; });
 }

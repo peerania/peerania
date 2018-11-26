@@ -15,7 +15,7 @@ void peerania::register_account(eosio::name owner, std::string display_name,
                           account.rating = RATING_ON_CREATE;
                           account.pay_out_rating = RATING_ON_CREATE; //Probably pay_out_rating != RATING_ON_CREATE discuss it
                           account.registration_time = current_time;
-                          account.last_seen = current_time;
+                          account.last_update_period = 0;
                           account.questions_left = 3;
                         });
 }
@@ -173,6 +173,7 @@ void peerania::update_rating(account_index::const_iterator iter_account,
         // paid_out_rating on week_{n} for any n Each week
         account.pay_out_rating += rating_to_award_change;
         account.rating = new_rating;
+        account.update();
       });
 }
 

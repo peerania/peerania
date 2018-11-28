@@ -2,7 +2,7 @@
 
 #include <eosiolib/asset.hpp>
 #include <eosiolib/eosio.hpp>
-#include <eosiolib/types.hpp>
+#include <eosiolib/name.hpp>
 #include <string>
 #include "utils.hpp"
 

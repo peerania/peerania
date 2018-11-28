@@ -6,20 +6,31 @@ question_index::const_iterator peerania::find_question(uint64_t question_id) {
   return iter_question;
 }
 
-void peerania::post_question(account_name user, const std::string &ipfs_link) {
+void peerania::post_question(eosio::name user, const std::string &title,
+                             const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
+  assert_title(title);
   auto iter_account = find_account(user);
   assert_allowed(*iter_account, user, Action::POST_QUESTION);
+
+  account_table.modify(iter_account, _self, [](auto &account) {
+    account.update();
+    eosio_assert(account.questions_left > 0, "Reached weekly question limit");
+    account.questions_left -= 1;
+  });
+
   question_table.emplace(_self, [&](auto &question) {
-    question.id = question_table.available_primary_key();
+    question.id = get_quiestion_pk(question_table);
     question.user = user;
+    question.title = title;
     question.ipfs_link = ipfs_link;
     question.post_time = now();
   });
+
   update_rating(iter_account, POST_QUESTION_REWARD);
 }
 
-void peerania::post_answer(account_name user, uint64_t question_id,
+void peerania::post_answer(eosio::name user, uint64_t question_id,
                            const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
@@ -41,7 +52,7 @@ void peerania::post_answer(account_name user, uint64_t question_id,
   update_rating(iter_account, POST_ANSWER_REWARD);
 }
 
-void peerania::post_comment(account_name user, uint64_t question_id,
+void peerania::post_comment(eosio::name user, uint64_t question_id,
                             uint16_t answer_id, const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
@@ -51,28 +62,33 @@ void peerania::post_comment(account_name user, uint64_t question_id,
   new_comment.ipfs_link = ipfs_link;
   new_comment.post_time = now();
   question_table.modify(
-      iter_question, _self, [iter_account, answer_id, &new_comment](auto &question) {
+      iter_question, _self,
+      [iter_account, answer_id, &new_comment](auto &question) {
         if (apply_to_question(answer_id)) {
           assert_allowed(*iter_account, question.user, Action::POST_COMMENT);
-          eosio_assert(question.comments.size() < MAX_ANSWER_COUNT,
+          eosio_assert(question.comments.size() < MAX_COMMENT_COUNT,
                        "For this question reached comment count limit");
+          assert_comment_limit(*iter_account, question.user,
+                               question.comments);
           push_new_forum_item(question.comments, new_comment);
         } else {
           auto iter_answer = find_answer(question, answer_id);
           eosio_assert(iter_answer->comments.size() < MAX_COMMENT_COUNT,
                        "For this answer reached comment count limit");
-          assert_allowed(*iter_account,
-                         question.user == iter_account->owner
-                             ? question.user
-                             : iter_answer->user,
+          auto global_item_owner = question.user == iter_account->owner
+                                       ? question.user
+                                       : iter_answer->user;
+          assert_allowed(*iter_account, global_item_owner,
                          Action::POST_COMMENT);
+          assert_comment_limit(*iter_account, global_item_owner,
+                               question.comments);
           push_new_forum_item(iter_answer->comments, new_comment);
         }
       });
   update_rating(iter_account, POST_COMMENT_REWARD);
 }
 
-void peerania::delete_question(account_name user, uint64_t question_id) {
+void peerania::delete_question(eosio::name user, uint64_t question_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
   assert_allowed(*iter_account, iter_question->user, Action::DELETE_QUESTION);
@@ -84,7 +100,7 @@ void peerania::delete_question(account_name user, uint64_t question_id) {
   update_rating(iter_account, DELETE_OWN_QUESTION_REWARD);
 }
 
-void peerania::delete_answer(account_name user, uint64_t question_id,
+void peerania::delete_answer(eosio::name user, uint64_t question_id,
                              uint16_t answer_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
@@ -99,7 +115,7 @@ void peerania::delete_answer(account_name user, uint64_t question_id,
   update_rating(iter_account, DELETE_OWN_ANSWER_REWARD);
 }
 
-void peerania::delete_comment(account_name user, uint64_t question_id,
+void peerania::delete_comment(eosio::name user, uint64_t question_id,
                               uint16_t answer_id, uint64_t comment_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
@@ -122,32 +138,38 @@ void peerania::delete_comment(account_name user, uint64_t question_id,
   update_rating(iter_account, DELETE_OWN_COMMENT_REWARD);
 }
 
-void peerania::modify_question(account_name user, uint64_t question_id,
+void peerania::modify_question(eosio::name user, uint64_t question_id,
+                               const std::string &title,
                                const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
+  assert_title(title);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
   assert_allowed(*iter_account, iter_question->user, Action::MODIFY_QUESTION);
-  question_table.modify(iter_question, _self, [&ipfs_link](auto &question) {
-    question.ipfs_link = ipfs_link;
-  });
+  question_table.modify(
+      iter_question, _self, [&ipfs_link, &title](auto &question) {
+        question.ipfs_link = ipfs_link;
+        question.title = title;
+        set_property(question.properties, PROPERTY_LAST_MODIFIED, now());
+      });
 }
 
-void peerania::modify_answer(account_name user, uint64_t question_id,
+void peerania::modify_answer(eosio::name user, uint64_t question_id,
                              uint16_t answer_id, const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
-  question_table.modify(iter_question, _self,
-                        [iter_account, answer_id, &ipfs_link](auto &question) {
-                          auto iter_answer = find_answer(question, answer_id);
-                          assert_allowed(*iter_account, iter_answer->user,
-                                         Action::MODIFY_ANSWER);
-                          iter_answer->ipfs_link = ipfs_link;
-                        });
+  question_table.modify(
+      iter_question, _self,
+      [iter_account, answer_id, &ipfs_link](auto &question) {
+        auto iter_answer = find_answer(question, answer_id);
+        assert_allowed(*iter_account, iter_answer->user, Action::MODIFY_ANSWER);
+        iter_answer->ipfs_link = ipfs_link;
+        set_property(iter_answer->properties, PROPERTY_LAST_MODIFIED, now());
+      });
 }
 
-void peerania::modify_comment(account_name user, uint64_t question_id,
+void peerania::modify_comment(eosio::name user, uint64_t question_id,
                               uint16_t answer_id, uint16_t comment_id,
                               const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
@@ -161,17 +183,19 @@ void peerania::modify_comment(account_name user, uint64_t question_id,
           assert_allowed(*iter_account, iter_comment->user,
                          Action::MODIFY_COMMENT);
           iter_comment->ipfs_link = ipfs_link;
+          set_property(iter_comment->properties, PROPERTY_LAST_MODIFIED, now());
         } else {
           auto iter_answer = find_answer(question, answer_id);
           auto iter_comment = find_comment(*iter_answer, comment_id);
           assert_allowed(*iter_account, iter_comment->user,
                          Action::MODIFY_COMMENT);
           iter_comment->ipfs_link = ipfs_link;
+          set_property(iter_comment->properties, PROPERTY_LAST_MODIFIED, now());
         }
       });
 }
 
-void peerania::mark_answer_as_correct(account_name user, uint64_t question_id,
+void peerania::mark_answer_as_correct(eosio::name user, uint64_t question_id,
                                       uint16_t answer_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);

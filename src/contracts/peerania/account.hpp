@@ -1,17 +1,19 @@
-
 #pragma once
 #include <eosiolib/eosio.hpp>
-#include <eosiolib/types.hpp>
+#include <eosiolib/name.hpp>
 #include <string>
+#include "peerania_types.h"
 #include "property.hpp"
+#include "status.hpp"
 
-struct account_timer {
-  uint8_t timer;
-  time last_update;
-};
+#ifndef DEBUG
+#define ACCOUNT_STAT_RESET_PERIOD 259200  // 3 Days
+#else
+#define ACCOUNT_STAT_RESET_PERIOD 3
+#endif
 
 struct [[eosio::table("account")]] account {
-  account_name owner;
+  eosio::name owner;
   // mandatory fields
   std::string display_name;
   std::string ipfs_profile;
@@ -20,14 +22,40 @@ struct [[eosio::table("account")]] account {
   std::vector<int_key_value> integer_properties;
   int16_t rating = 0;
   uint16_t moderation_points = 0;
-  std::vector<account_timer> timers;//excluded from abi
   int16_t pay_out_rating = 0;
-  uint64_t primary_key() const { return owner; }
+  uint16_t last_update_period = 0;
+  uint8_t questions_left = 0;
+  bool require_update() const { return current_period() > last_update_period; }
+
+  uint16_t current_period() const {
+    return (now() - registration_time) / ACCOUNT_STAT_RESET_PERIOD;
+  }
+
+  void update() {
+    if (require_update()) {
+      questions_left = status_question_limit(pay_out_rating);
+      moderation_points = status_moderation_points(pay_out_rating);
+      last_update_period = current_period();
+    }
+  }
+
+  uint64_t primary_key() const { return owner.value; }
+  // uint64_t rating_rkey() const { return (1 << 17) - pay_out_rating; }
   EOSLIB_SERIALIZE(
       account,
       (owner)(display_name)(ipfs_profile)(registration_time)(string_properties)(
-          integer_properties)(rating)(moderation_points)(timers)(pay_out_rating))
+          integer_properties)(rating)(moderation_points)(pay_out_rating)(
+          last_update_period)(questions_left))
 };
 
-const scope_name all_accounts = N(allaccounts);
-typedef eosio::multi_index<N(account), account> account_index;
+#define MIN_DISPLAY_NAME_LEN 3
+#define MAX_DISPLAY_NAME_LEN 20
+
+void assert_display_name(const std::string &display_name) {
+  eosio_assert(display_name.length() >= MIN_DISPLAY_NAME_LEN &&
+                   display_name.length() <= MAX_DISPLAY_NAME_LEN,
+               "The display name too short.");
+}
+
+const uint64_t scope_all_accounts = "allaccounts"_n.value;
+typedef eosio::multi_index<"account"_n, account> account_index;

@@ -1,6 +1,6 @@
 #pragma once
 #include <eosiolib/eosio.hpp>
-#include <eosiolib/types.hpp>
+#include <eosiolib/name.hpp>
 
 #ifndef DEBUG
 #define PERIOD_LENGTH 604800                // 7 day = 1 week
@@ -27,7 +27,7 @@ struct [[eosio::table("periodrating")]] periodrating {
   EOSLIB_SERIALIZE(periodrating, (period)(rating)(rating_to_award))
 };
 
-typedef eosio::multi_index<N(periodrating), periodrating> period_rating_index;
+typedef eosio::multi_index<"periodrating"_n, periodrating> period_rating_index;
 
 // owned by main
 // scopeed by const = N(allperiods)
@@ -41,5 +41,5 @@ struct [[eosio::table("totalrating")]] totalrating {
   EOSLIB_SERIALIZE(totalrating, (period)(total_rating_to_reward))
 };
 
-typedef eosio::multi_index<N(totalrating), totalrating> total_rating_index;
-const scope_name all_periods = N(allperiods);
+typedef eosio::multi_index<"totalrating"_n, totalrating> total_rating_index;
+const uint64_t scope_all_periods = "allperiods"_n.value;

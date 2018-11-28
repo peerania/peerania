@@ -1,21 +1,22 @@
 #pragma once
 #include <eosiolib/eosio.hpp>
-#include <eosiolib/types.hpp>
+#include <eosiolib/name.hpp>
 #include <string>
 #include <vector>
 #include "history.hpp"
+#include "status.hpp"
 
 // Answer id starts from FORUM_INDEX_START
 #define EMPTY_ANSWER_ID 0
 
 // Return true if the action must be applied to question
-#define apply_to_question(answer_id) ((answer_id)==EMPTY_ANSWER_ID)
+#define apply_to_question(answer_id) ((answer_id) == EMPTY_ANSWER_ID)
 
 // Comment id starts from FORUM_INDEX_START
 #define EMPTY_COMMENT_ID 0
 
 // Return true if the action must be applied to answer
-#define apply_to_answer(comment_id) ((comment_id)==EMPTY_COMMENT_ID)
+#define apply_to_answer(comment_id) ((comment_id) == EMPTY_COMMENT_ID)
 
 #define FORUM_INDEX_START 1
 
@@ -29,11 +30,14 @@
 
 #define PROPERTY_DELETION_VOTES 0
 #define PROPERTY_MODERATION_VOTES 1
+#define PROPERTY_LAST_MODIFIED 3
+
+#define PROPERTY_MAX_QUESTION_ID 0xfffffffffffffULL
 
 struct comment {
   uint16_t id;
   time post_time;
-  account_name user;
+  eosio::name user;
   std::string ipfs_link;
   std::vector<int_key_value> properties;
   std::vector<history_item> history;
@@ -43,7 +47,7 @@ struct comment {
 struct answer {
   uint16_t id;
   time post_time;
-  account_name user;
+  eosio::name user;
   std::string ipfs_link;
   std::vector<comment> comments;
   // additional info
@@ -56,7 +60,8 @@ struct answer {
 struct [[eosio::table("question")]] question {
   uint64_t id;
   time post_time;
-  account_name user;
+  eosio::name user;
+  std::string title;
   std::string ipfs_link;
   std::vector<answer> answers;
   std::vector<comment> comments;
@@ -67,12 +72,12 @@ struct [[eosio::table("question")]] question {
   std::vector<history_item> history;
   uint64_t primary_key() const { return id; }
   EOSLIB_SERIALIZE(question,
-                   (id)(post_time)(user)(ipfs_link)(answers)(comments)(
+                   (id)(post_time)(user)(title)(ipfs_link)(answers)(comments)(
                        correct_answer_id)(rating)(properties)(history))
 };
 
-const scope_name all_questions = N(allquestions);
-typedef eosio::multi_index<N(question), question> question_index;
+const uint64_t scope_all_questions = "allquestions"_n.value;
+typedef eosio::multi_index<"question"_n, question> question_index;
 
 template <typename T>
 void push_new_forum_item(std::vector<T> &container, T &item) {
@@ -95,6 +100,30 @@ std::vector<comment>::iterator find_comment(T &item, uint16_t comment_id) {
       binary_find(item.comments.begin(), item.comments.end(), comment_id);
   eosio_assert(iter_comment != item.comments.end(), "Comment not found");
   return iter_comment;
+}
+
+void assert_comment_limit(const account &action_caller, eosio::name item_owner,
+                          const std::vector<comment> &comments) {
+  if (item_owner != action_caller.owner) {
+    int comments_count = 0;
+    for (auto iter_comment = comments.begin(); iter_comment != comments.end();
+         ++iter_comment) {
+      if (iter_comment->user == action_caller.owner) comments_count++;
+    }
+    eosio_assert(
+        comments_count < status_comments_limit(action_caller.pay_out_rating),
+        "Your status doesn't allow you to post more comment");
+  }
+}
+
+uint64_t get_quiestion_pk(const question_index &question_table) {
+  if (question_table.begin() == question_table.end()) {
+    return PROPERTY_MAX_QUESTION_ID;
+  } else {
+    auto pk = question_table.begin()
+                  ->primary_key();  // largest primary key currently in table
+    return --pk;
+  }
 }
 
 /*

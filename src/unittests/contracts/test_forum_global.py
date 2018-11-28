@@ -10,13 +10,14 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
-        self.action('postquestion', {'user': 'alice', 'ipfs_link': 'Alice question'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question','ipfs_link': 'Alice question'}, alice,
                     'Register question from alice')
-        self.action('postquestion', {'user': 'bob', 'ipfs_link': 'Bob question'}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question','ipfs_link': 'Bob question'}, bob,
                     'Register question from bob')
         e = ['#ignoreorder', {
             'id': '#var aq',
             'user': 'alice',
+            'title': 'Title alice question',
             'ipfs_link': 'Alice question',
             'post_time': '#ignore',
             'answers': [],
@@ -24,6 +25,7 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
         }, {
             'id': '#var bq',
             'user': 'bob',
+            'title': 'Title bob question',
             'ipfs_link': 'Bob question',
             'post_time': '#ignore',
             'answers': [],
@@ -281,11 +283,12 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
         carol = self.register_carol_account()
         ted = self.register_ted_account()
         frank = self.register_frank_account()
-        self.action('postquestion', {'user': 'alice', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                     'Register question from alice')
         e = [{
             'id': '#var aq',
             'user': 'alice',
+            'title': 'Title alice question',
             'ipfs_link': 'AQ',
             'answers': [],
             'comments': []
@@ -343,11 +346,12 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
         begin('Delete own question with answer', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                     'Register question from alice')
         e = [{
             'id': '#var aq',
             'user': 'alice',
+            'title': 'Title alice question',
             'ipfs_link': 'AQ',
             'answers': [],
             'comments': []
@@ -355,7 +359,7 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
-        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'AQ->BA'},
+        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'title': 'Title bob question','ipfs_link': 'AQ->BA'},
                     bob, 'Register Bob answer to Alice question')
         self.failed_action('delquestion', {
             'user': 'alice', 'question_id': var['aq']}, alice, 'Attempt to delete Alice question', 'assert')
@@ -365,11 +369,12 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
         begin('Delete own answer marked as correct', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                     'Register question from alice')
         e = [{
             'id': '#var aq',
             'user': 'alice',
+            'title': 'Title alice question',
             'ipfs_link': 'AQ',
             'answers': [],
             'comments': []

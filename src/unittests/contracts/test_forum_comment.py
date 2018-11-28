@@ -63,7 +63,9 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         self.action('modcomment', cbody(
             bob, var['aq'], var['aq_aa'], 'updated Bob comment to Alice answer', c_id=var['aq_aa_bc']), bob, 'Update bob comment to Alice question->Alice answer')
         e[1]['comments'][0]['ipfs_link'] = 'updated Bob comment to Alice question'
+        e[1]['comments'][0]['properties'] = [{'key': 3, 'value': '#ignore'}]
         e[1]['answers'][0]['comments'][0]['ipfs_link'] = 'updated Bob comment to Alice answer'
+        e[1]['answers'][0]['comments'][0]['properties'] = [{'key': 3, 'value': '#ignore'}]
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         info('Table after action', t)
@@ -276,9 +278,9 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         bob = self.register_bob_account()
         carol = self.get_non_registered_carol()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.failed_action('postcomment', cbody(carol, var['aq'] + 10, ipfs='test'), carol,
+        self.failed_action('postcomment', cbody(carol, int(var['aq']) + 10, ipfs='test'), carol,
                            'Attempt to register comment to non-existent question', 'assert')
-        self.failed_action('postcomment', cbody(carol, var['aq'], var['aq_ba'] + 10, 'test'), carol,
+        self.failed_action('postcomment', cbody(carol, var['aq'], int(var['aq_ba']) + 10, 'test'), carol,
                            'Attempt to register comment to non-existent answer' 'assert')
         end()
 
@@ -299,10 +301,10 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('modcomment', cbody(
-                            bob, var['aq'] + 10, ipfs = 'test', c_id=var['aq_bc']), bob,
+                            bob, int(var['aq']) + 10, ipfs = 'test', c_id=var['aq_bc']), bob,
                             'Attempt to modify comment to non-existent question', 'assert')
         self.failed_action('modcomment', cbody(
-                            bob, var['aq'], var['aq_aa'] + 10, ipfs = 'test', c_id=var['aq_aa_bc']),  bob,
+                            bob, var['aq'], int(var['aq_aa']) + 10, ipfs = 'test', c_id=var['aq_aa_bc']),  bob,
                             'Attempt to modify comment to non-existent answer' 'assert')
         end()
 
@@ -322,20 +324,21 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('delcomment', cbody(
-                            bob, var['aq'] + 10, c_id=var['aq_bc']), bob,
+                            bob, int(var['aq']) + 10, c_id=var['aq_bc']), bob,
                             'Attempt to delete comment to non-existent question', 'assert')
         self.failed_action('delcomment', cbody(
-                            bob, var['aq'], var['aq_aa'] + 10, c_id=var['aq_aa_bc']),  bob,
+                            bob, var['aq'], int(var['aq_aa']) + 10, c_id=var['aq_aa_bc']),  bob,
                             'Attempt to delte comment to non-existent answer' 'assert')
         end()
 
     def _create_basic_hierarchy(self, alice, bob):
-        self.action('postquestion', {'user': 'alice', 'ipfs_link': 'Alice question'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question','ipfs_link': 'Alice question'}, alice,
                     'Asking question from alice with text "Alice question"')
         e = ['#ignoreorder', {
             'id': '#var aq',
             'user': 'alice',
                     'ipfs_link': 'Alice question',
+                    'title': 'Title alice question',
                     'post_time': '#ignore',
                     'answers': [],
                     'comments': []
@@ -360,11 +363,12 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
             'ipfs_link': 'Bob answer to alice',
             'post_time': '#ignore',
             'comments': []})
-        self.action('postquestion', {'user': 'bob', 'ipfs_link': 'Bob question'}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'Bob question'}, bob,
                     'Asking question from bob with text "Bob question"')
         e.append({
             'id': '#var bq',
             'user': 'bob',
+            'title': 'Title bob question',
             'ipfs_link': 'Bob question',
             'post_time': '#ignore',
             'answers': [],

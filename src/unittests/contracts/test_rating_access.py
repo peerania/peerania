@@ -10,10 +10,10 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
         begin('Testing assertion rating for question post')
         defs = load_defines('./src/contracts/peerania/economy.h')
         alice = self.register_alice_account(defs['POST_QUESTION_ALLOWED'], 1)
-        self.action('postquestion', {'user': 'alice', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                     'Register question from alice')
         self.action('setaccrtmpc', {'user': 'alice', 'rating': defs['POST_QUESTION_ALLOWED'] - 1, 'moderation_points': 1}, alice, "Reduce alice rating for 1")
-        self.failed_action('postquestion', {'user': 'alice', 'ipfs_link': 'AQ2'}, alice,
+        self.failed_action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ2'}, alice,
             'Attempt to register question from alice', 'assert')
         end()
     
@@ -92,11 +92,12 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
         end()
 
     def _create_simple_hierarchy(self, alice, bob):
-        self.action('postquestion', {'user': 'alice', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                     'Register question from alice')
         e = [{
             'id': '#var aq',
             'user': 'alice',
+            'title': 'Title alice question', 
             'ipfs_link': 'AQ',
             'properties': '#var aq_prop',
             'history': '#var aq_hst',

@@ -244,9 +244,9 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.failed_action('upvote', {'user': 'alice', 'question_id': var['aq'] + 5, 'answer_id': 0},
+        self.failed_action('upvote', {'user': 'alice', 'question_id': int(var['aq']) + 5, 'answer_id': 0},
                            alice, 'Attempt to upvote non-existent  question', 'assert')
-        self.failed_action('downvote', {'user': 'alice', 'question_id': var['aq'] + 5, 'answer_id': 0},
+        self.failed_action('downvote', {'user': 'alice', 'question_id': int(var['aq']) + 5, 'answer_id': 0},
                            alice, 'Attempt to downvote non-existent  question', 'assert')
         self.failed_action('upvote', {'user': 'alice', 'question_id': var['aq'], 'answer_id': var[
                            'aq_ba'] + 5}, alice, 'Attempt to upvote non-existent answer', 'assert')
@@ -264,11 +264,12 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         end()
 
     def _create_basic_hierarchy(self, alice, bob):
-        self.action('postquestion', {'user': 'alice', 'ipfs_link': 'Alice question'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'Alice question'}, alice,
                     'Asking question from alice with text "Alice question"')
         e = ['#ignoreorder', {
             'id': '#var aq',
             'user': 'alice',
+                    'title': 'Title alice question',
                     'ipfs_link': 'Alice question',
                     'post_time': '#ignore',
                     'answers': [],
@@ -298,10 +299,11 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
             'post_time': '#ignore',
             'rating': '#var aq_ba_rating',
             'comments': []})
-        self.action('postquestion', {'user': 'bob', 'ipfs_link': 'Bob question'}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question','ipfs_link': 'Bob question'}, bob,
                     'Asking question from bob with text "Bob question"')
         e.append({
             'id': '#var bq',
+            'title': 'Title bob question',
             'user': 'bob',
             'ipfs_link': 'Bob question',
             'post_time': '#ignore',

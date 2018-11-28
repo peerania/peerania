@@ -45,6 +45,7 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         setvar(q, var)
         t = self.table('question', 'allquestions')
         q[0]['answers'][0]['ipfs_link'] = 'updated IPFS'
+        q[0]['answers'][0]['properties'] = [{'key': 3, 'value': '#ignore'}]
         self.assertTrue(compare(q, t, ignore_excess=True))
         info('Table question after actions', t)
         end()
@@ -86,7 +87,7 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         self._register_answer_action(
             bob, var['q1_id'], 'Bob answer 1 to Alice question 1', q)
         self.failed_action('postanswer', {'user': 'bob', 'question_id': var['q1_id'], 'ipfs_link': 'test'}, bob,
-                    'Attempt to register answer for the second time', 'assert')        
+                           'Attempt to register answer for the second time', 'assert')
         end()
 
     def test_register_answer_from_non_existent_account_failed(self):
@@ -99,7 +100,7 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         var = {}
         self.assertTrue(compare(q, t, var, True))
         self.failed_action('postanswer', {'user': 'bob', 'question_id': var['q1_id'], 'ipfs_link': 'test'}, bob,
-                    'Attempt to register answer from non-regidtered account', 'assert')
+                           'Attempt to register answer from non-regidtered account', 'assert')
         end()
 
     def test_register_answer_another_auth_failed(self):
@@ -121,7 +122,8 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
-        q = [self._register_question_action(alice, 'Alice question 1', 'q1_id')]
+        q = [self._register_question_action(
+            alice, 'Alice question 1', 'q1_id')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(q, t, var, True))
@@ -131,10 +133,10 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(q, t, var, True))
         self.failed_action('modanswer', {'user': 'bob',
-                                  'question_id': var['q1_id'],
-                                  'answer_id': var['q1_a1_id'],
-                                  'ipfs_link': 'test'},
-                    carol, 'Attempt to modify bob answer with carol auth', 'auth')
+                                         'question_id': var['q1_id'],
+                                         'answer_id': var['q1_a1_id'],
+                                         'ipfs_link': 'test'},
+                           carol, 'Attempt to modify bob answer with carol auth', 'auth')
         end()
 
     def test_delete_answer_another_auth_failed(self):
@@ -142,7 +144,8 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
-        q = [self._register_question_action(alice, 'Alice question 1', 'q1_id')]
+        q = [self._register_question_action(
+            alice, 'Alice question 1', 'q1_id')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(q, t, var, True))
@@ -152,9 +155,9 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(q, t, var, True))
         self.failed_action('delanswer', {'user': 'bob',
-                                  'question_id': var['q1_id'],
-                                  'answer_id': var['q1_a1_id']},
-                    carol, 'Attempt to delete bob answer with carol auth', 'auth')
+                                         'question_id': var['q1_id'],
+                                         'answer_id': var['q1_a1_id']},
+                           carol, 'Attempt to delete bob answer with carol auth', 'auth')
         end()
 
     def test_modify_answer_of_another_owner_failed(self):
@@ -162,7 +165,8 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
-        q = [self._register_question_action(alice, 'Alice question 1', 'q1_id')]
+        q = [self._register_question_action(
+            alice, 'Alice question 1', 'q1_id')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(q, t, var, True))
@@ -172,10 +176,10 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(q, t, var, True))
         self.failed_action('modanswer', {'user': 'carol',
-                                  'question_id': var['q1_id'],
-                                  'answer_id': var['q1_a1_id'],
-                                  'ipfs_link': 'test'},
-                    carol, 'Attempt to modify bob answer with carol account', 'assert')
+                                         'question_id': var['q1_id'],
+                                         'answer_id': var['q1_a1_id'],
+                                         'ipfs_link': 'test'},
+                           carol, 'Attempt to modify bob answer with carol account', 'assert')
         end()
 
     def test_delete_answer_of_another_owner_failed(self):
@@ -183,7 +187,8 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
-        q = [self._register_question_action(alice, 'Alice question 1', 'q1_id')]
+        q = [self._register_question_action(
+            alice, 'Alice question 1', 'q1_id')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(q, t, var, True))
@@ -193,9 +198,9 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(q, t, var, True))
         self.failed_action('delanswer', {'user': 'carol',
-                                  'question_id': var['q1_id'],
-                                  'answer_id': var['q1_a1_id']},
-                    carol, 'Attempt to delete bob answer from carol account', 'assert')
+                                         'question_id': var['q1_id'],
+                                         'answer_id': var['q1_a1_id']},
+                           carol, 'Attempt to delete bob answer from carol account', 'assert')
         end()
 
     def test_modify_non_existent_answer_failed(self):
@@ -213,10 +218,10 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(q, t, var, True))
         self.failed_action('modanswer', {'user': 'bob',
-                                  'question_id': var['q1_id'],
-                                  'answer_id': var['q1_a1_id'] + 1,
-                                  'ipfs_link': 'updated IPFS'},
-                    bob, 'Attempt to update non-existent answer', 'assert')
+                                         'question_id': var['q1_id'],
+                                         'answer_id': var['q1_a1_id'] + 1,
+                                         'ipfs_link': 'updated IPFS'},
+                           bob, 'Attempt to update non-existent answer', 'assert')
         end()
 
     def test_delete_non_existent_answer_failed(self):
@@ -234,11 +239,10 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(q, t, var, True))
         self.failed_action('delanswer', {'user': 'bob',
-                                  'question_id': var['q1_id'],
-                                  'answer_id': var['q1_a1_id'] + 1},
-                    bob, 'Attempt to delete non-existent answer', 'assert')
+                                         'question_id': var['q1_id'],
+                                         'answer_id': var['q1_a1_id'] + 1},
+                           bob, 'Attempt to delete non-existent answer', 'assert')
         end()
-
 
     def test_register_answer_to_non_existent_question_failed(self):
         begin('Register answer to non-existent question', True)
@@ -249,8 +253,8 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(q, t, var, True))
-        self.failed_action('postanswer', {'user': 'bob', 'question_id': var['q1_id'] + 1, 'ipfs_link': 'test'}, bob,
-                    'Attempt to register answer to non existent question', 'assert')
+        self.failed_action('postanswer', {'user': 'bob', 'question_id': int(var['q1_id']) + 1, 'ipfs_link': 'test'}, bob,
+                           'Attempt to register answer to non existent question', 'assert')
         end()
 
     def test_modify_answer_of_non_existent_question_failed(self):
@@ -268,10 +272,10 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(q, t, var, True))
         self.failed_action('modanswer', {'user': 'bob',
-                                  'question_id': var['q1_id'] + 1,
-                                  'answer_id': var['q1_a1_id'],
-                                  'ipfs_link': 'updated IPFS'},
-                    bob, 'Attempt to modify answer of non-existent question', 'assert')
+                                         'question_id': int(var['q1_id']) + 1,
+                                         'answer_id': var['q1_a1_id'],
+                                         'ipfs_link': 'updated IPFS'},
+                           bob, 'Attempt to modify answer of non-existent question', 'assert')
         end()
 
     def test_delete_answer_of_non_existent_question_failed(self):
@@ -289,17 +293,18 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(q, t, var, True))
         self.failed_action('delanswer', {'user': 'bob',
-                                  'question_id': var['q1_id'] + 1,
-                                  'answer_id': var['q1_a1_id']},
-                    bob, 'Attempt to delete answer of non-existent question', 'assert')
+                                         'question_id': int(var['q1_id']) + 1,
+                                         'answer_id': var['q1_a1_id']},
+                           bob, 'Attempt to delete answer of non-existent question', 'assert')
         end()
 
     def _register_question_action(self, owner, ipfs_link, id_var=''):
-        self.action('postquestion', {'user': str(owner), 'ipfs_link': ipfs_link}, owner,
+        self.action('postquestion', {'user': str(owner), 'title': 'title ' + ipfs_link, 'ipfs_link': ipfs_link}, owner,
                     'Asking question from {} with text "{}"'.format(str(owner), ipfs_link))
         return {'id': '#ignore' if id_var == '' else '#var ' + id_var,
                 'user': str(owner),
                 'ipfs_link': ipfs_link,
+                'title': 'title ' + ipfs_link,
                 'post_time': '#ignore',
                 'answers': [],
                 'comments': []}

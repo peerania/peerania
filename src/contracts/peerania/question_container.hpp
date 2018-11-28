@@ -32,7 +32,7 @@
 #define PROPERTY_MODERATION_VOTES 1
 #define PROPERTY_LAST_MODIFIED 3
 
-#define PROPERTY_MAX_QUESTION_ID 0x7FFFFFFFFFFFFFFFULL
+#define PROPERTY_MAX_QUESTION_ID 0xfffffffffffffULL
 
 struct comment {
   uint16_t id;
@@ -105,13 +105,13 @@ std::vector<comment>::iterator find_comment(T &item, uint16_t comment_id) {
 void assert_comment_limit(const account &action_caller, eosio::name item_owner,
                           const std::vector<comment> &comments) {
   if (item_owner != action_caller.owner) {
-    int comment_count = 0;
+    int comments_count = 0;
     for (auto iter_comment = comments.begin(); iter_comment != comments.end();
          ++iter_comment) {
-      if (iter_comment->user == action_caller.owner) comment_count++;
+      if (iter_comment->user == action_caller.owner) comments_count++;
     }
     eosio_assert(
-        comment_count < status_comments_limit(action_caller.pay_out_rating),
+        comments_count < status_comments_limit(action_caller.pay_out_rating),
         "Your status doesn't allow you to post more comment");
   }
 }

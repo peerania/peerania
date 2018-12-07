@@ -157,6 +157,81 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
             self.defs['ANSWER_ACCEPTED_AS_CORRECT_REWARD']
         end()
 
+    def test_mark_as_correct_own_reward(self):
+        begin('Mark own answer as correct rating change')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+                    'Alice asking question')
+        self.forum_e = [{
+                            'id': '#var aq',
+                            'user': 'alice',
+                            'ipfs_link': 'AQ',
+                            'correct_answer_id': '#var aq_caid',
+                            'answers': [],
+                        }]
+        t = self.table('question', 'allquestions')
+        self.var = {}
+        self.assertTrue(compare(self.forum_e, t, self.var, True))
+        self.action('postanswer', {'user': 'alice', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->AA'},
+                    alice, 'Alice answering Alice')
+        self.action('postanswer', {'user': 'bob', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->BA'},
+                    bob, 'Bob answering Alice')
+
+        self.forum_e[0]['answers'].append({
+            'id': '#var aq_aa',
+            'user': 'alice',
+            'ipfs_link': 'AQ->AA'})
+        self.forum_e[0]['answers'].append({
+            'id': '#var aq_ba',
+            'user': 'bob',
+            'ipfs_link': 'AQ->BA'})
+
+        t = self.table('question', 'allquestions')
+        self.assertTrue(compare(self.forum_e, t, self.var, True))
+        self.defs = {**load_defines('./src/contracts/peerania/economy.h')}
+        self.account_e = ['#ignoreorder',
+                          {'owner': 'alice', 'moderation_points': '#var alice_mdp',
+                           'rating': '#var alice_rating'},
+                          {'owner': 'bob', 'moderation_points': '#var bob_mdp',
+                              'rating': '#var bob_rating'}]
+        self.assertTrue(compare(self.account_e, self.table(
+            'account', 'allaccounts'), self.var, ignore_excess=True))
+        info('hierarchy')
+        info('Alice question')
+        info('  |-->Alice answer')
+        info('   `->Bob answer')
+
+        self.action('mrkascorrect', {
+                    'user': 'alice', 'question_id': self.var['aq'], 'answer_id': self.var['aq_aa']}, alice, "Alice mark Own answer as correct")
+        self._verify_acc()
+        self.action('mrkascorrect', {
+                    'user': 'alice', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba']}, alice, "Alice mark Bob answer as correct")
+        self.var['alice_rating'] += self.defs['ACCEPT_ANSWER_AS_CORRECT_REWARD']
+        self.var['bob_rating'] += self.defs['ANSWER_ACCEPTED_AS_CORRECT_REWARD']
+        self._verify_acc()
+        self.wait()
+        self.action('mrkascorrect', {
+                    'user': 'alice', 'question_id': self.var['aq'], 'answer_id': 0}, alice, "Alice unmark Bob answer as correct")
+        self.var['alice_rating'] -= self.defs['ACCEPT_ANSWER_AS_CORRECT_REWARD']
+        self.var['bob_rating'] -= self.defs['ANSWER_ACCEPTED_AS_CORRECT_REWARD']
+        self._verify_acc()
+        self.action('mrkascorrect', {
+                    'user': 'alice', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba']}, alice, "Alice mark Bob answer as correct again")
+        self.var['alice_rating'] += self.defs['ACCEPT_ANSWER_AS_CORRECT_REWARD']
+        self.var['bob_rating'] += self.defs['ANSWER_ACCEPTED_AS_CORRECT_REWARD']
+        self._verify_acc()
+
+        self.action('mrkascorrect', {
+                    'user': 'alice', 'question_id': self.var['aq'], 'answer_id': self.var['aq_aa']}, alice, "Alice mark Own answer as correct")
+        self.var['alice_rating'] -= self.defs['ACCEPT_ANSWER_AS_CORRECT_REWARD']
+        self.var['bob_rating'] -= self.defs['ANSWER_ACCEPTED_AS_CORRECT_REWARD']
+        self.wait()
+        self.action('mrkascorrect', {
+                    'user': 'alice', 'question_id': self.var['aq'], 'answer_id': 0}, alice, "Alice unmark own answer as correct")
+        self._verify_acc()
+        end()
+
     def test_delete_own_item_reward(self):
         begin('Delete own item reward')
         (alice, bob, carol) = self._create_basic_hierarchy()

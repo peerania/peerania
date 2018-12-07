@@ -1,5 +1,6 @@
 #include "peerania.hpp"
 #include "peerania_account.cpp"
+#include "peerania_communities_and_tags.cpp"
 #include "peerania_forum.cpp"
 #include "peerania_vote.cpp"
 
@@ -9,8 +10,7 @@ void peerania::registeracc(eosio::name owner, std::string display_name,
   register_account(owner, display_name, ipfs_profile);
 }
 
-void peerania::setaccstrprp(eosio::name owner, uint8_t key,
-                            std::string value) {
+void peerania::setaccstrprp(eosio::name owner, uint8_t key, std::string value) {
   require_auth(owner);
   set_account_string_property(owner, key, value);
 }
@@ -20,20 +20,16 @@ void peerania::setaccintprp(eosio::name owner, uint8_t key, int32_t value) {
   set_account_integer_property(owner, key, value);
 }
 
-void peerania::setipfspro(eosio::name owner, std::string ipfs_profile) {
+void peerania::setaccprof(eosio::name owner, std::string ipfs_profile,
+                          std::string display_name) {
   require_auth(owner);
-  set_account_ipfs_profile(owner, ipfs_profile);
+  set_account_profile(owner, ipfs_profile, display_name);
 }
 
-void peerania::setdispname(eosio::name owner, std::string display_name) {
-  require_auth(owner);
-  set_account_display_name(owner, display_name);
-}
-
-void peerania::postquestion(eosio::name user, std::string title,
-                            std::string ipfs_link) {
+void peerania::postquestion(eosio::name user, uint16_t community_id,
+                            std::string title, std::string ipfs_link) {
   require_auth(user);
-  post_question(user, title, ipfs_link);
+  post_question(user, community_id, title, ipfs_link);
 }
 
 void peerania::postanswer(eosio::name user, uint64_t question_id,
@@ -87,13 +83,13 @@ void peerania::modcomment(eosio::name user, uint64_t question_id,
 void peerania::upvote(eosio::name user, uint64_t question_id,
                       uint16_t answer_id) {
   require_auth(user);
-  vote(user, question_id, answer_id, true);
+  vote_forum_item(user, question_id, answer_id, true);
 }
 
 void peerania::downvote(eosio::name user, uint64_t question_id,
                         uint16_t answer_id) {
   require_auth(user);
-  vote(user, question_id, answer_id, false);
+  vote_forum_item(user, question_id, answer_id, false);
 }
 
 void peerania::mrkascorrect(eosio::name user, uint64_t question_id,
@@ -108,8 +104,47 @@ void peerania::votedelete(eosio::name user, uint64_t question_id,
   vote_for_deletion(user, question_id, answer_id, comment_id);
 }
 
+// stub
 void peerania::votemoderate(eosio::name user, uint64_t question_id,
                             uint16_t answer_id, uint16_t comment_id) {}
+
+// Tags and communities
+void peerania::crcommunity(eosio::name user, const std::string &name,
+                           const std::string &ipfs_description) {
+  require_auth(user);
+  create_community_or_tag(user, name, ipfs_description, ID_CREATE_COMMUNITY);
+}
+
+void peerania::crtag(eosio::name user, uint16_t community_id, std::string name,
+                     std::string ipfs_description) {
+  require_auth(user);
+  eosio_assert(community_id != ID_CREATE_COMMUNITY, "Invalid community id");
+  create_community_or_tag(user, name, ipfs_description, community_id);
+}
+
+void peerania::vtcrcomm(eosio::name user, uint16_t community_id) {
+  require_auth(user);
+  vote_create_community_or_tag(user, community_id, ID_CREATE_COMMUNITY);
+}
+
+void peerania::vtcrtag(eosio::name user, uint16_t community_id,
+                       uint32_t tag_id) {
+  require_auth(user);
+  eosio_assert(community_id != ID_CREATE_COMMUNITY, "Invalid community id");
+  vote_create_community_or_tag(user, tag_id, community_id);
+}
+
+void peerania::vtdelcomm(eosio::name user, uint16_t community_id) {
+  require_auth(user);
+  vote_delete_community_or_tag(user, community_id, ID_CREATE_COMMUNITY);
+}
+
+void peerania::vtdeltag(eosio::name user, uint16_t community_id,
+                        uint32_t tag_id) {
+  require_auth(user);
+  eosio_assert(community_id != ID_CREATE_COMMUNITY, "Invalid community id");
+  vote_delete_community_or_tag(user, tag_id, community_id);
+}
 
 #ifdef DEBUG
 void peerania::setaccrtmpc(eosio::name user, int16_t rating,
@@ -117,7 +152,6 @@ void peerania::setaccrtmpc(eosio::name user, int16_t rating,
   auto itr = find_account(user);
   account_table.modify(itr, _self, [&](auto &account) {
     account.rating = rating;
-    account.pay_out_rating = rating;
     account.moderation_points = moderation_points;
   });
 }
@@ -126,7 +160,8 @@ void peerania::resettables() {
   auto iter_account = account_table.begin();
   while (iter_account != account_table.end()) {
     // clean reward tables for user
-    auto period_rating_table = period_rating_index(_self, iter_account->owner.value);
+    auto period_rating_table =
+        period_rating_index(_self, iter_account->owner.value);
     auto iter_period_rating = period_rating_table.begin();
     while (iter_period_rating != period_rating_table.end()) {
       iter_period_rating = period_rating_table.erase(iter_period_rating);
@@ -163,15 +198,17 @@ void peerania::chnguserrt(eosio::name user, int16_t rating_change) {
 
 #ifndef DEBUG
 EOSIO_DISPATCH(peerania,
-          (registeracc)(setaccintprp)(setaccstrprp)(setipfspro)(setdispname)(
-              postquestion)(postanswer)(postcomment)(delquestion)(delanswer)(
-              delcomment)(modanswer)(modquestion)(modcomment)(upvote)(downvote)(
-              mrkascorrect)(votedelete)(votemoderate))
+               (registeracc)(setaccintprp)(setaccstrprp)(setaccprof)(
+                   postquestion)(postanswer)(postcomment)(delquestion)(
+                   delanswer)(delcomment)(modanswer)(modquestion)(modcomment)(
+                   upvote)(downvote)(mrkascorrect)(votedelete)(votemoderate)(
+                   crtag)(crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm))
 #else
-EOSIO_DISPATCH(peerania,
-          (registeracc)(setaccintprp)(setaccstrprp)(setipfspro)(setdispname)(
-              postquestion)(postanswer)(postcomment)(delquestion)(delanswer)(
-              delcomment)(modanswer)(modquestion)(modcomment)(upvote)(downvote)(
-              mrkascorrect)(votedelete)(votemoderate)(setaccrtmpc)(resettables)(
-              chnguserrt))
+EOSIO_DISPATCH(
+    peerania,
+    (registeracc)(setaccintprp)(setaccstrprp)(setaccprof)(postquestion)(
+        postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(modanswer)(
+        modquestion)(modcomment)(upvote)(downvote)(mrkascorrect)(votedelete)(
+        votemoderate)(crtag)(crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(
+        vtdelcomm)(setaccrtmpc)(resettables)(chnguserrt))
 #endif

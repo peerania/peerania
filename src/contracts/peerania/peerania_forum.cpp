@@ -6,7 +6,8 @@ question_index::const_iterator peerania::find_question(uint64_t question_id) {
   return iter_question;
 }
 
-void peerania::post_question(eosio::name user, const std::string &title,
+void peerania::post_question(eosio::name user, uint16_t community_id,
+                             const std::string &title,
                              const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
   assert_title(title);
@@ -20,7 +21,8 @@ void peerania::post_question(eosio::name user, const std::string &title,
   });
 
   question_table.emplace(_self, [&](auto &question) {
-    question.id = get_quiestion_pk(question_table);
+    question.id = get_reversive_pk(question_table, MAX_QUESTION_ID);
+    question.community_id = community_id;
     question.user = user;
     question.title = title;
     question.ipfs_link = ipfs_link;
@@ -68,8 +70,7 @@ void peerania::post_comment(eosio::name user, uint64_t question_id,
           assert_allowed(*iter_account, question.user, Action::POST_COMMENT);
           eosio_assert(question.comments.size() < MAX_COMMENT_COUNT,
                        "For this question reached comment count limit");
-          assert_comment_limit(*iter_account, question.user,
-                               question.comments);
+          assert_comment_limit(*iter_account, question.user, question.comments);
           push_new_forum_item(question.comments, new_comment);
         } else {
           auto iter_answer = find_answer(question, answer_id);
@@ -194,7 +195,6 @@ void peerania::modify_comment(eosio::name user, uint64_t question_id,
         }
       });
 }
-
 void peerania::mark_answer_as_correct(eosio::name user, uint64_t question_id,
                                       uint16_t answer_id) {
   auto iter_account = find_account(user);
@@ -210,8 +210,11 @@ void peerania::mark_answer_as_correct(eosio::name user, uint64_t question_id,
                  "Answer not found");
     if (iter_question->correct_answer_id == EMPTY_ANSWER_ID) {
       // No one answer has not been marked as correct yet
-      update_rating(iter_account, ACCEPT_ANSWER_AS_CORRECT_REWARD);
-      update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+      // Reward question and answer owners
+      if (iter_answer->user != user) {
+        update_rating(iter_account, ACCEPT_ANSWER_AS_CORRECT_REWARD);
+        update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+      }
     } else {
       // One of answers is marked as correct. Find this one,
       // pick up the reward of past owner and give it to new
@@ -219,8 +222,16 @@ void peerania::mark_answer_as_correct(eosio::name user, uint64_t question_id,
                                          iter_question->answers.end(),
                                          iter_question->correct_answer_id);
       // check internal error iter_old_answer
-      update_rating(iter_old_answer->user, -ANSWER_ACCEPTED_AS_CORRECT_REWARD);
-      update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+      if (iter_old_answer->user != user)
+        update_rating(iter_old_answer->user,
+                      -ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+      else
+        update_rating(iter_account, ACCEPT_ANSWER_AS_CORRECT_REWARD);
+
+      if (iter_answer->user != user)
+        update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+      else
+        update_rating(iter_account, -ACCEPT_ANSWER_AS_CORRECT_REWARD);
     }
   } else {
     // Set question to "without answer"
@@ -230,12 +241,13 @@ void peerania::mark_answer_as_correct(eosio::name user, uint64_t question_id,
     auto iter_old_answer = binary_find(iter_question->answers.begin(),
                                        iter_question->answers.end(),
                                        iter_question->correct_answer_id);
-    // pick up reward
+    // pick up reward if question author isn't answer author
     // check internal error iter_old_answer
-    update_rating(iter_account, -ACCEPT_ANSWER_AS_CORRECT_REWARD);
-    update_rating(iter_old_answer->user, -ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+    if (iter_old_answer->user != user) {
+      update_rating(iter_account, -ACCEPT_ANSWER_AS_CORRECT_REWARD);
+      update_rating(iter_old_answer->user, -ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+    }
   }
-
   question_table.modify(iter_question, _self, [answer_id](auto &question) {
     question.correct_answer_id = answer_id;
   });

@@ -96,10 +96,8 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         e = ['#ignoreorder',
              get_expected_account_body(alice),
              get_expected_account_body(bob)]
-        self.action('setipfspro', {'owner': 'alice', 'ipfs_profile': 'updated IPFS'},
+        self.action('setaccprof', {'owner': 'alice', 'ipfs_profile': 'updated IPFS', 'display_name': 'updated display name'},
                     alice, 'Set Alice IPFS profile to \'updated IPFS\'')
-        self.action('setdispname', {'owner': 'alice', 'display_name': 'updated display name'},
-                    alice, 'Set Alice display name to \'updated display name\'')
         t = self.table('account', 'allaccounts')
         e[1]['ipfs_profile'] = 'updated IPFS'
         e[1]['display_name'] = 'updated display name'
@@ -122,10 +120,8 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
     def test_change_display_name_and_ipfs_profile_for_non_existent_account_failed(self):
         begin('Testing changing account IPFS profile and display_name for non-existing account', True)
         alice = self.get_non_registered_alice()
-        self.failed_action('setipfspro', {
-                           'owner': 'alice', 'ipfs_profile': 'test'}, alice, 'Changing Alice ipfs profile', 'assert')
-        self.failed_action('setdispname', {
-                           'owner': 'alice', 'display_name': 'test'}, alice, 'Changing Alice display_name', 'assert')
+        self.failed_action('setaccprof', {
+                           'owner': 'alice', 'ipfs_profile': 'test', 'display_name': 'test'}, alice, 'Changing Alice ipfs profile', 'assert')
         end()
 
     def test_properties_another_owner_failed(self):
@@ -142,10 +138,8 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         begin('Testing changing account IPFS profile and display_name with another account', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.failed_action('setipfspro',  {
-                           'owner': 'alice', 'ipfs_profile': 'test'}, bob, 'Changing Alice ipfs profile with bob auth', 'auth')
-        self.failed_action('setdispname',  {
-                           'owner': 'alice', 'display_name': 'test'}, bob, 'Changing Alice display_name with bob auth', 'auth')
+        self.failed_action('setaccprof',  {
+                           'owner': 'alice', 'ipfs_profile': 'test', 'display_name': 'test'}, bob, 'Changing Alice ipfs profile with bob auth', 'auth')
         end()
 
 

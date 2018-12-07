@@ -86,19 +86,6 @@
 			]
 		},
 		{
-			"name": "disp_to_acc",
-			"base": "",
-			"fields": [{
-					"name": "owner",
-					"type": "name"
-				},
-				{
-					"name": "display_name",
-					"type": "string"
-				}
-			]
-		},
-		{
 			"name": "history_item",
 			"base": "",
 			"fields": [{
@@ -184,6 +171,10 @@
 					"name": "id",
 					"type": "uint64"
 				},
+				{
+					"name": "community_id",
+					"type": "uint16"
+				}
 				{
 					"name": "post_time",
 					"type": "time"
@@ -278,7 +269,7 @@
 			]
 		},
 		{
-			"name": "setipfspro",
+			"name": "setaccprof",
 			"base": "",
 			"fields": [{
 					"name": "owner",
@@ -287,15 +278,6 @@
 				{
 					"name": "ipfs_profile",
 					"type": "string"
-				}
-			]
-		},
-		{
-			"name": "setdispname",
-			"base": "",
-			"fields": [{
-					"name": "owner",
-					"type": "name"
 				},
 				{
 					"name": "display_name",
@@ -596,6 +578,110 @@
 				}
 			]
 		},
+		        {
+            "name": "crcommunity",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "name",
+                    "type": "string"
+                },
+                {
+                    "name": "ipfs_description",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "crtag",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "community_id",
+                    "type": "uint16"
+                },
+                {
+                    "name": "name",
+                    "type": "string"
+                },
+                {
+                    "name": "ipfs_description",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "vtdelcomm",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "community_id",
+                    "type": "uint16"
+                }
+            ]
+        },
+        {
+            "name": "vtdeltag",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "community_id",
+                    "type": "uint16"
+                },
+                {
+                    "name": "tag_id",
+                    "type": "uint32"
+                }
+            ]
+        },
+        {
+            "name": "vtcrcomm",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "community_id",
+                    "type": "uint16"
+                }
+            ]
+        },
+        {
+            "name": "vtcrtag",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "community_id",
+                    "type": "uint16"
+                },
+                {
+                    "name": "tag_id",
+                    "type": "uint32"
+                }
+            ]
+        },
 		{
 			"name": "setaccrtmpc",
 			"base": "",
@@ -648,15 +734,10 @@
 			"ricardian_contract": ""
 		},
 		{
-			"name": "setipfspro",
-			"type": "setipfspro",
+			"name": "setaccprof",
+			"type": "setaccprof",
 			"ricardian_contract": ""
-		},
-		{
-			"name": "setdispname",
-			"type": "setdispname",
-			"ricardian_contract": ""
-		},
+		}
 		{
 			"name": "postquestion",
 			"type": "postquestion",
@@ -728,6 +809,36 @@
 			"ricardian_contract": ""
 		},
 		{
+            "name": "crcommunity",
+            "type": "crcommunity",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "crtag",
+            "type": "crtag",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "vtdelcomm",
+            "type": "vtdelcomm",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "vtdeltag",
+            "type": "vtdeltag",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "vtcrcomm",
+            "type": "vtcrcomm",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "vtcrtag",
+            "type": "vtcrtag",
+            "ricardian_contract": ""
+        },
+		{
 			"name": "setaccrtmpc",
 			"type": "setaccrtmpc",
 			"ricardian_contract": ""
@@ -753,17 +864,6 @@
 				"name"
 			],
 			"type": "account"
-		},
-		{
-			"name": "disptoacc",
-			"index_type": "i64",
-			"key_names": [
-				"owner"
-			],
-			"key_types": [
-				"name"
-			],
-			"type": "disp_to_acc"
 		},
 		{
 			"name": "question",

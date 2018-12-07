@@ -6,6 +6,8 @@
 #include "property.hpp"
 #include "status.hpp"
 
+#define BAN_RATING_INCREMENT_PER_PERIOD 6
+
 #ifndef DEBUG
 #define ACCOUNT_STAT_RESET_PERIOD 259200  // 3 Days
 #else
@@ -25,17 +27,21 @@ struct [[eosio::table("account")]] account {
   int16_t pay_out_rating = 0;
   uint16_t last_update_period = 0;
   uint8_t questions_left = 0;
-  bool require_update() const { return current_period() > last_update_period; }
-
-  uint16_t current_period() const {
-    return (now() - registration_time) / ACCOUNT_STAT_RESET_PERIOD;
-  }
 
   void update() {
-    if (require_update()) {
-      questions_left = status_question_limit(pay_out_rating);
-      moderation_points = status_moderation_points(pay_out_rating);
-      last_update_period = current_period();
+    uint16_t current_period =
+        (now() - registration_time) / ACCOUNT_STAT_RESET_PERIOD;
+    uint16_t periods_have_passed = current_period - last_update_period;
+    if (periods_have_passed > 0) {
+      if (rating < 0) {
+        rating += periods_have_passed * BAN_RATING_INCREMENT_PER_PERIOD;
+        if(rating > 0)
+          rating = 0;
+      } else {
+        questions_left = status_question_limit(rating);
+        moderation_points = status_moderation_points(rating);
+        last_update_period = current_period;
+      }
     }
   }
 

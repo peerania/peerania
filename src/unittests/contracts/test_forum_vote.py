@@ -147,9 +147,26 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         info('Now Alice question rating is 0')
         end()
 
+    def test_upvote_voted_for_deletion_failed(self):
+        begin('Test upvote reported question')
+        begin('Test upvote question and answer when downwoted')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        carol = self.register_carol_account()
+        (e, var) = self._create_basic_hierarchy(alice, bob)
+        self.action('votedelete', {
+            'user': 'carol', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0}, carol, "Carol report alice question")
+        self.action('votedelete', {
+            'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0}, carol, "Carol report bob answer")
+
+        self.failed_action('upvote', {'user': 'carol', 'question_id': var['aq'], 'answer_id': 0},
+                    carol, 'Carol attempt to upvote alice question', 'assert')
+        self.failed_action('upvote', {'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba']},
+                    carol, 'Carol attempt to upvote bob answer', 'assert')
+        end()
+
     def test_mark_answer_as_correct(self):
         begin('Test mark answer as correct')
-        begin('Test vote answer')
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)

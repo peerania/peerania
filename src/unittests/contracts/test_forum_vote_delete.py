@@ -244,6 +244,22 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         self.assertTrue(var['aq_caid'] == 0)
         end()
 
+    def test_vote_delete_upvoted_item(self):
+        begin('Test upvote question and answer when downwoted')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        carol = self.register_carol_account()
+        (e, var) = self._create_simple_hierarchy(alice, bob)
+        self.action('upvote', {'user': 'carol', 'question_id': var['aq'], 'answer_id': 0},
+                    carol, 'Carol upvote alice question')
+        self.action('upvote', {'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba']},
+                    carol, 'Carol upvote bob answer')
+        self.failed_action('votedelete', {
+            'user': 'carol', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0}, carol, "Carol attempt to report alice question", 'assert')
+        self.failed_action('votedelete', {
+            'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0}, carol, "Carol attempt to report bob answer", 'assert')
+        end()
+
     def test_vote_delete_twice_failed(self):
         begin('Test vote for deletion twice', True)
         alice = self.register_alice_account()
@@ -341,7 +357,7 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
     def _create_basic_hierarchy(self, alice, bob, carol):
         self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                     'Register question from alice')
-        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question' ,'ipfs_link': 'BQ'}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'BQ'}, bob,
                     'Register question from bob')
         e = ['#ignoreorder', {
             'id': '#var aq',

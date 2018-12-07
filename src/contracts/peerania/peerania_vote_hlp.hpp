@@ -25,6 +25,7 @@ void upvote_item(T &item, T_iter_acc iter_account, eosio::name &item_owner,
     caller_rating_change += upvote_cost_caller;
     owner_rating_change += upvote_cost_owner;
   } else {
+    eosio_assert(!(itr_history->is_flag_set(HISTORY_DELETE_VOTED_FLG)), "You couldn't upvote reported item");
     if (itr_history->is_flag_set(HISTORY_UPVOTED_FLG)) {
       /*The item was upvoted by user, but user call
       upvote again, this action remove upvote(now
@@ -119,6 +120,7 @@ bool set_deletion_votes_and_history(T &item, const account &user, uint16_t limit
   if (is_new) {
     itr_history->set_flag(HISTORY_DELETE_VOTED_FLG);
   } else {
+    eosio_assert(!(itr_history->is_flag_set(HISTORY_UPVOTED_FLG)), "Can't report upvoted item");
     eosio_assert(!(itr_history->is_flag_set(HISTORY_DELETE_VOTED_FLG)),
                  "Already voted for deletion!");
     itr_history->set_flag(HISTORY_DELETE_VOTED_FLG);

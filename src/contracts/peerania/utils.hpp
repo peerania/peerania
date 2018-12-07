@@ -32,11 +32,20 @@ Iter linear_find(Iter begin, Iter end, t_key key) {
 }
 }  // namespace std
 
-//Replace with more strict
-inline void assert_ipfs(const std::string &ipfs_link){
-  eosio_assert(ipfs_link.size() >= 2 && ipfs_link.size() < 65, "Incorrect ipfs");
+// Replace with more strict
+inline void assert_ipfs(const std::string &ipfs_link) {
+  eosio_assert(ipfs_link.size() >= 2 && ipfs_link.size() < 65,
+               "Incorrect ipfs");
 }
 
-inline void assert_title(const std::string &title){
-  eosio_assert(title.size() > 2 && title.size() < 129, "Invalid title length");
+template <typename table_index>
+uint64_t get_reversive_pk(const table_index &table, uint64_t max_pk) {
+  if (table.begin() == table.end()) {
+    return max_pk;
+  } else {
+    // largest primary key currently in table
+    auto pk = table.begin()->primary_key();
+    eosio_assert(pk > 0, "No available primary key");
+    return --pk;
+  }
 }

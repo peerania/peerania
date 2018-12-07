@@ -7,17 +7,18 @@ void peerania::register_account(eosio::name owner, std::string display_name,
   assert_display_name(display_name);
   assert_ipfs(ipfs_profile);
   time current_time = now();
-  account_table.emplace(_self,
-                        [owner, &display_name, &ipfs_profile, current_time](auto &account) {
-                          account.owner = owner;
-                          account.display_name = display_name;
-                          account.ipfs_profile = ipfs_profile;
-                          account.rating = RATING_ON_CREATE;
-                          account.pay_out_rating = RATING_ON_CREATE; //Probably pay_out_rating != RATING_ON_CREATE discuss it
-                          account.registration_time = current_time;
-                          account.last_update_period = 0;
-                          account.questions_left = 3;
-                        });
+  account_table.emplace(_self, [owner, &display_name, &ipfs_profile,
+                                current_time](auto &account) {
+    account.owner = owner;
+    account.display_name = display_name;
+    account.ipfs_profile = ipfs_profile;
+    account.rating = RATING_ON_CREATE;
+    account.pay_out_rating = RATING_ON_CREATE;  // Probably pay_out_rating !=
+                                                // RATING_ON_CREATE discuss it
+    account.registration_time = current_time;
+    account.last_update_period = 0;
+    account.questions_left = 3;
+  });
 }
 
 void peerania::set_account_string_property(eosio::name owner, uint8_t key,
@@ -40,22 +41,15 @@ void peerania::set_account_integer_property(eosio::name owner, uint8_t key,
   });
 }
 
-void peerania::set_account_ipfs_profile(eosio::name owner,
-                                        const std::string &ipfs_profile) {
-  auto iter_account = find_account(owner);
-  assert_ipfs(ipfs_profile);
-  assert_allowed(*iter_account, owner, Action::SET_ACCOUNT_IPFS_PROFILE);
-  account_table.modify(iter_account, _self, [&](auto &account) {
-    account.ipfs_profile = ipfs_profile;
-  });
-}
-
-void peerania::set_account_display_name(eosio::name owner,
+void peerania::set_account_profile(eosio::name owner,
+                                        const std::string &ipfs_profile, 
                                         const std::string &display_name) {
   auto iter_account = find_account(owner);
+  assert_ipfs(ipfs_profile);
   assert_display_name(display_name);
-  assert_allowed(*iter_account, owner, Action::SET_ACCOUNT_DISPLAYNAME);
-  account_table.modify(iter_account, _self, [display_name](auto &account) {
+  assert_allowed(*iter_account, owner, Action::SET_ACCOUNT_PROFILE);
+  account_table.modify(iter_account, _self, [&](auto &account) {
+    account.ipfs_profile = ipfs_profile;
     account.display_name = display_name;
   });
 }
@@ -86,9 +80,11 @@ void peerania::update_rating(account_index::const_iterator iter_account,
                              int rating_change) {
   if (rating_change == 0) return;
   const uint16_t current_period = get_period(now());
-  const int16_t new_rating =
-      iter_account->rating + rating_change;  // verify higher than -100;
-  auto period_rating_table = period_rating_index(_self, iter_account->owner.value);
+  int16_t new_rating = iter_account->rating + rating_change; 
+  if (new_rating < MIN_RATING) new_rating = MIN_RATING;
+  if (new_rating > MAX_RATING) new_rating = MAX_RATING;
+  auto period_rating_table =
+      period_rating_index(_self, iter_account->owner.value);
   auto iter_this_week_rating = period_rating_table.find(current_period);
 
   // iter_this_week_rating == period_rating_table.end() Means that it's first
@@ -109,7 +105,8 @@ void peerania::update_rating(account_index::const_iterator iter_account,
         std::min(iter_previous_week_rating->rating, new_rating);
     rating_to_award_change =
         (user_week_rating_after_change - paid_out_rating) -
-        rating_to_award; //equal user_week_rating_after_change - pay_out_rating;
+        rating_to_award;  // equal user_week_rating_after_change -
+                          // pay_out_rating;
     // Test 2
     if (rating_to_award_change + rating_to_award < 0)
       rating_to_award_change = -rating_to_award;
@@ -166,14 +163,15 @@ void peerania::update_rating(account_index::const_iterator iter_account,
         });
   }
   account_table.modify(
-      iter_account, _self,
-      [rating_to_award_change, new_rating](auto &account) {
-        // Real value of paid out rating for this week is paid_out_rating -
-        // rating_to_award Proof paid_out_rating on week_{n-1} <=
-        // paid_out_rating on week_{n} for any n Each week
+      iter_account, _self, [rating_to_award_change, new_rating](auto &account) {
+        // Real value of paid out rating for this week is
+        // paid_out_rating - rating_to_award Proof
+        // paid_out_rating on week_{n-1} <= paid_out_rating on
+        // week_{n} for any n Each week
         account.pay_out_rating += rating_to_award_change;
         account.rating = new_rating;
-        account.update();
+        account.update();  // Think about behavior of this part(ratin could be
+                           // rewrited in this func)!!!!
       });
 }
 
@@ -181,8 +179,7 @@ void peerania::update_rating(eosio::name user, int rating_change) {
   update_rating(find_account(user), rating_change);
 }
 
-account_index::const_iterator peerania::find_account(
-    eosio::name owner) {
+account_index::const_iterator peerania::find_account(eosio::name owner) {
   auto iter_user = account_table.find(owner.value);
   eosio_assert(iter_user != account_table.end(), "Account not registered");
   return iter_user;

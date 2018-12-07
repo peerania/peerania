@@ -40,6 +40,24 @@ class[[eosio::contract]] peerania : public eosio::contract {
             constants.id = all_constants_table.available_primary_key();
             constants.start_period_time = current_time;
           });
+      tag_community_index community_table(_self, scope_all_communities);
+      community_table.emplace(
+          _self, [](auto &community) {
+            community.id = 1;
+            community.name = "DEBUG";
+            community.ipfs_description = "DEBUG_COMMUNITY_IPFS";
+            community.popularity = 0;
+          });
+      tag_community_index tag_table(_self, get_tag_scope(1));
+      for (int i = 0; i < 10; ++i) {
+        tag_table.emplace(
+            _self, [i](auto &tag) {
+              tag.id = i;
+              tag.name = "Tag " + std::to_string(i);
+              tag.ipfs_description = "DEBUG_COMMUNITY1_TAG " + std::to_string(i);
+              tag.popularity = 0;
+            });
+      }
     }
 #endif
   };
@@ -62,6 +80,7 @@ class[[eosio::contract]] peerania : public eosio::contract {
 
   // Post question
   [[eosio::action]] void postquestion(eosio::name user, uint16_t community_id,
+                                      const std::vector<uint32_t> tags,
                                       std::string title, std::string ipfs_link);
 
   // Post answer(answer question)
@@ -179,7 +198,7 @@ class[[eosio::contract]] peerania : public eosio::contract {
   question_index::const_iterator find_question(uint64_t question_id);
 
   void post_question(eosio::name user, uint16_t community_id,
-                     const std::string &title,
+                     const std::vector<uint32_t> tags, const std::string &title,
                      const std::string &ipfs_link);
 
   void post_answer(eosio::name user, uint64_t question_id,
@@ -236,4 +255,6 @@ class[[eosio::contract]] peerania : public eosio::contract {
   uint64_t get_tag_scope(uint16_t community_id);
 
   void assert_community_exist(uint16_t community_id);
+
+  void remove_user_question_or_answer(eosio::name user, uint64_t question_id, uint16_t answer_id);
 };

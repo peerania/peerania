@@ -37,6 +37,7 @@ void assert_allowed(const account &action_caller, eosio::name data_owner,
                    "Internal function call error");
       eosio_assert(action_caller.rating >= POST_QUESTION_ALLOWED,
                    "You can't post question!");
+      break;
     case POST_ANSWER:
       if (action_caller.owner == data_owner)
         eosio_assert(action_caller.rating >= POST_ANSWER_OWN_ALLOWED,
@@ -71,42 +72,47 @@ void assert_allowed(const account &action_caller, eosio::name data_owner,
       eosio_assert(action_caller.rating >= VOTE_FOR_DELETION_ALLOWED,
                    "Your rating is too small to put deletion flag");
       break;
-
-    case CREATE_TAG:
-      eosio_assert(action_caller.owner == data_owner,
-                   "Internal function call error");
-      eosio_assert(action_caller.rating >= CREATE_TAG_ALLOWED,
-                   "Your rating is too small to create tag!");
-
     case CREATE_COMMUNITY:
       eosio_assert(action_caller.owner == data_owner,
                    "Internal function call error");
       eosio_assert(action_caller.rating >= CREATE_COMMUNITY_ALLOWED,
                    "Your rating is too small to create community!");
 
-    case VOTE_CREATE_TAG:
+      break;
+    case CREATE_TAG:
       eosio_assert(action_caller.owner == data_owner,
                    "Internal function call error");
-      eosio_assert(action_caller.rating >= VOTE_CREATE_TAG_ALLOWED,
-                   "Your rating is too small to vote tag!");
+      eosio_assert(action_caller.rating >= CREATE_TAG_ALLOWED,
+                   "Your rating is too small to create tag!");
 
+      break;
     case VOTE_CREATE_COMMUNITY:
       eosio_assert(action_caller.owner == data_owner,
                    "Internal function call error");
       eosio_assert(action_caller.rating >= VOTE_CREATE_COMMUNITY_ALLOWED,
                    "Your rating is too small to vote community!");
 
-    case VOTE_DELETE_TAG:
+      break;
+    case VOTE_CREATE_TAG:
       eosio_assert(action_caller.owner == data_owner,
                    "Internal function call error");
-      eosio_assert(action_caller.rating >= VOTE_DELETE_TAG_ALLOWED,
-                   "Your rating is too small to vote for tag deletion!");
+      eosio_assert(action_caller.rating >= VOTE_CREATE_TAG_ALLOWED,
+                   "Your rating is too small to vote tag!");
 
+      break;
     case VOTE_DELETE_COMMUNITY:
       eosio_assert(action_caller.owner == data_owner,
                    "Internal function call error");
       eosio_assert(action_caller.rating >= VOTE_DELETE_COMMUNITY_ALLOWED,
                    "Your rating is too small to vote for community deletion!");
+
+      break;
+    case VOTE_DELETE_TAG:
+      eosio_assert(action_caller.owner == data_owner,
+                   "Internal function call error");
+      eosio_assert(action_caller.rating >= VOTE_DELETE_TAG_ALLOWED,
+                   "Your rating is too small to vote for tag deletion!");
+      break;
 
     default:
       eosio_assert(action_caller.owner == data_owner, "Action not allowed");

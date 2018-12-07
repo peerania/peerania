@@ -17,7 +17,7 @@
 #define MAX_COMMUNITY_ID 0xFFFF
 #define MAX_TAG_ID 0xFFFFFFFF
 
-struct [[eosio::table("crttagcomm")]] crttagcomm {
+struct [[eosio::table("crtagcomm")]] crtagcomm {
   uint32_t id;
   eosio::name creator;
   std::string name;
@@ -28,7 +28,7 @@ struct [[eosio::table("crttagcomm")]] crttagcomm {
     return id;
   }
 };
-typedef eosio::multi_index<"crttagcomm"_n, crttagcomm> create_tag_community_index;
+typedef eosio::multi_index<"crtagcomm"_n, crtagcomm> create_tag_community_index;
 const uint64_t scope_all_communities = "allcomm"_n.value;
 
 

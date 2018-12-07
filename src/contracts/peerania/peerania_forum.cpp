@@ -7,28 +7,35 @@ question_index::const_iterator peerania::find_question(uint64_t question_id) {
 }
 
 void peerania::post_question(eosio::name user, uint16_t community_id,
+                             const std::vector<uint32_t> tags,
                              const std::string &title,
                              const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
   assert_title(title);
   auto iter_account = find_account(user);
   assert_allowed(*iter_account, user, Action::POST_QUESTION);
-
+  eosio_assert(tags.size() <= MAX_TAG_COUNT, "Too many tags");
   account_table.modify(iter_account, _self, [](auto &account) {
     account.update();
     eosio_assert(account.questions_left > 0, "Reached weekly question limit");
     account.questions_left -= 1;
   });
-
+  uint64_t question_id = get_reversive_pk(question_table, MAX_QUESTION_ID);
   question_table.emplace(_self, [&](auto &question) {
-    question.id = get_reversive_pk(question_table, MAX_QUESTION_ID);
+    question.id = question_id;
     question.community_id = community_id;
+    question.tags = tags;
     question.user = user;
     question.title = title;
     question.ipfs_link = ipfs_link;
     question.post_time = now();
   });
 
+  user_questions_index user_questions_table(_self, user.value);
+  user_questions_table.emplace(_self, [question_id](auto &usr_question) {
+    usr_question.question_id = question_id;
+  });
+  update_popularity(community_id, tags, true);
   update_rating(iter_account, POST_QUESTION_REWARD);
 }
 
@@ -48,10 +55,43 @@ void peerania::post_answer(eosio::name user, uint64_t question_id,
   new_answer.user = user;
   new_answer.ipfs_link = ipfs_link;
   new_answer.post_time = now();
-  question_table.modify(iter_question, _self, [&new_answer](auto &question) {
-    push_new_forum_item(question.answers, new_answer);
+
+  uint16_t answer_id;
+  question_table.modify(iter_question, _self,
+                        [&new_answer, &answer_id](auto &question) {
+                          push_new_forum_item(question.answers, new_answer);
+                          answer_id = new_answer.id;
+                        });
+
+  user_answers_index user_answers_table(_self, user.value);
+  user_answers_table.emplace(_self, [question_id, answer_id](auto &usr_answer) {
+    usr_answer.question_id = question_id;
+    usr_answer.answer_id = answer_id;
   });
+
   update_rating(iter_account, POST_ANSWER_REWARD);
+}
+
+void peerania::remove_user_question_or_answer(eosio::name user,
+                                              uint64_t question_id,
+                                              uint16_t answer_id) {
+  if (apply_to_question(answer_id)) {
+    user_questions_index user_questions_table(_self, user.value);
+    auto iter_user_question = user_questions_table.find(user.value);
+    eosio_assert(iter_user_question != user_questions_table.end(),
+                 "Question not found");
+    user_questions_table.erase(iter_user_question);
+    eosio_assert(iter_user_question != user_questions_table.end(),
+                 "Address not erased properly");
+  } else {
+    user_answers_index user_answers_table(_self, user.value);
+    auto iter_user_answer = user_answers_table.find(user.value);
+    eosio_assert(iter_user_answer != user_answers_table.end(),
+                 "Answer not found");
+    user_answers_table.erase(iter_user_answer);
+    eosio_assert(iter_user_answer != user_answers_table.end(),
+                 "Address not erased properly");
+  }
 }
 
 void peerania::post_comment(eosio::name user, uint64_t question_id,
@@ -98,6 +138,7 @@ void peerania::delete_question(eosio::name user, uint64_t question_id) {
   question_table.erase(iter_question);
   eosio_assert(iter_question != question_table.end(),
                "Address not erased properly");
+  remove_user_question_or_answer(user, question_id, EMPTY_ANSWER_ID);
   update_rating(iter_account, DELETE_OWN_QUESTION_REWARD);
 }
 
@@ -113,6 +154,7 @@ void peerania::delete_answer(eosio::name user, uint64_t question_id,
         assert_allowed(*iter_account, iter_answer->user, Action::DELETE_ANSWER);
         question.answers.erase(iter_answer);
       });
+  remove_user_question_or_answer(user, question_id, answer_id);
   update_rating(iter_account, DELETE_OWN_ANSWER_REWARD);
 }
 

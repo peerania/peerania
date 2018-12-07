@@ -89,7 +89,7 @@ void peerania::vote_create_community_or_tag(eosio::name user, uint32_t tag_or_co
     assert_allowed(*iter_account, user, Action::VOTE_CREATE_TAG);
     assert_community_exist(commuinty_id);
     scope = get_tag_scope(commuinty_id);
-    rating_to_create = TagsAndCommunities::VOTES_TO_CREATE_COMMUNITY;
+    rating_to_create = TagsAndCommunities::VOTES_TO_CREATE_TAG;
   }
 
   create_tag_community_index create_tag_community_table(_self, scope);
@@ -125,7 +125,7 @@ void peerania::vote_create_community_or_tag(eosio::name user, uint32_t tag_or_co
     } else {
       auto iter_pk = --(tag_community_table.end());
       pk = iter_pk->primary_key() + 1;
-      eosio_assert(pk > max_pk, "No available primary key");
+      eosio_assert(pk < max_pk, "No available primary key");
     }
     tag_community_table.emplace(
         _self, [&iter_create_or_tag_community, pk](auto &tag_or_community) {

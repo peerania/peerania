@@ -174,7 +174,11 @@
 				{
 					"name": "community_id",
 					"type": "uint16"
-				}
+				},
+				{
+					"name": "tags",
+					"type": "uint32[]"
+				},
 				{
 					"name": "post_time",
 					"type": "time"
@@ -291,10 +295,20 @@
 			"fields": [{
 				"name": "user",
 				"type": "name"
-			}, {
+			},
+			{
+				"name": "community_id",
+				"type": "uint16"
+			},
+			{
+				"name": "tags",
+				"type": "uint32[]"
+			},
+			{
 				"name": "title",
 				"type": "string"
-			}, {
+			}, 
+			{
 				"name": "ipfs_link",
 				"type": "string"
 			}]
@@ -578,7 +592,57 @@
 				}
 			]
 		},
-		        {
+		{
+			"name": "crtagcomm",
+			"base": "",
+			"fields": [{
+					"name": "id",
+					"type": "uint32"
+				},
+				{
+                    "name": "creator",
+                    "type": "name"
+                },
+				{
+                    "name": "name",
+                    "type": "string"
+                },
+				{
+                    "name": "ipfs_description",
+                    "type": "string"
+                },
+				{
+                    "name": "rating",
+                    "type": "int32"
+                },
+				{
+                    "name": "voted",
+                    "type": "name[]"
+                }
+			]
+		},
+		{
+			"name": "tagandcomm",
+			"base": "",
+			"fields": [{
+					"name": "id",
+					"type": "uint32"
+				},
+				{
+                    "name": "name",
+                    "type": "string"
+                },
+				{
+                    "name": "ipfs_description",
+                    "type": "string"
+                },
+				{
+                    "name": "popularity",
+                    "type": "uint32"
+                }
+			]
+		},
+		{
             "name": "crcommunity",
             "base": "",
             "fields": [
@@ -679,6 +743,30 @@
                 {
                     "name": "tag_id",
                     "type": "uint32"
+                }
+            ]
+        },
+		{
+            "name": "usrquestions",
+            "base": "",
+            "fields": [
+                {
+                    "name": "answer_id",
+                    "type": "uint16"
+                }
+            ]
+        },
+		{
+            "name": "usranswers",
+            "base": "",
+            "fields": [
+                {
+                    "name": "question_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "answer_id",
+                    "type": "uint16"
                 }
             ]
         },
@@ -897,6 +985,27 @@
 				"uint16"
 			],
 			"type": "totalrating"
+		},
+		{
+			"name": "tagandcomm",
+			"index_type": "i64",
+			"key_names": [
+				"id"
+			],
+			"key_types": [
+				"uint32"
+			],
+			"type": "tagandcomm"
+		},{
+			"name": "crtagcomm",
+			"index_type": "i64",
+			"key_names": [
+				"id"
+			],
+			"key_types": [
+				"uint32"
+			],
+			"type": "crtagcomm"
 		}
 	],
 	"ricardian_clauses": [],

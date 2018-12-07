@@ -27,9 +27,10 @@ void peerania::setaccprof(eosio::name owner, std::string ipfs_profile,
 }
 
 void peerania::postquestion(eosio::name user, uint16_t community_id,
-                            std::string title, std::string ipfs_link) {
+                            std::vector<uint32_t> tags, std::string title,
+                            std::string ipfs_link) {
   require_auth(user);
-  post_question(user, community_id, title, ipfs_link);
+  post_question(user, community_id, tags, title, ipfs_link);
 }
 
 void peerania::postanswer(eosio::name user, uint64_t question_id,
@@ -160,11 +161,55 @@ void peerania::resettables() {
   auto iter_account = account_table.begin();
   while (iter_account != account_table.end()) {
     // clean reward tables for user
-    auto period_rating_table =
-        period_rating_index(_self, iter_account->owner.value);
+    period_rating_index period_rating_table(_self, iter_account->owner.value);
     auto iter_period_rating = period_rating_table.begin();
     while (iter_period_rating != period_rating_table.end()) {
       iter_period_rating = period_rating_table.erase(iter_period_rating);
+    }
+
+    // clean user_questions table
+    user_questions_index user_questions_table(_self, iter_account->owner.value);
+    auto iter_user_questions = user_questions_table.begin();
+    while (iter_user_questions != user_questions_table.end()) {
+      iter_user_questions = user_questions_table.erase(iter_user_questions);
+    }
+
+    // clean user_answers table
+    user_answers_index user_answers_table(_self, iter_account->owner.value);
+    auto iter_user_answers = user_answers_table.begin();
+    while (iter_user_answers != user_answers_table.end()) {
+      iter_user_answers = user_answers_table.erase(iter_user_answers);
+    }
+
+    // clean create community table
+    create_tag_community_index create_community_table(_self,
+                                                      scope_all_communities);
+    auto iter_create_community = create_community_table.begin();
+    while (iter_create_community != create_community_table.end()) {
+      iter_create_community =
+          create_community_table.erase(iter_create_community);
+    }
+
+    // clean create tags and tags tables
+    tag_community_index community_table(_self, scope_all_communities);
+    auto iter_community = community_table.begin();
+    while (iter_community != community_table.end()) {
+      // clean all tags for creation
+      create_tag_community_index create_tag_table(
+          _self, get_tag_scope(iter_community->id));
+      auto iter_create_tag = create_tag_table.begin();
+      while (iter_create_tag != create_tag_table.end()) {
+        iter_create_tag = create_tag_table.erase(iter_create_tag);
+      }
+
+      // Clean tags
+      tag_community_index tag_table(_self, get_tag_scope(iter_community->id));
+      auto iter_tag = tag_table.begin();
+      while (iter_tag != tag_table.end()) {
+        iter_tag = tag_table.erase(iter_tag);
+      }
+
+      iter_community = community_table.erase(iter_community);
     }
 
     // remove user

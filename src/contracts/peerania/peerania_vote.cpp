@@ -59,10 +59,11 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
   eosio::name item_owner;
   // If this flag == true the question will erased
   bool delete_question = false;
+  bool delete_answer = false;
   question_table.modify(
       iter_question, _self,
       [&iter_account, answer_id, comment_id, &delete_question,
-       &owner_rating_change, &item_owner](auto &question) {
+       &owner_rating_change, &item_owner, &delete_answer](auto &question) {
         if (apply_to_question(answer_id)) {
           if (apply_to_answer(comment_id)) {
             // Delete question
@@ -96,7 +97,7 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
           // Delete answer to question by vote (comment_id == 0)
           if (set_deletion_votes_and_history(*iter_answer, *iter_account,
                                       DeletionVotes::DELETION_VOTES_ANSWER)) {
-            // Get for mar as correct
+            // Get for mark as correct
             item_owner = iter_answer->user;
             if (question.correct_answer_id == iter_answer->id) {
               owner_rating_change -= ANSWER_ACCEPTED_AS_CORRECT_REWARD;
@@ -106,7 +107,9 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
                 upvote_count(iter_answer->history) * ANSWER_UPVOTED_REWARD;
             owner_rating_change += ANSWER_DELETED_REWARD;
             question.answers.erase(iter_answer);
+            delete_answer = true;
           }
+          
         } else {
           // Delete comment to answer
           auto iter_comment = find_comment(*iter_answer, comment_id);
@@ -123,8 +126,13 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
   if (iter_question->correct_answer_id != old_correct_answer_id) {
     update_rating(iter_question->user, -ACCEPT_ANSWER_AS_CORRECT_REWARD);
   }
+  if(delete_answer){
+    remove_user_question_or_answer(user, iter_question->id, answer_id);
+  }
 
   if (delete_question) {
+    update_popularity(iter_question->community_id, iter_question->tags, false);
+    remove_user_question_or_answer(user, iter_question->id, EMPTY_ANSWER_ID);
     if (iter_question->correct_answer_id != EMPTY_ANSWER_ID)
       owner_rating_change -= ACCEPT_ANSWER_AS_CORRECT_REWARD;
     for (auto answer = iter_question->answers.begin();

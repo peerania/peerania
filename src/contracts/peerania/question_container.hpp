@@ -60,6 +60,7 @@ struct answer {
 struct [[eosio::table("question")]] question {
   uint64_t id;
   uint16_t community_id;
+  std::vector<uint32_t> tags;
   time post_time;
   eosio::name user;
   std::string title;
@@ -76,8 +77,9 @@ struct [[eosio::table("question")]] question {
     return (static_cast<uint64_t>(community_id) << 36) + id;
   }
   EOSLIB_SERIALIZE(
-      question, (id)(community_id)(post_time)(user)(title)(ipfs_link)(answers)(
-                    comments)(correct_answer_id)(rating)(properties)(history))
+      question,
+      (id)(community_id)(tags)(post_time)(user)(title)(ipfs_link)(answers)(
+          comments)(correct_answer_id)(rating)(properties)(history))
 };
 
 const uint64_t scope_all_questions = "allquestions"_n.value;
@@ -124,22 +126,22 @@ void assert_comment_limit(const account &action_caller, eosio::name item_owner,
   }
 }
 
-
 struct [[eosio::table("usrquestions")]] usrquestions {
   uint64_t question_id;
   uint64_t primary_key() const { return question_id; }
 };
+typedef eosio::multi_index<"usrquestions"_n, usrquestions> user_questions_index;
 
 struct [[eosio::table("usranswers")]] usranswers {
   uint64_t question_id;
   uint16_t answer_id;
   uint64_t primary_key() const { return question_id; }
 };
+typedef eosio::multi_index<"usranswers"_n, usranswers> user_answers_index;
 
-inline void assert_title(const std::string &title){
+inline void assert_title(const std::string &title) {
   eosio_assert(title.size() > 2 && title.size() < 129, "Invalid title length");
 }
-
 
 /*
 Invariant 1:

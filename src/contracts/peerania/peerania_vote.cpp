@@ -127,12 +127,12 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
     update_rating(iter_question->user, -ACCEPT_ANSWER_AS_CORRECT_REWARD);
   }
   if(delete_answer){
-    remove_user_question_or_answer(user, iter_question->id, answer_id);
+    remove_user_question_or_answer(item_owner, iter_question->id, false);
   }
 
   if (delete_question) {
     update_popularity(iter_question->community_id, iter_question->tags, false);
-    remove_user_question_or_answer(user, iter_question->id, EMPTY_ANSWER_ID);
+    remove_user_question_or_answer(iter_question->user, iter_question->id, true);
     if (iter_question->correct_answer_id != EMPTY_ANSWER_ID)
       owner_rating_change -= ACCEPT_ANSWER_AS_CORRECT_REWARD;
     for (auto answer = iter_question->answers.begin();
@@ -142,6 +142,7 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
       if (answer->id == iter_question->correct_answer_id)
         rating_change -= ANSWER_ACCEPTED_AS_CORRECT_REWARD;
       update_rating(answer->user, rating_change);
+      remove_user_question_or_answer(answer->user, iter_question->id, false);
     }
     question_table.erase(iter_question);
     eosio_assert(iter_question != question_table.end(),

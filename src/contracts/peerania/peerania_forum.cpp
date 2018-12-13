@@ -14,7 +14,7 @@ void peerania::post_question(eosio::name user, uint16_t community_id,
   assert_title(title);
   auto iter_account = find_account(user);
   assert_allowed(*iter_account, user, Action::POST_QUESTION);
-  eosio_assert(tags.size() <= MAX_TAG_COUNT, "Too many tags");
+  update_popularity(community_id, tags, true);
   account_table.modify(iter_account, _self, [](auto &account) {
     account.update();
     eosio_assert(account.questions_left > 0, "Reached weekly question limit");
@@ -35,7 +35,6 @@ void peerania::post_question(eosio::name user, uint16_t community_id,
   user_questions_table.emplace(_self, [question_id](auto &usr_question) {
     usr_question.question_id = question_id;
   });
-  update_popularity(community_id, tags, true);
   update_rating(iter_account, POST_QUESTION_REWARD);
 }
 
@@ -74,10 +73,10 @@ void peerania::post_answer(eosio::name user, uint64_t question_id,
 
 void peerania::remove_user_question_or_answer(eosio::name user,
                                               uint64_t question_id,
-                                              uint16_t answer_id) {
-  if (apply_to_question(answer_id)) {
+                                              bool is_question) {
+  if (is_question) {
     user_questions_index user_questions_table(_self, user.value);
-    auto iter_user_question = user_questions_table.find(user.value);
+    auto iter_user_question = user_questions_table.find(question_id);
     eosio_assert(iter_user_question != user_questions_table.end(),
                  "Question not found");
     user_questions_table.erase(iter_user_question);
@@ -85,7 +84,7 @@ void peerania::remove_user_question_or_answer(eosio::name user,
                  "Address not erased properly");
   } else {
     user_answers_index user_answers_table(_self, user.value);
-    auto iter_user_answer = user_answers_table.find(user.value);
+    auto iter_user_answer = user_answers_table.find(question_id);
     eosio_assert(iter_user_answer != user_answers_table.end(),
                  "Answer not found");
     user_answers_table.erase(iter_user_answer);
@@ -135,10 +134,11 @@ void peerania::delete_question(eosio::name user, uint64_t question_id) {
   assert_allowed(*iter_account, iter_question->user, Action::DELETE_QUESTION);
   eosio_assert(iter_question->answers.empty(),
                "You can't delete not empty question");
+  update_popularity(iter_question->community_id, iter_question->tags, false);
   question_table.erase(iter_question);
   eosio_assert(iter_question != question_table.end(),
                "Address not erased properly");
-  remove_user_question_or_answer(user, question_id, EMPTY_ANSWER_ID);
+  remove_user_question_or_answer(user, question_id, true);
   update_rating(iter_account, DELETE_OWN_QUESTION_REWARD);
 }
 
@@ -154,7 +154,7 @@ void peerania::delete_answer(eosio::name user, uint64_t question_id,
         assert_allowed(*iter_account, iter_answer->user, Action::DELETE_ANSWER);
         question.answers.erase(iter_answer);
       });
-  remove_user_question_or_answer(user, question_id, answer_id);
+  remove_user_question_or_answer(user, question_id, false);
   update_rating(iter_account, DELETE_OWN_ANSWER_REWARD);
 }
 
@@ -183,16 +183,23 @@ void peerania::delete_comment(eosio::name user, uint64_t question_id,
 
 void peerania::modify_question(eosio::name user, uint64_t question_id,
                                const std::string &title,
-                               const std::string &ipfs_link) {
+                               const std::string &ipfs_link,
+                               const uint16_t community_id,
+                               const std::vector<uint32_t> tags) {
   assert_ipfs(ipfs_link);
   assert_title(title);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
   assert_allowed(*iter_account, iter_question->user, Action::MODIFY_QUESTION);
+  eosio_assert(tags.size() <= MAX_TAG_COUNT, "Too many tags");
+  update_popularity(iter_question->community_id, iter_question->tags, false);
+  update_popularity(community_id, tags, true);
   question_table.modify(
-      iter_question, _self, [&ipfs_link, &title](auto &question) {
+      iter_question, _self, [&ipfs_link, &title, community_id, &tags](auto &question) {
         question.ipfs_link = ipfs_link;
         question.title = title;
+        question.community_id = community_id;
+        question.tags = tags;
         set_property(question.properties, PROPERTY_LAST_MODIFIED, now());
       });
 }

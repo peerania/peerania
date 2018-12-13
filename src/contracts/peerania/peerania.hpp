@@ -41,22 +41,24 @@ class[[eosio::contract]] peerania : public eosio::contract {
             constants.start_period_time = current_time;
           });
       tag_community_index community_table(_self, scope_all_communities);
-      community_table.emplace(
-          _self, [](auto &community) {
-            community.id = 1;
-            community.name = "DEBUG";
-            community.ipfs_description = "DEBUG_COMMUNITY_IPFS";
-            community.popularity = 0;
+      for (int i = 1; i < 3; ++i) {
+        std::string index = std::to_string(i);
+        community_table.emplace(_self, [i, &index](auto &community) {
+          community.id = i;
+          community.name = "DEBUG" + index;
+          community.ipfs_description = "DEBUG_COMMUNITY_IPFS" + index;
+          community.popularity = 0;
+        });
+        tag_community_index tag_table(_self, get_tag_scope(i));
+        for (int j = 0; j < 6 / i; ++j) {
+          tag_table.emplace(_self, [&index, j](auto &tag) {
+            tag.id = j;
+            tag.name = "Tag " + std::to_string(j) + " community " + index;
+            tag.ipfs_description =
+                "DEBUG_COMMUNITY" + index + "_TAG " + std::to_string(j);
+            tag.popularity = 0;
           });
-      tag_community_index tag_table(_self, get_tag_scope(1));
-      for (int i = 0; i < 10; ++i) {
-        tag_table.emplace(
-            _self, [i](auto &tag) {
-              tag.id = i;
-              tag.name = "Tag " + std::to_string(i);
-              tag.ipfs_description = "DEBUG_COMMUNITY1_TAG " + std::to_string(i);
-              tag.popularity = 0;
-            });
+        }
       }
     }
 #endif
@@ -80,7 +82,7 @@ class[[eosio::contract]] peerania : public eosio::contract {
 
   // Post question
   [[eosio::action]] void postquestion(eosio::name user, uint16_t community_id,
-                                      const std::vector<uint32_t> tags,
+                                      std::vector<uint32_t> tags,
                                       std::string title, std::string ipfs_link);
 
   // Post answer(answer question)
@@ -91,8 +93,7 @@ class[[eosio::contract]] peerania : public eosio::contract {
   // If the answer_id set to 0 comment question, otherwise comment question
   // with passed answer_id
   [[eosio::action]] void postcomment(eosio::name user, uint64_t question_id,
-                                     uint16_t answer_id,
-                                     const std::string &ipfs_link);
+                                     uint16_t answer_id, std::string ipfs_link);
 
   // Delete question
   [[eosio::action]] void delquestion(eosio::name user, uint64_t question_id);
@@ -106,19 +107,18 @@ class[[eosio::contract]] peerania : public eosio::contract {
                                     uint16_t answer_id, uint16_t comment_id);
 
   // Modify question
-  [[eosio::action]] void modquestion(eosio::name user, uint64_t question_id,
-                                     const std::string &title,
-                                     const std::string &ipfs_link);
+  [[eosio::action]] void modquestion(
+      eosio::name user, uint64_t question_id, std::string title,
+      std::string ipfs_link, uint16_t community_id, std::vector<uint32_t> tags);
 
   // Modify answer
   [[eosio::action]] void modanswer(eosio::name user, uint64_t question_id,
-                                   uint16_t answer_id,
-                                   const std::string &ipfs_link);
+                                   uint16_t answer_id, std::string ipfs_link);
 
   // Modify comment
   [[eosio::action]] void modcomment(eosio::name user, uint64_t question_id,
                                     uint16_t answer_id, uint16_t comment_id,
-                                    const std::string &ipfs_link);
+                                    std::string ipfs_link);
 
   // Upvote question/answer
   [[eosio::action]] void upvote(eosio::name user, uint64_t question_id,
@@ -149,18 +149,18 @@ class[[eosio::contract]] peerania : public eosio::contract {
                                       uint16_t answer_id);
 
   // Tags and communities
-  [[eosio::action]] void crcommunity(eosio::name user, const std::string &name,
-                                     const std::string &ipfs_description);
+  [[eosio::action]] void crcommunity(eosio::name user, std::string name,
+                                     std::string ipfs_description);
 
   [[eosio::action]] void crtag(eosio::name user, uint16_t community_id,
                                std::string name, std::string ipfs_description);
 
-  [[eosio::action]] void vtcrcomm(eosio::name user, uint16_t community_id);
+  [[eosio::action]] void vtcrcomm(eosio::name user, uint32_t community_id);
 
   [[eosio::action]] void vtcrtag(eosio::name user, uint16_t community_id,
                                  uint32_t tag_id);
 
-  [[eosio::action]] void vtdelcomm(eosio::name user, uint16_t community_id);
+  [[eosio::action]] void vtdelcomm(eosio::name user, uint32_t community_id);
 
   [[eosio::action]] void vtdeltag(eosio::name user, uint16_t community_id,
                                   uint32_t tag_id);
@@ -216,7 +216,9 @@ class[[eosio::contract]] peerania : public eosio::contract {
                       uint16_t answer_id, uint64_t comment_id);
 
   void modify_question(eosio::name user, uint64_t question_id,
-                       const std::string &title, const std::string &ipfs_link);
+                       const std::string &title, const std::string &ipfs_link,
+                       const uint16_t community_id,
+                       const std::vector<uint32_t> tags);
 
   void modify_answer(eosio::name user, uint64_t question_id, uint16_t answer_id,
                      const std::string &ipfs_link);
@@ -229,11 +231,13 @@ class[[eosio::contract]] peerania : public eosio::contract {
                                const std::string &ipfs_description,
                                uint16_t commuinty_id);
 
-  void vote_create_community_or_tag(eosio::name user, uint32_t tag_id,
-                                    uint16_t commuinty_id);
+  void vote_create_community_or_tag(eosio::name user,
+                                            uint32_t tag_or_community_id,
+                                            uint16_t commuinty_id);
 
-  void vote_delete_community_or_tag(eosio::name user, uint32_t tag_id,
-                                    uint16_t commuinty_id);
+  void vote_delete_community_or_tag(eosio::name user,
+                                            uint32_t tag_or_community_id,
+                                            uint16_t commuinty_id);
 
   void vote_forum_item(eosio::name user, uint64_t question_id,
                        uint16_t answer_id, bool is_upvote);
@@ -256,5 +260,6 @@ class[[eosio::contract]] peerania : public eosio::contract {
 
   void assert_community_exist(uint16_t community_id);
 
-  void remove_user_question_or_answer(eosio::name user, uint64_t question_id, uint16_t answer_id);
+  void remove_user_question_or_answer(eosio::name user, uint64_t question_id,
+                                      bool is_question);
 };

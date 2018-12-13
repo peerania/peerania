@@ -84,18 +84,18 @@ class FrumStatusLimitsTests(peeraniatest.PeeraniaTest):
     def _test_question_limit(self, user, user_rating, question_count):
         for i in range(question_count):
             self.action('postquestion', {'user': user, 'title': 'Hey you' + str(
-                i), 'ipfs_link': 'IPFS ' + str(i)}, user, 'Reg question ' + str(i))
+                i), 'ipfs_link': 'IPFS ' + str(i), 'community_id': 1, 'tags':[1]}, user, 'Reg question ' + str(i))
         self.failed_action('postquestion', {'user': user, 'title': 'Hey you',
-                                            'ipfs_link': 'IPFS '}, user, 'Reg alice question, after limit reached', 'assert')
+                                            'ipfs_link': 'IPFS ', 'community_id': 1, 'tags':[1]}, user, 'Reg alice question, after limit reached', 'assert')
         end()
  
     def _create_simple_hierarchy(self, user_rating):
         alice = self.register_alice_account(user_rating, 0)
         bob = self.register_bob_account(user_rating, 0)
         carol = self.register_carol_account(user_rating, 0)
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags':[1]}, alice,
                     'Register question from alice')
-        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'BQ'}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'BQ', 'community_id': 1, 'tags':[1]}, bob,
                     'Register question from bob')
         e = ['#ignoreorder', {
             'id': '#var aq',

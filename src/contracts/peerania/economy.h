@@ -9,10 +9,17 @@ const int DELETION_VOTES_COMMENT = 1000;
 }  // namespace DeletionVotes
 
 namespace TagsAndCommunities {
-const int VOTES_TO_CREATE_COMMUNITY = 40000;
-const int VOTES_TO_DELETE_COMMUNITY = -2000;
-const int VOTES_TO_CREATE_TAG = 10000;
-const int VOTES_TO_DELETE_TAG = -500;
+#ifndef DEBUG
+const int VOTES_TO_CREATE_COMMUNITY = 100;
+const int VOTES_TO_DELETE_COMMUNITY = -35;
+const int VOTES_TO_CREATE_TAG = 10;
+const int VOTES_TO_DELETE_TAG = -10;
+#else
+const int VOTES_TO_CREATE_COMMUNITY = 5;
+const int VOTES_TO_DELETE_COMMUNITY = -3;
+const int VOTES_TO_CREATE_TAG = 4;
+const int VOTES_TO_DELETE_TAG = -2;
+#endif
 }  // namespace TagsAndCommunities
 
 #define POST_QUESTION_REWARD 0
@@ -59,7 +66,6 @@ const int VOTES_TO_DELETE_TAG = -500;
 #define VOTE_DELETE_TAG_ALLOWED 35
 #define VOTE_DELETE_COMMUNITY_ALLOWED 100
 
-
 #define MODERATION_POINTS_PER_TAG 3
 #define MODERATION_POINTS_PER_COMMUNITY 5
 
@@ -68,9 +74,6 @@ const int VOTES_TO_DELETE_TAG = -500;
 
 #define COMMUNITY_CREATED_REWARD 200
 #define COMMUNITY_DELETED_REWARD -150
-
-
-
 
 #ifdef DEBUG
 struct [[eosio::table("constants")]] constants {

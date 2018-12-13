@@ -416,10 +416,18 @@
 				{
 					"name": "title",
 					"type": "string"
-				}
+				},
 				{
 					"name": "ipfs_link",
 					"type": "string"
+				},
+				{
+					"name": "community_id",
+					"type": "uint16"
+				},
+				{
+					"name": "tags",
+					"type": "uint32[]"
 				}
 			]
 		},
@@ -612,11 +620,11 @@
                     "type": "string"
                 },
 				{
-                    "name": "rating",
-                    "type": "int32"
+                    "name": "votes",
+                    "type": "int16"
                 },
 				{
-                    "name": "voted",
+                    "name": "voters",
                     "type": "name[]"
                 }
 			]
@@ -692,7 +700,7 @@
                 },
                 {
                     "name": "community_id",
-                    "type": "uint16"
+                    "type": "uint32"
                 }
             ]
         },
@@ -724,7 +732,7 @@
                 },
                 {
                     "name": "community_id",
-                    "type": "uint16"
+                    "type": "uint32"
                 }
             ]
         },
@@ -751,8 +759,8 @@
             "base": "",
             "fields": [
                 {
-                    "name": "answer_id",
-                    "type": "uint16"
+                    "name": "question_id",
+                    "type": "uint64"
                 }
             ]
         },
@@ -985,6 +993,27 @@
 				"uint16"
 			],
 			"type": "totalrating"
+		},
+		{
+			"name": "usrquestions",
+			"index_type": "i64",
+			"key_names": [
+				"question_id"
+			],
+			"key_types": [
+				"uint64"
+			],
+			"type": "usrquestions"
+		},{
+			"name": "usranswers",
+			"index_type": "i64",
+			"key_names": [
+				"question_id"
+			],
+			"key_types": [
+				"uint64"
+			],
+			"type": "usranswers"
 		},
 		{
 			"name": "tagandcomm",

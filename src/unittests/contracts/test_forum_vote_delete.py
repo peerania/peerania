@@ -355,9 +355,9 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         end()
 
     def _create_basic_hierarchy(self, alice, bob, carol):
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags':[1]}, alice,
                     'Register question from alice')
-        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'BQ'}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'BQ', 'community_id': 1, 'tags':[1]}, bob,
                     'Register question from bob')
         e = ['#ignoreorder', {
             'id': '#var aq',
@@ -525,7 +525,7 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         return (e, var)
 
     def _create_simple_hierarchy(self, alice, bob):
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags':[1]}, alice,
                     'Register question from alice')
         e = [{
             'id': '#var aq',

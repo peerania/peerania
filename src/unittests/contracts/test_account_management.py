@@ -18,7 +18,6 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         t = self.table('account', 'allaccounts')
         self.assertTrue(compare(['#ignoreorder',
                                  get_expected_account_body(alice)], t, ignore_excess=True))
-        info('Table accounts: ', t)
         end()
 
     def test_register_user_another_owner_failed(self):

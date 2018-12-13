@@ -299,7 +299,7 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         end()
 
     def _register_question_action(self, owner, ipfs_link, id_var=''):
-        self.action('postquestion', {'user': str(owner), 'title': 'title ' + ipfs_link, 'ipfs_link': ipfs_link}, owner,
+        self.action('postquestion', {'user': str(owner), 'title': 'title ' + ipfs_link, 'ipfs_link': ipfs_link, 'community_id': 1, 'tags': [1]}, owner,
                     'Asking question from {} with text "{}"'.format(str(owner), ipfs_link))
         return {'id': '#ignore' if id_var == '' else '#var ' + id_var,
                 'user': str(owner),

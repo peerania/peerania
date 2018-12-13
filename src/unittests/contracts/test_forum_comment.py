@@ -332,7 +332,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         end()
 
     def _create_basic_hierarchy(self, alice, bob):
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question','ipfs_link': 'Alice question'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question','ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1]}, alice,
                     'Asking question from alice with text "Alice question"')
         e = ['#ignoreorder', {
             'id': '#var aq',
@@ -363,7 +363,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
             'ipfs_link': 'Bob answer to alice',
             'post_time': '#ignore',
             'comments': []})
-        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'Bob question'}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'Bob question',  'community_id': 1, 'tags': [2]}, bob,
                     'Asking question from bob with text "Bob question"')
         e.append({
             'id': '#var bq',

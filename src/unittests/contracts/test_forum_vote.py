@@ -160,9 +160,9 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
             'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0}, carol, "Carol report bob answer")
 
         self.failed_action('upvote', {'user': 'carol', 'question_id': var['aq'], 'answer_id': 0},
-                    carol, 'Carol attempt to upvote alice question', 'assert')
+                           carol, 'Carol attempt to upvote alice question', 'assert')
         self.failed_action('upvote', {'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba']},
-                    carol, 'Carol attempt to upvote bob answer', 'assert')
+                           carol, 'Carol attempt to upvote bob answer', 'assert')
         end()
 
     def test_mark_answer_as_correct(self):
@@ -281,7 +281,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         end()
 
     def _create_basic_hierarchy(self, alice, bob):
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'Alice question'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1, 2, 3]}, alice,
                     'Asking question from alice with text "Alice question"')
         e = ['#ignoreorder', {
             'id': '#var aq',
@@ -316,7 +316,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
             'post_time': '#ignore',
             'rating': '#var aq_ba_rating',
             'comments': []})
-        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question','ipfs_link': 'Bob question'}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'Bob question', 'community_id': 1, 'tags': [1, 2, 3]}, bob,
                     'Asking question from bob with text "Bob question"')
         e.append({
             'id': '#var bq',

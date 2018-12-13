@@ -22,8 +22,8 @@ struct [[eosio::table("crtagcomm")]] crtagcomm {
   eosio::name creator;
   std::string name;
   std::string ipfs_description;
-  int32_t rating;
-  std::vector<eosio::name> voted;
+  int16_t votes;
+  std::vector<eosio::name> voters;
   uint64_t primary_key() const {
     return id;
   }
@@ -46,11 +46,11 @@ typedef eosio::multi_index<"tagandcomm"_n, tagandcomm> tag_community_index;
 
 
 void assert_tag_name(const std::string name) {
-  eosio_assert(name.size() >= 2 && name.size() < 15, "Invalid tag name");
+  eosio_assert(name.size() >= 2 && name.size() <= 15, "Invalid tag name");
 }
 
 void assert_community_name(const std::string name) {
-  eosio_assert(name.size() >= 2 && name.size() < 25, "Invalid tag name");
+  eosio_assert(name.size() >= 2 && name.size() <= 25, "Invalid community name");
 }
 
 

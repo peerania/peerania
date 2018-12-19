@@ -1,7 +1,7 @@
 {
     "verbose": false,
     "eos-node": "./eos-node/",
-    "terminal": true,
+    "terminal": flase,
     "default-contract": "main",
     "contracts": [
         {

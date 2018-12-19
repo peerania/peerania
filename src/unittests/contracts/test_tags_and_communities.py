@@ -176,7 +176,7 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
                                     'ipfs_description': 'BCM'}, bob, 'Bob create ')
         c = self.table('crtagcomm', 'allcomm')
         t = self.table('crtagcomm', get_tag_scope(1))
-        account_e = ["#ignoreorder", {'owner': 'alice', 'rating' : 10000}, {'owner': 'bob', 'rating' : 10000}, {'owner': 'carol', 'rating' : 10000}]
+        account_e = ["#ignoreorder", {'user': 'alice', 'rating' : 10000}, {'user': 'bob', 'rating' : 10000}, {'user': 'carol', 'rating' : 10000}]
         self.action('vtdelcomm', {'user': carol, 'community_id': c[0]['id']}, carol, 'Carol vote delete alice community')
         self.action('vtdeltag', {'user': carol, 'community_id': 1, 'tag_id': t[0]['id']}, carol, 'Carol vote delete bob tag')
         self.action('vtdelcomm', {'user': alice, 'community_id': c[0]['id']}, alice, 'Alice vote delete own community')
@@ -206,7 +206,7 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
         self.assertTrue(self.table('crtagcomm', 'allcomm') == [])
         self.assertTrue(self.table('crtagcomm', get_tag_scope(1)) == [])
         #Couldn't load int values, loaddefines method
-        account_e = ["#ignoreorder", {'owner': 'alice', 'rating' : 10000 - (150//3)}, {'owner': 'bob', 'rating' : 10000-(50//2)}, {'owner': 'carol', 'rating' : 10000}]
+        account_e = ["#ignoreorder", {'user': 'alice', 'rating' : 10000 - (150//3)}, {'user': 'bob', 'rating' : 10000-(50//2)}, {'user': 'carol', 'rating' : 10000}]
         self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
 
@@ -222,8 +222,8 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
         self.action('crtag', {'user': 'bob', 'community_id': 1, 'name': 'BT', 'ipfs_description': 'Bob tag description'}, bob,
                     'Bob create tag')
         accounts_e = [
-            {'owner': 'alice', 'rating': '#var alice_rt', 'moderation_points': '#var alice_mdp'},
-            {'owner': 'bob', 'rating': '#var bob_rt', 'moderation_points': '#var bob_mdp'},
+            {'user': 'alice', 'rating': '#var alice_rt', 'moderation_points': '#var alice_mdp'},
+            {'user': 'bob', 'rating': '#var bob_rt', 'moderation_points': '#var bob_mdp'},
             {}, {}
         ]
         var = {}
@@ -276,8 +276,8 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
             'user': carol, 'community_id': c[0]['id']}, carol, 'Carol vote create  community', 'assert')
         end()
 
-    def test_another_owner(self):
-        begin('Test vote assert another owner', True)
+    def test_another_user(self):
+        begin('Test vote assert another user', True)
         alice = self.register_alice_account(10000, 10)
         bob = self.register_bob_account(10000, 10)
         carol = self.register_carol_account(10000, 10)

@@ -10,7 +10,7 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         begin('Test rating value for new account')
         defs = load_defines('./src/contracts/peerania/economy.h')
         alice = self.get_non_registered_alice()
-        self.action('registeracc', {'owner': 'alice', 'display_name': 'test',
+        self.action('registeracc', {'user': 'alice', 'display_name': 'test',
                                     'ipfs_profile': 'test'}, alice, 'Register alice account')
         self.assertTrue(self.table(
             'account', 'allaccounts')[0]['rating'] == defs['RATING_ON_CREATE'])
@@ -21,7 +21,7 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         (alice, bob, carol) = self._create_basic_hierarchy()
         ted = self.register_ted_account()
         self.account_e.append(
-            {'owner': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
+            {'user': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
         self.assertTrue(compare(self.account_e, self.table(
             'account', 'allaccounts'), self.var, ignore_excess=True))
         self.action('upvote', {
@@ -73,7 +73,7 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         (alice, bob, carol) = self._create_basic_hierarchy()
         ted = self.register_ted_account()
         self.account_e.append(
-            {'owner': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
+            {'user': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
         self.assertTrue(compare(self.account_e, self.table(
             'account', 'allaccounts'), self.var, ignore_excess=True))
         self.action('upvote', {
@@ -125,7 +125,7 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         (alice, bob, carol) = self._create_basic_hierarchy()
         ted = self.register_ted_account(3000, 1)
         self.account_e.append(
-            {'owner': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
+            {'user': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
         self.assertTrue(compare(self.account_e, self.table(
             'account', 'allaccounts'), self.var, ignore_excess=True))
         self.action('mrkascorrect', {
@@ -191,9 +191,9 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         self.assertTrue(compare(self.forum_e, t, self.var, True))
         self.defs = {**load_defines('./src/contracts/peerania/economy.h')}
         self.account_e = ['#ignoreorder',
-                          {'owner': 'alice', 'moderation_points': '#var alice_mdp',
+                          {'user': 'alice', 'moderation_points': '#var alice_mdp',
                            'rating': '#var alice_rating'},
-                          {'owner': 'bob', 'moderation_points': '#var bob_mdp',
+                          {'user': 'bob', 'moderation_points': '#var bob_mdp',
                               'rating': '#var bob_rating'}]
         self.assertTrue(compare(self.account_e, self.table(
             'account', 'allaccounts'), self.var, ignore_excess=True))
@@ -252,10 +252,10 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         (alice, bob, carol) = self._create_basic_hierarchy()
         ted = self.register_ted_account(3000, 3)  # man who will delte
         self.account_e.append(
-            {'owner': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
+            {'user': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
         dan = self.register_dan_account()
         self.account_e.append(
-            {'owner': 'dan', 'moderation_points': '#var dan_mdp', 'rating': '#var dan_rating'})
+            {'user': 'dan', 'moderation_points': '#var dan_mdp', 'rating': '#var dan_rating'})
         self.assertTrue(compare(self.account_e, self.table(
             'account', 'allaccounts'), self.var, ignore_excess=True))
         (bob_old_rt, alice_old_rt, carol_old_rt) = (
@@ -300,10 +300,10 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         (alice, bob, carol) = self._create_basic_hierarchy()
         ted = self.register_ted_account(3000, 3)  # man who will delte
         self.account_e.append(
-            {'owner': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
+            {'user': 'ted', 'moderation_points': '#var ted_mdp', 'rating': '#var ted_rating'})
         dan = self.register_dan_account()
         self.account_e.append(
-            {'owner': 'dan', 'moderation_points': '#var dan_mdp', 'rating': '#var dan_rating'})
+            {'user': 'dan', 'moderation_points': '#var dan_mdp', 'rating': '#var dan_rating'})
         self.assertTrue(compare(self.account_e, self.table(
             'account', 'allaccounts'), self.var, ignore_excess=True))
         bob_old_rt = self.var['bob_rating']
@@ -348,8 +348,8 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         voters = [self.register_carol_account(), self.register_dan_account(),
                   self.register_frank_account(), self.register_ted_account()]
         accounts_e = [
-            {'owner': 'alice', 'rating': '#var alice_rt', 'moderation_points': '#var alice_mdp'},
-            {'owner': 'bob', 'rating': '#var bob_rt', 'moderation_points': '#var bob_mdp'},
+            {'user': 'alice', 'rating': '#var alice_rt', 'moderation_points': '#var alice_mdp'},
+            {'user': 'bob', 'rating': '#var bob_rt', 'moderation_points': '#var bob_mdp'},
             {}, {}, {}, {}
         ]
         var = {}
@@ -384,8 +384,8 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         voters = [self.register_carol_account(), self.register_dan_account(),
                   self.register_frank_account(), self.register_ted_account()]
         accounts_e = [
-            {'owner': 'alice', 'rating': '#var alice_rt', 'moderation_points': '#var alice_mdp'},
-            {'owner': 'bob', 'rating': '#var bob_rt', 'moderation_points': '#var bob_mdp'},
+            {'user': 'alice', 'rating': '#var alice_rt', 'moderation_points': '#var alice_mdp'},
+            {'user': 'bob', 'rating': '#var bob_rt', 'moderation_points': '#var bob_mdp'},
             {}, {}, {}, {}
         ]
         var = {}
@@ -483,11 +483,11 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         self.defs = {**load_defines('./src/contracts/peerania/economy.h'),
                      **load_defines('./src/contracts/peerania/question_container.hpp')}
         self.account_e = ['#ignoreorder',
-                          {'owner': 'alice', 'moderation_points': '#var alice_mdp',
+                          {'user': 'alice', 'moderation_points': '#var alice_mdp',
                            'rating': '#var alice_rating'},
-                          {'owner': 'bob', 'moderation_points': '#var bob_mdp',
+                          {'user': 'bob', 'moderation_points': '#var bob_mdp',
                               'rating': '#var bob_rating'},
-                          {'owner': 'carol', 'moderation_points': '#var carol_mdp',
+                          {'user': 'carol', 'moderation_points': '#var carol_mdp',
                               'rating': '#var carol_rating'}]
         self.assertTrue(compare(self.account_e, self.table(
             'account', 'allaccounts'), self.var, ignore_excess=True))

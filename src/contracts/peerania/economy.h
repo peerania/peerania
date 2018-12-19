@@ -22,6 +22,8 @@ const int VOTES_TO_DELETE_TAG = -2;
 #endif
 }  // namespace TagsAndCommunities
 
+#define MODERATION_POINTS_VOTE_DELETE 1
+
 #define POST_QUESTION_REWARD 0
 #define POST_ANSWER_REWARD 0
 #define POST_COMMENT_REWARD 0
@@ -47,7 +49,7 @@ const int VOTES_TO_DELETE_TAG = -2;
 #define COMMENT_DELETED_REWARD -5
 
 #define MIN_RATING -100
-#define MAX_RATING 32767
+#define MAX_RATING 2000000000
 #define RATING_ON_CREATE 10
 
 #define POST_QUESTION_ALLOWED 0
@@ -76,7 +78,7 @@ const int VOTES_TO_DELETE_TAG = -2;
 #define COMMUNITY_DELETED_REWARD -150
 
 #ifdef DEBUG
-struct [[eosio::table("constants")]] constants {
+struct [[eosio::table("constants"), eosio::contract("peerania")]] constants {
   uint64_t id;
   time start_period_time;
   uint64_t primary_key() const { return id; }

@@ -9,11 +9,11 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         begin('Test vote for question comment')
         (alice, bob, carol) = self._init_all_accounts()
         account_e = ['#ignoreorder',
-                     {'owner': 'alice', 'moderation_points': '#var alice_mdp',
+                     {'user': 'alice', 'moderation_points': '#var alice_mdp',
                          'rating': '#var alice_rating'},
-                     {'owner': 'bob', 'moderation_points': '#var bob_mdp',
+                     {'user': 'bob', 'moderation_points': '#var bob_mdp',
                          'rating': '#var bob_rating'},
-                     {'owner': 'carol', 'moderation_points': '#var carol_mdp', 'rating': '#var carol_rating'}]
+                     {'user': 'carol', 'moderation_points': '#var carol_mdp', 'rating': '#var carol_rating'}]
         (e, var) = self._create_basic_hierarchy(alice, bob, carol)
         for key, value in var.items():
             if '_hst' in key or '_prop' in key:
@@ -102,11 +102,11 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         begin('Test vote for answer deletion')
         (alice, bob, carol) = self._init_all_accounts()
         account_e = ['#ignoreorder',
-                     {'owner': 'alice', 'moderation_points': '#var alice_mdp',
+                     {'user': 'alice', 'moderation_points': '#var alice_mdp',
                          'rating': '#var alice_rating'},
-                     {'owner': 'bob', 'moderation_points': '#var bob_mdp',
+                     {'user': 'bob', 'moderation_points': '#var bob_mdp',
                          'rating': '#var bob_rating'},
-                     {'owner': 'carol', 'moderation_points': '#var carol_mdp', 'rating': '#var carol_rating'}]
+                     {'user': 'carol', 'moderation_points': '#var carol_mdp', 'rating': '#var carol_rating'}]
         (e, var) = self._create_basic_hierarchy(alice, bob, carol)
         for key, value in var.items():
             if '_hst' in key or '_prop' in key:
@@ -180,11 +180,11 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         begin('Test vote for question comment')
         (alice, bob, carol) = self._init_all_accounts()
         account_e = ['#ignoreorder',
-                     {'owner': 'alice', 'moderation_points': '#var alice_mdp',
+                     {'user': 'alice', 'moderation_points': '#var alice_mdp',
                          'rating': '#var alice_rating'},
-                     {'owner': 'bob', 'moderation_points': '#var bob_mdp',
+                     {'user': 'bob', 'moderation_points': '#var bob_mdp',
                          'rating': '#var bob_rating'},
-                     {'owner': 'carol', 'moderation_points': '#var carol_mdp', 'rating': '#var carol_rating'}]
+                     {'user': 'carol', 'moderation_points': '#var carol_mdp', 'rating': '#var carol_rating'}]
         (e, var) = self._create_basic_hierarchy(alice, bob, carol)
         for key, value in var.items():
             if '_hst' in key or '_prop' in key:
@@ -307,18 +307,18 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_vote_with_another_auth_failed(self):
-        begin('Vote with another owner auth', True)
+        begin('Vote with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_simple_hierarchy(alice, bob)
         self.failed_action('votedelete', {'user': 'bob', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0},
-                           alice, 'Attempt tovote for deletion Alice question with another owner auth', 'auth')
+                           alice, 'Attempt tovote for deletion Alice question with another user auth', 'auth')
         self.failed_action('votedelete', {'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0},
-                           bob, 'Attempt to vote for deletion Alice question->Bob answer with another owner auth', 'auth')
+                           bob, 'Attempt to vote for deletion Alice question->Bob answer with another user auth', 'auth')
         self.failed_action('votedelete', {'user': 'alice', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': var['aq_bc']},
-                           bob, 'Attempt to vote for deletion Alice question->Bob comment with another owner auth', 'auth')
+                           bob, 'Attempt to vote for deletion Alice question->Bob comment with another user auth', 'auth')
         self.failed_action('votedelete', {'user': 'bob', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': var['aq_ba_ac']},
-                           alice, 'Attempt to vote for deletion Alice question->Bob answer->Alice comment with another owner auth', 'auth')
+                           alice, 'Attempt to vote for deletion Alice question->Bob answer->Alice comment with another user auth', 'auth')
         end()
 
     def test_vote_non_existent_item(self):

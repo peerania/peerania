@@ -57,7 +57,7 @@ struct answer {
   uint16_t bkey() const { return id; }
 };
 
-struct [[eosio::table("question")]] question {
+struct [[eosio::table("question"), eosio::contract("peerania")]] question {
   uint64_t id;
   uint16_t community_id;
   std::vector<uint32_t> tags;
@@ -113,26 +113,26 @@ std::vector<comment>::iterator find_comment(T &item, uint16_t comment_id) {
   return iter_comment;
 }
 
-void assert_comment_limit(const account &action_caller, eosio::name item_owner,
+void assert_comment_limit(const account &action_caller, eosio::name item_user,
                           const std::vector<comment> &comments) {
-  if (item_owner != action_caller.owner) {
+  if (item_user != action_caller.user) {
     int comments_count = 0;
     for (auto iter_comment = comments.begin(); iter_comment != comments.end();
          ++iter_comment) {
-      if (iter_comment->user == action_caller.owner) comments_count++;
+      if (iter_comment->user == action_caller.user) comments_count++;
     }
     eosio_assert(comments_count < status_comments_limit(action_caller.rating),
                  "Your status doesn't allow you to post more comment");
   }
 }
 
-struct [[eosio::table("usrquestions")]] usrquestions {
+struct [[eosio::table("usrquestions"), eosio::contract("peerania")]] usrquestions {
   uint64_t question_id;
   uint64_t primary_key() const { return question_id; }
 };
 typedef eosio::multi_index<"usrquestions"_n, usrquestions> user_questions_index;
 
-struct [[eosio::table("usranswers")]] usranswers {
+struct [[eosio::table("usranswers"), eosio::contract("peerania")]] usranswers {
   uint64_t question_id;
   uint16_t answer_id;
   uint64_t primary_key() const { return question_id; }

@@ -60,7 +60,7 @@ class PeeraniaTest(EOSTest):
         return 'token'
 
     def _register_account(self, user, rating, moderation_points):
-        self.action('registeracc', {'owner': str(user), 'display_name': str(
+        self.action('registeracc', {'user': str(user), 'display_name': str(
             user) + 'DispName', 'ipfs_profile': str(user) + '_IPFS'},
             user, 'Register {} account'.format(user))
         if rating is None:
@@ -71,14 +71,14 @@ class PeeraniaTest(EOSTest):
                     user, 'Set {} rating to {} and give {} moderation points'.format(str(user), rating, moderation_points))
         return user
 
-def get_expected_account_body(owner):
+def get_expected_account_body(user):
     return {
-        'owner': str(owner),
-        'display_name': str(owner) + 'DispName',
-        'ipfs_profile': str(owner) + '_IPFS',
+        'user': str(user),
+        'display_name': str(user) + 'DispName',
+        'ipfs_profile': str(user) + '_IPFS',
         'registration_time': '#ignore',
-        'moderation_points': '#var ' + str(owner) + '_mdp',
-        'rating': '#var ' + str(owner) + '_rating',
+        'moderation_points': '#var ' + str(user) + '_mdp',
+        'rating': '#var ' + str(user) + '_rating',
         'string_properties': [],
         'integer_properties': []
     }

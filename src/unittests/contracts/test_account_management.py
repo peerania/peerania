@@ -11,7 +11,7 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         begin('Testing registration of new user Alice')
         alice = self.get_non_registered_alice()
         self.action('registeracc', {
-            'owner': 'alice',
+            'user': 'alice',
             'display_name': 'aliceDispName',
             'ipfs_profile': 'alice_IPFS'},
             alice, 'Register Alice account')
@@ -20,11 +20,11 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
                                  get_expected_account_body(alice)], t, ignore_excess=True))
         end()
 
-    def test_register_user_another_owner_failed(self):
+    def test_register_user_another_user_failed(self):
         begin('Register Alice with bob auth', True)
         bob = self.get_non_registered_bob()
         self.failed_action('registeracc', {
-            'owner': 'alice',
+            'user': 'alice',
             'display_name': 'aliceDispName',
             'ipfs_profile': 'alice_IPFS'},
             bob, 'Register Alice account', 'auth')
@@ -35,7 +35,7 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         self.wait()
         self.failed_action('registeracc', {
-            'owner': 'alice',
+            'user': 'alice',
             'display_name': 'aliceDispName',
             'ipfs_profile': 'alice_IPFS'},
             alice, 'Register Alice account again', 'assert')
@@ -46,18 +46,18 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
 
-        def regInt(owner, key, value):
+        def regInt(user, key, value):
             self.action('setaccintprp',
-                        {'owner': str(
-                            owner), 'key': key, 'value': value}, owner,
-                        'Set {} integer property, {{key = {}, value = {} }}'.format(str(owner),
+                        {'user': str(
+                            user), 'key': key, 'value': value}, user,
+                        'Set {} integer property, {{key = {}, value = {} }}'.format(str(user),
                                                                                     key, value))
 
-        def regStr(owner, key, value):
+        def regStr(user, key, value):
             self.action('setaccstrprp',
-                        {'owner': str(
-                            owner), 'key': key, 'value': value}, owner,
-                        'Set {} string property, {{key = {}, value = "{}" }}'.format(str(owner),
+                        {'user': str(
+                            user), 'key': key, 'value': value}, user,
+                        'Set {} string property, {{key = {}, value = "{}" }}'.format(str(user),
                                                                                      key, value))
         e = ['#ignoreorder',
              get_expected_account_body(alice),
@@ -95,7 +95,7 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         e = ['#ignoreorder',
              get_expected_account_body(alice),
              get_expected_account_body(bob)]
-        self.action('setaccprof', {'owner': 'alice', 'ipfs_profile': 'updated IPFS', 'display_name': 'updated display name'},
+        self.action('setaccprof', {'user': 'alice', 'ipfs_profile': 'updated IPFS', 'display_name': 'updated display name'},
                     alice, 'Set Alice IPFS profile to \'updated IPFS\'')
         t = self.table('account', 'allaccounts')
         e[1]['ipfs_profile'] = 'updated IPFS'
@@ -107,11 +107,11 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         begin('Testing register property for non-existing account', True)
         alice = self.get_non_registered_alice()
         self.failed_action('setaccintprp',
-                           {'owner': str(
+                           {'user': str(
                                alice), 'key': 1, 'value': 1}, alice,
                            'Set Alice(not registered) integer property', 'assert')
         self.failed_action('setaccstrprp',
-                           {'owner': str(
+                           {'user': str(
                                alice), 'key': 1, 'value': '1'}, alice,
                            'Set Alice(not registered) integer property', 'assert')
         end()
@@ -120,25 +120,25 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         begin('Testing changing account IPFS profile and display_name for non-existing account', True)
         alice = self.get_non_registered_alice()
         self.failed_action('setaccprof', {
-                           'owner': 'alice', 'ipfs_profile': 'test', 'display_name': 'test'}, alice, 'Changing Alice ipfs profile', 'assert')
+                           'user': 'alice', 'ipfs_profile': 'test', 'display_name': 'test'}, alice, 'Changing Alice ipfs profile', 'assert')
         end()
 
-    def test_properties_another_owner_failed(self):
+    def test_properties_another_user_failed(self):
         begin('Testing registration of the integer and string property with another account', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         self.failed_action('setaccstrprp',  {
-                           'owner': 'alice', 'key': 1, 'value': 1}, bob, 'Register new Alice string property with bob auth', 'auth')
+                           'user': 'alice', 'key': 1, 'value': 1}, bob, 'Register new Alice string property with bob auth', 'auth')
         self.failed_action('setaccintprp',  {
-                           'owner': 'alice', 'key': 1, 'value': '1'}, bob, 'Register new Alice integer property with bob auth', 'auth')
+                           'user': 'alice', 'key': 1, 'value': '1'}, bob, 'Register new Alice integer property with bob auth', 'auth')
         end()
 
-    def test_change_display_name_and_ipfs_profile_another_owner_failed(self):
+    def test_change_display_name_and_ipfs_profile_another_user_failed(self):
         begin('Testing changing account IPFS profile and display_name with another account', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         self.failed_action('setaccprof',  {
-                           'owner': 'alice', 'ipfs_profile': 'test', 'display_name': 'test'}, bob, 'Changing Alice ipfs profile with bob auth', 'auth')
+                           'user': 'alice', 'ipfs_profile': 'test', 'display_name': 'test'}, bob, 'Changing Alice ipfs profile with bob auth', 'auth')
         end()
 
 

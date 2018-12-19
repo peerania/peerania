@@ -16,9 +16,9 @@ uint16_t get_period(time t) {
 }
 
 // scoped by user
-struct [[eosio::table("periodrating")]] periodrating {
+struct [[eosio::table("periodrating"), eosio::contract(CONTRACT_NAME)]] periodrating {
   uint16_t period;
-  int16_t rating;
+  int rating;
   uint16_t rating_to_award = 0;
   uint64_t primary_key() const {
     // implicit cast
@@ -31,7 +31,7 @@ typedef eosio::multi_index<"periodrating"_n, periodrating> period_rating_index;
 
 // owned by main
 // scopeed by const = N(allperiods)
-struct [[eosio::table("totalrating")]] totalrating {
+struct [[eosio::table("totalrating"), eosio::contract(CONTRACT_NAME)]] totalrating {
   uint16_t period;
   uint32_t total_rating_to_reward;
   uint64_t primary_key() const {

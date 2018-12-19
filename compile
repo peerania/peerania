@@ -3,12 +3,15 @@
 set -e
 #compile
 
+contract='peerania'
+
 if [ "$1" = "debug" ]
 then
     echo -e "\e[31mCompiling with debug macro\e[0m"
     def=-DDEBUG
 fi
 
-eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania.cpp -I./src/contracts/utils/ $def
+eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania.cpp -I./src/contracts/utils/ -DCONTRACT_NAME='"${contract}"' $def
+eosio-abigen ./src/contracts/peerania/peerania.hpp --contract=$contract --output=./src/contracts/peerania/peerania.abi -R./src/contracts/peerania/rc --extra-arg="-I./src/contracts/utils/" --extra-arg-before="$def"  --extra-arg-before="-DCONTRACT_NAME=\"${contract}\""
 eosio-cpp -o ./src/contracts/peerania.token/peerania.token.wasm ./src/contracts/peerania.token/peerania.token.cpp -I./src/contracts/utils/ $def
 echo -e "\e[92mCompilation done! :)\e[0m"

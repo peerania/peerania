@@ -223,7 +223,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_vote_with_another_auth_failed(self):
-        begin('Vote with another owner auth', True)
+        begin('Vote with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
@@ -238,8 +238,8 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
                            'aq_ba']}, alice, 'Attempt to downvote answer from non-existent account', 'auth')
         end()
 
-    def test_mark_answer_as_correct_for_question_of_another_owner_failed(self):
-        begin('Mark answer as correct for question of another owner', True)
+    def test_mark_answer_as_correct_for_question_of_another_user_failed(self):
+        begin('Mark answer as correct for question of another user', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
@@ -248,7 +248,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_mark_answer_as_correct_another_auth(self):
-        begin('Mark answer as correct for question with another owner auth', True)
+        begin('Mark answer as correct for question with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)

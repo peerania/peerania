@@ -9,7 +9,7 @@
 5000 - Hero Resident - 50
 10000 - Legendary Resident - 100
 */
-uint8_t status_moderation_points(int16_t rating) {
+uint8_t status_moderation_points(int rating) {
   if (rating < 100) return 0;
   switch (rating) {
     case 100 ... 499:
@@ -27,7 +27,7 @@ uint8_t status_moderation_points(int16_t rating) {
   }
 }
 
-uint8_t status_question_limit(int16_t rating) {
+uint8_t status_question_limit(int rating) {
   if (rating < 0) return 0;
   switch (rating) {
     case 0 ... 99:

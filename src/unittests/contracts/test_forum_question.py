@@ -57,7 +57,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_register_question_another_auth_failed(self):
-        begin('Call register question with another owner auth', True)
+        begin('Call register question with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         self.failed_action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'test', 'community_id': 1, 'tags':[1]}, bob,
@@ -65,7 +65,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_modify_question_another_auth_failed(self):
-        begin('Call modify question with another owner auth', True)
+        begin('Call modify question with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
@@ -94,7 +94,7 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_delete_question_another_auth_failed(self):
-        begin('Call delete question with another owner auth', True)
+        begin('Call delete question with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
@@ -105,8 +105,8 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
             'user': 'alice', 'question_id': var['q1']}, bob, 'Attempt to delete Alice question with bob auth', 'auth')
         end()
 
-    def test_modify_question_of_another_owner_failed(self):
-        begin('Modify question of another owner', True)
+    def test_modify_question_of_another_user_failed(self):
+        begin('Modify question of another user', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
@@ -117,8 +117,8 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
             'user': 'bob', 'question_id': var['q1'], 'title': 'test', 'ipfs_link': 'test', 'community_id': 2, 'tags':[1]}, bob, 'Attempt to modify alice question from bob account', 'assert')
         end()
 
-    def test_delete_question_of_another_owner_failed(self):
-        begin('Delete  question of another owner', True)
+    def test_delete_question_of_another_user_failed(self):
+        begin('Delete  question of another user', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
@@ -152,12 +152,12 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
             'user': 'alice', 'question_id': int(var['q1']) + 1}, alice, 'Delete non-existent question', 'assert')
         end()
 
-    def _register_question_action(self, owner, ipfs_link, id_var=''):
-        tags = [1, 2, 3] if str(owner) == 'alice' else [2, 3, 4]
-        self.action('postquestion', {'user': str(owner), 'title': 'Title ' + ipfs_link, 'ipfs_link': ipfs_link, 'community_id': 1, 'tags': tags}, owner,
-                    'Asking question from {} with text "{}"'.format(str(owner), ipfs_link))
+    def _register_question_action(self, user, ipfs_link, id_var=''):
+        tags = [1, 2, 3] if str(user) == 'alice' else [2, 3, 4]
+        self.action('postquestion', {'user': str(user), 'title': 'Title ' + ipfs_link, 'ipfs_link': ipfs_link, 'community_id': 1, 'tags': tags}, user,
+                    'Asking question from {} with text "{}"'.format(str(user), ipfs_link))
         return {'id': '#ignore' if id_var == '' else '#var ' + id_var,
-                'user': str(owner),
+                'user': str(user),
                 'title': 'Title ' + ipfs_link,
                 'ipfs_link': ipfs_link,
                 'post_time': '#ignore',

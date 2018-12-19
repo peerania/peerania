@@ -17,7 +17,7 @@ class FrumStatusLimitsTests(peeraniatest.PeeraniaTest):
         sleep(3)
         info('All stats restored')
         var = {}
-        e = [{'owner': 'alice', 'moderation_points': '#var alice_mdp'}]
+        e = [{'user': 'alice', 'moderation_points': '#var alice_mdp'}]
         self._test_question_limit(alice, 499, 5)
         self.assertTrue(compare(e, self.table('account', 'allaccounts'), var, True))
         self.assertTrue(var['alice_mdp'] == 1)
@@ -53,7 +53,7 @@ class FrumStatusLimitsTests(peeraniatest.PeeraniaTest):
         self._test_comment_inside_own_question_limit(499, 3)
 
     def _test_comment_to_question_limit_failed(self, user_rating, comment_count):
-        begin('The queston has answer, answer owner has limit to comment question', True)
+        begin('The queston has answer, answer user has limit to comment question', True)
         (_, carol, _, var) = self._create_simple_hierarchy(user_rating)
         for i in range(comment_count):
             self.action('postcomment', {'user': carol, 'question_id': var['aq'], 'answer_id': 0,

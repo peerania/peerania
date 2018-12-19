@@ -5,17 +5,17 @@
 #include "utils.hpp"
 
 template <typename T, typename T_iter_acc>
-void upvote_item(T &item, T_iter_acc iter_account, eosio::name &item_owner,
-                 int8_t &owner_rating_change, int8_t &caller_rating_change,
-                 const int8_t upvote_cost_owner,
+void upvote_item(T &item, T_iter_acc iter_account, eosio::name &item_user,
+                 int8_t &user_rating_change, int8_t &caller_rating_change,
+                 const int8_t upvote_cost_user,
                  const int8_t upvote_cost_caller,
-                 const int8_t downvote_cost_owner,
+                 const int8_t downvote_cost_user,
                  const int8_t downvote_cost_caller) {
-  item_owner = item.user;
-  assert_allowed(*iter_account, item_owner, Action::UPVOTE);
+  item_user = item.user;
+  assert_allowed(*iter_account, item_user, Action::UPVOTE);
   bool is_new;
   auto itr_history =
-      get_history_item_iter(item.history, iter_account->owner, is_new);
+      get_history_item_iter(item.history, iter_account->user, is_new);
   if (is_new) {
     /*The user isn't do any actions with item
     (i.e. the user isn't in history) add user to history,
@@ -23,7 +23,7 @@ void upvote_item(T &item, T_iter_acc iter_account, eosio::name &item_owner,
     itr_history->set_flag(HISTORY_UPVOTED_FLG);
     item.rating += 1;
     caller_rating_change += upvote_cost_caller;
-    owner_rating_change += upvote_cost_owner;
+    user_rating_change += upvote_cost_user;
   } else {
     eosio_assert(!(itr_history->is_flag_set(HISTORY_DELETE_VOTED_FLG)), "You couldn't upvote reported item");
     if (itr_history->is_flag_set(HISTORY_UPVOTED_FLG)) {
@@ -33,7 +33,7 @@ void upvote_item(T &item, T_iter_acc iter_account, eosio::name &item_owner,
       item.rating -= 1;
       itr_history->remove_flag(HISTORY_UPVOTED_FLG);
       caller_rating_change -= upvote_cost_caller;
-      owner_rating_change -= upvote_cost_owner;
+      user_rating_change -= upvote_cost_user;
     } else {
       if (itr_history->is_flag_set(HISTORY_DOWNVOTED_FLG)) {
         /*The item was downvoted by user, but after user
@@ -42,13 +42,13 @@ void upvote_item(T &item, T_iter_acc iter_account, eosio::name &item_owner,
         item.rating += 2;
         itr_history->remove_flag(HISTORY_DOWNVOTED_FLG);
         caller_rating_change += upvote_cost_caller - downvote_cost_caller;
-        owner_rating_change += upvote_cost_owner - downvote_cost_owner;
+        user_rating_change += upvote_cost_user - downvote_cost_user;
       } else {
         // There was item in history but it is not ralated
         // to upvoting / downvoting(simple upvote)
         item.rating += 1;
         caller_rating_change += upvote_cost_caller;
-        owner_rating_change += upvote_cost_owner;
+        user_rating_change += upvote_cost_user;
       }
       itr_history->set_flag(HISTORY_UPVOTED_FLG);
     }
@@ -58,17 +58,17 @@ void upvote_item(T &item, T_iter_acc iter_account, eosio::name &item_owner,
 }
 
 template <typename T, typename T_iter_acc>
-void downvote_item(T &item, T_iter_acc iter_account, eosio::name &item_owner,
-                   int8_t &owner_rating_change, int8_t &caller_rating_change,
-                   const int8_t upvote_cost_owner,
+void downvote_item(T &item, T_iter_acc iter_account, eosio::name &item_user,
+                   int8_t &user_rating_change, int8_t &caller_rating_change,
+                   const int8_t upvote_cost_user,
                    const int8_t upvote_cost_caller,
-                   const int8_t downvote_cost_owner,
+                   const int8_t downvote_cost_user,
                    const int8_t downvote_cost_caller) {
-  item_owner = item.user;
-  assert_allowed(*iter_account, item_owner, Action::DOWNVOTE);
+  item_user = item.user;
+  assert_allowed(*iter_account, item_user, Action::DOWNVOTE);
   bool is_new;
   auto itr_history =
-      get_history_item_iter(item.history, iter_account->owner, is_new);
+      get_history_item_iter(item.history, iter_account->user, is_new);
   if (is_new) {
     /*The user isn't do any actions with item
     (i.e. the user isn't in history) add user to history
@@ -76,7 +76,7 @@ void downvote_item(T &item, T_iter_acc iter_account, eosio::name &item_owner,
     itr_history->set_flag(HISTORY_DOWNVOTED_FLG);
     item.rating -= 1;
     caller_rating_change += downvote_cost_caller;
-    owner_rating_change += downvote_cost_owner;
+    user_rating_change += downvote_cost_user;
   } else {
     if (itr_history->is_flag_set(HISTORY_DOWNVOTED_FLG)) {
       /*The item was downvoted by user, but user call
@@ -85,7 +85,7 @@ void downvote_item(T &item, T_iter_acc iter_account, eosio::name &item_owner,
       item.rating += 1;
       itr_history->remove_flag(HISTORY_DOWNVOTED_FLG);
       caller_rating_change -= downvote_cost_caller;
-      owner_rating_change -= downvote_cost_owner;
+      user_rating_change -= downvote_cost_user;
     } else {
       if (itr_history->is_flag_set(HISTORY_UPVOTED_FLG)) {
         /*The item was upvoted by user, but after user
@@ -94,13 +94,13 @@ void downvote_item(T &item, T_iter_acc iter_account, eosio::name &item_owner,
         item.rating -= 2;
         itr_history->remove_flag(HISTORY_UPVOTED_FLG);
         caller_rating_change += downvote_cost_caller - upvote_cost_caller;
-        owner_rating_change += downvote_cost_owner - upvote_cost_owner;
+        user_rating_change += downvote_cost_user - upvote_cost_user;
       } else {
         // There was item in history but it is not ralated
         // to upvoting / downvoting (simple downwote)
         item.rating -= 1;
         caller_rating_change += downvote_cost_caller;
-        owner_rating_change += downvote_cost_owner;
+        user_rating_change += downvote_cost_user;
       }
       itr_history->set_flag(HISTORY_DOWNVOTED_FLG);
     }
@@ -116,7 +116,7 @@ bool set_deletion_votes_and_history(T &item, const account &user, uint16_t limit
   assert_allowed(user, item.user, Action::VOTE_FOR_DELETION);
   bool is_new;
   auto itr_history =
-      get_history_item_iter(item.history, user.owner, is_new);
+      get_history_item_iter(item.history, user.user, is_new);
   if (is_new) {
     itr_history->set_flag(HISTORY_DELETE_VOTED_FLG);
   } else {

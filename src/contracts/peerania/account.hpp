@@ -14,17 +14,17 @@
 #define ACCOUNT_STAT_RESET_PERIOD 3
 #endif
 
-struct [[eosio::table("account")]] account {
-  eosio::name owner;
+struct [[eosio::table("account"), eosio::contract("peerania")]] account {
+  eosio::name user;
   // mandatory fields
   std::string display_name;
   std::string ipfs_profile;
   time registration_time;
   std::vector<str_key_value> string_properties;
   std::vector<int_key_value> integer_properties;
-  int16_t rating = 0;
-  uint16_t moderation_points = 0;
-  int16_t pay_out_rating = 0;
+  int rating = 0;
+  uint8_t moderation_points = 0;
+  int pay_out_rating = 0;
   uint16_t last_update_period = 0;
   uint8_t questions_left = 0;
 
@@ -45,11 +45,11 @@ struct [[eosio::table("account")]] account {
     }
   }
 
-  uint64_t primary_key() const { return owner.value; }
+  uint64_t primary_key() const { return user.value; }
   // uint64_t rating_rkey() const { return (1 << 17) - pay_out_rating; }
   EOSLIB_SERIALIZE(
       account,
-      (owner)(display_name)(ipfs_profile)(registration_time)(string_properties)(
+      (user)(display_name)(ipfs_profile)(registration_time)(string_properties)(
           integer_properties)(rating)(moderation_points)(pay_out_rating)(
           last_update_period)(questions_left))
 };

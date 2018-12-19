@@ -71,26 +71,24 @@ void peerania::post_answer(eosio::name user, uint64_t question_id,
   update_rating(iter_account, POST_ANSWER_REWARD);
 }
 
-void peerania::remove_user_question_or_answer(eosio::name user,
-                                              uint64_t question_id,
-                                              bool is_question) {
-  if (is_question) {
-    user_questions_index user_questions_table(_self, user.value);
-    auto iter_user_question = user_questions_table.find(question_id);
-    eosio_assert(iter_user_question != user_questions_table.end(),
-                 "Question not found");
-    user_questions_table.erase(iter_user_question);
-    eosio_assert(iter_user_question != user_questions_table.end(),
-                 "Address not erased properly");
-  } else {
-    user_answers_index user_answers_table(_self, user.value);
-    auto iter_user_answer = user_answers_table.find(question_id);
-    eosio_assert(iter_user_answer != user_answers_table.end(),
-                 "Answer not found");
-    user_answers_table.erase(iter_user_answer);
-    eosio_assert(iter_user_answer != user_answers_table.end(),
-                 "Address not erased properly");
-  }
+void peerania::remove_user_question(eosio::name user, uint64_t question_id) {
+  user_questions_index user_questions_table(_self, user.value);
+  auto iter_user_question = user_questions_table.find(question_id);
+  eosio_assert(iter_user_question != user_questions_table.end(),
+               "Question not found");
+  user_questions_table.erase(iter_user_question);
+  eosio_assert(iter_user_question != user_questions_table.end(),
+               "Address not erased properly");
+}
+
+void peerania::remove_user_answer(eosio::name user, uint64_t question_id) {
+  user_answers_index user_answers_table(_self, user.value);
+  auto iter_user_answer = user_answers_table.find(question_id);
+  eosio_assert(iter_user_answer != user_answers_table.end(),
+               "Answer not found");
+  user_answers_table.erase(iter_user_answer);
+  eosio_assert(iter_user_answer != user_answers_table.end(),
+               "Address not erased properly");
 }
 
 void peerania::post_comment(eosio::name user, uint64_t question_id,
@@ -115,12 +113,11 @@ void peerania::post_comment(eosio::name user, uint64_t question_id,
           auto iter_answer = find_answer(question, answer_id);
           eosio_assert(iter_answer->comments.size() < MAX_COMMENT_COUNT,
                        "For this answer reached comment count limit");
-          auto global_item_owner = question.user == iter_account->owner
-                                       ? question.user
-                                       : iter_answer->user;
-          assert_allowed(*iter_account, global_item_owner,
-                         Action::POST_COMMENT);
-          assert_comment_limit(*iter_account, global_item_owner,
+          auto global_item_user = question.user == iter_account->user
+                                      ? question.user
+                                      : iter_answer->user;
+          assert_allowed(*iter_account, global_item_user, Action::POST_COMMENT);
+          assert_comment_limit(*iter_account, global_item_user,
                                question.comments);
           push_new_forum_item(iter_answer->comments, new_comment);
         }
@@ -138,7 +135,7 @@ void peerania::delete_question(eosio::name user, uint64_t question_id) {
   question_table.erase(iter_question);
   eosio_assert(iter_question != question_table.end(),
                "Address not erased properly");
-  remove_user_question_or_answer(user, question_id, true);
+  remove_user_question(user, question_id);
   update_rating(iter_account, DELETE_OWN_QUESTION_REWARD);
 }
 
@@ -154,7 +151,7 @@ void peerania::delete_answer(eosio::name user, uint64_t question_id,
         assert_allowed(*iter_account, iter_answer->user, Action::DELETE_ANSWER);
         question.answers.erase(iter_answer);
       });
-  remove_user_question_or_answer(user, question_id, false);
+  remove_user_answer(user, question_id);
   update_rating(iter_account, DELETE_OWN_ANSWER_REWARD);
 }
 
@@ -182,10 +179,10 @@ void peerania::delete_comment(eosio::name user, uint64_t question_id,
 }
 
 void peerania::modify_question(eosio::name user, uint64_t question_id,
+                               uint16_t community_id,
+                               const std::vector<uint32_t> &tags,
                                const std::string &title,
-                               const std::string &ipfs_link,
-                               const uint16_t community_id,
-                               const std::vector<uint32_t> tags) {
+                               const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
   assert_title(title);
   auto iter_account = find_account(user);
@@ -195,7 +192,8 @@ void peerania::modify_question(eosio::name user, uint64_t question_id,
   update_popularity(iter_question->community_id, iter_question->tags, false);
   update_popularity(community_id, tags, true);
   question_table.modify(
-      iter_question, _self, [&ipfs_link, &title, community_id, &tags](auto &question) {
+      iter_question, _self,
+      [&ipfs_link, &title, community_id, &tags](auto &question) {
         question.ipfs_link = ipfs_link;
         question.title = title;
         question.community_id = community_id;
@@ -259,14 +257,14 @@ void peerania::mark_answer_as_correct(eosio::name user, uint64_t question_id,
                  "Answer not found");
     if (iter_question->correct_answer_id == EMPTY_ANSWER_ID) {
       // No one answer has not been marked as correct yet
-      // Reward question and answer owners
+      // Reward question and answer users
       if (iter_answer->user != user) {
         update_rating(iter_account, ACCEPT_ANSWER_AS_CORRECT_REWARD);
         update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD);
       }
     } else {
       // One of answers is marked as correct. Find this one,
-      // pick up the reward of past owner and give it to new
+      // pick up the reward of past user and give it to new
       auto iter_old_answer = binary_find(iter_question->answers.begin(),
                                          iter_question->answers.end(),
                                          iter_question->correct_answer_id);

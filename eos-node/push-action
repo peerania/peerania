@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -ex
 
-cleos push action peerania.dev registeracc '{"owner": "alice", "display_name": "Alice", "ipfs_profile": "QmXJ16tS8RUzB82HGdKFw8YQKysnqyNaM9dxrzUZb9KZsp"}' -p alice
-cleos push action peerania.dev registeracc '{"owner": "bob", "display_name": "Bobby", "ipfs_profile": "QmR76vd3Wpjz2pAjso5v4tTrESa5heXzDvLtjq5cPgScUN"}' -p bob
-cleos push action peerania.dev registeracc '{"owner": "carol", "display_name": "Carol", "ipfs_profile": "QmXs7cPgUsMSo7jLs3ft4HoSCFCdfB8mfNWk7ZLc2LWf4e"}' -p carol
-cleos push action peerania.dev registeracc '{"owner": "user1", "display_name": "Roman", "ipfs_profile": "QmR5gQiRqQT9EbQbSa38xhqnUdDbVLXCf1A3juHVz5EuEc"}' -p user1
+cleos push action peerania.dev registeracc '{"user": "alice", "display_name": "Alice", "ipfs_profile": "QmXJ16tS8RUzB82HGdKFw8YQKysnqyNaM9dxrzUZb9KZsp"}' -p alice
+cleos push action peerania.dev registeracc '{"user": "bob", "display_name": "Bobby", "ipfs_profile": "QmR76vd3Wpjz2pAjso5v4tTrESa5heXzDvLtjq5cPgScUN"}' -p bob
+cleos push action peerania.dev registeracc '{"user": "carol", "display_name": "Carol", "ipfs_profile": "QmXs7cPgUsMSo7jLs3ft4HoSCFCdfB8mfNWk7ZLc2LWf4e"}' -p carol
+cleos push action peerania.dev registeracc '{"user": "user1", "display_name": "Roman", "ipfs_profile": "QmR5gQiRqQT9EbQbSa38xhqnUdDbVLXCf1A3juHVz5EuEc"}' -p user1
 
 cleos push action peerania.dev setaccrtmpc '{"user": "alice", "rating": 100, "moderation_points": 10}' -p alice
 cleos push action peerania.dev setaccrtmpc '{"user": "bob", "rating": 200, "moderation_points": 10}' -p bob

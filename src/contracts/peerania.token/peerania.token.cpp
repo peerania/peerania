@@ -98,18 +98,18 @@ void token::transfer(name from, name to, asset quantity, string memo) {
   add_balance(to, quantity, payer);
 }
 
-void token::sub_balance(name owner, asset value) {
-  accounts from_acnts(_self, owner.value);
+void token::sub_balance(name user, asset value) {
+  accounts from_acnts(_self, user.value);
 
   const auto& from =
       from_acnts.get(value.symbol.code().raw(), "no balance object found");
   eosio_assert(from.balance.amount >= value.amount, "overdrawn balance");
 
-  from_acnts.modify(from, owner, [&](auto& a) { a.balance -= value; });
+  from_acnts.modify(from, user, [&](auto& a) { a.balance -= value; });
 }
 
-void token::add_balance(name owner, asset value, name ram_payer) {
-  accounts to_acnts(_self, owner.value);
+void token::add_balance(name user, asset value, name ram_payer) {
+  accounts to_acnts(_self, user.value);
   auto to = to_acnts.find(value.symbol.code().raw());
   if (to == to_acnts.end()) {
     to_acnts.emplace(ram_payer, [&](auto& a) { a.balance = value; });
@@ -118,7 +118,7 @@ void token::add_balance(name owner, asset value, name ram_payer) {
   }
 }
 
-void token::open(name owner, const symbol& symbol, name ram_payer) {
+void token::open(name user, const symbol& symbol, name ram_payer) {
   require_auth(ram_payer);
 
   auto sym_code_raw = symbol.code().raw();
@@ -127,16 +127,16 @@ void token::open(name owner, const symbol& symbol, name ram_payer) {
   const auto& st = statstable.get(sym_code_raw, "symbol does not exist");
   eosio_assert(st.supply.symbol == symbol, "symbol precision mismatch");
 
-  accounts acnts(_self, owner.value);
+  accounts acnts(_self, user.value);
   auto it = acnts.find(sym_code_raw);
   if (it == acnts.end()) {
     acnts.emplace(ram_payer, [&](auto& a) { a.balance = asset{0, symbol}; });
   }
 }
 
-void token::close(name owner, const symbol& symbol) {
-  require_auth(owner);
-  accounts acnts(_self, owner.value);
+void token::close(name user, const symbol& symbol) {
+  require_auth(user);
+  accounts acnts(_self, user.value);
   auto it = acnts.find(symbol.code().raw());
   eosio_assert(it != acnts.end(),
                "Balance row already deleted or never existed. Action won't "

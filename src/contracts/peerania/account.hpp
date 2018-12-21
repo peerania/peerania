@@ -5,14 +5,7 @@
 #include "peerania_types.h"
 #include "property.hpp"
 #include "status.hpp"
-
-#define BAN_RATING_INCREMENT_PER_PERIOD 6
-
-#ifndef DEBUG
-#define ACCOUNT_STAT_RESET_PERIOD 259200  // 3 Days
-#else
-#define ACCOUNT_STAT_RESET_PERIOD 3
-#endif
+#include "economy.h"
 
 struct [[eosio::table("account"), eosio::contract("peerania")]] account {
   eosio::name user;
@@ -63,5 +56,5 @@ void assert_display_name(const std::string &display_name) {
                "The display name too short.");
 }
 
-const uint64_t scope_all_accounts = "allaccounts"_n.value;
+const uint64_t scope_all_accounts = eosio::name("allaccounts").value;
 typedef eosio::multi_index<"account"_n, account> account_index;

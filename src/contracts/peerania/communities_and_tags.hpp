@@ -1,3 +1,4 @@
+#pragma once
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/name.hpp>
 #include <string>
@@ -29,7 +30,7 @@ struct [[eosio::table("crtagcomm"), eosio::contract("peerania")]] crtagcomm {
   }
 };
 typedef eosio::multi_index<"crtagcomm"_n, crtagcomm> create_tag_community_index;
-const uint64_t scope_all_communities = "allcomm"_n.value;
+const uint64_t scope_all_communities = eosio::name("allcomm").value;
 
 
 struct [[eosio::table("tagandcomm"), eosio::contract("peerania")]] tagandcomm {

@@ -3,7 +3,7 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/name.hpp>
 #include <vector>
-
+#include "utils.hpp"
 // Flags
 #define HISTORY_UPVOTED_FLG 1       // 0b0000000000000001
 #define HISTORY_DOWNVOTED_FLG 2     // 0b0000000000000010

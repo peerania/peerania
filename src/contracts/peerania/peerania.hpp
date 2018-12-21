@@ -13,10 +13,6 @@
 #include "token_common.hpp"
 #include "utils.hpp"
 
-#ifdef DEBUG
-extern time START_PERIOD_TIME;
-#endif
-
 CONTRACT peerania : public eosio::contract {
  public:
   peerania(eosio::name receiver, eosio::name code,
@@ -24,45 +20,8 @@ CONTRACT peerania : public eosio::contract {
       : contract(receiver, code, ds),
         account_table(receiver, scope_all_accounts),
         question_table(receiver, scope_all_questions),
-        total_rating_table(receiver, scope_all_periods) {
-#ifdef DEBUG
-    // Initializte some constants for debug
-    // could be moved to a separate method
-    constants_index all_constants_table(_self, scope_all_constants);
-    auto settings = all_constants_table.rbegin();
-    if (settings != all_constants_table.rend()) {
-      START_PERIOD_TIME = settings->start_period_time;
-    } else {
-      time current_time = now();
-      START_PERIOD_TIME = current_time;
-      all_constants_table.emplace(
-          _self, [&all_constants_table, current_time](auto &constants) {
-            constants.id = all_constants_table.available_primary_key();
-            constants.start_period_time = current_time;
-          });
-      tag_community_index community_table(_self, scope_all_communities);
-      for (int i = 1; i < 3; ++i) {
-        std::string index = std::to_string(i);
-        community_table.emplace(_self, [i, &index](auto &community) {
-          community.id = i;
-          community.name = "DEBUG" + index;
-          community.ipfs_description = "DEBUG_COMMUNITY_IPFS" + index;
-          community.popularity = 0;
-        });
-        tag_community_index tag_table(_self, get_tag_scope(i));
-        for (int j = 0; j < 6 / i; ++j) {
-          tag_table.emplace(_self, [&index, j](auto &tag) {
-            tag.id = j;
-            tag.name = "Tag " + std::to_string(j) + " community " + index;
-            tag.ipfs_description =
-                "DEBUG_COMMUNITY" + index + "_TAG " + std::to_string(j);
-            tag.popularity = 0;
-          });
-        }
-      }
-    }
-#endif
-  };
+        total_rating_table(receiver, scope_all_periods){};
+
   // Probably we need to replace ACTION with [[eosio::action,
   // eosio::contract("peerania")]] void
 
@@ -151,22 +110,21 @@ CONTRACT peerania : public eosio::contract {
 
   ACTION vtdeltag(eosio::name user, uint16_t community_id, uint32_t tag_id);
 
-  // Debug methoods
-#ifdef DEBUG
-  // Set account rating and moderation points count
-  ACTION setaccrtmpc(eosio::name user, int16_t rating,
-                     uint16_t moderation_points);
-
-  ACTION resettables();
-
-  ACTION chnguserrt(eosio::name user, int16_t rating_change);
-
-#endif
-
- private:
+ protected:
   question_index question_table;
   account_index account_table;
   total_rating_index total_rating_table;
+
+  account_index::const_iterator find_account(eosio::name user);
+  question_index::const_iterator find_question(uint64_t question_id);
+  uint64_t get_tag_scope(uint16_t community_id);
+
+  void update_rating(account_index::const_iterator iter_account,
+                     int rating_change);
+
+  void update_rating(eosio::name user, int rating_change);
+
+ //private:
   void register_account(eosio::name user, std::string display_name,
                         const std::string &ipfs_profile);
 
@@ -178,10 +136,6 @@ CONTRACT peerania : public eosio::contract {
 
   void set_account_integer_property(eosio::name user, uint8_t key,
                                     int32_t value);
-
-  account_index::const_iterator find_account(eosio::name user);
-
-  question_index::const_iterator find_question(uint64_t question_id);
 
   void post_question(eosio::name user, uint16_t community_id,
                      const std::vector<uint32_t> tags, const std::string &title,
@@ -249,18 +203,11 @@ CONTRACT peerania : public eosio::contract {
   void vote_for_deletion(eosio::name user, uint64_t question_id,
                          uint16_t answer_id, uint16_t comment_id);
 
-  void update_rating(account_index::const_iterator iter_account,
-                     int rating_change);
-
-  void update_rating(eosio::name user, int rating_change);
-
   void reduce_moderation_points(account_index::const_iterator iter_account,
                                 int8_t moderation_points_change);
 
   void update_popularity(uint16_t commuinty_id,
                          const std::vector<uint32_t> &tags, bool increase);
-
-  uint64_t get_tag_scope(uint16_t community_id);
 
   void assert_community_exist(uint16_t community_id);
 

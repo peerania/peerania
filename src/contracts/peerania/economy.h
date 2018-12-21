@@ -8,19 +8,12 @@ const int DELETION_VOTES_ANSWER = 1500;
 const int DELETION_VOTES_COMMENT = 1000;
 }  // namespace DeletionVotes
 
-namespace TagsAndCommunities {
-#ifndef DEBUG
-const int VOTES_TO_CREATE_COMMUNITY = 100;
-const int VOTES_TO_DELETE_COMMUNITY = -35;
-const int VOTES_TO_CREATE_TAG = 10;
-const int VOTES_TO_DELETE_TAG = -10;
-#else
-const int VOTES_TO_CREATE_COMMUNITY = 5;
-const int VOTES_TO_DELETE_COMMUNITY = -3;
-const int VOTES_TO_CREATE_TAG = 4;
-const int VOTES_TO_DELETE_TAG = -2;
-#endif
-}  // namespace TagsAndCommunities
+
+//Stub solution
+#define VOTES_TO_CREATE_COMMUNITY 100
+#define VOTES_TO_DELETE_COMMUNITY -35
+#define VOTES_TO_CREATE_TAG 10
+#define VOTES_TO_DELETE_TAG -10
 
 #define MODERATION_POINTS_VOTE_DELETE 1
 
@@ -77,12 +70,31 @@ const int VOTES_TO_DELETE_TAG = -2;
 #define COMMUNITY_CREATED_REWARD 200
 #define COMMUNITY_DELETED_REWARD -150
 
-#ifdef DEBUG
-struct [[eosio::table("constants"), eosio::contract("peerania")]] constants {
-  uint64_t id;
-  time start_period_time;
-  uint64_t primary_key() const { return id; }
-};
-typedef eosio::multi_index<"constants"_n, constants> constants_index;
-const uint64_t scope_all_constants = "allconstants"_n.value;
-#endif
+//Status
+#define STATUS1_MODERATION_POINTS 1
+#define STATUS2_MODERATION_POINTS 5
+#define STATUS3_MODERATION_POINTS 10
+#define STATUS4_MODERATION_POINTS 25
+#define STATUS5_MODERATION_POINTS 50
+#define STATUS6_MODERATION_POINTS 100
+
+#define STATUS0_COMMENT_LIMIT 6
+#define STATUS1_COMMENT_LIMIT 10
+#define STATUS2_COMMENT_LIMIT 14
+#define STATUS3_COMMENT_LIMIT 18
+#define STATUS4_COMMENT_LIMIT 22
+#define STATUS5_COMMENT_LIMIT 26
+#define STATUS6_COMMENT_LIMIT 30
+
+#define STATUS0_QUESTION_LIMIT 3
+#define STATUS1_QUESTION_LIMIT 5
+#define STATUS2_QUESTION_LIMIT 6
+#define STATUS3_QUESTION_LIMIT 7
+#define STATUS4_QUESTION_LIMIT 8
+#define STATUS5_QUESTION_LIMIT 9
+#define STATUS6_QUESTION_LIMIT 10
+
+//Account period
+#define ACCOUNT_STAT_RESET_PERIOD 259200  // 3 Days
+#define BAN_RATING_INCREMENT_PER_PERIOD 6
+

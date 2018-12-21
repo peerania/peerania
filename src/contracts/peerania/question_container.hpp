@@ -5,6 +5,8 @@
 #include <vector>
 #include "history.hpp"
 #include "status.hpp"
+#include "property.hpp"
+#include "account.hpp"
 
 // Answer id starts from FORUM_INDEX_START
 #define EMPTY_ANSWER_ID 0
@@ -20,13 +22,8 @@
 
 #define FORUM_INDEX_START 1
 
-#ifndef DEBUG
 #define MAX_ANSWER_COUNT 200
 #define MAX_COMMENT_COUNT 200
-#else
-#define MAX_ANSWER_COUNT 4
-#define MAX_COMMENT_COUNT 4
-#endif
 
 #define PROPERTY_DELETION_VOTES 1
 #define PROPERTY_MODERATION_VOTES 2
@@ -82,7 +79,7 @@ struct [[eosio::table("question"), eosio::contract("peerania")]] question {
           comments)(correct_answer_id)(rating)(properties)(history))
 };
 
-const uint64_t scope_all_questions = "allquestions"_n.value;
+const uint64_t scope_all_questions = eosio::name("allquestions").value;
 typedef eosio::multi_index<
     "question"_n, question,
     eosio::indexed_by<

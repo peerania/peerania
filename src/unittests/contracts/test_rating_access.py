@@ -8,7 +8,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
     
     def test_post_question(self):
         begin('Testing assertion rating for question post')
-        defs = load_defines('./src/contracts/peerania/economy.h')
+        defs = self._get_defs()
         alice = self.register_alice_account(defs['POST_QUESTION_ALLOWED'], 1)
         self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1, 2, 3]}, alice,
                     'Register question from alice')
@@ -19,7 +19,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
     
     def test_post_answer(self):
         begin('Testing assertion rating for posting answer')
-        defs = load_defines('./src/contracts/peerania/economy.h')
+        defs = self._get_defs()
         alice = self.register_alice_account(defs['POST_QUESTION_ALLOWED'], 1)
         bob = self.register_bob_account(defs['POST_ANSWER_ALLOWED'], 1)
         carol = self.register_carol_account(defs['POST_ANSWER_ALLOWED'] - 1, 1)
@@ -37,7 +37,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
 
     def test_post_comment(self):
         begin('Testing assertion rating for posting comment')
-        defs = load_defines('./src/contracts/peerania/economy.h')
+        defs = self._get_defs()
         alice = self.register_alice_account(defs['POST_QUESTION_ALLOWED'], 1)
         bob = self.register_bob_account(defs['POST_ANSWER_ALLOWED'], 1)
         carol = self.register_carol_account(defs['POST_COMMENT_ALLOWED'] - 1, 1)
@@ -62,7 +62,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
 
     def test_upvote(self):
         begin('Testing assertion for upvote')
-        defs = load_defines('./src/contracts/peerania/economy.h')
+        defs = self._get_defs()
         alice = self.register_alice_account(defs['POST_QUESTION_ALLOWED'], 1)
         bob = self.register_bob_account(defs['POST_ANSWER_ALLOWED'], 1)
         carol = self.register_carol_account(defs['UPVOTE_ALLOWED'] - 1, 1)
@@ -77,7 +77,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
 
     def test_downvote(self):
         begin('Testing assertion for downvote')
-        defs = load_defines('./src/contracts/peerania/economy.h')
+        defs = self._get_defs()
         alice = self.register_alice_account(defs['POST_QUESTION_ALLOWED'], 1)
         bob = self.register_bob_account(defs['POST_ANSWER_ALLOWED'], 1)
         carol = self.register_carol_account(defs['DOWNVOTE_ALLOWED'] - 1, 1)
@@ -93,7 +93,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
 
     def test_create_tag_or_community(self):
         begin('Testing assertion for create tag or community', True)
-        defs = load_defines('./src/contracts/peerania/economy.h')
+        defs = self._get_defs()
         alice = self.register_alice_account(defs['CREATE_TAG_ALLOWED'], 10)
         bob = self.register_bob_account(defs['CREATE_TAG_ALLOWED'] -1, 10)
         carol = self.register_carol_account(defs['CREATE_COMMUNITY_ALLOWED'], 10)
@@ -106,7 +106,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
 
     def test_vote_create_tag_or_community(self):
         begin('Testing assertion for vote create tag or community', True)
-        defs = load_defines('./src/contracts/peerania/economy.h')
+        defs = self._get_defs()
         ted = self.register_ted_account(30000, 10)
         self.action('crtag', {'user': ted, 'community_id': 1, 'name': 'ted tag', 'ipfs_description': 'TT'}, ted, 'Ted create tag')
         self.action('crcommunity', {'user': ted, 'name': 'ted community', 'ipfs_description': 'TCM'}, ted, 'Ted create community')
@@ -124,7 +124,7 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
     
     def test_vote_delete_tag_or_community(self):
         begin('Testing assertion for vote delete tag or community', True)
-        defs = load_defines('./src/contracts/peerania/economy.h')
+        defs = self._get_defs()
         ted = self.register_ted_account(30000, 10)
         self.action('crtag', {'user': ted, 'community_id': 1, 'name': 'ted tag', 'ipfs_description': 'TT'}, ted, 'Ted create tag')
         self.action('crcommunity', {'user': ted, 'name': 'ted community', 'ipfs_description': 'TCM'}, ted, 'Ted create community')
@@ -139,6 +139,9 @@ class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
         self.action('vtdelcomm', {'user': carol, 'community_id': c[0]['id']}, carol, 'Carol vote delete community')
         self.failed_action('vtdelcomm', {'user': dan, 'community_id': c[0]['id']}, dan, 'Dan attempt to vote delete community', 'assert')
         end()
+
+    def _get_defs(self):
+        return load_defines('./src/contracts/peerania/economy.h')
 
     def _create_simple_hierarchy(self, alice, bob):
         self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1, 2, 3]}, alice,

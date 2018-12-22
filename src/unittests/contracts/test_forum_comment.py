@@ -4,8 +4,8 @@ from jsonutils import *
 from unittest import main
 
 
-def cbody(owner, question_id, a_id=0, ipfs='', c_id=-1):
-    ret = {'user': str(owner),
+def cbody(user, question_id, a_id=0, ipfs='', c_id=-1):
+    ret = {'user': str(user),
            'question_id': question_id,
            'answer_id': a_id}
     if ipfs != '':
@@ -125,13 +125,13 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
         self.failed_action('postcomment', cbody(bob, var['aq'], ipfs='test'), alice,
-                           'Attempt to register comment to question with another owner auth', 'auth')
+                           'Attempt to register comment to question with another user auth', 'auth')
         self.failed_action('postcomment', cbody(bob, var['aq'], var['aq_ba'], 'test'), alice,
-                           'Attempt to register comment to answer with another owner auth' 'auth')
+                           'Attempt to register comment to answer with another user auth' 'auth')
         end()
 
     def test_modify_comment_another_auth_failed(self):
-        begin('Call modify comment with another owner auth', True)
+        begin('Call modify comment with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
@@ -147,14 +147,14 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('modcomment', cbody(
             bob, var['aq'], ipfs='test', c_id=var['aq_bc']), alice,
-            'Attempt to modify comment to question with another owner auth', 'auth')
+            'Attempt to modify comment to question with another user auth', 'auth')
         self.failed_action('modcomment', cbody(
             bob, var['aq'], var['aq_aa'], 'test', c_id=var['aq_aa_bc']),  alice,
-            'Attempt to modify comment to answer with another owner auth' 'auth')
+            'Attempt to modify comment to answer with another user auth' 'auth')
         end()
 
     def test_delete_comment_another_auth_failed(self):
-        begin('Call modify comment with another owner auth', True)
+        begin('Call modify comment with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
@@ -170,14 +170,14 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('delcomment', cbody(
             bob, var['aq'], c_id=var['aq_bc']), alice,
-            'Attempt to delete comment to question with another owner auth', 'auth')
+            'Attempt to delete comment to question with another user auth', 'auth')
         self.failed_action('delcomment', cbody(
             bob, var['aq'], var['aq_aa'], c_id=var['aq_aa_bc']),  alice,
-            'Attempt to delete comment to answer with another owner auth' 'auth')
+            'Attempt to delete comment to answer with another user auth' 'auth')
         end()
 
-    def test_modify_comment_of_another_owner_failed(self):
-        begin('Modify comment of another owner', True)
+    def test_modify_comment_of_another_user_failed(self):
+        begin('Modify comment of another user', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
@@ -201,8 +201,8 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         end()
 
 
-    def test_delete_comment_of_another_owner_failed(self):
-        begin('Delete comment of another owner', True)
+    def test_delete_comment_of_another_user_failed(self):
+        begin('Delete comment of another user', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
@@ -332,7 +332,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
         end()
 
     def _create_basic_hierarchy(self, alice, bob):
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question','ipfs_link': 'Alice question'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question','ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1]}, alice,
                     'Asking question from alice with text "Alice question"')
         e = ['#ignoreorder', {
             'id': '#var aq',
@@ -363,7 +363,7 @@ class ForumCommentTests(peeraniatest.PeeraniaTest):
             'ipfs_link': 'Bob answer to alice',
             'post_time': '#ignore',
             'comments': []})
-        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'Bob question'}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'Bob question',  'community_id': 1, 'tags': [2]}, bob,
                     'Asking question from bob with text "Bob question"')
         e.append({
             'id': '#var bq',

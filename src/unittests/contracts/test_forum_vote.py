@@ -147,9 +147,26 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         info('Now Alice question rating is 0')
         end()
 
+    def test_upvote_voted_for_deletion_failed(self):
+        begin('Test upvote reported question')
+        begin('Test upvote question and answer when downwoted')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        carol = self.register_carol_account()
+        (e, var) = self._create_basic_hierarchy(alice, bob)
+        self.action('votedelete', {
+            'user': 'carol', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0}, carol, "Carol report alice question")
+        self.action('votedelete', {
+            'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0}, carol, "Carol report bob answer")
+
+        self.failed_action('upvote', {'user': 'carol', 'question_id': var['aq'], 'answer_id': 0},
+                           carol, 'Carol attempt to upvote alice question', 'assert')
+        self.failed_action('upvote', {'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba']},
+                           carol, 'Carol attempt to upvote bob answer', 'assert')
+        end()
+
     def test_mark_answer_as_correct(self):
         begin('Test mark answer as correct')
-        begin('Test vote answer')
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
@@ -206,7 +223,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_vote_with_another_auth_failed(self):
-        begin('Vote with another owner auth', True)
+        begin('Vote with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
@@ -221,8 +238,8 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
                            'aq_ba']}, alice, 'Attempt to downvote answer from non-existent account', 'auth')
         end()
 
-    def test_mark_answer_as_correct_for_question_of_another_owner_failed(self):
-        begin('Mark answer as correct for question of another owner', True)
+    def test_mark_answer_as_correct_for_question_of_another_user_failed(self):
+        begin('Mark answer as correct for question of another user', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
@@ -231,7 +248,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_mark_answer_as_correct_another_auth(self):
-        begin('Mark answer as correct for question with another owner auth', True)
+        begin('Mark answer as correct for question with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
@@ -264,7 +281,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         end()
 
     def _create_basic_hierarchy(self, alice, bob):
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'Alice question'}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1, 2, 3]}, alice,
                     'Asking question from alice with text "Alice question"')
         e = ['#ignoreorder', {
             'id': '#var aq',
@@ -299,7 +316,7 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
             'post_time': '#ignore',
             'rating': '#var aq_ba_rating',
             'comments': []})
-        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question','ipfs_link': 'Bob question'}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'Bob question', 'community_id': 1, 'tags': [1, 2, 3]}, bob,
                     'Asking question from bob with text "Bob question"')
         e.append({
             'id': '#var bq',

@@ -3,7 +3,7 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/name.hpp>
 #include <vector>
-
+#include "utils.hpp"
 // Flags
 #define HISTORY_UPVOTED_FLG 1       // 0b0000000000000001
 #define HISTORY_DOWNVOTED_FLG 2     // 0b0000000000000010
@@ -32,7 +32,7 @@ struct history_item {
 };
 
 /*
-If history contain the history item with passed owner
+If history contain the history item with passed user
 return iterator to this history item(is_new = false) else
 insert history item into history, return the iterator to
 new element(is_new = true).

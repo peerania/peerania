@@ -6,4 +6,5 @@ eos-node/data
 *.wasm
 *.wast
 *.pyc
+*.abi
 src/unittests/contracts/__pycache__

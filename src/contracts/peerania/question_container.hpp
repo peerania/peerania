@@ -5,6 +5,8 @@
 #include <vector>
 #include "history.hpp"
 #include "status.hpp"
+#include "property.hpp"
+#include "account.hpp"
 
 // Answer id starts from FORUM_INDEX_START
 #define EMPTY_ANSWER_ID 0
@@ -20,19 +22,14 @@
 
 #define FORUM_INDEX_START 1
 
-#ifndef DEBUG
 #define MAX_ANSWER_COUNT 200
 #define MAX_COMMENT_COUNT 200
-#else
-#define MAX_ANSWER_COUNT 4
-#define MAX_COMMENT_COUNT 4
-#endif
 
-#define PROPERTY_DELETION_VOTES 0
-#define PROPERTY_MODERATION_VOTES 1
+#define PROPERTY_DELETION_VOTES 1
+#define PROPERTY_MODERATION_VOTES 2
 #define PROPERTY_LAST_MODIFIED 3
 
-#define PROPERTY_MAX_QUESTION_ID 0xfffffffffffffULL
+#define MAX_QUESTION_ID 0xfffffffffULL
 
 struct comment {
   uint16_t id;
@@ -57,8 +54,10 @@ struct answer {
   uint16_t bkey() const { return id; }
 };
 
-struct [[eosio::table("question")]] question {
+struct [[eosio::table("question"), eosio::contract("peerania")]] question {
   uint64_t id;
+  uint16_t community_id;
+  std::vector<uint32_t> tags;
   time post_time;
   eosio::name user;
   std::string title;
@@ -71,13 +70,22 @@ struct [[eosio::table("question")]] question {
   std::vector<int_key_value> properties;
   std::vector<history_item> history;
   uint64_t primary_key() const { return id; }
-  EOSLIB_SERIALIZE(question,
-                   (id)(post_time)(user)(title)(ipfs_link)(answers)(comments)(
-                       correct_answer_id)(rating)(properties)(history))
+  uint64_t community_skey() const {
+    return (static_cast<uint64_t>(community_id) << 36) + id;
+  }
+  EOSLIB_SERIALIZE(
+      question,
+      (id)(community_id)(tags)(post_time)(user)(title)(ipfs_link)(answers)(
+          comments)(correct_answer_id)(rating)(properties)(history))
 };
 
-const uint64_t scope_all_questions = "allquestions"_n.value;
-typedef eosio::multi_index<"question"_n, question> question_index;
+const uint64_t scope_all_questions = eosio::name("allquestions").value;
+typedef eosio::multi_index<
+    "question"_n, question,
+    eosio::indexed_by<
+        "community"_n,
+        eosio::const_mem_fun<question, uint64_t, &question::community_skey>>>
+    question_index;
 
 template <typename T>
 void push_new_forum_item(std::vector<T> &container, T &item) {
@@ -102,28 +110,34 @@ std::vector<comment>::iterator find_comment(T &item, uint16_t comment_id) {
   return iter_comment;
 }
 
-void assert_comment_limit(const account &action_caller, eosio::name item_owner,
+void assert_comment_limit(const account &action_caller, eosio::name item_user,
                           const std::vector<comment> &comments) {
-  if (item_owner != action_caller.owner) {
+  if (item_user != action_caller.user) {
     int comments_count = 0;
     for (auto iter_comment = comments.begin(); iter_comment != comments.end();
          ++iter_comment) {
-      if (iter_comment->user == action_caller.owner) comments_count++;
+      if (iter_comment->user == action_caller.user) comments_count++;
     }
-    eosio_assert(
-        comments_count < status_comments_limit(action_caller.pay_out_rating),
-        "Your status doesn't allow you to post more comment");
+    eosio_assert(comments_count < status_comments_limit(action_caller.rating),
+                 "Your status doesn't allow you to post more comment");
   }
 }
 
-uint64_t get_quiestion_pk(const question_index &question_table) {
-  if (question_table.begin() == question_table.end()) {
-    return PROPERTY_MAX_QUESTION_ID;
-  } else {
-    auto pk = question_table.begin()
-                  ->primary_key();  // largest primary key currently in table
-    return --pk;
-  }
+struct [[eosio::table("usrquestions"), eosio::contract("peerania")]] usrquestions {
+  uint64_t question_id;
+  uint64_t primary_key() const { return question_id; }
+};
+typedef eosio::multi_index<"usrquestions"_n, usrquestions> user_questions_index;
+
+struct [[eosio::table("usranswers"), eosio::contract("peerania")]] usranswers {
+  uint64_t question_id;
+  uint16_t answer_id;
+  uint64_t primary_key() const { return question_id; }
+};
+typedef eosio::multi_index<"usranswers"_n, usranswers> user_answers_index;
+
+inline void assert_title(const std::string &title) {
+  eosio_assert(title.size() > 2 && title.size() < 129, "Invalid title length");
 }
 
 /*

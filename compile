@@ -3,12 +3,18 @@
 set -e
 #compile
 
+contract='peerania'
+
 if [ "$1" = "debug" ]
 then
-    echo -e "\e[31mCompiling with debug macro\e[0m"
-    def=-DDEBUG
-fi
+    echo -e "\e[31mCompiling debug contract!!!\e[0m"
+    eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania_debug.cpp -I./src/contracts/utils/ -DCONTRACT_NAME='"${contract}"' 
+    eosio-abigen ./src/contracts/peerania/peerania_debug.cpp --contract=$contract --output=./src/contracts/peerania/peerania.abi -R./src/contracts/peerania/rc --extra-arg="-I./src/contracts/utils/"  --extra-arg-before="-DCONTRACT_NAME=\"${contract}\""
+else
+    eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania.cpp -I./src/contracts/utils/ -DCONTRACT_NAME='"${contract}"' 
+    eosio-abigen ./src/contracts/peerania/peerania.hpp --contract=$contract --output=./src/contracts/peerania/peerania.abi -R./src/contracts/peerania/rc --extra-arg="-I./src/contracts/utils/"  --extra-arg-before="-DCONTRACT_NAME=\"${contract}\""
+fi 
 
-eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania.cpp -I./src/contracts/utils/ $def
-eosio-cpp -o ./src/contracts/peerania.token/peerania.token.wasm ./src/contracts/peerania.token/peerania.token.cpp -I./src/contracts/utils/ $def
+
+eosio-cpp -o ./src/contracts/peerania.token/peerania.token.wasm ./src/contracts/peerania.token/peerania.token.cpp -I./src/contracts/utils/ 
 echo -e "\e[92mCompilation done! :)\e[0m"

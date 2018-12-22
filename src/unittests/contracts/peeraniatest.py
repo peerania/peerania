@@ -60,7 +60,7 @@ class PeeraniaTest(EOSTest):
         return 'token'
 
     def _register_account(self, user, rating, moderation_points):
-        self.action('registeracc', {'owner': str(user), 'display_name': str(
+        self.action('registeracc', {'user': str(user), 'display_name': str(
             user) + 'DispName', 'ipfs_profile': str(user) + '_IPFS'},
             user, 'Register {} account'.format(user))
         if rating is None:
@@ -71,24 +71,32 @@ class PeeraniaTest(EOSTest):
                     user, 'Set {} rating to {} and give {} moderation points'.format(str(user), rating, moderation_points))
         return user
 
-def get_expected_account_body(owner):
+def get_expected_account_body(user):
     return {
-        'owner': str(owner),
-        'display_name': str(owner) + 'DispName',
-        'ipfs_profile': str(owner) + '_IPFS',
+        'user': str(user),
+        'display_name': str(user) + 'DispName',
+        'ipfs_profile': str(user) + '_IPFS',
         'registration_time': '#ignore',
-        'moderation_points': '#var ' + str(owner) + '_mdp',
-        'rating': '#var ' + str(owner) + '_rating',
+        'moderation_points': '#var ' + str(user) + '_mdp',
+        'rating': '#var ' + str(user) + '_rating',
         'string_properties': [],
         'integer_properties': []
     }
 
-def hash_display_name(display_name):
-    charmap='abcdefghijklmnopqrstuvwxyz'
-    hash=''
-    for i in range(min(12, len(display_name))):
-        hash += charmap[ord(display_name[i]) % 26]
-    return hash
+
+def get_tag_scope(community_id):
+    charmap = ".12345abcdefghijklmnopqrstuvwxyz"
+    mask = 0xF800000000000000
+    v = 3774731489195851776 + community_id
+    ret = ""
+    for i in range(13):
+        v &= 0xFFFFFFFFFFFFFFFF
+        if v == 0:
+            break
+        indx = (v & mask) >> (60 if i == 12 else 59)
+        ret+=charmap[indx]
+        v <<=5
+    return ret
 
 def time_sec():
     return round(time())

@@ -39,10 +39,10 @@ namespace eosio {
                         string  memo );
 
          [[eosio::action]]
-         void open( name owner, const symbol& symbol, name ram_payer );
+         void open( name user, const symbol& symbol, name ram_payer );
 
          [[eosio::action]]
-         void close( name owner, const symbol& symbol );
+         void close( name user, const symbol& symbol );
 
          static asset get_supply( name token_contract_account, symbol_code sym_code )
          {
@@ -51,9 +51,9 @@ namespace eosio {
             return st.supply;
          }
 
-         static asset get_balance( name token_contract_account, name owner, symbol_code sym_code )
+         static asset get_balance( name token_contract_account, name user, symbol_code sym_code )
          {
-            accounts accountstable( token_contract_account, owner.value );
+            accounts accountstable( token_contract_account, user.value );
             const auto& ac = accountstable.get( sym_code.raw() );
             return ac.balance;
          }
@@ -76,8 +76,8 @@ namespace eosio {
          typedef eosio::multi_index< "accounts"_n, account > accounts;
          typedef eosio::multi_index< "stat"_n, currency_stats > stats;
 
-         void sub_balance( name owner, asset value );
-         void add_balance( name owner, asset value, name ram_payer );
+         void sub_balance( name user, asset value );
+         void add_balance( name user, asset value, name ram_payer );
    };
 
 } /// namespace eosio

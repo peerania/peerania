@@ -2,13 +2,10 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/name.hpp>
 
-#ifndef DEBUG
-#define PERIOD_LENGTH 604800                // 7 day = 1 week
-const time START_PERIOD_TIME = 1538341200;  // Monday 1st october 2018
-#else
-#define PERIOD_LENGTH 3  // 2 sec
-time START_PERIOD_TIME;  // We need mechanism which change it once on deploy
-#endif
+
+//Couldn't redefine it
+int PERIOD_LENGTH = 604800;                // 7 day = 1 week
+time START_PERIOD_TIME = 1538341200UL;  // Monday 1st october 2018
 
 uint16_t get_period(time t) {
   t -= START_PERIOD_TIME;
@@ -16,9 +13,9 @@ uint16_t get_period(time t) {
 }
 
 // scoped by user
-struct [[eosio::table("periodrating")]] periodrating {
+struct [[eosio::table("periodrating"), eosio::contract(CONTRACT_NAME)]] periodrating {
   uint16_t period;
-  int16_t rating;
+  int rating;
   uint16_t rating_to_award = 0;
   uint64_t primary_key() const {
     // implicit cast
@@ -31,7 +28,7 @@ typedef eosio::multi_index<"periodrating"_n, periodrating> period_rating_index;
 
 // owned by main
 // scopeed by const = N(allperiods)
-struct [[eosio::table("totalrating")]] totalrating {
+struct [[eosio::table("totalrating"), eosio::contract(CONTRACT_NAME)]] totalrating {
   uint16_t period;
   uint32_t total_rating_to_reward;
   uint64_t primary_key() const {
@@ -42,4 +39,4 @@ struct [[eosio::table("totalrating")]] totalrating {
 };
 
 typedef eosio::multi_index<"totalrating"_n, totalrating> total_rating_index;
-const uint64_t scope_all_periods = "allperiods"_n.value;
+const uint64_t scope_all_periods = eosio::name("allperiods").value;

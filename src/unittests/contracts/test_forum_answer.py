@@ -104,7 +104,7 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_register_answer_another_auth_failed(self):
-        begin('Register answer with another owner auth', True)
+        begin('Register answer with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
@@ -118,7 +118,7 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_modify_answer_another_auth_failed(self):
-        begin('Call modify answer with another owner auth', True)
+        begin('Call modify answer with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
@@ -140,7 +140,7 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         end()
 
     def test_delete_answer_another_auth_failed(self):
-        begin('Call delete answer with another owner auth', True)
+        begin('Call delete answer with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
@@ -160,8 +160,8 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
                            carol, 'Attempt to delete bob answer with carol auth', 'auth')
         end()
 
-    def test_modify_answer_of_another_owner_failed(self):
-        begin('Modify answer of another owner', True)
+    def test_modify_answer_of_another_user_failed(self):
+        begin('Modify answer of another user', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
@@ -182,8 +182,8 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
                            carol, 'Attempt to modify bob answer with carol account', 'assert')
         end()
 
-    def test_delete_answer_of_another_owner_failed(self):
-        begin('Delete answer of another owner', True)
+    def test_delete_answer_of_another_user_failed(self):
+        begin('Delete answer of another user', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
@@ -298,27 +298,27 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
                            bob, 'Attempt to delete answer of non-existent question', 'assert')
         end()
 
-    def _register_question_action(self, owner, ipfs_link, id_var=''):
-        self.action('postquestion', {'user': str(owner), 'title': 'title ' + ipfs_link, 'ipfs_link': ipfs_link}, owner,
-                    'Asking question from {} with text "{}"'.format(str(owner), ipfs_link))
+    def _register_question_action(self, user, ipfs_link, id_var=''):
+        self.action('postquestion', {'user': str(user), 'title': 'title ' + ipfs_link, 'ipfs_link': ipfs_link, 'community_id': 1, 'tags': [1]}, user,
+                    'Asking question from {} with text "{}"'.format(str(user), ipfs_link))
         return {'id': '#ignore' if id_var == '' else '#var ' + id_var,
-                'user': str(owner),
+                'user': str(user),
                 'ipfs_link': ipfs_link,
                 'title': 'title ' + ipfs_link,
                 'post_time': '#ignore',
                 'answers': [],
                 'comments': []}
 
-    def _register_answer_action(self, owner, question_id, ipfs_link, question_table, id_var=''):
-        self.action('postanswer', {'user': str(owner), 'question_id': question_id, 'ipfs_link': ipfs_link}, owner,
-                    '{} answer to question with id={}: "{}"'.format(str(owner), question_id, ipfs_link))
+    def _register_answer_action(self, user, question_id, ipfs_link, question_table, id_var=''):
+        self.action('postanswer', {'user': str(user), 'question_id': question_id, 'ipfs_link': ipfs_link}, user,
+                    '{} answer to question with id={}: "{}"'.format(str(user), question_id, ipfs_link))
         for question in question_table:
             if isinstance(question, str):
                 continue
             if question['id'] == question_id:
                 question['answers'].append({
                     'id': '#ignore' if id_var == '' else '#var ' + id_var,
-                    'user': str(owner),
+                    'user': str(user),
                     'ipfs_link': ipfs_link,
                     'post_time': '#ignore',
                     'comments': []})

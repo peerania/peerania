@@ -43,8 +43,9 @@
 extern time
     START_PERIOD_TIME;  // We need mechanism which change it once on deploy
 extern int PERIOD_LENGTH;
-
 class[[eosio::contract("peerania")]] peerania_d : public peerania {
+  using peerania::peerania;
+
  public:
   struct [[
     eosio::table("constants"), eosio::contract("peerania")
@@ -52,10 +53,11 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
     uint64_t id;
     time start_period_time;
     uint64_t primary_key() const { return id; }
+    EOSLIB_SERIALIZE(constants, (id)(start_period_time))
   };
-
   typedef eosio::multi_index<eosio::name("constants"), constants>
       constants_index;
+
   const uint64_t scope_all_constants = eosio::name("allconstants").value;
 
   peerania_d(eosio::name receiver, eosio::name code,
@@ -195,14 +197,13 @@ extern "C" {
 void apply(uint64_t receiver, uint64_t code, uint64_t action) {
   if (code == receiver) {
     switch (action) {
-      EOSIO_DISPATCH_HELPER(peerania_d, (chnguserrt)(resettables)(setaccrtmpc))
       EOSIO_DISPATCH_HELPER(
-          peerania,
-          (registeracc)(setaccintprp)(setaccstrprp)(setaccprof)(postquestion)(
-              postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(
-              modanswer)(modquestion)(modcomment)(upvote)(downvote)(
-              mrkascorrect)(votedelete)(crtag)(crcommunity)(vtcrtag)(vtcrcomm)(
-              vtdeltag)(vtdelcomm))
+          peerania_d,
+          (chnguserrt)(resettables)(setaccrtmpc)(registeracc)(setaccintprp)(
+              setaccstrprp)(setaccprof)(postquestion)(postanswer)(postcomment)(
+              delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(
+              modcomment)(upvote)(downvote)(mrkascorrect)(votedelete)(crtag)(
+              crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm))
     }
   }
 }

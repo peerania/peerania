@@ -22,9 +22,6 @@ CONTRACT peerania : public eosio::contract {
         question_table(receiver, scope_all_questions),
         total_rating_table(receiver, scope_all_periods){};
 
-  // Probably we need to replace ACTION with [[eosio::action,
-  // eosio::contract("peerania")]] void
-
   // Register new user
   ACTION registeracc(eosio::name user, std::string display_name,
                      std::string ipfs_profile);

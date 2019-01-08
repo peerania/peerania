@@ -1,5 +1,5 @@
 {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Fri Dec 21 17:58:03 2018",
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Tue Jan  8 21:00:34 2019",
     "version": "eosio::abi/1.1",
     "structs": [
         {
@@ -428,7 +428,7 @@
                 },
                 {
                     "name": "rating_to_award",
-                    "type": "uint16"
+                    "type": "int32"
                 }
             ]
         },

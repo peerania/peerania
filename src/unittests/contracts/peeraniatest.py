@@ -14,9 +14,10 @@ class PeeraniaTest(EOSTest):
     contracts = {}
 
     def setUp(self):
-        pass
+        self.action('create', {'issuer': 'peerania.tkn', 'maximum_supply':'100000000.000000 PEER'}, 'peerania.tkn', 'Create token PEER', contract='token')
 
     def tearDown(self):
+        self.action('resettables', {}, self.get_contract_deployer('token'), 'Reset all token tables', contract='token')
         self.action('resettables', {}, self.get_contract_deployer(self.get_default_contract()),'Reset all tables')
         self.wait(1)
 

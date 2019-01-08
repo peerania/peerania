@@ -9,7 +9,6 @@ void token::create(name issuer, asset maximum_supply) {
   eosio_assert(sym.is_valid(), "invalid symbol name");
   eosio_assert(maximum_supply.is_valid(), "invalid supply");
   eosio_assert(maximum_supply.amount > 0, "max-supply must be positive");
-
   stats statstable(_self, sym.code().raw());
   auto existing = statstable.find(sym.code().raw());
   eosio_assert(existing == statstable.end(),
@@ -146,6 +145,66 @@ void token::close(name user, const symbol& symbol) {
   acnts.erase(it);
 }
 
+asset get_inflation(uint16_t period){
+    const symbol sym = symbol("PEER", 6);
+    int64_t reward_pool = 1000000ULL*(START_POOL - (period/INFLATION_PERIOD) * POOL_REDUSE);
+    if (reward_pool < 0) reward_pool = 0;
+    return asset(reward_pool, sym);
+}
+
+asset get_reward(asset total_reward, int rating_to_reward, int total_rating){
+  return total_reward * rating_to_reward / total_rating;
+}
+
+void token::pickupreward(name user, const uint16_t period) {
+  require_auth(user);
+  time current_time = now();
+  eosio_assert(get_period(current_time) > period,
+               "This period isn't ended yet!");
+  period_reward_index period_reward_table(_self, user.value);
+  eosio_assert(period_reward_table.find(period) == period_reward_table.end(),
+               "You already pick up this reward");
+
+  total_reward_index total_reward_table(_self, scope_all_periods);
+  auto iter_total_reward = total_reward_table.find(period);
+  if (iter_total_reward == total_reward_table.end()) {
+    asset quantity = get_inflation(period);
+    const symbol sym = quantity.symbol;
+    stats statstable(_self, sym.code().raw());
+    auto existing = statstable.find(sym.code().raw());
+    const auto& st = *existing;
+    statstable.modify(st, _self, [&](auto& s) { s.supply += quantity; });
+    add_balance(peerania_main, quantity, _self);
+    iter_total_reward = total_reward_table.emplace(_self, [&quantity, period](auto &total_reward_item){
+      total_reward_item.period = period;
+      total_reward_item.total_reward = quantity;
+    });
+  }
+
+  period_rating_index period_rating_table(peerania_main, user.value);
+  auto period_rating = period_rating_table.find(period);
+  eosio_assert(period_rating != period_rating_table.end(), "No reward for you in this period");
+
+  total_rating_index total_rating_table(peerania_main, scope_all_periods);
+  auto total_rating = total_rating_table.find(period);
+  eosio_assert(total_rating != total_rating_table.end(), "Fatal internal error");
+
+  asset user_reward = get_reward(iter_total_reward->total_reward, period_rating->rating_to_award, total_rating->total_rating_to_reward);
+  period_reward_table.emplace(user, [user_reward, period](auto &reward){
+    reward.period = period;
+    reward.reward = user_reward;
+  });
+  // Subbalance
+  accounts from_acnts(_self, peerania_main.value);
+  const auto& from = from_acnts.get(user_reward.symbol.code().raw(), "no balance object found");
+  eosio_assert(from.balance.amount >= user_reward.amount, "overdrawn balance");
+
+  from_acnts.modify(from, user, [&](auto& a) { a.balance -= user_reward; });
+
+  add_balance(user, user_reward, user);
+}
+
 }  // namespace eosio
 
-EOSIO_DISPATCH(eosio::token, (create)(issue)(transfer)(open)(close)(retire))
+EOSIO_DISPATCH(eosio::token,
+               (create)(issue)(transfer)(open)(close)(retire)(pickupreward))

@@ -151,6 +151,7 @@ class TestTokenIntegration(peeraniatest.PeeraniaTest):
                 self.assertTrue(total_get['total_rating_to_reward'] == total)
             info('Period finished!!\n')
             period_id += 1
+        info('table all periods', self.table('totalrating', 'allperiods'))
 
 
 if __name__ == '__main__':

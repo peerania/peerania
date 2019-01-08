@@ -7,12 +7,10 @@
 #include <eosiolib/asset.hpp>
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/name.hpp>
-
+#include "peerania.token.period.hpp"
+#include "token_common.hpp"
+#include "peerania_types.h"
 #include <string>
-
-namespace eosiosystem {
-   class system_contract;
-}
 
 namespace eosio {
 
@@ -20,8 +18,9 @@ namespace eosio {
 
    class [[eosio::contract("peerania.tkn")]] token : public contract {
       public:
-         using contract::contract;
-
+         token(eosio::name receiver, eosio::name code,
+           eosio::datastream<const char *> ds):contract(receiver, code, ds){};
+         name peerania_main = name("peerania.dev");
          [[eosio::action]]
          void create( name   issuer,
                       asset  maximum_supply);
@@ -44,6 +43,9 @@ namespace eosio {
          [[eosio::action]]
          void close( name user, const symbol& symbol );
 
+         [[eosio::action]]
+         void pickupreward(name user, const uint16_t period);
+
          static asset get_supply( name token_contract_account, symbol_code sym_code )
          {
             stats statstable( token_contract_account, sym_code.raw() );
@@ -58,7 +60,7 @@ namespace eosio {
             return ac.balance;
          }
 
-      private:
+      protected:
          struct [[eosio::table]] account {
             asset    balance;
 

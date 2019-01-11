@@ -145,14 +145,14 @@ void token::close(name user, const symbol& symbol) {
   acnts.erase(it);
 }
 
-asset get_inflation(uint16_t period){
-    const symbol sym = symbol("PEER", 6);
+asset token::get_inflation(uint16_t period){
+    const symbol sym = symbol(peerania_asset_symbol, 6);
     int64_t reward_pool = 1000000ULL*(START_POOL - (period/INFLATION_PERIOD) * POOL_REDUSE);
     if (reward_pool < 0) reward_pool = 0;
     return asset(reward_pool, sym);
 }
 
-asset get_reward(asset total_reward, int rating_to_reward, int total_rating){
+asset token::get_reward(asset total_reward, int rating_to_reward, int total_rating){
   return total_reward * rating_to_reward / total_rating;
 }
 
@@ -161,12 +161,16 @@ void token::pickupreward(name user, const uint16_t period) {
   time current_time = now();
   eosio_assert(get_period(current_time) > period,
                "This period isn't ended yet!");
+
   period_reward_index period_reward_table(_self, user.value);
+  // Ensure that there is no records in period_reward_table for this period,
+  // it means user isn't pickup reward yet
   eosio_assert(period_reward_table.find(period) == period_reward_table.end(),
                "You already pick up this reward");
 
   total_reward_index total_reward_table(_self, scope_all_periods);
   auto iter_total_reward = total_reward_table.find(period);
+  //Create reward pool
   if (iter_total_reward == total_reward_table.end()) {
     asset quantity = get_inflation(period);
     const symbol sym = quantity.symbol;
@@ -198,7 +202,6 @@ void token::pickupreward(name user, const uint16_t period) {
   accounts from_acnts(_self, peerania_main.value);
   const auto& from = from_acnts.get(user_reward.symbol.code().raw(), "no balance object found");
   eosio_assert(from.balance.amount >= user_reward.amount, "overdrawn balance");
-
   from_acnts.modify(from, user, [&](auto& a) { a.balance -= user_reward; });
 
   add_balance(user, user_reward, user);

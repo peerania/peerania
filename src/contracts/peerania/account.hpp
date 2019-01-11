@@ -20,7 +20,7 @@ struct [[eosio::table("account"), eosio::contract("peerania")]] account {
   int pay_out_rating = 0;
   uint16_t last_update_period = 0;
   uint8_t questions_left = 0;
-
+  std::vector<uint16_t> followed_communities;
   void update() {
     uint16_t current_period =
         (now() - registration_time) / ACCOUNT_STAT_RESET_PERIOD;
@@ -44,7 +44,7 @@ struct [[eosio::table("account"), eosio::contract("peerania")]] account {
       account,
       (user)(display_name)(ipfs_profile)(registration_time)(string_properties)(
           integer_properties)(rating)(moderation_points)(pay_out_rating)(
-          last_update_period)(questions_left))
+          last_update_period)(questions_left)(followed_communities))
 };
 
 #define MIN_DISPLAY_NAME_LEN 3

@@ -82,8 +82,8 @@ void peerania::vote_create_community(eosio::name user, uint32_t community_id) {
   auto iter_account = find_account(user);
   assert_allowed(*iter_account, user, Action::VOTE_CREATE_COMMUNITY);
   vote_create_comm_or_tag(iter_account, community_id, scope_all_communities,
-                          VOTES_TO_CREATE_COMMUNITY,
-                          MAX_COMMUNITY_ID, COMMUNITY_CREATED_REWARD);
+                          VOTES_TO_CREATE_COMMUNITY, MAX_COMMUNITY_ID,
+                          COMMUNITY_CREATED_REWARD);
 }
 
 void peerania::vote_create_tag(eosio::name user, uint16_t community_id,
@@ -92,8 +92,7 @@ void peerania::vote_create_tag(eosio::name user, uint16_t community_id,
   assert_allowed(*iter_account, user, Action::VOTE_CREATE_TAG);
   assert_community_exist(community_id);
   vote_create_comm_or_tag(iter_account, tag_id, get_tag_scope(community_id),
-                          VOTES_TO_CREATE_TAG,
-                          MAX_TAG_ID, TAG_CREATED_REWARD);
+                          VOTES_TO_CREATE_TAG, MAX_TAG_ID, TAG_CREATED_REWARD);
 }
 
 void peerania::vote_create_comm_or_tag(
@@ -146,8 +145,7 @@ void peerania::vote_delete_community(eosio::name user, uint32_t community_id) {
   auto iter_account = find_account(user);
   assert_allowed(*iter_account, user, Action::VOTE_DELETE_COMMUNITY);
   vote_delete_comm_or_tag(iter_account, community_id, scope_all_communities,
-                          VOTES_TO_DELETE_COMMUNITY,
-                          COMMUNITY_DELETED_REWARD);
+                          VOTES_TO_DELETE_COMMUNITY, COMMUNITY_DELETED_REWARD);
 }
 
 void peerania::vote_delete_tag(eosio::name user, uint16_t community_id,
@@ -156,8 +154,7 @@ void peerania::vote_delete_tag(eosio::name user, uint16_t community_id,
   assert_allowed(*iter_account, user, Action::VOTE_DELETE_TAG);
   assert_community_exist(community_id);
   vote_delete_comm_or_tag(iter_account, tag_id, get_tag_scope(community_id),
-                          VOTES_TO_DELETE_TAG,
-                          TAG_DELETED_REWARD);
+                          VOTES_TO_DELETE_TAG, TAG_DELETED_REWARD);
 }
 
 void peerania::vote_delete_comm_or_tag(
@@ -195,4 +192,29 @@ void peerania::vote_delete_comm_or_tag(
           "Address not erased properly");
     }
   }
+}
+
+void peerania::follow_community(eosio::name user, uint16_t community_id) {
+  assert_community_exist(community_id);
+  auto iter_acc = find_account(user);
+  eosio_assert(std::find(iter_acc->followed_communities.begin(),
+                         iter_acc->followed_communities.end(),
+                         community_id) == iter_acc->followed_communities.end(),
+               "You are already followed this community");
+  account_table.modify(iter_acc, _self, [community_id](auto &account) {
+    account.followed_communities.push_back(community_id);
+  });
+}
+
+void peerania::unfollow_community(eosio::name user, uint16_t community_id) {
+  assert_community_exist(community_id);
+  auto iter_acc = find_account(user);
+  account_table.modify(iter_acc, _self, [community_id](auto &account) {
+    auto community =
+        std::find(account.followed_communities.begin(),
+                  account.followed_communities.end(), community_id);
+    eosio_assert(community != account.followed_communities.end(),
+                 "You are not followed this community");
+    account.followed_communities.erase(community);             
+  });
 }

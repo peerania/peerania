@@ -142,9 +142,19 @@ void peerania::vtdeltag(eosio::name user, uint16_t community_id,
   vote_delete_tag(user, community_id, tag_id);
 }
 
+void peerania::followcomm(eosio::name user, uint16_t community_id){
+  require_auth(user);
+  follow_community(user, community_id);
+}
+
+void peerania::unfollowcomm(eosio::name user, uint16_t community_id){
+  require_auth(user);
+  unfollow_community(user, community_id);
+}
+
 EOSIO_DISPATCH(
     peerania,
     (registeracc)(setaccintprp)(setaccstrprp)(setaccprof)(postquestion)(
         postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(modanswer)(
         modquestion)(modcomment)(upvote)(downvote)(mrkascorrect)(votedelete)(
-        crtag)(crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm))
+        crtag)(crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm))

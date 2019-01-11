@@ -9,7 +9,7 @@ if [ "$1" = "debug" ]
 then
     echo -e "\e[31mCompiling debug contract!!!\e[0m"
     eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania_debug.cpp -I./src/contracts/utils/
-    eosio-abigen ./src/contracts/peerania/peerania_debug.cpp --contract=$contract --output=./src/contracts/peerania/peerania.abi -R./src/contracts/peerania/rc --extra-arg="-I./src/contracts/utils/"  --extra-arg-before="-DCONTRACT_NAME=\"${contract}\""
+    eosio-abigen ./src/contracts/peerania/peerania_debug.cpp --contract=$contract --output=./src/contracts/peerania/peerania.abi -R./src/contracts/peerania/rc --extra-arg="-I./src/contracts/utils/" 
 
     eosio-cpp -o ./src/contracts/peerania.token/peerania.token.wasm ./src/contracts/peerania.token/peerania.token_debug.cpp -I./src/contracts/utils/
     eosio-abigen ./src/contracts/peerania.token/peerania.token_debug.cpp --contract=peerania.tkn --output=./src/contracts/peerania.token/peerania.token.abi -R./src/contracts/peerania.token/rc --extra-arg="-I./src/contracts/utils/"

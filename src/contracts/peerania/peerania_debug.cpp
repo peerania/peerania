@@ -197,13 +197,13 @@ extern "C" {
 void apply(uint64_t receiver, uint64_t code, uint64_t action) {
   if (code == receiver) {
     switch (action) {
-      EOSIO_DISPATCH_HELPER(
-          peerania_d,
-          (chnguserrt)(resettables)(setaccrtmpc)(registeracc)(setaccintprp)(
-              setaccstrprp)(setaccprof)(postquestion)(postanswer)(postcomment)(
-              delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(
-              modcomment)(upvote)(downvote)(mrkascorrect)(votedelete)(crtag)(
-              crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm))
+      EOSIO_DISPATCH_HELPER(peerania_d, (chnguserrt)(resettables)(setaccrtmpc))
+      EOSIO_DISPATCH_HELPER(peerania,
+          (registeracc)(setaccintprp)(setaccstrprp)(setaccprof)(postquestion)(
+              postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(
+              modanswer)(modquestion)(modcomment)(upvote)(downvote)(
+              mrkascorrect)(votedelete)(crtag)(crcommunity)(vtcrtag)(vtcrcomm)(
+              vtdeltag)(vtdelcomm))
     }
   }
 }

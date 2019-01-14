@@ -79,7 +79,7 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
             constants.start_period_time = current_time;
           });
       tag_community_index community_table(_self, scope_all_communities);
-      for (int i = 1; i < 3; ++i) {
+      for (int i = 1; i < 4; ++i) {
         std::string index = std::to_string(i);
         community_table.emplace(_self, [i, &index](auto &community) {
           community.id = i;
@@ -203,7 +203,7 @@ void apply(uint64_t receiver, uint64_t code, uint64_t action) {
               postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(
               modanswer)(modquestion)(modcomment)(upvote)(downvote)(
               mrkascorrect)(votedelete)(crtag)(crcommunity)(vtcrtag)(vtcrcomm)(
-              vtdeltag)(vtdelcomm))
+              vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm))
     }
   }
 }

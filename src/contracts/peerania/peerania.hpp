@@ -107,6 +107,10 @@ CONTRACT peerania : public eosio::contract {
 
   ACTION vtdeltag(eosio::name user, uint16_t community_id, uint32_t tag_id);
 
+  ACTION followcomm(eosio::name user, uint16_t community_id);
+
+  ACTION unfollowcomm(eosio::name user, uint16_t community_id);
+
  protected:
   question_index question_table;
   account_index account_table;
@@ -211,4 +215,8 @@ CONTRACT peerania : public eosio::contract {
   void remove_user_question(eosio::name user, uint64_t question_id);
 
   void remove_user_answer(eosio::name user, uint64_t question_id);
+
+  void follow_community(eosio::name user, uint16_t community_id);
+
+  void unfollow_community(eosio::name user, uint16_t community_id);
 };

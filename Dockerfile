@@ -15,4 +15,4 @@ RUN apt install python3-pip -y
 RUN pip3 install termcolor
 RUN pip3 install requests
 
-CMD ["bin/bash"]
+CMD ["peerania/eos-node/run"]

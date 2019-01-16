@@ -74,7 +74,6 @@ void peerania::create_community_or_tag(
         new_tag_or_community.creator = iter_account->user;
         new_tag_or_community.name = name;
         new_tag_or_community.ipfs_description = ipfs_description;
-        new_tag_or_community.votes = 1;
       });
 }
 
@@ -107,15 +106,27 @@ void peerania::vote_create_comm_or_tag(
   create_tag_community_table.modify(
       iter_create_or_tag_community, _self,
       [&iter_account](auto &tag_or_community) {
-        eosio_assert(
-            std::find(tag_or_community.voters.begin(),
-                      tag_or_community.voters.end(),
-                      iter_account->user) == tag_or_community.voters.end(),
-            "You already voted for this item");
-        tag_or_community.voters.push_back(iter_account->user);
-        tag_or_community.votes += 1;
+        auto iter_upvoter =
+            std::find(tag_or_community.upvotes.begin(),
+                      tag_or_community.upvotes.end(), iter_account->user);
+        auto iter_downvoter =
+            std::find(tag_or_community.downvotes.begin(),
+                      tag_or_community.downvotes.end(), iter_account->user);
+        if (iter_upvoter == tag_or_community.upvotes.end() &&
+            iter_downvoter == tag_or_community.downvotes.end()) {
+          tag_or_community.upvotes.push_back(iter_account->user);
+        } else if (iter_upvoter != tag_or_community.upvotes.end() &&
+                   iter_downvoter == tag_or_community.downvotes.end()) {
+          tag_or_community.upvotes.erase(iter_upvoter);
+        } else if (iter_upvoter == tag_or_community.upvotes.end() &&
+                   iter_downvoter != tag_or_community.downvotes.end()) {
+          tag_or_community.downvotes.erase(iter_downvoter);
+          tag_or_community.upvotes.push_back(iter_account->user);
+        } else {
+          eosio_assert(false, "Fatal internal error");
+        }
       });
-  if (iter_create_or_tag_community->votes >= votes_to_create) {
+  if (iter_create_or_tag_community->upvotes.size() >= votes_to_create) {
     uint32_t pk;
     tag_community_index tag_community_table(_self, scope);
     if (tag_community_table.begin() == tag_community_table.end()) {
@@ -165,9 +176,10 @@ void peerania::vote_delete_comm_or_tag(
   eosio_assert(iter_create_or_tag_community != create_tag_community_table.end(),
                "Tag or community not found");
   if (iter_create_or_tag_community->creator == iter_account->user) {
-    if (iter_create_or_tag_community->votes < 0) {
-      update_rating(iter_account, reward * iter_create_or_tag_community->votes /
-                                      votes_to_delete);
+    int report_count = iter_create_or_tag_community->upvotes.size() -
+                       iter_create_or_tag_community->downvotes.size();
+    if (report_count < 0) {
+      update_rating(iter_account, reward * report_count / votes_to_delete);
     }
     create_tag_community_table.erase(iter_create_or_tag_community);
     eosio_assert(
@@ -177,15 +189,27 @@ void peerania::vote_delete_comm_or_tag(
     create_tag_community_table.modify(
         iter_create_or_tag_community, _self,
         [&iter_account](auto &tag_or_community) {
-          eosio_assert(
-              std::find(tag_or_community.voters.begin(),
-                        tag_or_community.voters.end(),
-                        iter_account->user) == tag_or_community.voters.end(),
-              "You already voted for this item");
-          tag_or_community.voters.push_back(iter_account->user);
-          tag_or_community.votes -= 1;
+          auto iter_upvoter =
+              std::find(tag_or_community.upvotes.begin(),
+                        tag_or_community.upvotes.end(), iter_account->user);
+          auto iter_downvoter =
+              std::find(tag_or_community.downvotes.begin(),
+                        tag_or_community.downvotes.end(), iter_account->user);
+          if (iter_upvoter == tag_or_community.upvotes.end() &&
+              iter_downvoter == tag_or_community.downvotes.end()) {
+            tag_or_community.downvotes.push_back(iter_account->user);
+          } else if (iter_upvoter == tag_or_community.upvotes.end() &&
+                     iter_downvoter != tag_or_community.downvotes.end()) {
+            tag_or_community.downvotes.erase(iter_downvoter);
+          } else if (iter_upvoter != tag_or_community.upvotes.end() &&
+                     iter_downvoter == tag_or_community.downvotes.end()) {
+            tag_or_community.upvotes.erase(iter_upvoter);
+            tag_or_community.downvotes.push_back(iter_account->user);
+          } else {
+            eosio_assert(false, "Fatal internal error");
+          }
         });
-    if (iter_create_or_tag_community->votes <= votes_to_delete) {
+    if (-iter_create_or_tag_community->downvotes.size() <= votes_to_delete) {
       update_rating(iter_create_or_tag_community->creator, reward);
       eosio_assert(
           iter_create_or_tag_community != create_tag_community_table.end(),
@@ -215,6 +239,6 @@ void peerania::unfollow_community(eosio::name user, uint16_t community_id) {
                   account.followed_communities.end(), community_id);
     eosio_assert(community != account.followed_communities.end(),
                  "You are not followed this community");
-    account.followed_communities.erase(community);             
+    account.followed_communities.erase(community);
   });
 }

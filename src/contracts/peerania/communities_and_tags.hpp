@@ -23,8 +23,8 @@ struct [[eosio::table("crtagcomm"), eosio::contract("peerania")]] crtagcomm {
   eosio::name creator;
   std::string name;
   std::string ipfs_description;
-  int16_t votes;
-  std::vector<eosio::name> voters;
+  std::vector<eosio::name> upvotes;
+  std::vector<eosio::name> downvotes;
   uint64_t primary_key() const {
     return id;
   }

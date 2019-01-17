@@ -392,8 +392,8 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         self.assertTrue(compare(accounts_e, self.table('account', 'allaccounts'), var, True))
         c = self.table('crtagcomm', 'allcomm')
         t = self.table('crtagcomm', get_tag_scope(1))
-        for i in range(4):
-            if i < 3:
+        for i in range(3):
+            if i < 2:
                 self.assertTrue(var['bob_rt'] == defs['CREATE_TAG_ALLOWED'])
                 self.action('vtdeltag', {'user': voters[i], 'community_id': 1, 'tag_id': t[0]['id']}, voters[i], f'{voters[i]} vote delete tag')
             else:

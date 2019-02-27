@@ -1,6 +1,7 @@
 set -ex
 
 cleos push action peerania.dev registeracc '{"user": "alice", "display_name": "Alice", "ipfs_profile": "Qmb7RRtjXTpXw3vs93LtSXL5gzhjFz7EBZDarbfRnyitLY"}' -p alice
+cleos push action peerania.dev registeracc '{"user": "bob", "display_name": "Bobby", "ipfs_profile": "QmYBPXQMG32aUVqtMuptyR4dzgjykmBozyuDbvRGXxc1DK"}' -p bob
 cleos push action peerania.dev registeracc '{"user": "carol", "display_name": "Carol", "ipfs_profile": "Qmc7Cq35A27VN4ft9UfbQ4D5azGA6g2GKTEAyC6sZjsDK9"}' -p carol
 cleos push action peerania.dev registeracc '{"user": "user1", "display_name": "Roman", "ipfs_profile": "QmYBPXQMG32aUVqtMuptyR4dzgjykmBozyuDbvRGXxc1DK"}' -p user1
 cleos push action peerania.dev setaccrtmpc '{"user": "alice", "rating": 100, "moderation_points": 10}' -p alice

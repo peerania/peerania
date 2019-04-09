@@ -84,7 +84,7 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
         community_table.emplace(_self, [i, &index](auto &community) {
           community.id = i;
           community.name = "DEBUG" + index;
-          community.ipfs_description = "DEBUG_COMMUNITY_IPFS" + index;
+          community.ipfs_description = "QmPkZZtizV8Qat2Y9HkBWmgEX1L8p6VJZi1c6A2cf4vyfu";
           community.popularity = 0;
         });
         tag_community_index tag_table(_self, get_tag_scope(i));
@@ -92,8 +92,7 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
           tag_table.emplace(_self, [&index, j](auto &tag) {
             tag.id = j;
             tag.name = "Tag " + std::to_string(j) + " community " + index;
-            tag.ipfs_description =
-                "DEBUG_COMMUNITY" + index + "_TAG " + std::to_string(j);
+            tag.ipfs_description = "QmPkZZtizV8Qat2Y9HkBWmgEX1L8p6VJZi1c6A2cf4vyfu";
             tag.popularity = 0;
           });
         }

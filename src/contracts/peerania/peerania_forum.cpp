@@ -13,14 +13,17 @@ void peerania::post_question(eosio::name user, uint16_t community_id,
   assert_ipfs(ipfs_link);
   assert_title(title);
   auto iter_account = find_account(user);
-  assert_allowed(*iter_account, user, Action::POST_QUESTION);
-  update_popularity(community_id, tags, true);
-  account_table.modify(iter_account, _self, [](auto &account) {
-    account.update();
+  update_rating(iter_account, POST_QUESTION_REWARD, [](auto &account) {
     eosio_assert(account.questions_left > 0, "Reached weekly question limit");
     account.questions_left -= 1;
+    account.questions_asked += 1;
   });
+  assert_allowed(*iter_account, user, Action::POST_QUESTION);
   uint64_t question_id = get_reversive_pk(question_table, MAX_QUESTION_ID);
+    // sort - unique
+  for (int i = 0; i < tags.size(); ++i)
+    for (int j = i + 1; j < tags.size(); ++j)
+      if (tags[i] == tags[j]) eosio_assert(false, "Duplicate tag");
   question_table.emplace(_self, [&](auto &question) {
     question.id = question_id;
     question.community_id = community_id;
@@ -35,7 +38,8 @@ void peerania::post_question(eosio::name user, uint16_t community_id,
   user_questions_table.emplace(_self, [question_id](auto &usr_question) {
     usr_question.question_id = question_id;
   });
-  update_rating(iter_account, POST_QUESTION_REWARD);
+  update_community_statistics(community_id, 1, 0, 0, 0);
+  update_tags_statistics(community_id, tags, 1);
 }
 
 void peerania::post_answer(eosio::name user, uint64_t question_id,
@@ -67,8 +71,9 @@ void peerania::post_answer(eosio::name user, uint64_t question_id,
     usr_answer.question_id = question_id;
     usr_answer.answer_id = answer_id;
   });
-
-  update_rating(iter_account, POST_ANSWER_REWARD);
+  update_community_statistics(iter_question->community_id, 0, 1, 0, 0);
+  update_rating(iter_account, POST_ANSWER_REWARD,
+                [](auto &account) { account.answers_given += 1; });
 }
 
 void peerania::remove_user_question(eosio::name user, uint64_t question_id) {
@@ -131,12 +136,14 @@ void peerania::delete_question(eosio::name user, uint64_t question_id) {
   assert_allowed(*iter_account, iter_question->user, Action::DELETE_QUESTION);
   eosio_assert(iter_question->answers.empty(),
                "You can't delete not empty question");
-  update_popularity(iter_question->community_id, iter_question->tags, false);
+  update_community_statistics(iter_question->community_id, -1, 0, 0, 0);
+  update_tags_statistics(iter_question->community_id, iter_question->tags, -1);
   question_table.erase(iter_question);
   eosio_assert(iter_question != question_table.end(),
                "Address not erased properly");
   remove_user_question(user, question_id);
-  update_rating(iter_account, DELETE_OWN_QUESTION_REWARD);
+  update_rating(iter_account, DELETE_OWN_QUESTION_REWARD,
+                [](auto &account) { account.questions_asked -= 1; });
 }
 
 void peerania::delete_answer(eosio::name user, uint64_t question_id,
@@ -152,7 +159,9 @@ void peerania::delete_answer(eosio::name user, uint64_t question_id,
         question.answers.erase(iter_answer);
       });
   remove_user_answer(user, question_id);
-  update_rating(iter_account, DELETE_OWN_ANSWER_REWARD);
+  update_community_statistics(iter_question->community_id, 0, -1, 0, 0);
+  update_rating(iter_account, DELETE_OWN_ANSWER_REWARD,
+                [](auto &account) { account.answers_given += 1; });
 }
 
 void peerania::delete_comment(eosio::name user, uint64_t question_id,
@@ -188,9 +197,14 @@ void peerania::modify_question(eosio::name user, uint64_t question_id,
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
   assert_allowed(*iter_account, iter_question->user, Action::MODIFY_QUESTION);
+  for (int i = 0; i < tags.size(); ++i)
+    for (int j = i + 1; j < tags.size(); ++j)
+      if (tags[i] == tags[j]) eosio_assert(false, "Duplicate tag");
   eosio_assert(tags.size() <= MAX_TAG_COUNT, "Too many tags");
-  update_popularity(iter_question->community_id, iter_question->tags, false);
-  update_popularity(community_id, tags, true);
+  update_community_statistics(iter_question->community_id, -1, 0, 0, 0);
+  update_tags_statistics(iter_question->community_id, iter_question->tags, -1);
+  update_community_statistics(community_id, 1, 0, 0, 0);
+  update_tags_statistics(community_id, tags, 1);
   question_table.modify(
       iter_question, _self,
       [&ipfs_link, &title, community_id, &tags](auto &question) {
@@ -260,7 +274,8 @@ void peerania::mark_answer_as_correct(eosio::name user, uint64_t question_id,
       // Reward question and answer users
       if (iter_answer->user != user) {
         update_rating(iter_account, ACCEPT_ANSWER_AS_CORRECT_REWARD);
-        update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+        update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD,
+                      [](auto &account) { account.correct_answers += 1; });
       }
     } else {
       // One of answers is marked as correct. Find this one,
@@ -270,13 +285,14 @@ void peerania::mark_answer_as_correct(eosio::name user, uint64_t question_id,
                                          iter_question->correct_answer_id);
       // check internal error iter_old_answer
       if (iter_old_answer->user != user)
-        update_rating(iter_old_answer->user,
-                      -ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+        update_rating(iter_old_answer->user, -ANSWER_ACCEPTED_AS_CORRECT_REWARD,
+                      [](auto &account) { account.correct_answers -= 1; });
       else
         update_rating(iter_account, ACCEPT_ANSWER_AS_CORRECT_REWARD);
 
       if (iter_answer->user != user)
-        update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+        update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD,
+                      [](auto &account) { account.correct_answers += 1; });
       else
         update_rating(iter_account, -ACCEPT_ANSWER_AS_CORRECT_REWARD);
     }
@@ -292,9 +308,12 @@ void peerania::mark_answer_as_correct(eosio::name user, uint64_t question_id,
     // check internal error iter_old_answer
     if (iter_old_answer->user != user) {
       update_rating(iter_account, -ACCEPT_ANSWER_AS_CORRECT_REWARD);
-      update_rating(iter_old_answer->user, -ANSWER_ACCEPTED_AS_CORRECT_REWARD);
+      update_rating(iter_old_answer->user, -ANSWER_ACCEPTED_AS_CORRECT_REWARD,
+                    [](auto &account) { account.correct_answers -= 1; });
     }
   }
+  update_community_statistics(iter_question->community_id, 0, 0,
+                              answer_id == EMPTY_ANSWER_ID ? 1 : -1, 0);
   question_table.modify(iter_question, _self, [answer_id](auto &question) {
     question.correct_answer_id = answer_id;
   });

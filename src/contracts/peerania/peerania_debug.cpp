@@ -78,23 +78,23 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
             constants.id = all_constants_table.available_primary_key();
             constants.start_period_time = current_time;
           });
-      tag_community_index community_table(_self, scope_all_communities);
+      community_table_index community_table(_self, scope_all_communities);
       for (int i = 1; i < 4; ++i) {
         std::string index = std::to_string(i);
         community_table.emplace(_self, [i, &index](auto &community) {
           community.id = i;
           community.name = "DEBUG" + index;
-          community.ipfs_description = "DEBUG_COMMUNITY_IPFS" + index;
-          community.popularity = 0;
+          community.ipfs_description = "QmPkZZtizV8Qat2Y9HkBWmgEX1L8p6VJZi1c6A2cf4vyfu";
+          community.questions_asked = 0;
         });
-        tag_community_index tag_table(_self, get_tag_scope(i));
+        tag_table_index tag_table(_self, get_tag_scope(i));
         for (int j = 0; j < 6 / i; ++j) {
           tag_table.emplace(_self, [&index, j](auto &tag) {
             tag.id = j;
             tag.name = "Tag " + std::to_string(j) + " community " + index;
             tag.ipfs_description =
                 "DEBUG_COMMUNITY" + index + "_TAG " + std::to_string(j);
-            tag.popularity = 0;
+            tag.questions_asked = 0;
           });
         }
       }
@@ -139,7 +139,7 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
     }
 
     // clean create community table
-    create_tag_community_index create_community_table(_self,
+    create_community_index create_community_table(_self,
                                                       scope_all_communities);
     auto iter_create_community = create_community_table.begin();
     while (iter_create_community != create_community_table.end()) {
@@ -148,11 +148,11 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
     }
 
     // clean create tags and tags tables
-    tag_community_index community_table(_self, scope_all_communities);
+    community_table_index community_table(_self, scope_all_communities);
     auto iter_community = community_table.begin();
     while (iter_community != community_table.end()) {
       // clean all tags for creation
-      create_tag_community_index create_tag_table(
+      create_tag_index create_tag_table(
           _self, get_tag_scope(iter_community->id));
       auto iter_create_tag = create_tag_table.begin();
       while (iter_create_tag != create_tag_table.end()) {
@@ -160,7 +160,7 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
       }
 
       // Clean tags
-      tag_community_index tag_table(_self, get_tag_scope(iter_community->id));
+      tag_table_index tag_table(_self, get_tag_scope(iter_community->id));
       auto iter_tag = tag_table.begin();
       while (iter_tag != tag_table.end()) {
         iter_tag = tag_table.erase(iter_tag);

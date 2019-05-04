@@ -2,12 +2,12 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/name.hpp>
 #include <string>
+#include "economy.h"
 #include "peerania_types.h"
 #include "property.hpp"
 #include "status.hpp"
-#include "economy.h"
 
-struct [[eosio::table("account"), eosio::contract("peerania")]] account {
+struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
   eosio::name user;
   // mandatory fields
   std::string display_name;
@@ -21,6 +21,10 @@ struct [[eosio::table("account"), eosio::contract("peerania")]] account {
   uint16_t last_update_period = 0;
   uint8_t questions_left = 0;
   std::vector<uint16_t> followed_communities;
+  uint32_t questions_asked = 0;
+  uint32_t answers_given = 0;
+  uint32_t correct_answers = 0;
+
   void update() {
     uint16_t current_period =
         (now() - registration_time) / ACCOUNT_STAT_RESET_PERIOD;
@@ -28,8 +32,7 @@ struct [[eosio::table("account"), eosio::contract("peerania")]] account {
     if (periods_have_passed > 0) {
       if (rating < 0) {
         rating += periods_have_passed * BAN_RATING_INCREMENT_PER_PERIOD;
-        if(rating > 0)
-          rating = 0;
+        if (rating > 0) rating = 0;
       } else {
         questions_left = status_question_limit(rating);
         moderation_points = status_moderation_points(rating);
@@ -44,7 +47,8 @@ struct [[eosio::table("account"), eosio::contract("peerania")]] account {
       account,
       (user)(display_name)(ipfs_profile)(registration_time)(string_properties)(
           integer_properties)(rating)(moderation_points)(pay_out_rating)(
-          last_update_period)(questions_left)(followed_communities))
+          last_update_period)(questions_left)(followed_communities)(
+          questions_asked)(answers_given)(correct_answers))
 };
 
 #define MIN_DISPLAY_NAME_LEN 3

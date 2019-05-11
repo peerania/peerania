@@ -5,7 +5,7 @@ from unittest import main
 
 
 class ForumGlobalTests(peeraniatest.PeeraniaTest):
-    def test__un_follow_community(self):
+    def test_un_follow_community(self):
         begin('Test follow community, unfollow community')
         alice = self.register_alice_account()
         account_e = [{
@@ -27,7 +27,7 @@ class ForumGlobalTests(peeraniatest.PeeraniaTest):
         self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
 
-    def test__un_follow_community_another_auth_failed(self):
+    def test_un_follow_community_another_auth_failed(self):
         begin('Test follow community, unfollow community with another owner auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()

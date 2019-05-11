@@ -131,7 +131,6 @@ void peerania::vote_create_community(eosio::name user, uint32_t community_id) {
           eosio_assert(false, "Fatal internal error");
         }
       });
-  // add tag transfer
   if (iter_create_community->upvotes.size() >= VOTES_TO_CREATE_COMMUNITY) {
     community_table_index community_table(_self, scope_all_communities);
     uint16_t community_pk = get_direct_pk(community_table, MAX_COMMUNITY_ID);

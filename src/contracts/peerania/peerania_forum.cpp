@@ -20,7 +20,7 @@ void peerania::post_question(eosio::name user, uint16_t community_id,
   });
   assert_allowed(*iter_account, user, Action::POST_QUESTION);
   uint64_t question_id = get_reversive_pk(question_table, MAX_QUESTION_ID);
-    // sort - unique
+  // sort - unique
   for (int i = 0; i < tags.size(); ++i)
     for (int j = i + 1; j < tags.size(); ++j)
       if (tags[i] == tags[j]) eosio_assert(false, "Duplicate tag");
@@ -161,7 +161,7 @@ void peerania::delete_answer(eosio::name user, uint64_t question_id,
   remove_user_answer(user, question_id);
   update_community_statistics(iter_question->community_id, 0, -1, 0, 0);
   update_rating(iter_account, DELETE_OWN_ANSWER_REWARD,
-                [](auto &account) { account.answers_given += 1; });
+                [](auto &account) { account.answers_given -= 1; });
 }
 
 void peerania::delete_comment(eosio::name user, uint64_t question_id,
@@ -276,6 +276,9 @@ void peerania::mark_answer_as_correct(eosio::name user, uint64_t question_id,
         update_rating(iter_account, ACCEPT_ANSWER_AS_CORRECT_REWARD);
         update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD,
                       [](auto &account) { account.correct_answers += 1; });
+      } else {
+        update_rating(iter_answer->user, 0,
+                      [](auto &account) { account.correct_answers += 1; });
       }
     } else {
       // One of answers is marked as correct. Find this one,
@@ -288,13 +291,15 @@ void peerania::mark_answer_as_correct(eosio::name user, uint64_t question_id,
         update_rating(iter_old_answer->user, -ANSWER_ACCEPTED_AS_CORRECT_REWARD,
                       [](auto &account) { account.correct_answers -= 1; });
       else
-        update_rating(iter_account, ACCEPT_ANSWER_AS_CORRECT_REWARD);
+        update_rating(iter_account, ACCEPT_ANSWER_AS_CORRECT_REWARD,
+                      [](auto &account) { account.correct_answers -= 1; });
 
       if (iter_answer->user != user)
         update_rating(iter_answer->user, ANSWER_ACCEPTED_AS_CORRECT_REWARD,
                       [](auto &account) { account.correct_answers += 1; });
       else
-        update_rating(iter_account, -ACCEPT_ANSWER_AS_CORRECT_REWARD);
+        update_rating(iter_account, -ACCEPT_ANSWER_AS_CORRECT_REWARD,
+                      [](auto &account) { account.correct_answers += 1; });
     }
   } else {
     // Set question to "without answer"
@@ -312,8 +317,12 @@ void peerania::mark_answer_as_correct(eosio::name user, uint64_t question_id,
                     [](auto &account) { account.correct_answers -= 1; });
     }
   }
-  update_community_statistics(iter_question->community_id, 0, 0,
-                              answer_id == EMPTY_ANSWER_ID ? 1 : -1, 0);
+  if (iter_question->correct_answer_id == EMPTY_ANSWER_ID &&
+      answer_id != EMPTY_ANSWER_ID)
+    update_community_statistics(iter_question->community_id, 0, 0, 1, 0);
+  else if (iter_question->correct_answer_id != EMPTY_ANSWER_ID &&
+           answer_id == EMPTY_ANSWER_ID)
+    update_community_statistics(iter_question->community_id, 0, 0, -1, 0);
   question_table.modify(iter_question, _self, [answer_id](auto &question) {
     question.correct_answer_id = answer_id;
   });

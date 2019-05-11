@@ -122,19 +122,22 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
           }
         }
       });
-  // ADDDDDDDDD answer count reduse
-  // Means that answer, marked as correct was deleted
   bool is_correct_answer_deleted = false;
   if (delete_answer) {
     remove_user_answer(item_user, iter_question->id);
-    is_correct_answer_deleted = iter_question->correct_answer_id != old_correct_answer_id;
+    is_correct_answer_deleted =
+        iter_question->correct_answer_id != old_correct_answer_id;
     if (is_correct_answer_deleted) {
       update_rating(iter_question->user, -ACCEPT_ANSWER_AS_CORRECT_REWARD);
     }
+    update_community_statistics(iter_question->community_id, 0, -1,
+                                is_correct_answer_deleted ? -1 : 0, 0);
   }
 
   if (delete_question) {
-    update_community_statistics(iter_question->community_id, -1, 0, 0, 0);
+    update_community_statistics(
+        iter_question->community_id, -1, 0 - (int)iter_question->answers.size(),
+        iter_question->correct_answer_id == EMPTY_ANSWER_ID ? 0 : -1, 0);
     update_tags_statistics(iter_question->community_id, iter_question->tags,
                            -1);
     remove_user_question(iter_question->user, iter_question->id);
@@ -161,14 +164,16 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
                  "Address not erased properly");
   }
   // user_rating_change = 0 also means that item_user was not found
-  if(item_user.value != 0)
+  if (item_user.value != 0)
     update_rating(item_user, user_rating_change,
-                    [delete_question, delete_answer, is_correct_answer_deleted](auto &account) {
-                      if(delete_question) {
-                        account.questions_asked -= 1;
-                      } else if (delete_answer){
-                        account.answers_given -= 1;
-                        if (is_correct_answer_deleted) account.correct_answers -= 1;
-                      }
-                    });
+                  [delete_question, delete_answer,
+                   is_correct_answer_deleted](auto &account) {
+                    if (delete_question) {
+                      account.questions_asked -= 1;
+                    } else if (delete_answer) {
+                      account.answers_given -= 1;
+                      if (is_correct_answer_deleted)
+                        account.correct_answers -= 1;
+                    }
+                  });
 }

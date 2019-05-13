@@ -63,10 +63,8 @@ void peerania::delcomment(eosio::name user, uint64_t question_id,
 }
 
 void peerania::modquestion(eosio::name user, uint64_t question_id,
-                               uint16_t community_id,
-                               std::vector<uint32_t> tags,
-                               std::string title,
-                               std::string ipfs_link) {
+                           uint16_t community_id, std::vector<uint32_t> tags,
+                           std::string title, std::string ipfs_link) {
   require_auth(user);
   modify_question(user, question_id, community_id, tags, title, ipfs_link);
 }
@@ -109,9 +107,10 @@ void peerania::votedelete(eosio::name user, uint64_t question_id,
 
 // Tags and communities
 void peerania::crcommunity(eosio::name user, std::string name,
-                           std::string ipfs_description) {
+                           std::string ipfs_description,
+                           std::vector<suggest_tag> suggested_tags) {
   require_auth(user);
-  create_community(user, name, ipfs_description);
+  create_community(user, name, ipfs_description, suggested_tags);
 }
 
 void peerania::crtag(eosio::name user, uint16_t community_id, std::string name,
@@ -142,12 +141,12 @@ void peerania::vtdeltag(eosio::name user, uint16_t community_id,
   vote_delete_tag(user, community_id, tag_id);
 }
 
-void peerania::followcomm(eosio::name user, uint16_t community_id){
+void peerania::followcomm(eosio::name user, uint16_t community_id) {
   require_auth(user);
   follow_community(user, community_id);
 }
 
-void peerania::unfollowcomm(eosio::name user, uint16_t community_id){
+void peerania::unfollowcomm(eosio::name user, uint16_t community_id) {
   require_auth(user);
   unfollow_community(user, community_id);
 }
@@ -157,4 +156,5 @@ EOSIO_DISPATCH(
     (registeracc)(setaccintprp)(setaccstrprp)(setaccprof)(postquestion)(
         postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(modanswer)(
         modquestion)(modcomment)(upvote)(downvote)(mrkascorrect)(votedelete)(
-        crtag)(crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm))
+        crtag)(crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(
+        unfollowcomm))

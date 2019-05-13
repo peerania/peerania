@@ -94,7 +94,8 @@ CONTRACT peerania : public eosio::contract {
 
   // Tags and communities
   ACTION crcommunity(eosio::name user, std::string name,
-                     std::string ipfs_description);
+                     std::string ipfs_description,
+                     std::vector<suggest_tag> suggested_tags);
 
   ACTION crtag(eosio::name user, uint16_t community_id, std::string name,
                std::string ipfs_description);
@@ -120,12 +121,22 @@ CONTRACT peerania : public eosio::contract {
   question_index::const_iterator find_question(uint64_t question_id);
   uint64_t get_tag_scope(uint16_t community_id);
 
-  void update_rating(account_index::const_iterator iter_account,
-                     int rating_change);
+  void update_rating_base(
+      account_index::const_iterator iter_account, int rating_change,
+      const std::function<void(account &)> account_modifying_lambda, bool hasLambda);
 
   void update_rating(eosio::name user, int rating_change);
 
- //private:
+  void update_rating( eosio::name user, int rating_change,
+    const std::function<void(account &)> account_modifying_lambda);
+
+  void update_rating(account_index::const_iterator iter_account, int rating_change);
+
+  void update_rating(
+      account_index::const_iterator iter_account, int rating_change,
+      const std::function<void(account &)> account_modifying_lambda);
+
+  // private:
   void register_account(eosio::name user, std::string display_name,
                         const std::string &ipfs_profile);
 
@@ -168,7 +179,8 @@ CONTRACT peerania : public eosio::contract {
                       const std::string &ipfs_link);
 
   void create_community(eosio::name user, const std::string &name,
-                        const std::string &ipfs_description);
+                        const std::string &ipfs_description,
+                        const std::vector<suggest_tag> &suggested_tags);
 
   void create_tag(eosio::name user, uint16_t commuinty_id,
                   const std::string &name, const std::string &ipfs_description);
@@ -204,11 +216,13 @@ CONTRACT peerania : public eosio::contract {
   void vote_for_deletion(eosio::name user, uint64_t question_id,
                          uint16_t answer_id, uint16_t comment_id);
 
-  void reduce_moderation_points(account_index::const_iterator iter_account,
-                                int8_t moderation_points_change);
+  void update_community_statistics(
+      uint16_t commuinty_id, int8_t questions_asked, int8_t answers_given,
+      int8_t correct_answers, int8_t users_subscribed);
 
-  void update_popularity(uint16_t commuinty_id,
-                         const std::vector<uint32_t> &tags, bool increase);
+  void update_tags_statistics(uint16_t community_id,
+                              std::vector<uint32_t> tags_id,
+                              int8_t questions_asked);
 
   void assert_community_exist(uint16_t community_id);
 

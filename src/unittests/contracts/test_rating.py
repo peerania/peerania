@@ -342,7 +342,7 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account(defs['CREATE_COMMUNITY_ALLOWED'], defs['MODERATION_POINTS_CREATE_COMMUNITY'])
         bob = self.register_bob_account(defs['CREATE_TAG_ALLOWED'], defs['MODERATION_POINTS_CREATE_TAG'])
         self.action('crcommunity', {'user': alice, 'name': 'alice community',
-                              'ipfs_description': 'AC',}, alice, 'Alice create community')
+                              'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community')
         self.action('crtag', {'user': bob, 'name': 'bob tag',  'community_id': 1,
                                     'ipfs_description': 'BCM'}, bob, 'Bob create ')
         voters = [self.register_carol_account(), self.register_dan_account(),
@@ -354,8 +354,8 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         ]
         var = {}
         self.assertTrue(compare(accounts_e, self.table('account', 'allaccounts'), var, True))
-        c = self.table('crtagcomm', 'allcomm')
-        t = self.table('crtagcomm', get_tag_scope(1))
+        c = self.table('crcommtb', 'allcomm')
+        t = self.table('crtagtb', get_tag_scope(1))
         self.assertTrue(var['alice_mdp'] == 0)
         self.assertTrue(var['bob_mdp'] == 0)
         for i in range(4):
@@ -378,7 +378,7 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account(defs['CREATE_COMMUNITY_ALLOWED'], defs['MODERATION_POINTS_CREATE_COMMUNITY'])
         bob = self.register_bob_account(defs['CREATE_TAG_ALLOWED'], defs['MODERATION_POINTS_CREATE_TAG'])
         self.action('crcommunity', {'user': alice, 'name': 'alice community',
-                              'ipfs_description': 'AC',}, alice, 'Alice create community')
+                              'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community')
         self.action('crtag', {'user': bob, 'name': 'bob tag',  'community_id': 1,
                                     'ipfs_description': 'BCM'}, bob, 'Bob create ')
         voters = [self.register_carol_account(), self.register_dan_account(),
@@ -390,13 +390,15 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         ]
         var = {}
         self.assertTrue(compare(accounts_e, self.table('account', 'allaccounts'), var, True))
-        c = self.table('crtagcomm', 'allcomm')
-        t = self.table('crtagcomm', get_tag_scope(1))
+        c = self.table('crcommtb', 'allcomm')
+        t = self.table('crtagtb', get_tag_scope(1))
         for i in range(3):
             if i < 2:
+                print(var['bob_rt'])
                 self.assertTrue(var['bob_rt'] == defs['CREATE_TAG_ALLOWED'])
                 self.action('vtdeltag', {'user': voters[i], 'community_id': 1, 'tag_id': t[0]['id']}, voters[i], f'{voters[i]} vote delete tag')
             else:
+                print(var['bob_rt'])
                 self.assertTrue(var['bob_rt'] == defs['CREATE_TAG_ALLOWED'] + defs['TAG_DELETED_REWARD'])
             self.assertTrue(var['alice_rt'] == defs['CREATE_COMMUNITY_ALLOWED'])
             self.action('vtdelcomm', {'user': voters[i], 'community_id': c[0]['id']}, voters[i], f'{voters[i]} vote delete community')
@@ -515,6 +517,15 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
             #print(self.var[key], value)
             self.assertTrue(self.var[key] == value)
 
+
+    def get_stub_suggested_tags(self):
+        tags = []
+        for i in range(0, 10):
+            tags.append({
+                'name': f'Tag {i}',
+                'ipfs_description': f'IPFS of tag {i}'
+            })
+        return tags
 
 if __name__ == '__main__':
     main()

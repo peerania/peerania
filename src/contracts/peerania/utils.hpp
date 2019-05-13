@@ -49,3 +49,15 @@ uint64_t get_reversive_pk(const table_index &table, uint64_t max_pk) {
     return --pk;
   }
 }
+
+template <typename table_index>
+uint64_t get_direct_pk(const table_index &table, uint64_t max_pk) {
+  if (table.begin() == table.end()) {
+    return 1;
+  } else {
+    // largest primary key currently in table
+    auto pk = table.rbegin()->primary_key();
+    eosio_assert(pk < max_pk, "No available primary key");
+    return ++pk;
+  }
+}

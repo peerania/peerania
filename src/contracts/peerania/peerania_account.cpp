@@ -54,9 +54,22 @@ void peerania::set_account_profile(eosio::name user,
   });
 }
 
-void peerania::update_rating(account_index::const_iterator iter_account,
-                             int rating_change) {
-  if (rating_change == 0) return;
+void peerania::update_rating_base(
+    account_index::const_iterator iter_account, int rating_change,
+    const std::function<void(account &)> account_modifying_lambda,
+    bool hasLambda) {
+  if (rating_change == 0) {
+    if (hasLambda)
+      account_table.modify(
+          iter_account, _self, [account_modifying_lambda](auto &account) {
+            account.update();
+            auto const rating_before = account.rating;
+            account_modifying_lambda(account);
+            eosio_assert(account.rating == rating_before,
+                         "Change rating in lambda is forbidden");
+          });
+    return;
+  }
   const uint16_t current_period = get_period(now());
   int new_rating = iter_account->rating + rating_change;
   if (new_rating < MIN_RATING) new_rating = MIN_RATING;
@@ -140,33 +153,45 @@ void peerania::update_rating(account_index::const_iterator iter_account,
           period_rating.rating_to_award += rating_to_award_change;
         });
   }
-  account_table.modify(
-      iter_account, _self, [rating_to_award_change, new_rating](auto &account) {
-        // Real value of paid out rating for this week is
-        // paid_out_rating - rating_to_award Proof
-        // paid_out_rating on week_{n-1} <= paid_out_rating on
-        // week_{n} for any n Each week
-        account.pay_out_rating += rating_to_award_change;
-        account.rating = new_rating;
-        account.update();  // Think about behavior of this part(rating could be
-                           // rewritten)!!!
-      });
-}
+  account_table.modify(iter_account, _self,
+                       [rating_to_award_change, new_rating, hasLambda,
+                        account_modifying_lambda](auto &account) {
+                         // Real value of paid out rating for this week is
+                         // paid_out_rating - rating_to_award Proof
+                         // paid_out_rating on week_{n-1} <= paid_out_rating on
+                         // week_{n} for any n Each week
+                         account.pay_out_rating += rating_to_award_change;
+                         account.rating = new_rating;
+                         account.update();
 
-void peerania::reduce_moderation_points(
-    account_index::const_iterator iter_account,
-    int8_t moderation_points_change) {
-  account_table.modify(
-      iter_account, _self, [moderation_points_change](auto &account) {
-        account.update();
-        eosio_assert(account.moderation_points - moderation_points_change >= 0,
-                     "Not enought moderation point");
-        account.moderation_points -= moderation_points_change;
-      });
+                         auto const rating_before = account.rating;
+                         if (hasLambda) account_modifying_lambda(account);
+                         eosio_assert(account.rating == rating_before,
+                                      "Change rating in lambda is forbidden");
+                       });
 }
 
 void peerania::update_rating(eosio::name user, int rating_change) {
-  update_rating(find_account(user), rating_change);
+  update_rating_base(find_account(user), rating_change, nullptr, false);
+}
+
+void peerania::update_rating(
+    account_index::const_iterator iter_account, int rating_change,
+    const std::function<void(account &)> account_modifying_lambda) {
+  update_rating_base(iter_account, rating_change, account_modifying_lambda,
+                     true);
+}
+
+void peerania::update_rating(
+    eosio::name user, int rating_change,
+    const std::function<void(account &)> account_modifying_lambda) {
+  update_rating_base(find_account(user), rating_change,
+                     account_modifying_lambda, true);
+}
+
+void peerania::update_rating(account_index::const_iterator iter_account,
+                             int rating_change) {
+  update_rating_base(iter_account, rating_change, nullptr, false);
 }
 
 account_index::const_iterator peerania::find_account(eosio::name user) {

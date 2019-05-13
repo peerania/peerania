@@ -155,8 +155,8 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
     auto iter_community = community_table.begin();
     while (iter_community != community_table.end()) {
       // clean all tags for creation
-      create_tag_index create_tag_table(_self,
-                                        get_tag_scope(iter_community->id));
+      create_tag_index create_tag_table(
+          _self, get_tag_scope(iter_community->id));
       auto iter_create_tag = create_tag_table.begin();
       while (iter_create_tag != create_tag_table.end()) {
         iter_create_tag = create_tag_table.erase(iter_create_tag);

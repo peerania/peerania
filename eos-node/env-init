@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -ex
+
+EOS_NODE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+$EOS_NODE_DIR/init-accounts
+$EOS_NODE_DIR/deploy
+$EOS_NODE_DIR/push-action

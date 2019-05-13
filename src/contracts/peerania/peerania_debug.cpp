@@ -81,11 +81,16 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
       community_table_index community_table(_self, scope_all_communities);
       for (int i = 1; i < 4; ++i) {
         std::string index = std::to_string(i);
-        community_table.emplace(_self, [i, &index](auto &community) {
+        community_table.emplace(_self, [i, &index, current_time](auto &community) {
           community.id = i;
           community.name = "DEBUG" + index;
-          community.ipfs_description = "QmPkZZtizV8Qat2Y9HkBWmgEX1L8p6VJZi1c6A2cf4vyfu";
+          community.ipfs_description =
+              "QmPkZZtizV8Qat2Y9HkBWmgEX1L8p6VJZi1c6A2cf4vyfu";
+          community.creation_time = current_time;
           community.questions_asked = 0;
+          community.answers_given = 0;
+          community.correct_answers = 0;
+          community.users_subscribed = 0;
         });
         tag_table_index tag_table(_self, get_tag_scope(i));
         for (int j = 0; j < 6 / i; ++j) {
@@ -139,8 +144,7 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
     }
 
     // clean create community table
-    create_community_index create_community_table(_self,
-                                                      scope_all_communities);
+    create_community_index create_community_table(_self, scope_all_communities);
     auto iter_create_community = create_community_table.begin();
     while (iter_create_community != create_community_table.end()) {
       iter_create_community =
@@ -152,8 +156,8 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
     auto iter_community = community_table.begin();
     while (iter_community != community_table.end()) {
       // clean all tags for creation
-      create_tag_index create_tag_table(
-          _self, get_tag_scope(iter_community->id));
+      create_tag_index create_tag_table(_self,
+                                        get_tag_scope(iter_community->id));
       auto iter_create_tag = create_tag_table.begin();
       while (iter_create_tag != create_tag_table.end()) {
         iter_create_tag = create_tag_table.erase(iter_create_tag);
@@ -198,7 +202,8 @@ void apply(uint64_t receiver, uint64_t code, uint64_t action) {
   if (code == receiver) {
     switch (action) {
       EOSIO_DISPATCH_HELPER(peerania_d, (chnguserrt)(resettables)(setaccrtmpc))
-      EOSIO_DISPATCH_HELPER(peerania,
+      EOSIO_DISPATCH_HELPER(
+          peerania,
           (registeracc)(setaccintprp)(setaccstrprp)(setaccprof)(postquestion)(
               postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(
               modanswer)(modquestion)(modcomment)(upvote)(downvote)(

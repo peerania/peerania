@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
+EOS_NODE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # deploy token contract
-cleos set contract peerania.dev ../src/contracts/peerania -p peerania.dev
+cleos set contract peerania.dev $EOS_NODE_DIR/../src/contracts/peerania -p peerania.dev

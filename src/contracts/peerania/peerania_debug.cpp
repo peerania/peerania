@@ -85,7 +85,7 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
           community.id = i;
           community.name = "DEBUG" + index;
           community.ipfs_description =
-              "QmPkZZtizV8Qat2Y9HkBWmgEX1L8p6VJZi1c6A2cf4vyfu";
+              "Qme1CiDMWNNYqRLxzXmsP8GSngUfoi34juTKBSmSVHGFCE";
           community.creation_time = current_time;
           community.questions_asked = 0;
           community.answers_given = 0;

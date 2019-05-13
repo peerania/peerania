@@ -6,7 +6,7 @@ cleos push action peerania.dev registeracc '{"user": "user1", "display_name": "R
 cleos push action peerania.dev setaccrtmpc '{"user": "bob", "rating": 3000, "moderation_points": 10}' -p bob
 cleos push action peerania.dev setaccrtmpc '{"user": "user1", "rating": 3000, "moderation_points": 100}' -p user1
 cleos push action peerania.dev followcomm '{"user": "user1", "community_id": "1"}' -p user1
-cleos push action peerania.dev crcommunity '{"user": "bob", "name": "JJQJQJ", "ipfs_description": "QmPkZZtizV8Qat2Y9HkBWmgEX1L8p6VJZi1c6A2cf4vyfu", "suggested_tags": [
+cleos push action peerania.dev crcommunity '{"user": "bob", "name": "JJQJQJ", "ipfs_description": "Qme1CiDMWNNYqRLxzXmsP8GSngUfoi34juTKBSmSVHGFCE", "suggested_tags": [
     {"name": "TAG1", "ipfs_description": "QmZrh8RVZwmX8H1DCUgNZ486U9HKsApkFLnzCf5sP9Aa1M"},
     {"name": "TAG2", "ipfs_description": "QmZrh8RVZwmX8H1DCUgNZ486U9HKsApkFLnzCf5sP9Aa1M"},
     {"name": "TAG3", "ipfs_description": "QmZrh8RVZwmX8H1DCUgNZ486U9HKsApkFLnzCf5sP9Aa1M"},

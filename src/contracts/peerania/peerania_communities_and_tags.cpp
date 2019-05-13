@@ -7,8 +7,6 @@ void peerania::update_community_statistics(uint16_t community_id,
                                            int8_t users_subscribed) {
   community_table_index community_table(_self, scope_all_communities);
   auto iter_community = community_table.find(community_id);
-  eosio_assert(iter_community != community_table.end(), "Community not found");
-  printf("Call update %d %d", questions_asked, community_id);
   community_table.modify(iter_community, _self,
                          [questions_asked, answers_given, correct_answers,
                           users_subscribed](auto &community) {
@@ -22,11 +20,9 @@ void peerania::update_community_statistics(uint16_t community_id,
 void peerania::update_tags_statistics(uint16_t community_id,
                                       std::vector<uint32_t> tags_id,
                                       int8_t questions_asked) {
-  printf("Call tag statistic update %d %d for:", community_id, questions_asked);
   tag_table_index tag_table(_self, get_tag_scope(community_id));
   for (auto tag_id_iter = tags_id.begin(); tag_id_iter != tags_id.end();
        tag_id_iter++) {
-    printf("%d, ", *tag_id_iter);
     auto iter_tag = tag_table.find(*tag_id_iter);
     eosio_assert(iter_tag != tag_table.end(), "Tag not found");
     tag_table.modify(iter_tag, _self, [questions_asked](auto &tag) {
@@ -72,6 +68,7 @@ void peerania::create_community(
         new_community.name = name;
         new_community.ipfs_description = ipfs_description;
         new_community.suggested_tags = suggested_tags;
+        new_community.creation_time = now();
       });
 }
 
@@ -249,7 +246,6 @@ void peerania::vote_delete_community(eosio::name user, uint32_t community_id) {
             eosio_assert(false, "Fatal internal error");
           }
         });
-    //printf("Delete community %d %d %d", iter_create_community->downvotes.size(), VOTES_TO_DELETE_COMMUNITY, (VOTES_TO_DELETE_COMMUNITY + iter_create_community->downvotes.size()) > -1);
     if (VOTES_TO_DELETE_COMMUNITY + (int)iter_create_community->downvotes.size() >=0) {
       update_rating(iter_create_community->creator, COMMUNITY_DELETED_REWARD);
       create_community_table.erase(iter_create_community);
@@ -296,7 +292,6 @@ void peerania::vote_delete_tag(eosio::name user, uint16_t community_id,
         eosio_assert(false, "Fatal internal error");
       }
     });
-//printf("Delete tag %d %d %d", iter_create_tag->downvotes.size(), VOTES_TO_DELETE_TAG, (VOTES_TO_DELETE_TAG + (int)iter_create_tag->downvotes.size()) > -1);
     if (VOTES_TO_DELETE_TAG + (int)iter_create_tag->downvotes.size() >= 0 ) {
       update_rating(iter_create_tag->creator, TAG_DELETED_REWARD);
       create_tag_table.erase(iter_create_tag);

@@ -81,19 +81,23 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
       community_table_index community_table(_self, scope_all_communities);
       for (int i = 1; i < 4; ++i) {
         std::string index = std::to_string(i);
-        community_table.emplace(_self, [i, &index](auto &community) {
+        community_table.emplace(_self, [i, &index, current_time](auto &community) {
           community.id = i;
           community.name = "DEBUG" + index;
-          community.ipfs_description = "QmPkZZtizV8Qat2Y9HkBWmgEX1L8p6VJZi1c6A2cf4vyfu";
+          community.ipfs_description =
+              "Qme1CiDMWNNYqRLxzXmsP8GSngUfoi34juTKBSmSVHGFCE";
+          community.creation_time = current_time;
           community.questions_asked = 0;
+          community.answers_given = 0;
+          community.correct_answers = 0;
+          community.users_subscribed = 0;
         });
         tag_table_index tag_table(_self, get_tag_scope(i));
         for (int j = 0; j < 6 / i; ++j) {
           tag_table.emplace(_self, [&index, j](auto &tag) {
             tag.id = j;
             tag.name = "Tag " + std::to_string(j) + " community " + index;
-            tag.ipfs_description =
-                "DEBUG_COMMUNITY" + index + "_TAG " + std::to_string(j);
+            tag.ipfs_description = "QmPkZZtizV8Qat2Y9HkBWmgEX1L8p6VJZi1c6A2cf4vyfu";
             tag.questions_asked = 0;
           });
         }
@@ -139,8 +143,7 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
     }
 
     // clean create community table
-    create_community_index create_community_table(_self,
-                                                      scope_all_communities);
+    create_community_index create_community_table(_self, scope_all_communities);
     auto iter_create_community = create_community_table.begin();
     while (iter_create_community != create_community_table.end()) {
       iter_create_community =
@@ -198,7 +201,8 @@ void apply(uint64_t receiver, uint64_t code, uint64_t action) {
   if (code == receiver) {
     switch (action) {
       EOSIO_DISPATCH_HELPER(peerania_d, (chnguserrt)(resettables)(setaccrtmpc))
-      EOSIO_DISPATCH_HELPER(peerania,
+      EOSIO_DISPATCH_HELPER(
+          peerania,
           (registeracc)(setaccintprp)(setaccstrprp)(setaccprof)(postquestion)(
               postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(
               modanswer)(modquestion)(modcomment)(upvote)(downvote)(

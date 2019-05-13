@@ -32,6 +32,7 @@ struct [[eosio::table("crcommtb"), eosio::contract("peerania")]] crcommtb {
   eosio::name creator;
   std::string name;
   std::string ipfs_description;
+  time creation_time;
   std::vector<eosio::name> upvotes;
   std::vector<eosio::name> downvotes;
   std::vector<suggest_tag> suggested_tags;

@@ -97,8 +97,7 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
           tag_table.emplace(_self, [&index, j](auto &tag) {
             tag.id = j;
             tag.name = "Tag " + std::to_string(j) + " community " + index;
-            tag.ipfs_description =
-                "DEBUG_COMMUNITY" + index + "_TAG " + std::to_string(j);
+            tag.ipfs_description = "QmPkZZtizV8Qat2Y9HkBWmgEX1L8p6VJZi1c6A2cf4vyfu";
             tag.questions_asked = 0;
           });
         }

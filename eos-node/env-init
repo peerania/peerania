@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -ex
+
+./init-accounts
+./deploy
+./push-action

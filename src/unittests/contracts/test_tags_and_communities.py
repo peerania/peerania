@@ -126,11 +126,11 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
         bob = self.register_bob_account(10000, 10)
         self.action('crcommunity', {'user': alice, 'name': 'alice community',
                                     'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags() }, alice, 'Alice create community')
+
         self.action('crtag', {'user': bob, 'name': 'bob tag',  'community_id': 1,
                               'ipfs_description': 'BCM'}, bob, 'Bob create ')
         voters = [self.register_carol_account(), self.register_dan_account(),
                   self.register_frank_account(), self.register_ted_account()]
-
         c = self.table('crcommtb', 'allcomm')
         t = self.table('crtagtb', get_tag_scope(1))
 
@@ -167,6 +167,7 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
         t = self.table('crtagtb', get_tag_scope(1))
         self.failed_action('crtag', {'user': carol, 'name': 'carol tag',  'community_id': c[0]['id'],
                                      'ipfs_description': 'CCM'}, carol, 'Carol attempt to create tag with invaid community', 'assert')
+
         self.failed_action('vtcrcomm', {
                            'user': carol, 'community_id': c[0]['id'] - 1}, carol, 'Carol vote create non-existent community', 'assert')
         self.failed_action('vtdelcomm', {

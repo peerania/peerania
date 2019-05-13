@@ -2,7 +2,7 @@
 #set -ex
 
 # remove all data files from previous run
-rm -rf data
-rm ~/eosio-wallet/default.wallet
+# rm -rf data
+# rm ~/eosio-wallet/default.wallet
 
-nodeos -e -p eosio --config-dir config --data-dir data --plugin eosio::chain_api_plugin --plugin eosio::history_api_plugin --delete-all-blocks --contracts-console
+nodeos -e -p eosio --config-dir peerania/eos-node/config --data-dir data --plugin eosio::chain_api_plugin --plugin eosio::history_api_plugin --plugin eosio::http_plugin --http-server-address=0.0.0.0:8888 --delete-all-blocks --contracts-console

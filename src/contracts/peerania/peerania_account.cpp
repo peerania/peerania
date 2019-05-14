@@ -1,13 +1,14 @@
 #include "peerania.hpp"
 
 void peerania::register_account(eosio::name user, std::string display_name,
-                                const std::string &ipfs_profile) {
+                                const std::string &ipfs_profile,
+                                const std::string &ipfs_avatar) {
   eosio_assert(account_table.find(user.value) == account_table.end(),
                "Account already exists");
   assert_display_name(display_name);
   assert_ipfs(ipfs_profile);
   time current_time = now();
-  account_table.emplace(_self, [user, &display_name, &ipfs_profile,
+  account_table.emplace(_self, [user, &display_name, &ipfs_profile, &ipfs_avatar,
                                 current_time](auto &account) {
     account.user = user;
     account.display_name = display_name;
@@ -18,6 +19,14 @@ void peerania::register_account(eosio::name user, std::string display_name,
     account.registration_time = current_time;
     account.last_update_period = 0;
     account.questions_left = 3;
+    account.ipfs_avatar = ipfs_avatar;
+  });
+
+  global_stat_index global_stat_table(_self, scope_all_stat);
+  auto iter_global_stat = global_stat_table.rbegin();
+  eosio_assert(iter_global_stat != global_stat_table.rend() && iter_global_stat->version == version, "Init contract first");
+  global_stat_table.modify(--global_stat_table.end(), _self, [](auto &global_stat){
+    global_stat.user_count += 1;
   });
 }
 
@@ -43,14 +52,17 @@ void peerania::set_account_integer_property(eosio::name user, uint8_t key,
 
 void peerania::set_account_profile(eosio::name user,
                                    const std::string &ipfs_profile,
-                                   const std::string &display_name) {
+                                   const std::string &display_name,
+                                   const std::string &ipfs_avatar) {
   auto iter_account = find_account(user);
   assert_ipfs(ipfs_profile);
+  assert_ipfs(ipfs_avatar);
   assert_display_name(display_name);
   assert_allowed(*iter_account, user, Action::SET_ACCOUNT_PROFILE);
   account_table.modify(iter_account, _self, [&](auto &account) {
     account.ipfs_profile = ipfs_profile;
     account.display_name = display_name;
+    account.ipfs_avatar = ipfs_avatar;
   });
 }
 

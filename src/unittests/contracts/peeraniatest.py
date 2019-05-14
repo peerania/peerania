@@ -15,6 +15,7 @@ class PeeraniaTest(EOSTest):
 
     def setUp(self):
         self.action('create', {'issuer': 'peerania.tkn', 'maximum_supply':'100000000.000000 PEER'}, 'peerania.tkn', 'Create token PEER', contract='token')
+        self.action('init', {}, self.get_contract_deployer(self.get_default_contract()),'Init contract')
 
     def tearDown(self):
         self.action('resettables', {}, self.get_contract_deployer('token'), 'Reset all token tables', contract='token')
@@ -62,7 +63,7 @@ class PeeraniaTest(EOSTest):
 
     def _register_account(self, user, rating, moderation_points):
         self.action('registeracc', {'user': str(user), 'display_name': str(
-            user) + 'DispName', 'ipfs_profile': str(user) + '_IPFS'},
+            user) + 'DispName', 'ipfs_profile': str(user) + '_IPFS', 'ipfs_avatar': str(user) + '_avatar'},
             user, 'Register {} account'.format(user))
         if rating is None:
             rating=self.DEFAULT_RATING
@@ -77,6 +78,7 @@ def get_expected_account_body(user):
         'user': str(user),
         'display_name': str(user) + 'DispName',
         'ipfs_profile': str(user) + '_IPFS',
+        'ipfs_avatar': str(user) + '_avatar',
         'registration_time': '#ignore',
         'moderation_points': '#var ' + str(user) + '_mdp',
         'rating': '#var ' + str(user) + '_rating',

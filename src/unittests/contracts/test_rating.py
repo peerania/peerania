@@ -11,7 +11,8 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         defs = load_defines('./src/contracts/peerania/economy.h')
         alice = self.get_non_registered_alice()
         self.action('registeracc', {'user': 'alice', 'display_name': 'test',
-                                    'ipfs_profile': 'test'}, alice, 'Register alice account')
+                                    'ipfs_profile': 'test',
+                                    'ipfs_avatar': 'alice_avatar'}, alice, 'Register alice account')
         self.assertTrue(self.table(
             'account', 'allaccounts')[0]['rating'] == defs['RATING_ON_CREATE'])
         end()

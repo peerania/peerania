@@ -5,9 +5,9 @@
 #include "peerania_vote.cpp"
 
 void peerania::registeracc(eosio::name user, std::string display_name,
-                           std::string ipfs_profile) {
+                           std::string ipfs_profile, std::string ipfs_avatar) {
   require_auth(user);
-  register_account(user, display_name, ipfs_profile);
+  register_account(user, display_name, ipfs_profile, ipfs_avatar);
 }
 
 void peerania::setaccstrprp(eosio::name user, uint8_t key, std::string value) {
@@ -21,9 +21,9 @@ void peerania::setaccintprp(eosio::name user, uint8_t key, int32_t value) {
 }
 
 void peerania::setaccprof(eosio::name user, std::string ipfs_profile,
-                          std::string display_name) {
+                          std::string display_name, std::string ipfs_avatar) {
   require_auth(user);
-  set_account_profile(user, ipfs_profile, display_name);
+  set_account_profile(user, ipfs_profile, display_name, ipfs_avatar);
 }
 
 void peerania::postquestion(eosio::name user, uint16_t community_id,
@@ -151,10 +151,25 @@ void peerania::unfollowcomm(eosio::name user, uint16_t community_id) {
   unfollow_community(user, community_id);
 }
 
+void peerania::init(){
+  global_stat_index global_stat_table(_self, scope_all_stat);
+  auto iter_global_stat = global_stat_table.rbegin();
+  printf("Emplace start");
+  if (iter_global_stat != global_stat_table.rend() && iter_global_stat->version == version)
+    return;
+  printf("Emplace begin");
+  global_stat_table.emplace(_self, [&](auto &global_stat){
+      global_stat.version = version;
+      global_stat.user_count = 0;
+      global_stat.communities_count = 0;
+  });
+}
+
+
 EOSIO_DISPATCH(
     peerania,
     (registeracc)(setaccintprp)(setaccstrprp)(setaccprof)(postquestion)(
         postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(modanswer)(
         modquestion)(modcomment)(upvote)(downvote)(mrkascorrect)(votedelete)(
         crtag)(crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(
-        unfollowcomm))
+        unfollowcomm)(init))

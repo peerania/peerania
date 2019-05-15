@@ -159,6 +159,13 @@ void peerania::vote_create_community(eosio::name user, uint32_t community_id) {
     create_community_table.erase(iter_create_community);
     eosio_assert(iter_create_community != create_community_table.end(),
                  "Address not erased properly");
+    
+  global_stat_index global_stat_table(_self, scope_all_stat);
+  auto iter_global_stat = global_stat_table.rbegin();
+  eosio_assert(iter_global_stat != global_stat_table.rend() && iter_global_stat->version == version, "Init contract first");
+  global_stat_table.modify(--global_stat_table.end(), _self, [](auto &global_stat){
+    global_stat.communities_count += 1;
+  });
   }
 }
 

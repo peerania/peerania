@@ -13,7 +13,8 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         self.action('registeracc', {
             'user': 'alice',
             'display_name': 'aliceDispName',
-            'ipfs_profile': 'alice_IPFS'},
+            'ipfs_profile': 'alice_IPFS',
+            'ipfs_avatar': 'alice_avatar'},
             alice, 'Register Alice account')
         t = self.table('account', 'allaccounts')
         self.assertTrue(compare(['#ignoreorder',
@@ -26,7 +27,8 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         self.failed_action('registeracc', {
             'user': 'alice',
             'display_name': 'aliceDispName',
-            'ipfs_profile': 'alice_IPFS'},
+            'ipfs_profile': 'alice_IPFS',
+            'ipfs_avatar': 'alice_avatar'},
             bob, 'Register Alice account', 'auth')
         end()
 
@@ -37,7 +39,8 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         self.failed_action('registeracc', {
             'user': 'alice',
             'display_name': 'aliceDispName',
-            'ipfs_profile': 'alice_IPFS'},
+            'ipfs_profile': 'alice_IPFS',
+            'ipfs_avatar': 'alice_avatar'},
             alice, 'Register Alice account again', 'assert')
         end()
 
@@ -95,11 +98,12 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         e = ['#ignoreorder',
              get_expected_account_body(alice),
              get_expected_account_body(bob)]
-        self.action('setaccprof', {'user': 'alice', 'ipfs_profile': 'updated IPFS', 'display_name': 'updated display name'},
+        self.action('setaccprof', {'user': 'alice', 'ipfs_profile': 'updated IPFS', 'display_name': 'updated display name', 'ipfs_avatar': 'updated_avatar'},
                     alice, 'Set Alice IPFS profile to \'updated IPFS\'')
         t = self.table('account', 'allaccounts')
         e[1]['ipfs_profile'] = 'updated IPFS'
         e[1]['display_name'] = 'updated display name'
+        e[1]['ipfs_avatar'] = 'updated_avatar'
         self.assertTrue(compare(e, t, ignore_excess=True))
         end()
 
@@ -120,7 +124,7 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         begin('Testing changing account IPFS profile and display_name for non-existing account', True)
         alice = self.get_non_registered_alice()
         self.failed_action('setaccprof', {
-                           'user': 'alice', 'ipfs_profile': 'test', 'display_name': 'test'}, alice, 'Changing Alice ipfs profile', 'assert')
+                           'user': 'alice', 'ipfs_profile': 'test', 'display_name': 'test', 'ipfs_avatar': 'updated_avatar'}, alice, 'Changing Alice ipfs profile', 'assert')
         end()
 
     def test_properties_another_user_failed(self):
@@ -138,7 +142,7 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         self.failed_action('setaccprof',  {
-                           'user': 'alice', 'ipfs_profile': 'test', 'display_name': 'test'}, bob, 'Changing Alice ipfs profile with bob auth', 'auth')
+                           'user': 'alice', 'ipfs_profile': 'test', 'display_name': 'test', 'ipfs_avatar': 'updated_avatar'}, bob, 'Changing Alice ipfs profile with bob auth', 'auth')
         end()
 
 

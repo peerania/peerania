@@ -12,9 +12,12 @@
 #include "question_container.hpp"
 #include "token_common.hpp"
 #include "utils.hpp"
+#include "global_statistics.hpp"
 
 CONTRACT peerania : public eosio::contract {
  public:
+  const int version = 1;
+
   peerania(eosio::name receiver, eosio::name code,
            eosio::datastream<const char *> ds)
       : contract(receiver, code, ds),
@@ -24,7 +27,7 @@ CONTRACT peerania : public eosio::contract {
 
   // Register new user
   ACTION registeracc(eosio::name user, std::string display_name,
-                     std::string ipfs_profile);
+                     std::string ipfs_profile, std::string ipfs_avatar);
 
   // Set(or add) property to account
   ACTION setaccstrprp(eosio::name user, uint8_t key, std::string value);
@@ -34,7 +37,7 @@ CONTRACT peerania : public eosio::contract {
 
   // Set user profile (IPFS link)
   ACTION setaccprof(eosio::name user, std::string ipfs_profile,
-                    std::string display_name);
+                    std::string display_name, std::string ipfs_avatar);
 
   // Post question
   ACTION postquestion(eosio::name user, uint16_t community_id,
@@ -112,6 +115,8 @@ CONTRACT peerania : public eosio::contract {
 
   ACTION unfollowcomm(eosio::name user, uint16_t community_id);
 
+  ACTION init();
+
  protected:
   question_index question_table;
   account_index account_table;
@@ -123,14 +128,17 @@ CONTRACT peerania : public eosio::contract {
 
   void update_rating_base(
       account_index::const_iterator iter_account, int rating_change,
-      const std::function<void(account &)> account_modifying_lambda, bool hasLambda);
+      const std::function<void(account &)> account_modifying_lambda,
+      bool hasLambda);
 
   void update_rating(eosio::name user, int rating_change);
 
-  void update_rating( eosio::name user, int rating_change,
-    const std::function<void(account &)> account_modifying_lambda);
+  void update_rating(
+      eosio::name user, int rating_change,
+      const std::function<void(account &)> account_modifying_lambda);
 
-  void update_rating(account_index::const_iterator iter_account, int rating_change);
+  void update_rating(account_index::const_iterator iter_account,
+                     int rating_change);
 
   void update_rating(
       account_index::const_iterator iter_account, int rating_change,
@@ -138,10 +146,12 @@ CONTRACT peerania : public eosio::contract {
 
   // private:
   void register_account(eosio::name user, std::string display_name,
-                        const std::string &ipfs_profile);
+                        const std::string &ipfs_profile,
+                        const std::string &ipfs_avatar);
 
   void set_account_profile(eosio::name user, const std::string &ipfs_profile,
-                           const std::string &display_name);
+                           const std::string &display_name,
+                           const std::string &ipfs_avatar);
 
   void set_account_string_property(eosio::name user, uint8_t key,
                                    const std::string &value);

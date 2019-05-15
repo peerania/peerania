@@ -207,7 +207,7 @@ void apply(uint64_t receiver, uint64_t code, uint64_t action) {
               postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(
               modanswer)(modquestion)(modcomment)(upvote)(downvote)(
               mrkascorrect)(votedelete)(crtag)(crcommunity)(vtcrtag)(vtcrcomm)(
-              vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm))
+              vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(init))
     }
   }
 }

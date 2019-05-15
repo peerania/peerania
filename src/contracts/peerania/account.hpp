@@ -12,6 +12,7 @@ struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
   // mandatory fields
   std::string display_name;
   std::string ipfs_profile;
+  std::string ipfs_avatar;
   time registration_time;
   std::vector<str_key_value> string_properties;
   std::vector<int_key_value> integer_properties;
@@ -42,10 +43,12 @@ struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
   }
 
   uint64_t primary_key() const { return user.value; }
-  // uint64_t rating_rkey() const { return (1 << 17) - pay_out_rating; }
+  uint64_t rating_rkey() const { return (1ULL << 32) - rating; }
+  uint64_t registration_time_key() const { return registration_time; }
+
   EOSLIB_SERIALIZE(
       account,
-      (user)(display_name)(ipfs_profile)(registration_time)(string_properties)(
+      (user)(display_name)(ipfs_profile)(ipfs_avatar)(registration_time)(string_properties)(
           integer_properties)(rating)(moderation_points)(pay_out_rating)(
           last_update_period)(questions_left)(followed_communities)(
           questions_asked)(answers_given)(correct_answers))
@@ -61,4 +64,11 @@ void assert_display_name(const std::string &display_name) {
 }
 
 const uint64_t scope_all_accounts = eosio::name("allaccounts").value;
-typedef eosio::multi_index<"account"_n, account> account_index;
+typedef eosio::multi_index<
+    "account"_n, account,
+    eosio::indexed_by<
+        "rating"_n, eosio::const_mem_fun<account, uint64_t, &account::rating_rkey>>,
+    eosio::indexed_by<
+        "time"_n,
+        eosio::const_mem_fun<account, uint64_t, &account::registration_time_key>>>
+    account_index;

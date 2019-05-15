@@ -5,10 +5,12 @@ Input parameters:
 * `user`
 * `display_name`
 * `ipfs_profile`
+* `ipfs_avatar`
 
 Implied parameters: 
 
 * `account_name`
+* `string`
 * `string`
 * `string`
 

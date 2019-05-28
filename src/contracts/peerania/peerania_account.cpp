@@ -8,8 +8,8 @@ void peerania::register_account(eosio::name user, std::string display_name,
   assert_display_name(display_name);
   assert_ipfs(ipfs_profile);
   time current_time = now();
-  account_table.emplace(_self, [user, &display_name, &ipfs_profile, &ipfs_avatar,
-                                current_time](auto &account) {
+  account_table.emplace(_self, [user, &display_name, &ipfs_profile,
+                                &ipfs_avatar, current_time](auto &account) {
     account.user = user;
     account.display_name = display_name;
     account.ipfs_profile = ipfs_profile;
@@ -20,14 +20,20 @@ void peerania::register_account(eosio::name user, std::string display_name,
     account.last_update_period = 0;
     account.questions_left = 3;
     account.ipfs_avatar = ipfs_avatar;
+
+    account.report_power = 0;
+    account.last_freeze = current_time;
+    account.is_freezed = false;
   });
 
   global_stat_index global_stat_table(_self, scope_all_stat);
   auto iter_global_stat = global_stat_table.rbegin();
-  eosio_assert(iter_global_stat != global_stat_table.rend() && iter_global_stat->version == version, "Init contract first");
-  global_stat_table.modify(--global_stat_table.end(), _self, [](auto &global_stat){
-    global_stat.user_count += 1;
-  });
+  eosio_assert(iter_global_stat != global_stat_table.rend() &&
+                   iter_global_stat->version == version,
+               "Init contract first");
+  global_stat_table.modify(
+      --global_stat_table.end(), _self,
+      [](auto &global_stat) { global_stat.user_count += 1; });
 }
 
 void peerania::set_account_string_property(eosio::name user, uint8_t key,
@@ -63,6 +69,41 @@ void peerania::set_account_profile(eosio::name user,
     account.ipfs_profile = ipfs_profile;
     account.display_name = display_name;
     account.ipfs_avatar = ipfs_avatar;
+  });
+}
+
+void peerania::report_profile(eosio::name user, eosio::name user_to_report) {
+  auto iter_snitch = find_account(user);
+  auto iter_user_to_report = find_account(user_to_report);
+  eosio_assert(user != user_to_report, "You can't report yourself");
+  account_table.modify(iter_snitch, _self, [&](auto &account) {
+    account.update();
+    eosio_assert(
+      account.moderation_points >= MODERATION_POINTS_REPORT_PROFILE,
+      "Not enought moderation points");
+    account.moderation_points -= MODERATION_POINTS_REPORT_PROFILE;
+  });
+  account_table.modify(iter_user_to_report, _self, [&](auto &account) {
+    account.update();
+    eosio_assert(!account.is_freezed, "Profile alredy freezed");
+    uint16_t total_report_points = 0;
+    for (auto iter_reports = account.reports.begin();
+         iter_reports != account.reports.end(); iter_reports++) {
+      total_report_points += iter_reports->report_points;
+      eosio_assert(iter_reports->user != iter_snitch->user, "You have already reported");
+    }
+    report r;
+    r.report_time = now();
+    r.user = iter_snitch->user;
+    r.report_points = status_moderation_impact(iter_snitch->rating);
+    total_report_points += r.report_points;
+    account.reports.push_back(r);
+    if (total_report_points >= POINTS_TO_FREEZE) {
+      if (account.report_power < MAX_FREEZE_PERIOD_MULTIPLIER)  // Max freeze period is 32 weeks
+        account.report_power += 1;
+      account.last_freeze = now();
+      account.is_freezed = true;
+    }
   });
 }
 

@@ -20,6 +20,19 @@
 #undef VOTES_TO_DELETE_TAG
 #define VOTES_TO_DELETE_TAG -2
 
+#undef MIN_FREEZE_PERIOD
+#undef REPORT_RESET_PERIOD
+#undef REPORT_POWER_RESET_PERIOD
+#undef POINTS_TO_FREEZE
+#undef MODERATION_POINTS_REPORT_PROFILE
+#define MIN_FREEZE_PERIOD 3 
+#define REPORT_RESET_PERIOD 2       
+#define REPORT_POWER_RESET_PERIOD 4 
+#define POINTS_TO_FREEZE 10
+#define MODERATION_POINTS_REPORT_PROFILE 2
+
+
+
 #include "question_container.hpp"
 #undef MAX_ANSWER_COUNT
 #define MAX_ANSWER_COUNT 4
@@ -207,7 +220,7 @@ void apply(uint64_t receiver, uint64_t code, uint64_t action) {
               postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(
               modanswer)(modquestion)(modcomment)(upvote)(downvote)(
               mrkascorrect)(votedelete)(crtag)(crcommunity)(vtcrtag)(vtcrcomm)(
-              vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(init))
+              vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(init)(reportprof))
     }
   }
 }

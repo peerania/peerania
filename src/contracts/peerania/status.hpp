@@ -66,7 +66,7 @@ within one a single question. 1 - Stranger - 6 100 - Newbie - 10 500 - Junior
 Resident - 14 1000 - Resident - 18 2500 - Senior Resident - 22 5000 - Hero
 Resident - 26 10000 - Legendary Resident - 30
 */
-uint8_t status_comments_limit(int16_t rating) {
+uint8_t status_comments_limit(int rating) {
   if (rating < 0) return 0;
   switch (rating) {
     STATUS0(STATUS0_COMMENT_LIMIT);
@@ -76,5 +76,17 @@ uint8_t status_comments_limit(int16_t rating) {
     STATUS4(STATUS4_COMMENT_LIMIT);
     STATUS5(STATUS5_COMMENT_LIMIT);
     STATUS6(STATUS6_COMMENT_LIMIT);
+  }
+}
+
+uint8_t status_moderation_impact(int rating) {
+  if (rating < 100) return 0;
+  switch (rating) {
+    STATUS1(1);
+    STATUS2(2);
+    STATUS3(3);
+    STATUS4(4);
+    STATUS5(5);
+    STATUS6(6);
   }
 }

@@ -2,12 +2,12 @@
 #include <eosiolib/name.hpp>
 #include "peerania_types.h"
 // Limit to delte
-namespace DeletionVotes {
+namespace DeletionVotes
+{
 const int DELETION_VOTES_QUESTION = 1700;
 const int DELETION_VOTES_ANSWER = 1500;
 const int DELETION_VOTES_COMMENT = 1000;
-}  // namespace DeletionVotes
-
+} // namespace DeletionVotes
 
 //Stub solution
 #define VOTES_TO_CREATE_COMMUNITY 100
@@ -95,6 +95,13 @@ const int DELETION_VOTES_COMMENT = 1000;
 #define STATUS6_QUESTION_LIMIT 10
 
 //Account period
-#define ACCOUNT_STAT_RESET_PERIOD 259200  // 3 Days
+#define ACCOUNT_STAT_RESET_PERIOD 259200 // 3 Days
 #define BAN_RATING_INCREMENT_PER_PERIOD 6
 
+//Account report reset time
+#define MIN_FREEZE_PERIOD 302400           // 3.5 Days
+#define REPORT_RESET_PERIOD 2592000        // 30 Days
+#define REPORT_POWER_RESET_PERIOD 10368000 // 120 Days
+#define POINTS_TO_FREEZE 90
+#define MODERATION_POINTS_REPORT_PROFILE 2
+#define MAX_FREEZE_PERIOD_MULTIPLIER 6

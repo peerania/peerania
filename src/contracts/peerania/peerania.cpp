@@ -151,6 +151,11 @@ void peerania::unfollowcomm(eosio::name user, uint16_t community_id) {
   unfollow_community(user, community_id);
 }
 
+void peerania::reportprof(eosio::name user, eosio::name user_to_report){
+  require_auth(user);
+  report_profile(user, user_to_report);
+}
+
 void peerania::init(){
   global_stat_index global_stat_table(_self, scope_all_stat);
   auto iter_global_stat = global_stat_table.rbegin();

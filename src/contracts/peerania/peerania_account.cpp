@@ -78,9 +78,8 @@ void peerania::report_profile(eosio::name user, eosio::name user_to_report) {
   eosio_assert(user != user_to_report, "You can't report yourself");
   account_table.modify(iter_snitch, _self, [&](auto &account) {
     account.update();
-    eosio_assert(
-      account.moderation_points >= MODERATION_POINTS_REPORT_PROFILE,
-      "Not enought moderation points");
+    eosio_assert(account.moderation_points >= MODERATION_POINTS_REPORT_PROFILE,
+                 "Not enought moderation points");
     account.moderation_points -= MODERATION_POINTS_REPORT_PROFILE;
   });
   account_table.modify(iter_user_to_report, _self, [&](auto &account) {
@@ -90,7 +89,8 @@ void peerania::report_profile(eosio::name user, eosio::name user_to_report) {
     for (auto iter_reports = account.reports.begin();
          iter_reports != account.reports.end(); iter_reports++) {
       total_report_points += iter_reports->report_points;
-      eosio_assert(iter_reports->user != iter_snitch->user, "You have already reported");
+      eosio_assert(iter_reports->user != iter_snitch->user,
+                   "You have already reported");
     }
     report r;
     r.report_time = now();
@@ -99,7 +99,8 @@ void peerania::report_profile(eosio::name user, eosio::name user_to_report) {
     total_report_points += r.report_points;
     account.reports.push_back(r);
     if (total_report_points >= POINTS_TO_FREEZE) {
-      if (account.report_power < MAX_FREEZE_PERIOD_MULTIPLIER)  // Max freeze period is 32 weeks
+      if (account.report_power <
+          MAX_FREEZE_PERIOD_MULTIPLIER)  // Max freeze period is 32 weeks
         account.report_power += 1;
       account.last_freeze = now();
       account.is_freezed = true;

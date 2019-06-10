@@ -23,14 +23,13 @@ struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
   std::vector<str_key_value> string_properties;
   std::vector<int_key_value> integer_properties;
   int rating = 0;
-  uint8_t moderation_points = 0;
   int pay_out_rating = 0;
   uint16_t last_update_period = 0;
-  uint8_t questions_left = 0;
-  uint8_t answers_left;
-  uint8_t comments_left;
+  uint16_t energy;
   std::vector<uint16_t> followed_communities;
-
+  uint32_t questions_asked;
+  uint32_t answers_given;
+  uint32_t correct_answers;
   std::vector<report> reports;
   uint8_t report_power;
   time last_freeze;
@@ -45,14 +44,14 @@ struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
         rating += periods_have_passed * BAN_RATING_INCREMENT_PER_PERIOD;
         if (rating > 0) rating = 1;
       } else {
-        questions_left = status_question_limit(rating);
-        moderation_points = status_moderation_points(rating);
+        energy = status_energy(rating);
       }
       last_update_period = current_period;
     }
 
     if (is_freezed) {
-      if ((now() - last_freeze) >= (MIN_FREEZE_PERIOD * (1 << (report_power - 1)))) {
+      if ((now() - last_freeze) >=
+          (MIN_FREEZE_PERIOD * (1 << (report_power - 1)))) {
         reports.clear();
         is_freezed = false;
         last_freeze = now();
@@ -63,7 +62,8 @@ struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
         report_power = 0;
       }
       auto iter_report = reports.begin();
-      while (iter_report != reports.end() && now() - iter_report->report_time >= REPORT_RESET_PERIOD) {
+      while (iter_report != reports.end() &&
+             now() - iter_report->report_time >= REPORT_RESET_PERIOD) {
         iter_report = reports.erase(iter_report);
       }
     }
@@ -76,10 +76,10 @@ struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
   EOSLIB_SERIALIZE(
       account,
       (user)(display_name)(ipfs_profile)(ipfs_avatar)(registration_time)(
-          string_properties)(integer_properties)(rating)(moderation_points)(
-          pay_out_rating)(last_update_period)(questions_left)(
-          followed_communities)(questions_asked)(answers_given)(
-          correct_answers)(reports)(report_power)(last_freeze)(is_freezed))
+          string_properties)(integer_properties)(rating)(pay_out_rating)(
+          last_update_period)(followed_communities)(questions_asked)(
+          answers_given)(correct_answers)(reports)(report_power)(last_freeze)(
+          is_freezed))
 };
 
 #define MIN_DISPLAY_NAME_LEN 3

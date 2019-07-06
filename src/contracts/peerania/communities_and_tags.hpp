@@ -1,15 +1,11 @@
 #pragma once
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/name.hpp>
+#include <eosio/eosio.hpp>
 #include <string>
 #include <vector>
 #include "history.hpp"
 #include "status.hpp"
 
 #define ID_CREATE_COMMUNITY 0
-
-#define MODERATION_POINTS_CREATE_COMMUNITY 5
-#define MODERATION_POINTS_CREATE_TAG 2
 
 #define MAX_TAG_COMMUNITY_CREATE_ID 0xFFFFFFFF
 #define MAX_TAG_COUNT 5
@@ -74,9 +70,9 @@ struct [[eosio::table("communities"), eosio::contract("peerania")]] communities 
 typedef eosio::multi_index<"communities"_n, communities> community_table_index;
 
 void assert_tag_name(const std::string name) {
-  eosio_assert(name.size() >= 2 && name.size() <= 15, "Invalid tag name");
+  eosio::check(name.size() >= 2 && name.size() <= 15, "Invalid tag name");
 }
 
 void assert_community_name(const std::string name) {
-  eosio_assert(name.size() >= 2 && name.size() <= 25, "Invalid community name");
+  eosio::check(name.size() >= 2 && name.size() <= 25, "Invalid community name");
 }

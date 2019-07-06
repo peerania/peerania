@@ -10,16 +10,6 @@ void peerania::registeracc(eosio::name user, std::string display_name,
   register_account(user, display_name, ipfs_profile, ipfs_avatar);
 }
 
-void peerania::setaccstrprp(eosio::name user, uint8_t key, std::string value) {
-  require_auth(user);
-  set_account_string_property(user, key, value);
-}
-
-void peerania::setaccintprp(eosio::name user, uint8_t key, int32_t value) {
-  require_auth(user);
-  set_account_integer_property(user, key, value);
-}
-
 void peerania::setaccprof(eosio::name user, std::string ipfs_profile,
                           std::string display_name, std::string ipfs_avatar) {
   require_auth(user);
@@ -159,10 +149,8 @@ void peerania::reportprof(eosio::name user, eosio::name user_to_report){
 void peerania::init(){
   global_stat_index global_stat_table(_self, scope_all_stat);
   auto iter_global_stat = global_stat_table.rbegin();
-  printf("Emplace start");
   if (iter_global_stat != global_stat_table.rend() && iter_global_stat->version == version)
     return;
-  printf("Emplace begin");
   global_stat_table.emplace(_self, [&](auto &global_stat){
       global_stat.version = version;
       global_stat.user_count = 0;
@@ -173,7 +161,7 @@ void peerania::init(){
 
 EOSIO_DISPATCH(
     peerania,
-    (registeracc)(setaccintprp)(setaccstrprp)(setaccprof)(postquestion)(
+    (registeracc)(setaccprof)(postquestion)(
         postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(modanswer)(
         modquestion)(modcomment)(upvote)(downvote)(mrkascorrect)(votedelete)(
         crtag)(crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(

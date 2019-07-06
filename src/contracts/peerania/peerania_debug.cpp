@@ -1,12 +1,7 @@
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/name.hpp>
+#include <eosio/eosio.hpp>
+#include <eosio/name.hpp>
 #include <string>
 #include "economy.h"
-#undef STATUS0_COMMENT_LIMIT
-#define STATUS0_COMMENT_LIMIT 2
-
-#undef STATUS1_COMMENT_LIMIT
-#define STATUS1_COMMENT_LIMIT 3
 
 #undef ACCOUNT_STAT_RESET_PERIOD
 #define ACCOUNT_STAT_RESET_PERIOD 3  // 3 sec
@@ -25,13 +20,11 @@
 #undef REPORT_POWER_RESET_PERIOD
 #undef POINTS_TO_FREEZE
 #undef MODERATION_POINTS_REPORT_PROFILE
-#define MIN_FREEZE_PERIOD 3 
-#define REPORT_RESET_PERIOD 2       
-#define REPORT_POWER_RESET_PERIOD 4 
+#define MIN_FREEZE_PERIOD 3
+#define REPORT_RESET_PERIOD 2
+#define REPORT_POWER_RESET_PERIOD 4
 #define POINTS_TO_FREEZE 10
 #define MODERATION_POINTS_REPORT_PROFILE 2
-
-
 
 #include "question_container.hpp"
 #undef MAX_ANSWER_COUNT
@@ -39,13 +32,10 @@
 #undef MAX_COMMENT_COUNT
 #define MAX_COMMENT_COUNT 4
 
-#include "token_common.hpp"
-
 #include "access.hpp"
 #include "account.hpp"
 #include "communities_and_tags.hpp"
 #include "history.hpp"
-#include "peerania_types.h"
 #include "property.hpp"
 #include "utils.hpp"
 
@@ -94,23 +84,25 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
       community_table_index community_table(_self, scope_all_communities);
       for (int i = 1; i < 4; ++i) {
         std::string index = std::to_string(i);
-        community_table.emplace(_self, [i, &index, current_time](auto &community) {
-          community.id = i;
-          community.name = "DEBUG" + index;
-          community.ipfs_description =
-              "Qme1CiDMWNNYqRLxzXmsP8GSngUfoi34juTKBSmSVHGFCE";
-          community.creation_time = current_time;
-          community.questions_asked = 0;
-          community.answers_given = 0;
-          community.correct_answers = 0;
-          community.users_subscribed = 0;
-        });
+        community_table.emplace(
+            _self, [i, &index, current_time](auto &community) {
+              community.id = i;
+              community.name = "DEBUG" + index;
+              community.ipfs_description =
+                  "Qme1CiDMWNNYqRLxzXmsP8GSngUfoi34juTKBSmSVHGFCE";
+              community.creation_time = current_time;
+              community.questions_asked = 0;
+              community.answers_given = 0;
+              community.correct_answers = 0;
+              community.users_subscribed = 0;
+            });
         tag_table_index tag_table(_self, get_tag_scope(i));
         for (int j = 0; j < 6 / i; ++j) {
           tag_table.emplace(_self, [&index, j](auto &tag) {
             tag.id = j;
             tag.name = "Tag " + std::to_string(j) + " community " + index;
-            tag.ipfs_description = "QmPkZZtizV8Qat2Y9HkBWmgEX1L8p6VJZi1c6A2cf4vyfu";
+            tag.ipfs_description =
+                "QmPkZZtizV8Qat2Y9HkBWmgEX1L8p6VJZi1c6A2cf4vyfu";
             tag.questions_asked = 0;
           });
         }
@@ -118,12 +110,11 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
     }
   }
 
-  ACTION setaccrtmpc(eosio::name user, int16_t rating,
-                     uint16_t moderation_points) {
+  ACTION setaccrten(eosio::name user, int rating, int16_t energy) {
     auto itr = find_account(user);
-    account_table.modify(itr, _self, [&](auto &account) {
+    account_table.modify(itr, _self, [rating, energy](auto &account) {
       account.rating = rating;
-      account.moderation_points = moderation_points;
+      account.energy = energy;
     });
   }
 
@@ -168,8 +159,8 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
     auto iter_community = community_table.begin();
     while (iter_community != community_table.end()) {
       // clean all tags for creation
-      create_tag_index create_tag_table(
-          _self, get_tag_scope(iter_community->id));
+      create_tag_index create_tag_table(_self,
+                                        get_tag_scope(iter_community->id));
       auto iter_create_tag = create_tag_table.begin();
       while (iter_create_tag != create_tag_table.end()) {
         iter_create_tag = create_tag_table.erase(iter_create_tag);
@@ -213,10 +204,10 @@ extern "C" {
 void apply(uint64_t receiver, uint64_t code, uint64_t action) {
   if (code == receiver) {
     switch (action) {
-      EOSIO_DISPATCH_HELPER(peerania_d, (chnguserrt)(resettables)(setaccrtmpc))
+      EOSIO_DISPATCH_HELPER(peerania_d, (chnguserrt)(resettables)(setaccrten))
       EOSIO_DISPATCH_HELPER(
           peerania,
-          (registeracc)(setaccintprp)(setaccstrprp)(setaccprof)(postquestion)(
+          (registeracc)(setaccprof)(postquestion)(
               postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(
               modanswer)(modquestion)(modcomment)(upvote)(downvote)(
               mrkascorrect)(votedelete)(crtag)(crcommunity)(vtcrtag)(vtcrcomm)(

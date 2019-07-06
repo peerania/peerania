@@ -4,9 +4,8 @@
  */
 #pragma once
 
-#include <eosiolib/asset.hpp>
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/name.hpp>
+#include <eosio/eosio.hpp>
+#include <eosio/system.hpp>
 #include <string>
 #include "peerania.token.period.hpp"
 #include "peerania_types.h"

@@ -3,6 +3,7 @@ from peeraniatest import *
 from jsonutils import *
 from unittest import main
 
+economy = load_defines('./src/contracts/peerania/economy.h')
 
 class ForumVoteTests(peeraniatest.PeeraniaTest):
     def test_vote_question(self):
@@ -11,6 +12,12 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         bob = self.register_bob_account()
         carol = self.register_carol_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
+        account_e = [
+            '#ignoreorder',
+            get_expected_account_body(alice),
+            get_expected_account_body(bob),
+            get_expected_account_body(carol)
+        ]
         t = self.table('question', 'allquestions')
         for key, value in var.items():
             if 'rating' in key:
@@ -20,18 +27,26 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
                     'user': 'bob', 'question_id': var['aq'], 'answer_id': 0}, bob, 'Bob upvote Alice question')
         self.action('upvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': 0}, carol, 'Carol upvote Alice question')
+        account_e[1]['energy'] -= self.alice_energy_reduce
+        account_e[2]['energy'] -= self.bob_energy_reduce + economy['ENERGY_UPVOTE_QUESTION']
+        account_e[3]['energy'] -= economy['ENERGY_UPVOTE_QUESTION']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_rating'] == 2)
         info('Now Alice question rating is 2')
         self.action('downvote', {
                     'user': 'bob', 'question_id': var['aq'], 'answer_id': 0}, bob, 'Bob downvote Alice question')
+        account_e[2]['energy'] -= economy['ENERGY_DOWNVOTE_QUESTION']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_rating'] == 0)
         info('Now Alice question rating is 0')
         self.action('downvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': 0}, carol, 'Carol downvote Alice question')
+        account_e[3]['energy'] -= economy['ENERGY_DOWNVOTE_QUESTION']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_rating'] == -2)
@@ -44,6 +59,12 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         bob = self.register_bob_account()
         carol = self.register_carol_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
+        account_e = [
+            '#ignoreorder',
+            get_expected_account_body(alice),
+            get_expected_account_body(bob),
+            get_expected_account_body(carol)
+        ]
         t = self.table('question', 'allquestions')
         for key, value in var.items():
             if 'rating' in key:
@@ -53,12 +74,18 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
                     'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, alice, 'Alice upvote for Alice question->Bob answer rating')
         self.action('upvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, carol, 'Carol upvote for Alice question->Bob answer rating')
+        account_e[1]['energy'] -= self.alice_energy_reduce + economy['ENERGY_UPVOTE_ANSWER']
+        account_e[2]['energy'] -= self.bob_energy_reduce
+        account_e[3]['energy'] -= economy['ENERGY_UPVOTE_ANSWER']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_ba_rating'] == 2)
         info('Now Alice question->Bob answer rating is 2')
         self.action('downvote', {
                     'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, alice, 'Alice downvote for Alice question->Bob answer rating')
+        account_e[1]['energy'] -= economy['ENERGY_DOWNVOTE_ANSWER']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_ba_rating'] == 0)
@@ -66,47 +93,11 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         self.action('downvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, carol, 'Carol downvote for Alice question->Bob answer rating')
         t = self.table('question', 'allquestions')
+        account_e[3]['energy'] -= economy['ENERGY_DOWNVOTE_ANSWER']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_ba_rating'] == -2)
         info('Now Alice question->Bob answer rating is -2')
-        end()
-
-    def test_remove_vote_answer(self):
-        begin('Test remove vote answer')
-        alice = self.register_alice_account()
-        bob = self.register_bob_account()
-        (e, var) = self._create_basic_hierarchy(alice, bob)
-        t = self.table('question', 'allquestions')
-        for key, value in var.items():
-            if 'rating' in key:
-                self.assertTrue(value == 0)
-        setvar(e, var, 'aq_ba_rating')
-        self.action('upvote', {
-                    'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, alice, 'Alice upvote for Alice question->Bob answer rating')
-        t = self.table('question', 'allquestions')
-        self.assertTrue(compare(e, t, var, True))
-        self.assertTrue(var['aq_ba_rating'] == 1)
-        info('Now Alice question->Bob answer rating is 1')
-        self.wait()
-        self.action('upvote', {'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']},
-                    alice, 'Alice remove upvote for Alice question->Bob answer rating')
-        t = self.table('question', 'allquestions')
-        self.assertTrue(compare(e, t, var, True))
-        self.assertTrue(var['aq_ba_rating'] == 0)
-        info('Now Alice question->Bob answer rating is 0')
-        self.action('downvote', {
-                    'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, alice, 'Alice downvote for Alice question->Bob answer rating')
-        t = self.table('question', 'allquestions')
-        self.assertTrue(compare(e, t, var, True))
-        self.assertTrue(var['aq_ba_rating'] == -1)
-        info('Now Alice question->Bob answer rating is -1')
-        self.wait()
-        self.action('downvote', {
-                    'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, alice, 'Alice downvote for Alice question->Bob answer rating')
-        t = self.table('question', 'allquestions')
-        self.assertTrue(compare(e, t, var, True))
-        self.assertTrue(var['aq_ba_rating'] == 0)
-        info('Now Alice question->Bob answer rating is 0')
         end()
 
     def test_remove_vote_question(self):
@@ -114,6 +105,11 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
+        account_e = [
+            '#ignoreorder',
+            get_expected_account_body(alice),
+            get_expected_account_body(bob),
+        ]
         t = self.table('question', 'allquestions')
         for key, value in var.items():
             if 'rating' in key:
@@ -121,6 +117,9 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         setvar(e, var, 'aq_rating')
         self.action('upvote', {
                     'user': 'bob', 'question_id': var['aq'], 'answer_id': 0}, bob, 'Bob upvote for Alice question rating')
+        account_e[1]['energy'] -= self.alice_energy_reduce
+        account_e[2]['energy'] -= self.bob_energy_reduce + economy['ENERGY_UPVOTE_QUESTION']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_rating'] == 1)
@@ -128,12 +127,16 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         self.wait()
         self.action('upvote', {'user': 'bob', 'question_id': var['aq'], 'answer_id': 0},
                     bob, 'Bob remove upvote for Alice question rating')
+        account_e[2]['energy'] -= economy['ENERGY_FORUM_VOTE_CHANGE']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_rating'] == 0)
         info('Now Alice question rating is 0')
         self.action('downvote', {
                     'user': 'bob', 'question_id': var['aq'], 'answer_id': 0}, bob, 'Bob downvote for Alice question rating')
+        account_e[2]['energy'] -= economy['ENERGY_DOWNVOTE_QUESTION']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_rating'] == -1)
@@ -141,10 +144,64 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         self.wait()
         self.action('downvote', {
                     'user': 'bob', 'question_id': var['aq'], 'answer_id': 0}, bob, 'Bob downvote for Alice question rating')
+        account_e[2]['energy'] -= economy['ENERGY_FORUM_VOTE_CHANGE']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_rating'] == 0)
         info('Now Alice question rating is 0')
+        end()
+
+    def test_remove_vote_answer(self):
+        begin('Test remove vote answer')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        (e, var) = self._create_basic_hierarchy(alice, bob)
+        account_e = [
+            '#ignoreorder',
+            get_expected_account_body(alice),
+            get_expected_account_body(bob),
+        ]
+        t = self.table('question', 'allquestions')
+        for key, value in var.items():
+            if 'rating' in key:
+                self.assertTrue(value == 0)
+        setvar(e, var, 'aq_ba_rating')
+        self.action('upvote', {
+                    'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, alice, 'Alice upvote for Alice question->Bob answer rating')
+        account_e[1]['energy'] -= self.alice_energy_reduce + economy['ENERGY_UPVOTE_ANSWER']
+        account_e[2]['energy'] -= self.bob_energy_reduce
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
+        t = self.table('question', 'allquestions')
+        self.assertTrue(compare(e, t, var, True))
+        self.assertTrue(var['aq_ba_rating'] == 1)
+        info('Now Alice question->Bob answer rating is 1')
+        self.wait()
+        self.action('upvote', {'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']},
+                    alice, 'Alice remove upvote for Alice question->Bob answer rating')
+        account_e[1]['energy'] -= economy['ENERGY_FORUM_VOTE_CHANGE']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
+        t = self.table('question', 'allquestions')
+        self.assertTrue(compare(e, t, var, True))
+        self.assertTrue(var['aq_ba_rating'] == 0)
+        info('Now Alice question->Bob answer rating is 0')
+        self.action('downvote', {
+                    'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, alice, 'Alice downvote for Alice question->Bob answer rating')
+        account_e[1]['energy'] -=  economy['ENERGY_DOWNVOTE_ANSWER']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
+        t = self.table('question', 'allquestions')
+        self.assertTrue(compare(e, t, var, True))
+        self.assertTrue(var['aq_ba_rating'] == -1)
+        info('Now Alice question->Bob answer rating is -1')
+        self.wait()
+        self.action('downvote', {
+                    'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, alice, 'Alice downvote for Alice question->Bob answer rating')
+        account_e[1]['energy'] -= economy['ENERGY_FORUM_VOTE_CHANGE']     
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))   
+        t = self.table('question', 'allquestions')
+        self.assertTrue(compare(e, t, var, True))
+        self.assertTrue(var['aq_ba_rating'] == 0)
+        info('Now Alice question->Bob answer rating is 0')
         end()
 
     def test_upvote_voted_for_deletion_failed(self):
@@ -170,23 +227,35 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
+        account_e = [
+            '#ignoreorder',
+            get_expected_account_body(alice),
+            get_expected_account_body(bob),
+        ]
         setvar(e, var, 'caid')
         for key, value in var.items():
             if 'caid' in key:
                 self.assertTrue(value == 0)
         self.action('mrkascorrect', {
                     'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, alice, 'Alice mark bob answer as correct')
+        account_e[1]['energy'] -= self.alice_energy_reduce + economy['ENERGY_MARK_ANSWER_AS_CORRECT']
+        account_e[2]['energy'] -= self.bob_energy_reduce
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_caid'] == var['aq_ba'])
         self.action('mrkascorrect', {
                     'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_aa']}, alice, 'Alice mark herself answer as correct')
+        account_e[1]['energy'] -= economy['ENERGY_MARK_ANSWER_AS_CORRECT']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_caid'] == var['aq_aa'])
         self.action('mrkascorrect', {
                     'user': 'alice', 'question_id': var['aq'], 'answer_id': 0}, alice, 'Alice remove correct answer mark')
         t = self.table('question', 'allquestions')
+        account_e[1]['energy'] -= economy['ENERGY_MARK_ANSWER_AS_CORRECT']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(var['aq_caid'] == 0)
         end()
@@ -294,7 +363,6 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
                     'correct_answer_id':'#var aq_caid',
                     'rating':'#var aq_rating'
         }]
-
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
@@ -342,6 +410,10 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
             'comments': []})
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
+        self.alice_energy_reduce = economy['ENERGY_POST_QUESTION'] + \
+            2 * economy['ENERGY_POST_ANSWER'] 
+        self.bob_energy_reduce = economy['ENERGY_POST_QUESTION'] + \
+            economy['ENERGY_POST_ANSWER']
         return e, var
 
 

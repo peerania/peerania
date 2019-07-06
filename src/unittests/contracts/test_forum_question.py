@@ -3,27 +3,34 @@ from peeraniatest import *
 from jsonutils import compare
 from unittest import main
 
+economy = load_defines('src/contracts/peerania/economy.h')
 
 class ForumQuestionTests(peeraniatest.PeeraniaTest):
 
     def test_insert_question(self):
         begin('Testing registration of new question')
         alice = self.register_alice_account()
+        account_e = [get_expected_account_body(alice)]
         e = [self._register_question_action(alice, 'Alice question 1')]
         t = self.table('question', 'allquestions')
-        info('Table question: ', t)
+        account_e[0]['energy'] -= economy['ENERGY_POST_QUESTION']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         self.assertTrue(compare(e, t, ignore_excess=True))
         end()
 
     def test_modify_question(self):
         begin('Test modify question')
         alice = self.register_alice_account()
+        account_e = [get_expected_account_body(alice)]
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
         self.action('modquestion', {
                     'user': 'alice', 'question_id': var['q1'], 'title': 'updated Title', 'ipfs_link': 'updated IPFS', 'community_id': 2, 'tags':[1]}, alice, 'Update Alice question')
+        account_e[0]['energy'] -= economy['ENERGY_MODIFY_QUESTION']
+        account_e[0]['energy'] -= economy['ENERGY_POST_QUESTION']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         e[0]['ipfs_link'] = 'updated IPFS'
         e[0]['title'] = 'updated Title'
@@ -31,22 +38,24 @@ class ForumQuestionTests(peeraniatest.PeeraniaTest):
         e[0]['community_id'] = 2
         e[0]['tags'] = [1]
         self.assertTrue(compare(e, t, ignore_excess=True))
-        info('Table question: ', t)
         end()
 
     def test_delete_question(self):
         begin('Test delete question')
         alice = self.register_alice_account()
+        account_e = [get_expected_account_body(alice)]
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
         self.action('delquestion', {
                     'user': 'alice', 'question_id': var['q1']}, alice, 'Delete Alice question')
+        account_e[0]['energy'] -= economy['ENERGY_POST_QUESTION']
+        account_e[0]['energy'] -= economy['ENERGY_DELETE_QUESTION']
+        self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         e = []
         self.assertTrue(compare(e, t, ignore_excess=True))
-        info('Table question: ', t)
         end()
 
     def test_register_question_from_non_existent_account_failed(self):

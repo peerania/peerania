@@ -105,7 +105,7 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
 
     def test_create_tag_or_community_str_assert(self):
         begin('Test input string parameters limits')
-        alice = self.register_alice_account(10000, 10)
+        alice = self.register_alice_account(10000, 200)
         self.failed_action('crcommunity', {'user': 'alice', 'name': ''.join(['a' for i in range(26)]), 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
                            'Alice attempt to create community winth name length > 25', 'assert')
         self.failed_action('crtag', {'user': 'alice', 'community_id': 1, 'name': ''.join(['a' for i in range(16)]), 'ipfs_description': 'Alice tag description'}, alice,
@@ -122,8 +122,8 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
 
     def test_create_community_and_tag(self):
         begin('Test create community and tag')
-        alice = self.register_alice_account(10000, 10)
-        bob = self.register_bob_account(10000, 10)
+        alice = self.register_alice_account(10000, 200)
+        bob = self.register_bob_account(10000, 200)
         self.action('crcommunity', {'user': alice, 'name': 'alice community',
                                     'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags() }, alice, 'Alice create community')
 
@@ -156,9 +156,9 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
 
     def test_community_and_tag_vote_non_existent(self):
         begin('Test vote non exisent item, create tag with non-existen community', True)
-        alice = self.register_alice_account(10000, 10)
-        bob = self.register_bob_account(10000, 10)
-        carol = self.register_carol_account(10000, 10)
+        alice = self.register_alice_account(10000, 200)
+        bob = self.register_bob_account(1000, 100)
+        carol = self.register_carol_account(10000)
         self.action('crcommunity', {'user': alice, 'name': 'alice community',
                                     'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community')
         self.action('crtag', {'user': bob, 'name': 'bob tag',  'community_id': 1,
@@ -182,34 +182,34 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
                                         'tag_id': t[0]['id']}, carol, 'Carol vote delete non-existent tag', 'assert')
         end()
 
-    def test_moderation_point_limit(self):
-        begin('Test moderation points assert', True)
+    def test_energy_point_limit(self):
+        begin('Test energy points assert', True)
         defs = load_defines(
-            './src/contracts/peerania/communities_and_tags.hpp')
+            './src/contracts/peerania/economy.h')
         alice = self.register_alice_account(
-            10000, defs['MODERATION_POINTS_CREATE_COMMUNITY'])
+            10000, defs['ENERGY_CREATE_COMMUNITY'])
         bob = self.register_bob_account(
-            10000, defs['MODERATION_POINTS_CREATE_TAG'])
+            10000, defs['ENERGY_CREATE_TAG'])
         carol = self.register_carol_account(
-            10000, defs['MODERATION_POINTS_CREATE_COMMUNITY'] - 1)
+            10000, defs['ENERGY_CREATE_COMMUNITY'] - 1)
         dan = self.register_dan_account(
-            10000, defs['MODERATION_POINTS_CREATE_TAG'] - 1)
+            10000, defs['ENERGY_CREATE_TAG'] - 1)
         self.action('crcommunity', {'user': 'alice', 'name': 'ACM', 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
                     'Alice create community')
         self.action('crtag', {'user': 'bob', 'community_id': 1, 'name': 'BT', 'ipfs_description': 'Bob tag description'}, bob,
                     'Bob create tag')
         accounts_e = [
             {'user': 'alice', 'rating': '#var alice_rt',
-                'moderation_points': '#var alice_mdp'},
+                'energy': '#var alice_energy'},
             {'user': 'bob', 'rating': '#var bob_rt',
-                'moderation_points': '#var bob_mdp'},
+                'energy': '#var bob_energy'},
             {}, {}
         ]
         var = {}
         self.assertTrue(compare(accounts_e, self.table(
             'account', 'allaccounts'), var, True))
-        self.assertTrue(var['alice_mdp'] == 0)
-        self.assertTrue(var['bob_mdp'] == 0)
+        self.assertTrue(var['alice_energy'] == 0)
+        self.assertTrue(var['bob_energy'] == 0)
         self.failed_action('crcommunity', {'user': 'carol', 'name': 'CCM', 'ipfs_description': 'Carol community description', 'suggested_tags': self.get_stub_suggested_tags()}, carol,
                            'Carol attempt to create community', 'assert')
         self.failed_action('crtag', {'user': 'dan', 'community_id': 1, 'name': 'DT', 'ipfs_description': 'Dan tag description'}, dan,
@@ -218,8 +218,8 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
 
     def test_delete_own_vote(self):
         begin('Test delete own upvote or downvote')
-        alice = self.register_alice_account(10000, 10)
-        bob = self.register_bob_account(10000, 10)
+        alice = self.register_alice_account(10000, 200)
+        bob = self.register_bob_account(10000, 200)
         self.action('crcommunity', {'user': 'alice', 'name': 'ACM', 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
                     'Alice create community')
         self.action('crtag', {'user': 'alice', 'community_id': 1, 'name': 'AT', 'ipfs_description': 'Alice tag description'}, alice,
@@ -265,7 +265,7 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
 
     def test_upvote_own_community_or_tag(self):
         begin('Upvote own community or tag', True)
-        alice = self.register_alice_account(10000, 10)
+        alice = self.register_alice_account(10000, 200)
         self.action('crcommunity', {'user': alice, 'name': 'alice community',
                               'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community')
         self.action('crtag', {'user': alice, 'name': 'alice tag',  'community_id': 1,
@@ -280,8 +280,8 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
 
     def test_delete_with_downvotes_own(self):
         begin('Test delete own tag and community with downvote')
-        alice = self.register_alice_account(10000, 10)
-        bob = self.register_bob_account(10000, 10)
+        alice = self.register_alice_account(10000, 200)
+        bob = self.register_bob_account(10000, 200)
         carol =  self.register_carol_account()
         self.action('crcommunity', {'user': alice, 'name': 'alice community',
                               'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community')
@@ -304,8 +304,8 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
 
     def test_delete_with_downvotes_own_with_upvotes(self):
         begin('Test delete own tag and community with downvote')
-        alice = self.register_alice_account(10000, 10)
-        bob = self.register_bob_account(10000, 10)
+        alice = self.register_alice_account(10000, 200)
+        bob = self.register_bob_account(10000, 200)
         carol =  self.register_carol_account()
         dan = self.register_dan_account()
         
@@ -334,9 +334,9 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
 
     def test_change_own_vote(self):
         begin('Test upvote after downvote and downvote after upvote - change vote')
-        alice = self.register_alice_account(10000, 10)
-        bob = self.register_bob_account(10000, 10)
-        carol = self.register_carol_account(10000, 10)
+        alice = self.register_alice_account(10000, 200)
+        bob = self.register_bob_account(10000)
+        carol = self.register_carol_account(10000)
         self.action('crcommunity', {'user': 'alice', 'name': 'ACM', 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
                     'Alice create community')
         self.action('crtag', {'user': 'alice', 'community_id': 1, 'name': 'AT', 'ipfs_description': 'Alice tag description'}, alice,
@@ -386,9 +386,9 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
 
     def test_another_user(self):
         begin('Test vote assert another user', True)
-        alice = self.register_alice_account(10000, 10)
-        bob = self.register_bob_account(10000, 10)
-        carol = self.register_carol_account(10000, 10)
+        alice = self.register_alice_account(10000, 200)
+        bob = self.register_bob_account(10000, 200)
+        carol = self.register_carol_account(10000, 200)
         self.failed_action('crcommunity', {'user': 'alice', 'name': 'ACM', 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, bob,
                            'Alice attempt to create community with bob auth', 'auth')
         self.failed_action('crtag', {'user': 'alice', 'community_id': 1, 'name': 'AT', 'ipfs_description': 'Alice tag description'}, bob,

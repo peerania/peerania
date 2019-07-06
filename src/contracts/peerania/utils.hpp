@@ -1,6 +1,5 @@
 #pragma once
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/name.hpp>
+#include <eosio/eosio.hpp>
 #include <iterator>
 
 namespace std {
@@ -34,7 +33,7 @@ Iter linear_find(Iter begin, Iter end, t_key key) {
 
 // Replace with more strict
 inline void assert_ipfs(const std::string &ipfs_link) {
-  eosio_assert(ipfs_link.size() >= 2 && ipfs_link.size() < 65,
+  eosio::check(ipfs_link.size() >= 2 && ipfs_link.size() < 65,
                "Incorrect ipfs");
 }
 
@@ -45,7 +44,7 @@ uint64_t get_reversive_pk(const table_index &table, uint64_t max_pk) {
   } else {
     // largest primary key currently in table
     auto pk = table.begin()->primary_key();
-    eosio_assert(pk > 0, "No available primary key");
+    eosio::check(pk > 0, "No available primary key");
     return --pk;
   }
 }
@@ -57,7 +56,7 @@ uint64_t get_direct_pk(const table_index &table, uint64_t max_pk) {
   } else {
     // largest primary key currently in table
     auto pk = table.rbegin()->primary_key();
-    eosio_assert(pk < max_pk, "No available primary key");
+    eosio::check(pk < max_pk, "No available primary key");
     return ++pk;
   }
 }

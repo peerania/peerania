@@ -3,21 +3,23 @@ from peeraniatest import *
 from jsonutils import *
 from unittest import main
 
+economy = load_defines('src/contracts/peerania/economy.h')
 
 class ForumFeedTests(peeraniatest.PeeraniaTest):
     def test_un_follow_community(self):
         begin('Test follow community, unfollow community')
         alice = self.register_alice_account()
-        account_e = [{
-            'user': alice,
-            'followed_communities': []
-        }]
+        account_e = [
+            get_expected_account_body(alice)
+        ]
         self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         self.action('followcomm', {'user': alice, 'community_id': 1}, alice, 'Alice now following community 1')
         account_e[0]['followed_communities'].append(1)
+        account_e[0]['energy'] -= economy['ENERGY_FOLLOW_COMMUNITY']
         self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         self.action('followcomm', {'user': alice, 'community_id': 2}, alice, 'Alice now following community 2')
         account_e[0]['followed_communities'].append(2)
+        account_e[0]['energy'] -= economy['ENERGY_FOLLOW_COMMUNITY']
         self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
         self.action('unfollowcomm', {'user': alice, 'community_id': 1}, alice, 'Alice no longer follows 1 community.')
         del account_e[0]['followed_communities'][0]

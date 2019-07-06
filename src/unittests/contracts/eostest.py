@@ -128,9 +128,9 @@ class EOSTest(unittest.TestCase):
                 input()
             self.assertFalse(transaction.returncode == 0)
         if(errormsg == 'auth'):
-            errormsg = 'Error 3090004: Missing required authority'
+            errormsg = 'Error 3090004' #Missing required authority
         elif(errormsg == 'assert'):
-            errormsg = 'Error 3050003: eosio_assert_message assertion failure'
+            errormsg = 'Error 3050003' #check_message assertion failure
         if(errormsg != ''):
             self.assertTrue(errormsg in out.decode())
         cprint('Get correct error', end='',  color='yellow')

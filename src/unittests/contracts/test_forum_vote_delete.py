@@ -3,17 +3,21 @@ from peeraniatest import *
 from jsonutils import *
 from unittest import main
 
+defs = {**load_defines('./src/contracts/peerania/economy.h'),
+        **load_defines('./src/contracts/peerania/question_container.hpp')}
+
 
 class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
     def test_vote_delete_comment(self):
         begin('Test vote for question comment')
         (alice, bob, carol) = self._init_all_accounts()
         account_e = ['#ignoreorder',
-                     {'user': 'alice', 'moderation_points': '#var alice_mdp',
-                         'rating': '#var alice_rating'},
-                     {'user': 'bob', 'moderation_points': '#var bob_mdp',
-                         'rating': '#var bob_rating'},
-                     {'user': 'carol', 'moderation_points': '#var carol_mdp', 'rating': '#var carol_rating'}]
+                     {'user': 'alice', 'energy': '#var alice_energy',
+                      'rating': '#var alice_rating'},
+                     {'user': 'bob', 'energy': '#var bob_energy',
+                      'rating': '#var bob_rating'},
+                     {'user': 'carol', 'energy': '#var carol_energy',
+                      'rating': '#var carol_rating'}]
         (e, var) = self._create_basic_hierarchy(alice, bob, carol)
         for key, value in var.items():
             if '_hst' in key or '_prop' in key:
@@ -21,76 +25,72 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         setvar(e, var)
         self.action('votedelete', {'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_aa'], 'comment_id': var['aq_aa_bc2']},
                     alice, 'Alice vote for deletion Alice question->Alice answer->Bob comment')
-        self.alice_moderation_points -= 1
+        self.alice_energy -= defs['ENERGY_REPORT_COMMENT']
         find_by_field(
             e, 'ipfs_link', 'AQ->AA->BC2')['history'].append({'user': 'alice', 'flag': '#ignore'})
         find_by_field(
-            e, 'ipfs_link', 'AQ->AA->BC2')['properties'].append({'key': self.defs['PROPERTY_DELETION_VOTES'], 'value': self.alice_rating})
+            e, 'ipfs_link', 'AQ->AA->BC2')['properties'].append({'key': defs['PROPERTY_DELETION_VOTES'], 'value': self.alice_rating})
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, ignore_excess=True))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
-        self.assertTrue(var['alice_mdp'] == self.alice_moderation_points)
-        info('Now {} has {} moderation points'.format(
-            alice, self.alice_moderation_points))
-
+        self.assertTrue(var['alice_energy'] == self.alice_energy)
+        info('Now {} has {} energy points'.format(
+            alice, self.alice_energy))
         self.action('votedelete', {'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_aa'], 'comment_id': var['aq_aa_bc2']},
                     carol, 'Carol vote for deletion Alice question->Alice answer->Bob commnet')
-        self.carol_moderation_points -= 1
-        self.bob_rating += self.defs['COMMENT_DELETED_REWARD']
+        self.carol_energy -= defs['ENERGY_REPORT_COMMENT']
+        self.bob_rating += defs['COMMENT_DELETED_REWARD']
         del(find_by_field(e, 'ipfs_link', 'AQ->AA')['comments'][2])
         info('Alice question->Alice answer->Bob commnet now removed by vote')
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, ignore_excess=True))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
-        self.assertTrue(var['carol_mdp'] == self.carol_moderation_points)
-        info('Now {} has {} moderation points'.format(
-            carol, self.carol_moderation_points))
-
+        self.assertTrue(var['carol_energy'] == self.carol_energy)
+        info('Now {} has {} energy points'.format(
+            carol, self.carol_energy))
         self.action('votedelete', {'user': 'bob', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': var['aq_cc']},
                     bob, 'Bob vote for deletion Alice question->Carrol comment')
-        self.bob_moderation_points -= 1
+        self.bob_energy -= defs['ENERGY_REPORT_COMMENT']
         find_by_field(
             e, 'ipfs_link',  'AQ->CC')['history'].append({'user': 'bob', 'flag': '#ignore'})
         find_by_field(
-            e, 'ipfs_link',  'AQ->CC')['properties'].append({'key': self.defs['PROPERTY_DELETION_VOTES'], 'value': self.bob_rating})
+            e, 'ipfs_link',  'AQ->CC')['properties'].append({'key': defs['PROPERTY_DELETION_VOTES'], 'value': self.bob_rating})
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, ignore_excess=True))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
-        self.assertTrue(var['bob_mdp'] == self.bob_moderation_points)
-        info('Now {} has {} moderation points'.format(
-            bob, self.bob_moderation_points))
-
+        self.assertTrue(var['bob_energy'] == self.bob_energy)
+        info('Now {} has {} energy points'.format(
+            bob, self.bob_energy))
         self.action('votedelete', {'user': 'alice', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': var['aq_cc']},
                     alice, 'Alice vote for deletion Alice question->Carol comment')
-        self.alice_moderation_points -= 1
-        self.carol_rating += self.defs['COMMENT_DELETED_REWARD']
+        self.alice_energy -= defs['ENERGY_REPORT_COMMENT']
+        self.carol_rating += defs['COMMENT_DELETED_REWARD']
         del(find_by_field(e, 'ipfs_link',  'AQ')['comments'][0])
         info('Alice question->Carol comment now removed by vote')
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, ignore_excess=True))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
-        self.assertTrue(var['alice_mdp'] == self.alice_moderation_points)
-        info('Now {} has {} moderation points'.format(
-            alice, self.alice_moderation_points))
-        info('Now carol rating is {}'.format(self.carol_moderation_points))
-
+        self.assertTrue(var['alice_energy'] == self.alice_energy)
+        info('Now {} has {} energy points'.format(
+            alice, self.alice_energy))
+        info('Now carol rating is {}'.format(self.carol_energy))
         self.action('votedelete', {'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_aa'], 'comment_id': var['aq_aa_bc1']},
                     carol, 'Carol vote for deletion Alice question->Alice answer->Bob comment1')
-        self.carol_moderation_points -= 1
-        self.bob_rating += self.defs['COMMENT_DELETED_REWARD']
+        self.carol_energy -= defs['ENERGY_REPORT_COMMENT']
+        self.bob_rating += defs['COMMENT_DELETED_REWARD']
         del(find_by_field(e, 'ipfs_link',  'AQ->AA')['comments'][0])
         info('Alice question->Alice answer->Bob comment1 now removed by vote')
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, ignore_excess=True))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
-        self.assertTrue(var['carol_mdp'] == self.carol_moderation_points)
-        info('Now {} has {} moderation points'.format(
-            carol, self.carol_moderation_points))
+        self.assertTrue(var['carol_energy'] == self.carol_energy)
+        info('Now {} has {} energy points'.format(
+            carol, self.carol_energy))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
         self.assertTrue(var['alice_rating'] == self.alice_rating)
@@ -102,11 +102,11 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         begin('Test vote for answer deletion')
         (alice, bob, carol) = self._init_all_accounts()
         account_e = ['#ignoreorder',
-                     {'user': 'alice', 'moderation_points': '#var alice_mdp',
+                     {'user': 'alice', 'energy': '#var alice_energy',
                          'rating': '#var alice_rating'},
-                     {'user': 'bob', 'moderation_points': '#var bob_mdp',
+                     {'user': 'bob', 'energy': '#var bob_energy',
                          'rating': '#var bob_rating'},
-                     {'user': 'carol', 'moderation_points': '#var carol_mdp', 'rating': '#var carol_rating'}]
+                     {'user': 'carol', 'energy': '#var carol_energy', 'rating': '#var carol_rating'}]
         (e, var) = self._create_basic_hierarchy(alice, bob, carol)
         for key, value in var.items():
             if '_hst' in key or '_prop' in key:
@@ -114,49 +114,49 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         setvar(e, var)
         self.action('votedelete', {'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0},
                     alice, 'Alice vote for deletion Alice question->Bob answer')
-        self.alice_moderation_points -= 1
+        self.alice_energy -= defs['ENERGY_REPORT_ANSWER']
         find_by_field(
             e, 'ipfs_link',  'AQ->BA')['history'].append({'user': 'alice', 'flag': '#ignore'})
         find_by_field(
-            e, 'ipfs_link',  'AQ->BA')['properties'].append({'key': self.defs['PROPERTY_DELETION_VOTES'], 'value': self.alice_rating})
+            e, 'ipfs_link',  'AQ->BA')['properties'].append({'key': defs['PROPERTY_DELETION_VOTES'], 'value': self.alice_rating})
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, ignore_excess=True))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
-        self.assertTrue(var['alice_mdp'] == self.alice_moderation_points)
-        info('Now {} has {} moderation points'.format(
-            alice, self.alice_moderation_points))
+        self.assertTrue(var['alice_energy'] == self.alice_energy)
+        info('Now {} has {} energy points'.format(
+            alice, self.alice_energy))
 
         self.action('votedelete', {'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0},
                     carol, 'Carol vote for deletion Alice question->Bob answer')
-        self.carol_moderation_points -= 1
-        self.bob_rating += self.defs['ANSWER_DELETED_REWARD']
+        self.carol_energy -= defs['ENERGY_REPORT_ANSWER']
+        self.bob_rating += defs['ANSWER_DELETED_REWARD']
         del(find_by_field(e, 'ipfs_link',  'AQ')['answers'][1])
         info('Alice question->Bob answer now removed by vote')
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, ignore_excess=True))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
-        self.assertTrue(var['carol_mdp'] == self.carol_moderation_points)
-        info('Now {} has {} moderation points'.format(
-            carol, self.carol_moderation_points))
+        self.assertTrue(var['carol_energy'] == self.carol_energy)
+        info('Now {} has {} energy points'.format(
+            carol, self.carol_energy))
         self.action('votedelete', {'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ca'], 'comment_id': 0},
                     alice, 'Bob vote for deletion Alice question->Carrol answer')
-        self.alice_moderation_points -= 1
+        self.alice_energy -= defs['ENERGY_REPORT_ANSWER']
         find_by_field(
             e, 'ipfs_link',  'AQ->CA')['history'].append({'user': 'alice', 'flag': '#ignore'})
         find_by_field(
-            e, 'ipfs_link',  'AQ->CA')['properties'].append({'key': self.defs['PROPERTY_DELETION_VOTES'], 'value': self.alice_rating})
+            e, 'ipfs_link',  'AQ->CA')['properties'].append({'key': defs['PROPERTY_DELETION_VOTES'], 'value': self.alice_rating})
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, ignore_excess=True))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
-        self.assertTrue(var['alice_mdp'] == self.alice_moderation_points)
-        info('Now {} has {} moderation points'.format(
-            alice, self.alice_moderation_points))
+        self.assertTrue(var['alice_energy'] == self.alice_energy)
+        info('Now {} has {} energy points'.format(
+            alice, self.alice_energy))
         self.action('votedelete', {'user': 'bob', 'question_id': var['aq'], 'answer_id': var['aq_ca'], 'comment_id': 0},
                     bob, 'Bob vote for deletion Alice question->Carrol answer')
-        self.bob_moderation_points -= 1
+        self.bob_energy -= defs['ENERGY_REPORT_ANSWER']
         find_by_field(
             e, 'ipfs_link',  'AQ->CA')['history'].append({'user': 'bob', 'flag': '#ignore'})
         find_by_field(
@@ -165,9 +165,9 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         self.assertTrue(compare(e, t, ignore_excess=True))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
-        self.assertTrue(var['bob_mdp'] == self.bob_moderation_points)
-        info('Now {} has {} moderation points'.format(
-            bob, self.bob_moderation_points))
+        self.assertTrue(var['bob_energy'] == self.bob_energy)
+        info('Now {} has {} energy points'.format(
+            bob, self.bob_energy))
         info('Not enought deletion rating to remove carol answer')
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
@@ -180,11 +180,11 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         begin('Test vote for question comment')
         (alice, bob, carol) = self._init_all_accounts()
         account_e = ['#ignoreorder',
-                     {'user': 'alice', 'moderation_points': '#var alice_mdp',
+                     {'user': 'alice', 'energy': '#var alice_energy',
                          'rating': '#var alice_rating'},
-                     {'user': 'bob', 'moderation_points': '#var bob_mdp',
+                     {'user': 'bob', 'energy': '#var bob_energy',
                          'rating': '#var bob_rating'},
-                     {'user': 'carol', 'moderation_points': '#var carol_mdp', 'rating': '#var carol_rating'}]
+                     {'user': 'carol', 'energy': '#var carol_energy', 'rating': '#var carol_rating'}]
         (e, var) = self._create_basic_hierarchy(alice, bob, carol)
         for key, value in var.items():
             if '_hst' in key or '_prop' in key:
@@ -192,31 +192,31 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         setvar(e, var)
         self.action('votedelete', {'user': 'bob', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0},
                     bob, 'Bob vote for deletion Alice question')
-        self.bob_moderation_points -= 1
+        self.bob_energy -= defs['ENERGY_REPORT_QUESTION']
         find_by_field(
             e, 'ipfs_link',  'AQ')['history'].append({'user': 'bob', 'flag': '#ignore'})
         find_by_field(
-            e, 'ipfs_link',  'AQ')['properties'].append({'key': self.defs['PROPERTY_DELETION_VOTES'], 'value': self.bob_rating})
+            e, 'ipfs_link',  'AQ')['properties'].append({'key': defs['PROPERTY_DELETION_VOTES'], 'value': self.bob_rating})
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, ignore_excess=True))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
-        self.assertTrue(var['bob_mdp'] == self.bob_moderation_points)
-        info('Now {} has {} moderation points'.format(
-            bob, self.bob_moderation_points))
+        self.assertTrue(var['bob_energy'] == self.bob_energy)
+        info('Now {} has {} energy points'.format(
+            bob, self.bob_energy))
         self.action('votedelete', {'user': 'carol', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0},
                     carol, 'Carol vote for deletion Alice question-')
-        self.carol_moderation_points -= 1
+        self.carol_energy -= defs['ENERGY_REPORT_QUESTION']
         del(e[1])
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, ignore_excess=True))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
-        self.assertTrue(var['carol_mdp'] == self.carol_moderation_points)
-        info('Now {} has {} moderation points'.format(
-            carol, self.carol_moderation_points))
+        self.assertTrue(var['carol_energy'] == self.carol_energy)
+        info('Now {} has {} energy points'.format(
+            carol, self.carol_energy))
         info('Alice question now removed by vote')
-        self.alice_rating += self.defs['QUESTION_DELETED_REWARD']
+        self.alice_rating += defs['QUESTION_DELETED_REWARD']
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), var, ignore_excess=True))
         self.assertTrue(var['alice_rating'] == self.alice_rating)
@@ -228,9 +228,8 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         begin('Test delte correct answer(check rest correct answer id after action)')
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        carol = self.register_carol_account(3000, 1)
+        carol = self.register_carol_account(3000)
         (e, var) = self._create_simple_hierarchy(alice, bob)
-
         self.action('mrkascorrect', {
                     'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, alice, "Alice mark Bob answer as correct")
         t = self.table('question', 'allquestions')
@@ -337,27 +336,10 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
                            carol, 'Carol attempt to vote for deletion Alice question->non-existent comment', 'assert')
         end()
 
-    def test_moderation_point_limit(self):
-        begin('Test moderation points limit', True)
-        alice = self.register_alice_account()
-        bob = self.register_bob_account()
-        carol = self.register_carol_account(700, 3)
-        (e, var) = self._create_simple_hierarchy(alice, bob)
-        self.action('votedelete', {'user': 'carol', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0},
-                    carol, 'Carol vote for deletion question')
-        self.action('votedelete', {'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0},
-                    carol, 'Carol vote for answer deletion')
-        self.action('votedelete', {'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': var['aq_ba_ac']},
-                    carol, 'Carol vote for comment deletion')
-        info('Now carol has no moderation points')
-        self.failed_action('votedelete', {'user': 'carol', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': var['aq_bc']},
-                           carol, 'Carol attempt to vote for deletion without moderation points', 'assert')
-        end()
-
     def _create_basic_hierarchy(self, alice, bob, carol):
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags':[1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
                     'Register question from alice')
-        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'BQ', 'community_id': 1, 'tags':[1]}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'BQ', 'community_id': 1, 'tags': [1]}, bob,
                     'Register question from bob')
         e = ['#ignoreorder', {
             'id': '#var aq',
@@ -522,10 +504,18 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         info('      |-->Carol comment')
         info('      |-->Alice comment')
         info('       `->Bob comment')
+        self.alice_energy -= defs['ENERGY_POST_QUESTION'] + \
+            defs['ENERGY_POST_ANSWER'] + \
+            5 * defs['ENERGY_POST_COMMENT']
+        self.bob_energy -= defs['ENERGY_POST_QUESTION'] + \
+            defs['ENERGY_POST_ANSWER'] + \
+            6 * defs['ENERGY_POST_COMMENT']
+        self.carol_energy -= 2 * defs['ENERGY_POST_ANSWER'] + \
+            3 * defs['ENERGY_POST_COMMENT']
         return (e, var)
 
     def _create_simple_hierarchy(self, alice, bob):
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags':[1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
                     'Register question from alice')
         e = [{
             'id': '#var aq',
@@ -570,21 +560,20 @@ class ForumVoteDeleteTests(peeraniatest.PeeraniaTest):
         return (e, var)
 
     def _init_all_accounts(self):
+        self.init_account_call = True
         self.alice_rating = 551
         self.bob_rating = 751
         self.carol_rating = 1051
-        self.alice_moderation_points = 3
-        self.bob_moderation_points = 3
-        self.carol_moderation_points = 3
-        self.defs = {**load_defines('./src/contracts/peerania/economy.h'),
-                     **load_defines('./src/contracts/peerania/question_container.hpp')}
+        self.alice_energy = 70
+        self.bob_energy = 70
+        self.carol_energy = 70
 
         alice = self.register_alice_account(
-            self.alice_rating, self.alice_moderation_points)
+            self.alice_rating, self.alice_energy)
         bob = self.register_bob_account(
-            self.bob_rating, self.bob_moderation_points)
+            self.bob_rating, self.bob_energy)
         carol = self.register_carol_account(
-            self.carol_rating, self.carol_moderation_points)
+            self.carol_rating, self.carol_energy)
         return (alice, bob, carol)
 
 

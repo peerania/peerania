@@ -3,6 +3,7 @@ from peeraniatest import *
 from jsonutils import *
 from unittest import main
 
+economy = load_defines('src/contracts/peerania/economy.h')
 
 class ForumAnswerTests(peeraniatest.PeeraniaTest):
 
@@ -16,11 +17,16 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         var = {}
         self.assertTrue(compare(q, t, var, True))
         setvar(q, var)
+        account_e = ['#ignoreorder', get_expected_account_body(
+            alice), get_expected_account_body(bob)]
         self._register_answer_action(
             bob, var['q1_id'], 'Bob answer 1 to Alice question 1', q)
+        account_e[1]['energy'] -= economy['ENERGY_POST_QUESTION']
+        account_e[2]['energy'] -= economy['ENERGY_POST_ANSWER']
+        self.assertTrue(compare(account_e, self.table(
+            'account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(q, t, ignore_excess=True))
-        info('Table question after question registration', t)
         end()
 
     def test_modify_answer(self):
@@ -37,17 +43,23 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
             bob, var['q1_id'], 'Bob answer 1 to Alice question 1', q, 'q1_a1_id')
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(q, t, var, True))
+        account_e = ['#ignoreorder', get_expected_account_body(
+            alice), get_expected_account_body(bob)]
         self.action('modanswer', {'user': 'bob',
                                   'question_id': var['q1_id'],
                                   'answer_id': var['q1_a1_id'],
                                   'ipfs_link': 'updated IPFS'},
                     bob, 'Update Bob answer 1 to Alice question 1, set to "updated IPFS"')
+        account_e[1]['energy'] -= economy['ENERGY_POST_QUESTION']
+        account_e[2]['energy'] -= economy['ENERGY_POST_ANSWER']
+        account_e[2]['energy'] -= economy['ENERGY_MODIFY_ANSWER']
+        self.assertTrue(compare(account_e, self.table(
+            'account', 'allaccounts'), ignore_excess=True))
         setvar(q, var)
         t = self.table('question', 'allquestions')
         q[0]['answers'][0]['ipfs_link'] = 'updated IPFS'
         q[0]['answers'][0]['properties'] = [{'key': 3, 'value': '#ignore'}]
         self.assertTrue(compare(q, t, ignore_excess=True))
-        info('Table question after actions', t)
         end()
 
     def test_delete_answer(self):
@@ -64,14 +76,20 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
             bob, var['q1_id'], 'Bob answer 1 to Alice question 1', q, 'q1_a1_id')
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(q, t, var, True))
+        account_e = ['#ignoreorder', get_expected_account_body(
+            alice), get_expected_account_body(bob)]
         self.action('delanswer', {'user': 'bob',
                                   'question_id': var['q1_id'],
                                   'answer_id': var['q1_a1_id']},
                     bob, 'Delete Bob answer 1 to Alice question 1')
+        account_e[1]['energy'] -= economy['ENERGY_POST_QUESTION']
+        account_e[2]['energy'] -= economy['ENERGY_POST_ANSWER']
+        account_e[2]['energy'] -= economy['ENERGY_DELETE_ANSWER']
+        self.assertTrue(compare(account_e, self.table(
+            'account', 'allaccounts'), ignore_excess=True))
         t = self.table('question', 'allquestions')
         q[0]['answers'] = []
         self.assertTrue(compare(q, t, ignore_excess=True))
-        info('Table question after actions', t)
         end()
 
     def test_register_answer_twice_failed(self):
@@ -253,7 +271,9 @@ class ForumAnswerTests(peeraniatest.PeeraniaTest):
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(q, t, var, True))
-        self.failed_action('postanswer', {'user': 'bob', 'question_id': int(var['q1_id']) + 1, 'ipfs_link': 'test'}, bob,
+        self.failed_action('postanswer', {'user': 'bob',
+                                          'question_id': int(var['q1_id']) + 1,
+                                          'ipfs_link': 'test'}, bob,
                            'Attempt to register answer to non existent question', 'assert')
         end()
 

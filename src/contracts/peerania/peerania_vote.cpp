@@ -5,40 +5,37 @@ void peerania::vote_forum_item(eosio::name user, uint64_t question_id,
                                uint16_t answer_id, bool is_upvote) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
-  eosio::name item_user;
-  int8_t user_rating_change;
+  eosio::name target_user;
+  int8_t target_user_rating_change;
   int8_t caller_rating_change;
+  int8_t energy;
   question_table.modify(
       iter_question, _self,
-      [answer_id, is_upvote, iter_account, &item_user, &user_rating_change,
-       &caller_rating_change](auto &question) {
+      [answer_id, is_upvote, iter_account, &target_user,
+       &target_user_rating_change, &caller_rating_change, &energy](auto &question) {
         if (apply_to_question(answer_id)) {
+          target_user = question.user;
           if (is_upvote)
-            upvote_item(question, iter_account, item_user, user_rating_change,
-                        caller_rating_change, QUESTION_UPVOTED_REWARD,
-                        UPVOTE_QUESTION_REWARD, QUESTION_DOWNVOTED_REWARD,
-                        DOWNVOTE_QUESTION_REWARD);
+            upvote_item(question, iter_account, energy, caller_rating_change,
+                        target_user_rating_change, VoteItem::question);
           else
-            downvote_item(question, iter_account, item_user, user_rating_change,
-                          caller_rating_change, QUESTION_UPVOTED_REWARD,
-                          UPVOTE_QUESTION_REWARD, QUESTION_DOWNVOTED_REWARD,
-                          DOWNVOTE_QUESTION_REWARD);
+            downvote_item(question, iter_account, energy, caller_rating_change,
+                        target_user_rating_change, VoteItem::question);
         } else {
-          auto itr_answer = find_answer(question, answer_id);
+          auto iter_answer = find_answer(question, answer_id);
+          target_user = iter_answer->user;
           if (is_upvote)
-            upvote_item(*itr_answer, iter_account, item_user,
-                        user_rating_change, caller_rating_change,
-                        ANSWER_UPVOTED_REWARD, UPVOTE_ANSWER_REWARD,
-                        ANSWER_DOWNVOTED_REWARD, DOWNVOTE_ANSWER_REWARD);
+            upvote_item(*iter_answer, iter_account, energy, caller_rating_change,
+                        target_user_rating_change, VoteItem::answer);
           else
-            downvote_item(*itr_answer, iter_account, item_user,
-                          user_rating_change, caller_rating_change,
-                          ANSWER_UPVOTED_REWARD, UPVOTE_ANSWER_REWARD,
-                          ANSWER_DOWNVOTED_REWARD, DOWNVOTE_ANSWER_REWARD);
+            downvote_item(*iter_answer, iter_account, energy, caller_rating_change,
+                        target_user_rating_change, VoteItem::answer);
         }
       });
-  update_rating(iter_account, caller_rating_change);
-  update_rating(item_user, user_rating_change);
+  update_rating(iter_account, caller_rating_change, [energy](auto &account){
+    account.reduce_energy(energy);
+  });
+  update_rating(target_user, target_user_rating_change);
 }
 
 void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
@@ -46,10 +43,17 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
 
-  update_rating(iter_account, 0, [](auto &account) {
-    eosio_assert(account.moderation_points >= MODERATION_POINTS_VOTE_DELETE,
-                 "Not enought moderation points");
-    account.moderation_points -= MODERATION_POINTS_VOTE_DELETE;
+  update_rating(iter_account, [answer_id, comment_id](auto &account) {
+    int reduce_energy_value;
+    if (apply_to_answer(comment_id)) {
+      if (apply_to_question(answer_id))
+        reduce_energy_value = ENERGY_REPORT_QUESTION;
+      else
+        reduce_energy_value = ENERGY_REPORT_ANSWER;
+    } else {
+      reduce_energy_value = ENERGY_REPORT_COMMENT;
+    }
+    account.reduce_energy(reduce_energy_value);
   });
 
   int user_rating_change = 0;
@@ -160,7 +164,7 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
       remove_user_answer(answer->user, iter_question->id);
     }
     question_table.erase(iter_question);
-    eosio_assert(iter_question != question_table.end(),
+    eosio::check(iter_question != question_table.end(),
                  "Address not erased properly");
   }
   // user_rating_change = 0 also means that item_user was not found

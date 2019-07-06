@@ -1,5 +1,5 @@
 #pragma once
-#include <eosiolib/name.hpp>
+#include <eosio/name.hpp>
 #include "economy.h"
 /*
 1 - Stranger - 0
@@ -33,16 +33,18 @@
   default:         \
     return (X)
 
+
+
 uint16_t status_energy(int rating){
   if (rating < 0) return 0;
   switch (rating) {
-    STATUS0(50);
-    STATUS1(100);
-    STATUS2(200);
-    STATUS3(300);
-    STATUS4(400);
-    STATUS5(500);
-    STATUS6(600);
+    STATUS0(STATUS0_ENERGY);
+    STATUS1(STATUS1_ENERGY);
+    STATUS2(STATUS2_ENERGY);
+    STATUS3(STATUS3_ENERGY);
+    STATUS4(STATUS4_ENERGY);
+    STATUS5(STATUS5_ENERGY);
+    STATUS6(STATUS6_ENERGY);
   }
 }
 

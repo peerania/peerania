@@ -1,6 +1,6 @@
-#include <eosiolib/asset.hpp>
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/name.hpp>
+#include <eosio/asset.hpp>
+#include <eosio/eosio.hpp>
+#include <eosio/name.hpp>
 #include <string>
 #include <vector>
 
@@ -93,7 +93,7 @@ class[[eosio::contract("peerania.tkn")]] token_d : public token {
 
   // Stub I think about it later!!!!
   void pickupreward(name user, const uint16_t period) {
-    token t(_self, _code, _ds);
+    token t(_self, _first_receiver, _ds);
     allaccs_index allaccs_table(_self, _self.value);
     if (allaccs_table.find(user.value) == allaccs_table.end())
       allaccs_table.emplace(_self, [user](auto& a) { a.user = user; });

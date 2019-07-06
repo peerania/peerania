@@ -1,6 +1,6 @@
 #pragma once
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/name.hpp>
+#include <eosio/system.hpp>
+#include <eosio/eosio.hpp>
 #include <string>
 #include "economy.h"
 #include "peerania_types.h"
@@ -36,8 +36,8 @@ struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
   bool is_freezed;
 
   void update() {
-    uint16_t current_period =
-        (now() - registration_time) / ACCOUNT_STAT_RESET_PERIOD;
+    time current_time = now();
+    uint16_t current_period = (current_time - registration_time) / ACCOUNT_STAT_RESET_PERIOD;
     uint16_t periods_have_passed = current_period - last_update_period;
     if (periods_have_passed > 0) {
       if (rating <= 0) {
@@ -50,23 +50,28 @@ struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
     }
 
     if (is_freezed) {
-      if ((now() - last_freeze) >=
+      if ((current_time - last_freeze) >=
           (MIN_FREEZE_PERIOD * (1 << (report_power - 1)))) {
         reports.clear();
         is_freezed = false;
-        last_freeze = now();
+        last_freeze = current_time;
       }
     } else {
       if (report_power != 0 &&
-          (now() - last_freeze) >= REPORT_POWER_RESET_PERIOD) {
+          (current_time - last_freeze) >= REPORT_POWER_RESET_PERIOD) {
         report_power = 0;
       }
       auto iter_report = reports.begin();
       while (iter_report != reports.end() &&
-             now() - iter_report->report_time >= REPORT_RESET_PERIOD) {
+             current_time - iter_report->report_time >= REPORT_RESET_PERIOD) {
         iter_report = reports.erase(iter_report);
       }
     }
+  }
+
+  void reduce_energy(uint8_t value){
+    eosio::check(energy >= value, "Not enought energy!");
+    energy -= value;
   }
 
   uint64_t primary_key() const { return user.value; }
@@ -77,7 +82,7 @@ struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
       account,
       (user)(display_name)(ipfs_profile)(ipfs_avatar)(registration_time)(
           string_properties)(integer_properties)(rating)(pay_out_rating)(
-          last_update_period)(followed_communities)(questions_asked)(
+          last_update_period)(energy)(followed_communities)(questions_asked)(
           answers_given)(correct_answers)(reports)(report_power)(last_freeze)(
           is_freezed))
 };
@@ -86,7 +91,7 @@ struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
 #define MAX_DISPLAY_NAME_LEN 20
 
 void assert_display_name(const std::string &display_name) {
-  eosio_assert(display_name.length() >= MIN_DISPLAY_NAME_LEN &&
+  eosio::check(display_name.length() >= MIN_DISPLAY_NAME_LEN &&
                    display_name.length() <= MAX_DISPLAY_NAME_LEN,
                "The display name too short.");
 }

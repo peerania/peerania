@@ -3,31 +3,27 @@ from peeraniatest import *
 from jsonutils import *
 from unittest import main
 
+economy = load_defines('src/contracts/peerania/economy.h')
 
 class AccountModerationTests(peeraniatest.PeeraniaTest):
     def test_report_user(self):
         begin('Test report user')
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        account_e = [{
-            'user': alice,
-            'reports': [],
-            'report_power': 0,
-            'is_freezed': False
-        }, {
-            'user': bob,
-            'reports': [],
-            'report_power': 0,
-            'is_freezed': False
-        }]
+        account_e = ['#ignoreorder', get_expected_account_body(alice),
+                     get_expected_account_body(bob)]
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), ignore_excess=True))
         self.action('reportprof', {
                     'user': bob, 'user_to_report': 'alice'}, bob, 'Bob report alice account')
-        account_e[0]['reports'].append({
+        account_e[1]['reports'].append({
             'user': 'bob',
             'report_points': 1
         })
+        account_e[2]['energy'] -= economy['ENERGY_REPORT_PROFILE']
+        info('a', account_e)
+        info('b', self.table(
+            'account', 'allaccounts'))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), ignore_excess=True))
         end()
@@ -35,27 +31,20 @@ class AccountModerationTests(peeraniatest.PeeraniaTest):
     def test_clear_report(self):
         begin('Test clear reports')
         alice = self.register_alice_account()
-        bob = self.register_bob_account(10000, 5)
-        account_e = [{
-            'user': alice,
-            'reports': [],
-            'report_power': 0,
-            'is_freezed': False
-        }, {
-            'user': bob,
-            'reports': [],
-            'report_power': 0,
-            'is_freezed': False
-        }]
+        bob = self.register_bob_account(10000)
+        account_e = ['#ignoreorder', get_expected_account_body(alice),
+                     get_expected_account_body(bob)]
         self.action('reportprof', {
                     'user': bob, 'user_to_report': 'alice'}, bob, 'Bob report alice account')
+        account_e[2]['energy'] -= economy['ENERGY_REPORT_PROFILE']
         self.wait(2)
         self.action('reportprof', {
                     'user': bob, 'user_to_report': 'alice'}, bob, 'Bob report alice account')
-        account_e[0]['reports'].append({
+        account_e[1]['reports'].append({
             'user': 'bob',
             'report_points': 6
         })
+        account_e[2]['energy'] -= economy['ENERGY_REPORT_PROFILE']
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), ignore_excess=True))
         end()
@@ -114,7 +103,7 @@ class AccountModerationTests(peeraniatest.PeeraniaTest):
         self.action('reportprof', {
                     'user': carol, 'user_to_report': 'alice'}, carol, 'Carol report alice account')
         self.failed_action('reportprof', {
-                    'user': ted, 'user_to_report': 'alice'}, ted, 'Ted attempt to report alice account', 'assert')
+            'user': ted, 'user_to_report': 'alice'}, ted, 'Ted attempt to report alice account', 'assert')
         end()
 
     def test_autounfreze(self):
@@ -130,7 +119,7 @@ class AccountModerationTests(peeraniatest.PeeraniaTest):
         info("Wait untill freeze stoppeed")
         self.wait(2)
         self.failed_action('reportprof', {
-                    'user': ted, 'user_to_report': 'alice'}, ted, 'Ted attempt to report alice, it freezed yet', 'assert')
+            'user': ted, 'user_to_report': 'alice'}, ted, 'Ted attempt to report alice, it freezed yet', 'assert')
         self.wait(1)
         self.action('reportprof', {
                     'user': ted, 'user_to_report': 'alice'}, ted, 'Ted attempt to report alice account')
@@ -152,7 +141,7 @@ class AccountModerationTests(peeraniatest.PeeraniaTest):
         info("Wait untill freeze stoppeed")
         self.wait(5)
         self.failed_action('reportprof', {
-                    'user': ted, 'user_to_report': 'alice'}, ted, 'Ted attempt to report alice, it freezed yet', 'assert')
+            'user': ted, 'user_to_report': 'alice'}, ted, 'Ted attempt to report alice, it freezed yet', 'assert')
         self.wait(1)
         self.action('reportprof', {
                     'user': ted, 'user_to_report': 'alice'}, ted, 'Ted attempt to report alice account')
@@ -190,6 +179,7 @@ class AccountModerationTests(peeraniatest.PeeraniaTest):
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), ignore_excess=True))
         end()
+
 
 if __name__ == '__main__':
     main()

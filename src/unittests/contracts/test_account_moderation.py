@@ -86,7 +86,7 @@ class AccountModerationTests(peeraniatest.PeeraniaTest):
                 'report_points': 6
             }],
             'report_power': 1,
-            'is_freezed': 1
+            'is_frozen': 1
         }, {'user': bob}, {'user': carol}]
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), ignore_excess=True))
@@ -130,7 +130,7 @@ class AccountModerationTests(peeraniatest.PeeraniaTest):
                 'report_points': 2
             }],
             'report_power': 1,
-            'is_freezed': False
+            'is_frozen': False
         }, {'user': bob}, {'user': carol}, {'user': 'ted'}]
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), ignore_excess=True))
@@ -170,7 +170,7 @@ class AccountModerationTests(peeraniatest.PeeraniaTest):
                 'report_points': 2
             }],
             'report_power': 1,
-            'is_freezed': False
+            'is_frozen': False
         }, {'user': bob}, {'user': carol}, {'user': 'ted'}]
         self.wait(4)
         self.action('reportprof', {

@@ -92,7 +92,7 @@ def get_expected_account_body(user):
         'energy': 50,  # probably better to load from defines
         'reports': [],
         'report_power': 0,
-        'is_freezed': False,
+        'is_frozen': False,
         'followed_communities': []
     }
 

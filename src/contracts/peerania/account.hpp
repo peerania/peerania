@@ -33,7 +33,7 @@ struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
   std::vector<report> reports;
   uint8_t report_power;
   time last_freeze;
-  bool is_freezed;
+  bool is_frozen;
 
   void update() {
     time current_time = now();
@@ -49,11 +49,11 @@ struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
       last_update_period = current_period;
     }
 
-    if (is_freezed) {
+    if (is_frozen) {
       if ((current_time - last_freeze) >=
           (MIN_FREEZE_PERIOD * (1 << (report_power - 1)))) {
         reports.clear();
-        is_freezed = false;
+        is_frozen = false;
         last_freeze = current_time;
       }
     } else {
@@ -84,7 +84,7 @@ struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
           string_properties)(integer_properties)(rating)(pay_out_rating)(
           last_update_period)(energy)(followed_communities)(questions_asked)(
           answers_given)(correct_answers)(reports)(report_power)(last_freeze)(
-          is_freezed))
+          is_frozen))
 };
 
 #define MIN_DISPLAY_NAME_LEN 3

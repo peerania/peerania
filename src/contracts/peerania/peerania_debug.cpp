@@ -27,11 +27,6 @@
 #define MODERATION_POINTS_REPORT_PROFILE 2
 
 #include "question_container.hpp"
-#undef MAX_ANSWER_COUNT
-#define MAX_ANSWER_COUNT 4
-#undef MAX_COMMENT_COUNT
-#define MAX_COMMENT_COUNT 4
-
 #include "access.hpp"
 #include "account.hpp"
 #include "communities_and_tags.hpp"

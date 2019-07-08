@@ -78,7 +78,7 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
             if (delete_question) {
               item_user = question.user;
               user_rating_change -=
-                  upvote_count(question.history) * QUESTION_UPVOTED_REWARD;
+                  upvote_count(question.history) * VoteItem::question.upvoted_reward;
               user_rating_change += QUESTION_DELETED_REWARD;
             }
           } else {
@@ -108,7 +108,7 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
               question.correct_answer_id = EMPTY_ANSWER_ID;
             }
             user_rating_change -=
-                upvote_count(iter_answer->history) * ANSWER_UPVOTED_REWARD;
+                upvote_count(iter_answer->history) * VoteItem::answer.upvoted_reward;
             user_rating_change += ANSWER_DELETED_REWARD;
             question.answers.erase(iter_answer);
             delete_answer = true;
@@ -150,7 +150,7 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
     for (auto answer = iter_question->answers.begin();
          answer != iter_question->answers.end(); answer++) {
       int rating_change = 0;
-      rating_change -= upvote_count(answer->history) * ANSWER_UPVOTED_REWARD;
+      rating_change -= upvote_count(answer->history) * VoteItem::answer.upvoted_reward;
       bool is_correct_answer = false;
       if (answer->id == iter_question->correct_answer_id) {
         rating_change -= ANSWER_ACCEPTED_AS_CORRECT_REWARD;

@@ -22,7 +22,7 @@ void peerania::register_account(eosio::name user, std::string display_name,
     account.energy = status_energy(RATING_ON_CREATE);
     account.report_power = 0;
     account.last_freeze = current_time;
-    account.is_freezed = false;
+    account.is_frozen = false;
   });
 
   global_stat_index global_stat_table(_self, scope_all_stat);
@@ -62,7 +62,7 @@ void peerania::report_profile(eosio::name user, eosio::name user_to_report) {
   });
   update_rating(iter_user_to_report, [&](auto &account) {
     account.update();
-    eosio::check(!account.is_freezed, "Profile alredy freezed");
+    eosio::check(!account.is_frozen, "Profile is already frozen");
     uint16_t total_report_points = 0;
     for (auto iter_reports = account.reports.begin();
          iter_reports != account.reports.end(); iter_reports++) {
@@ -81,7 +81,7 @@ void peerania::report_profile(eosio::name user, eosio::name user_to_report) {
           MAX_FREEZE_PERIOD_MULTIPLIER)  // Max freeze period is 32 weeks
         account.report_power += 1;
       account.last_freeze = r.report_time;
-      account.is_freezed = true;
+      account.is_frozen = true;
     }
   });
 }

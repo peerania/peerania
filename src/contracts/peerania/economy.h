@@ -7,7 +7,7 @@ const int DELETION_VOTES_ANSWER = 1500;
 const int DELETION_VOTES_COMMENT = 1000;
 }  // namespace DeletionVotes
 
-
+#define ANSWER_ACCEPTED_AS_CORRECT_REWARD 15
 
 namespace VoteItem {
 struct vote_resources_t {
@@ -19,15 +19,17 @@ struct vote_resources_t {
   const int energy_downvote;
 };
 
+/*
+It should be here for debug
 #define UPVOTE_QUESTION_REWARD 0
 #define DOWNVOTE_QUESTION_REWARD -1
 #define UPVOTE_ANSWER_REWARD 0
 #define DOWNVOTE_ANSWER_REWARD -1
 #define QUESTION_UPVOTED_REWARD 5
 #define ANSWER_UPVOTED_REWARD 10
-#define ANSWER_ACCEPTED_AS_CORRECT_REWARD 15
 #define QUESTION_DOWNVOTED_REWARD -2
 #define ANSWER_DOWNVOTED_REWARD -2
+*/
 
 const vote_resources_t question = {
     .upvote_reward = 0,

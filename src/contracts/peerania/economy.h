@@ -8,19 +8,6 @@ const int DELETION_VOTES_COMMENT = 1000;
 }  // namespace DeletionVotes
 
 #define ANSWER_ACCEPTED_AS_CORRECT_REWARD 15
-
-namespace VoteItem {
-struct vote_resources_t {
-  const int upvote_reward;
-  const int downvote_reward;
-  const int upvoted_reward;
-  const int downvoted_reward;
-  const int energy_upvote;
-  const int energy_downvote;
-};
-
-/*
-It should be here for debug
 #define UPVOTE_QUESTION_REWARD 0
 #define DOWNVOTE_QUESTION_REWARD -1
 #define UPVOTE_ANSWER_REWARD 0
@@ -29,26 +16,6 @@ It should be here for debug
 #define ANSWER_UPVOTED_REWARD 10
 #define QUESTION_DOWNVOTED_REWARD -2
 #define ANSWER_DOWNVOTED_REWARD -2
-*/
-
-const vote_resources_t question = {
-    .upvote_reward = 0,
-    .downvote_reward = -1,
-    .upvoted_reward = 5,
-    .downvoted_reward = -2,
-    .energy_upvote = 1,
-    .energy_downvote = 5,
-};
-
-const vote_resources_t answer = {
-    .upvote_reward = 0,
-    .downvote_reward = -1,
-    .upvoted_reward = 10,
-    .downvoted_reward = -2,
-    .energy_upvote = 1,
-    .energy_downvote = 3,
-};
-}  // namespace VoteItem
 
 // Stub solution
 #define VOTES_TO_CREATE_COMMUNITY 100
@@ -143,3 +110,32 @@ const vote_resources_t answer = {
 #define POINTS_TO_FREEZE 90
 #define MODERATION_POINTS_REPORT_PROFILE 2
 #define MAX_FREEZE_PERIOD_MULTIPLIER 6
+
+namespace VoteItem {
+struct vote_resources_t {
+  const int upvote_reward;
+  const int downvote_reward;
+  const int upvoted_reward;
+  const int downvoted_reward;
+  const int energy_upvote;
+  const int energy_downvote;
+};
+
+const vote_resources_t question = {
+    .upvote_reward = UPVOTE_QUESTION_REWARD,
+    .downvote_reward = DOWNVOTE_QUESTION_REWARD,
+    .upvoted_reward = QUESTION_UPVOTED_REWARD,
+    .downvoted_reward = QUESTION_DOWNVOTED_REWARD,
+    .energy_upvote = ENERGY_UPVOTE_QUESTION,
+    .energy_downvote = ENERGY_DOWNVOTE_QUESTION,
+};
+
+const vote_resources_t answer = {
+    .upvote_reward = UPVOTE_ANSWER_REWARD,
+    .downvote_reward = DOWNVOTE_ANSWER_REWARD,
+    .upvoted_reward = ANSWER_UPVOTED_REWARD,
+    .downvoted_reward = ANSWER_DOWNVOTED_REWARD,
+    .energy_upvote = ENERGY_UPVOTE_ANSWER,
+    .energy_downvote = ENERGY_DOWNVOTE_ANSWER,
+};
+}  // namespace VoteItem

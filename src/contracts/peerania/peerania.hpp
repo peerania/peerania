@@ -80,7 +80,7 @@ CONTRACT peerania : public eosio::contract {
   // elif (comment_id == 0) delete answer question(question_id)->answer(by
   // answer_id) elif delete comment
   // question(question_id)->answer(answer_id)->comment(by comment_id)
-  ACTION votedelete(eosio::name user, uint64_t question_id, uint16_t answer_id,
+  ACTION reportforum(eosio::name user, uint64_t question_id, uint16_t answer_id,
                     uint16_t comment_id);
 
   // Mark answer as correct
@@ -218,7 +218,7 @@ CONTRACT peerania : public eosio::contract {
   void mark_answer_as_correct(eosio::name user, uint64_t question_id,
                               uint16_t answer_id);
 
-  void vote_for_deletion(eosio::name user, uint64_t question_id,
+  void report_forum_item(eosio::name user, uint64_t question_id,
                          uint16_t answer_id, uint16_t comment_id);
 
   void update_community_statistics(

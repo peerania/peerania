@@ -1,3 +1,5 @@
+#define DEBUG
+
 #include <eosio/eosio.hpp>
 #include <eosio/name.hpp>
 #include <string>
@@ -5,6 +7,7 @@
 
 #undef ACCOUNT_STAT_RESET_PERIOD
 #define ACCOUNT_STAT_RESET_PERIOD 3  // 3 sec
+
 
 #undef VOTES_TO_CREATE_COMMUNITY
 #define VOTES_TO_CREATE_COMMUNITY 4
@@ -205,7 +208,7 @@ void apply(uint64_t receiver, uint64_t code, uint64_t action) {
           (registeracc)(setaccprof)(postquestion)(
               postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(
               modanswer)(modquestion)(modcomment)(upvote)(downvote)(
-              mrkascorrect)(votedelete)(crtag)(crcommunity)(vtcrtag)(vtcrcomm)(
+              mrkascorrect)(reportforum)(crtag)(crcommunity)(vtcrtag)(vtcrcomm)(
               vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(init)(reportprof))
     }
   }

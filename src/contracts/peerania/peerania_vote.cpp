@@ -38,24 +38,12 @@ void peerania::vote_forum_item(eosio::name user, uint64_t question_id,
   update_rating(target_user, target_user_rating_change);
 }
 
-void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
+void peerania::report_forum_item(eosio::name user, uint64_t question_id,
                                  uint16_t answer_id, uint16_t comment_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
 
-  update_rating(iter_account, [answer_id, comment_id](auto &account) {
-    int reduce_energy_value;
-    if (apply_to_answer(comment_id)) {
-      if (apply_to_question(answer_id))
-        reduce_energy_value = ENERGY_REPORT_QUESTION;
-      else
-        reduce_energy_value = ENERGY_REPORT_ANSWER;
-    } else {
-      reduce_energy_value = ENERGY_REPORT_COMMENT;
-    }
-    account.reduce_energy(reduce_energy_value);
-  });
-
+  int snitch_reduce_energy_value = ENERGY_REPORT_COMMENT;
   int user_rating_change = 0;
   // Remember old correct_answer_id to detect correct answer_deletion
   uint16_t old_correct_answer_id = iter_question->correct_answer_id;
@@ -66,15 +54,16 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
   question_table.modify(
       iter_question, _self,
       [&iter_account, answer_id, comment_id, &delete_question,
-       &user_rating_change, &item_user, &delete_answer](auto &question) {
+       &user_rating_change, &item_user, &delete_answer, &snitch_reduce_energy_value](auto &question) {
         if (apply_to_question(answer_id)) {
           if (apply_to_answer(comment_id)) {
             // Delete question
             // Question could not be deleted inside modify lambda
             // set_deletion_votes_and_history - modify question
+            snitch_reduce_energy_value = ENERGY_REPORT_QUESTION;
             delete_question = set_deletion_votes_and_history(
                 question, *iter_account,
-                DeletionVotes::DELETION_VOTES_QUESTION);
+                ForumReportPoints::REPORT_POINTS_QUESTION);
             if (delete_question) {
               item_user = question.user;
               user_rating_change -=
@@ -87,7 +76,7 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
 
             if (set_deletion_votes_and_history(
                     *iter_comment, *iter_account,
-                    DeletionVotes::DELETION_VOTES_COMMENT)) {
+                    ForumReportPoints::REPORT_POINTS_COMMENT)) {
               item_user = iter_comment->user;
               user_rating_change += COMMENT_DELETED_REWARD;
               question.comments.erase(iter_comment);
@@ -98,9 +87,10 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
         auto iter_answer = find_answer(question, answer_id);
         if (apply_to_answer(comment_id)) {
           // Delete answer to question by vote (comment_id == 0)
+          snitch_reduce_energy_value = ENERGY_REPORT_ANSWER;
           if (set_deletion_votes_and_history(
                   *iter_answer, *iter_account,
-                  DeletionVotes::DELETION_VOTES_ANSWER)) {
+                  ForumReportPoints::REPORT_POINTS_ANSWER)) {
             // Get for mark as correct
             item_user = iter_answer->user;
             if (question.correct_answer_id == iter_answer->id) {
@@ -119,7 +109,7 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
           auto iter_comment = find_comment(*iter_answer, comment_id);
           if (set_deletion_votes_and_history(
                   *iter_comment, *iter_account,
-                  DeletionVotes::DELETION_VOTES_COMMENT)) {
+                  ForumReportPoints::REPORT_POINTS_COMMENT)) {
             item_user = iter_comment->user;
             user_rating_change += COMMENT_DELETED_REWARD;
             iter_answer->comments.erase(iter_comment);
@@ -180,4 +170,7 @@ void peerania::vote_for_deletion(eosio::name user, uint64_t question_id,
                         account.correct_answers -= 1;
                     }
                   });
+  update_rating(iter_account, [snitch_reduce_energy_value](auto &account) {
+    account.reduce_energy(snitch_reduce_energy_value);
+  });
 }

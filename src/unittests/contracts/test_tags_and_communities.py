@@ -48,6 +48,7 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
         begin("Testing work of tags and communities, when question deleted")
         alice, bob, e, var = self._create_basic_hierarchy()
         carol = self.register_carol_account(30000, 10)
+        dan = self.register_dan_account(10000)
         self.action('delquestion', {
                     'user': 'alice', 'question_id': var['aq']}, alice, 'Alice delete own question')
         c = self.table('communities', 'allcomm')
@@ -57,8 +58,10 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
         pupularity1 = [1, 1, 1, 0, 0, 0]
         for i in range(6):
             self.assertTrue(t[i]['questions_asked'] == pupularity1[i])
-        self.action('votedelete', {
+        self.action('reportforum', {
                     'user': carol, 'question_id': var['bq'], 'answer_id': 0, 'comment_id': 0}, carol, 'Carol delete Bob question')
+        self.action('reportforum', {
+                    'user': dan, 'question_id': var['bq'], 'answer_id': 0, 'comment_id': 0}, dan, 'Dan delete Bob question')
         c = self.table('communities', 'allcomm')
         self.assertTrue(c[0]['questions_asked'] ==
                         0 and c[1]['questions_asked'] == 0)

@@ -66,7 +66,7 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         self.var['alice_rating'] -= self.defs['QUESTION_DOWNVOTED_REWARD']
         self._verify_acc()
         info('Test history not empty')
-        self.action('votedelete', {'user': 'bob', 'question_id': self.var['aq'], 'answer_id': 0, 'comment_id': 0},
+        self.action('reportforum', {'user': 'bob', 'question_id': self.var['aq'], 'answer_id': 0, 'comment_id': 0},
                     bob, 'Bob vote for Alice question deletion')
         self.action('downvote', {'user': 'bob', 'question_id': self.var['aq'], 'answer_id': 0},
                     bob, 'Bob downvote alice question')
@@ -126,7 +126,7 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         self.var['bob_rating'] -= self.defs['ANSWER_DOWNVOTED_REWARD']
         self._verify_acc()
         info('Test history not empty')
-        self.action('votedelete', {'user': 'bob', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ca'], 'comment_id': 0},
+        self.action('reportforum', {'user': 'bob', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ca'], 'comment_id': 0},
                     bob, 'Bob vote for Alice question->Carol Answer deletion')
         self.action('downvote', {'user': 'bob', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ca']},
                     bob, 'Bob downvote Alice question->Carol Answer')
@@ -140,7 +140,7 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
     def test_mark_as_correct_reward(self):
         begin('Mark answer as correct rating change')
         (alice, bob, carol) = self._create_basic_hierarchy()
-        ted = self.register_ted_account(3000)
+        ted = self.register_ted_account(10000)
         self.account_e.append(
             {'user': 'ted', 'energy': '#var ted_energy', 'rating': '#var ted_rating'})
         self.assertTrue(compare(self.account_e, self.table(
@@ -170,7 +170,7 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         self.var['alice_energy'] -= self.defs['ENERGY_MARK_ANSWER_AS_CORRECT']
         self.var['bob_rating'] += self.defs['ANSWER_ACCEPTED_AS_CORRECT_REWARD']
         self._verify_acc()
-        self.action('votedelete', {
+        self.action('reportforum', {
                     'user': 'ted', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba'], 'comment_id': 0}, ted, "Ted delete bob answer")
         self.var['ted_energy'] -= self.defs['ENERGY_REPORT_ANSWER']
         self.var['alice_rating'] -= self.defs['ACCEPT_ANSWER_AS_CORRECT_REWARD']
@@ -281,9 +281,11 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
     def test_delete_question_reward(self):
         begin('Reward when question was deleted by vote')
         (alice, bob, carol) = self._create_basic_hierarchy()
-        ted = self.register_ted_account(3000, 3)  # man who will delte
+        ted = self.register_ted_account(10000, 3)  # man who will delte
+        frank = self.register_frank_account(10000) # man who help delete 
         self.account_e.append(
             {'user': 'ted', 'energy': '#var ted_energy', 'rating': '#var ted_rating'})
+        self.account_e.append({'user': 'frank'})
         dan = self.register_dan_account()
         self.account_e.append(
             {'user': 'dan', 'energy': '#var dan_energy', 'rating': '#var dan_rating'})
@@ -325,8 +327,10 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         self.var['dan_energy'] -= self.defs['ENERGY_UPVOTE_QUESTION'] + \
             self.defs['ENERGY_UPVOTE_ANSWER'] * 2
         self._verify_acc()
-        self.action('votedelete', {
-                    'user': 'ted', 'question_id': self.var['aq'], 'answer_id': 0, 'comment_id': 0}, ted, "Ted delete alice question")
+        self.action('reportforum', {
+                    'user': 'frank', 'question_id': self.var['aq'], 'answer_id': 0, 'comment_id': 0}, frank, "Frank report alice question")
+        self.action('reportforum', {
+                    'user': 'ted', 'question_id': self.var['aq'], 'answer_id': 0, 'comment_id': 0}, ted, "Ted (report)delete alice question")
         self.var['ted_energy'] -= self.defs['ENERGY_REPORT_QUESTION']
         (self.var['bob_rating'], self.var['alice_rating'], self.var['carol_rating']) = (
             bob_old_rt, alice_old_rt, carol_old_rt)
@@ -337,7 +341,7 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
     def test_delete_answer_reward(self):
         begin('Reward when answer was deleted by vote')
         (alice, bob, carol) = self._create_basic_hierarchy()
-        ted = self.register_ted_account(3000, 3)  # man who will delte
+        ted = self.register_ted_account(10000, 3)  # man who will delte
         self.account_e.append(
             {'user': 'ted', 'energy': '#var ted_energy', 'rating': '#var ted_rating'})
         dan = self.register_dan_account()
@@ -372,8 +376,8 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         self.var['alice_rating'] += 3 * self.defs['QUESTION_UPVOTED_REWARD'] + \
             self.defs['ACCEPT_ANSWER_AS_CORRECT_REWARD']
         self._verify_acc()
-        self.action('votedelete', {
-                    'user': 'ted', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba'], 'comment_id': 0}, ted, "Ted delete alice question->bob answer")
+        self.action('reportforum', {
+                    'user': 'ted', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba'], 'comment_id': 0}, ted, "Ted report alice question->bob answer")
         self.var['ted_energy'] -= self.defs['ENERGY_REPORT_ANSWER']
         self.var['alice_rating'] -= self.defs['ACCEPT_ANSWER_AS_CORRECT_REWARD']
         self.var['bob_rating'] = bob_old_rt + \
@@ -576,10 +580,8 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         buf_var = {}
         self.assertTrue(compare(self.account_e, self.table(
             'account', 'allaccounts'), buf_var, ignore_excess=True))
-        #print(self.table('account', 'allaccounts'))
-        #print(self.var)
         for key, value in buf_var.items():
-            #print(key, self.var[key], value)
+            print(key, self.var[key], value)
             self.assertTrue(self.var[key] == value)
 
     def get_stub_suggested_tags(self):

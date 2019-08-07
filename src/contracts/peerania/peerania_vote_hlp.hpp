@@ -128,11 +128,12 @@ bool set_deletion_votes_and_history(T &item, const account &user,
                  "Already voted for deletion!");
     itr_history->set_flag(HISTORY_DELETE_VOTED_FLG);
   }
-  int deletion_votes =
-      get_property_d(item.properties, PROPERTY_DELETION_VOTES, 0);
-  if (deletion_votes + user.rating > limit) return true;
-  set_property_d(item.properties, PROPERTY_DELETION_VOTES,
-                 deletion_votes + user.rating, 0);
+  int current_question_report_points =
+      get_property_d(item.properties, PROPERTY_REPORT_POINTS, 0);
+  int snitch_report_points = status_moderation_impact(user.rating);
+  if (current_question_report_points + snitch_report_points > limit) return true;
+  set_property_d(item.properties, PROPERTY_REPORT_POINTS,
+                 current_question_report_points + snitch_report_points, 0);
   return false;
 }
 

@@ -5,39 +5,53 @@
 path='./src/unittests/contracts/'
 path=$(realpath $path)
 files='test_*.py'
-if [ $# = 0 ]
-then
+
+for i in "$@"
+do
+case $i in
+    -n|--no-compile)
+    NO_COMPILE=1
+    shift
+    ;;
+    -d|--debug)
+    DEBUG=1
+    shift # past argument with no value
+    ;;
+    *)
+    echo "Error: Unrecognized option ${i%=*}"
+    exit
+    ;;
+esac
+done
+
+if [ -z $NO_COMPILE ] ; then
     ./compile debug
-    python3 -m unittest discover -s $path -p $files
-else
-    if [ "$2" != 'no-compile' ]
-    then
-        ./compile debug
-    fi
-    if [ "$1" = 'debug' ]
-    then
-        echo "Enter debug mode(for test developer)!"
-        stop=false
-        for file in $path/$files; do
-            while : ; do
-                python3 $file
-                ret=$? 
-                if [ $ret -eq 0 ]
-                then
-                    break
-                fi
-                read -p "$file test failed! Repeat it? [n - abort] " response
-                if [ "$response" = "n" ]
-                then
-                    stop=true
-                    break
-                fi
-            done
-            if $stop; then
+fi
+
+
+if [ $DEBUG ]
+then
+    echo "Enter debug mode(for test developer)!"
+    stop=false
+    for file in $path/$files; do
+        while : ; do
+            python3 $file
+            ret=$? 
+            if [ $ret -eq 0 ]
+            then
+                break
+            fi
+            read -p "$file test failed! Repeat it? [n - abort] " response
+            if [ "$response" = "n" ]
+            then
+                stop=true
                 break
             fi
         done
-    else
-        echo "Urecognized option \"$1\""
-    fi
+        if $stop; then
+            break
+        fi
+    done
+else
+    python3 -m unittest discover -s $path -p $files
 fi

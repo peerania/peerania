@@ -1,6 +1,5 @@
 #pragma once
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/name.hpp>
+#include <eosio/eosio.hpp>
 #include <string>
 #include <vector>
 #include "history.hpp"
@@ -98,7 +97,7 @@ void push_new_forum_item(std::vector<T> &container, T &item) {
 
 std::vector<answer>::iterator find_answer(question &q, uint16_t answer_id) {
   auto iter_answer = binary_find(q.answers.begin(), q.answers.end(), answer_id);
-  eosio_assert(iter_answer != q.answers.end(), "Answer not found");
+  eosio::check(iter_answer != q.answers.end(), "Answer not found");
   return iter_answer;
 }
 
@@ -106,21 +105,8 @@ template <typename T>
 std::vector<comment>::iterator find_comment(T &item, uint16_t comment_id) {
   auto iter_comment =
       binary_find(item.comments.begin(), item.comments.end(), comment_id);
-  eosio_assert(iter_comment != item.comments.end(), "Comment not found");
+  eosio::check(iter_comment != item.comments.end(), "Comment not found");
   return iter_comment;
-}
-
-void assert_comment_limit(const account &action_caller, eosio::name item_user,
-                          const std::vector<comment> &comments) {
-  if (item_user != action_caller.user) {
-    int comments_count = 0;
-    for (auto iter_comment = comments.begin(); iter_comment != comments.end();
-         ++iter_comment) {
-      if (iter_comment->user == action_caller.user) comments_count++;
-    }
-    eosio_assert(comments_count < status_comments_limit(action_caller.rating),
-                 "Your status doesn't allow you to post more comment");
-  }
 }
 
 struct [[eosio::table("usrquestions"), eosio::contract("peerania")]] usrquestions {
@@ -137,7 +123,7 @@ struct [[eosio::table("usranswers"), eosio::contract("peerania")]] usranswers {
 typedef eosio::multi_index<"usranswers"_n, usranswers> user_answers_index;
 
 inline void assert_title(const std::string &title) {
-  eosio_assert(title.size() > 2 && title.size() < 129, "Invalid title length");
+  eosio::check(title.size() > 2 && title.size() < 129, "Invalid title length");
 }
 
 /*

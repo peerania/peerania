@@ -1,7 +1,6 @@
 #pragma once
 
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/name.hpp>
+#include <eosio/eosio.hpp>
 #include <vector>
 #include "utils.hpp"
 // Flags

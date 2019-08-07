@@ -4,6 +4,7 @@ from jsonutils import compare
 from time import sleep
 from unittest import main
 
+economy = load_defines('src/contracts/peerania/economy.h')
 
 class AccountManagementTests(peeraniatest.PeeraniaTest):
 
@@ -44,53 +45,6 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
             alice, 'Register Alice account again', 'assert')
         end()
 
-    def test_user_property(self):
-        begin('Testing properties for accounts')
-        alice = self.register_alice_account()
-        bob = self.register_bob_account()
-
-        def regInt(user, key, value):
-            self.action('setaccintprp',
-                        {'user': str(
-                            user), 'key': key, 'value': value}, user,
-                        'Set {} integer property, {{key = {}, value = {} }}'.format(str(user),
-                                                                                    key, value))
-
-        def regStr(user, key, value):
-            self.action('setaccstrprp',
-                        {'user': str(
-                            user), 'key': key, 'value': value}, user,
-                        'Set {} string property, {{key = {}, value = "{}" }}'.format(str(user),
-                                                                                     key, value))
-        e = ['#ignoreorder',
-             get_expected_account_body(alice),
-             get_expected_account_body(bob)]
-        for i in range(3):
-            regInt(alice, i + 5, i * i * i)
-            e[1]['integer_properties'].append(
-                {'key': i + 5, 'value': i * i * i})
-            regInt(bob, i + 1, i * i)
-            e[2]['integer_properties'].append({'key': i + 1, 'value': i * i})
-            regStr(alice, i + 10, 'alice' + str(i + 2))
-            e[1]['string_properties'].append(
-                {'key': i + 10, 'value': 'alice'+str(i + 2)})
-            regStr(bob, i + 20, 'bob' + str(i + 10))
-            e[2]['string_properties'].append(
-                {'key': i + 20, 'value': 'bob' + str(i + 10)})
-
-        t = self.table('account', 'allaccounts')
-        self.assertTrue(compare(e, t, ignore_excess=True))
-        info('Table accounts after operation: ', t)
-        info('Test update property\n')
-        regInt(alice, 6, 48)
-        e[1]['integer_properties'][1] = {'key': 6, 'value': 48}
-        regStr(alice, 11, 'updated')
-        e[1]['string_properties'][1] = {'key': 11, 'value': 'updated'}
-        t = self.table('account', 'allaccounts')
-        self.assertTrue(compare(e, t, ignore_excess=True))
-        info('Table account after opertion: ', t)
-        end()
-
     def test_account_management(self):
         begin('Testing functions for changing ipfs profile and display_name')
         alice = self.register_alice_account()
@@ -100,41 +54,20 @@ class AccountManagementTests(peeraniatest.PeeraniaTest):
              get_expected_account_body(bob)]
         self.action('setaccprof', {'user': 'alice', 'ipfs_profile': 'updated IPFS', 'display_name': 'updated display name', 'ipfs_avatar': 'updated_avatar'},
                     alice, 'Set Alice IPFS profile to \'updated IPFS\'')
+        
         t = self.table('account', 'allaccounts')
         e[1]['ipfs_profile'] = 'updated IPFS'
         e[1]['display_name'] = 'updated display name'
         e[1]['ipfs_avatar'] = 'updated_avatar'
+        e[1]['energy'] -= economy['ENERGY_UPDATE_PROFILE']
         self.assertTrue(compare(e, t, ignore_excess=True))
         end()
 
-    def test_properties_for_non_existent_account_failed(self):
-        begin('Testing register property for non-existing account', True)
-        alice = self.get_non_registered_alice()
-        self.failed_action('setaccintprp',
-                           {'user': str(
-                               alice), 'key': 1, 'value': 1}, alice,
-                           'Set Alice(not registered) integer property', 'assert')
-        self.failed_action('setaccstrprp',
-                           {'user': str(
-                               alice), 'key': 1, 'value': '1'}, alice,
-                           'Set Alice(not registered) integer property', 'assert')
-        end()
-    
     def test_change_display_name_and_ipfs_profile_for_non_existent_account_failed(self):
         begin('Testing changing account IPFS profile and display_name for non-existing account', True)
         alice = self.get_non_registered_alice()
         self.failed_action('setaccprof', {
                            'user': 'alice', 'ipfs_profile': 'test', 'display_name': 'test', 'ipfs_avatar': 'updated_avatar'}, alice, 'Changing Alice ipfs profile', 'assert')
-        end()
-
-    def test_properties_another_user_failed(self):
-        begin('Testing registration of the integer and string property with another account', True)
-        alice = self.register_alice_account()
-        bob = self.register_bob_account()
-        self.failed_action('setaccstrprp',  {
-                           'user': 'alice', 'key': 1, 'value': 1}, bob, 'Register new Alice string property with bob auth', 'auth')
-        self.failed_action('setaccintprp',  {
-                           'user': 'alice', 'key': 1, 'value': '1'}, bob, 'Register new Alice integer property with bob auth', 'auth')
         end()
 
     def test_change_display_name_and_ipfs_profile_another_user_failed(self):

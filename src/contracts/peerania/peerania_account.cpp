@@ -3,13 +3,13 @@
 void peerania::register_account(eosio::name user, std::string display_name,
                                 const std::string &ipfs_profile,
                                 const std::string &ipfs_avatar) {
-  eosio_assert(account_table.find(user.value) == account_table.end(),
+  eosio::check(account_table.find(user.value) == account_table.end(),
                "Account already exists");
   assert_display_name(display_name);
   assert_ipfs(ipfs_profile);
   time current_time = now();
-  account_table.emplace(_self, [user, &display_name, &ipfs_profile, &ipfs_avatar,
-                                current_time](auto &account) {
+  account_table.emplace(_self, [user, &display_name, &ipfs_profile,
+                                &ipfs_avatar, current_time](auto &account) {
     account.user = user;
     account.display_name = display_name;
     account.ipfs_profile = ipfs_profile;
@@ -18,38 +18,24 @@ void peerania::register_account(eosio::name user, std::string display_name,
                                                 // RATING_ON_CREATE discuss it
     account.registration_time = current_time;
     account.last_update_period = 0;
-    account.questions_left = 3;
     account.ipfs_avatar = ipfs_avatar;
+    account.energy = status_energy(RATING_ON_CREATE);
+    account.report_power = 0;
+    account.last_freeze = current_time;
+    account.is_frozen = false;
   });
 
   global_stat_index global_stat_table(_self, scope_all_stat);
   auto iter_global_stat = global_stat_table.rbegin();
-  eosio_assert(iter_global_stat != global_stat_table.rend() && iter_global_stat->version == version, "Init contract first");
-  global_stat_table.modify(--global_stat_table.end(), _self, [](auto &global_stat){
-    global_stat.user_count += 1;
-  });
+  eosio::check(iter_global_stat != global_stat_table.rend() &&
+                   iter_global_stat->version == version,
+               "Init contract first");
+  global_stat_table.modify(
+      --global_stat_table.end(), _self,
+      [](auto &global_stat) { global_stat.user_count += 1; });
 }
 
-void peerania::set_account_string_property(eosio::name user, uint8_t key,
-                                           const std::string &value) {
-  // Check is key user-changeble
-  auto iter_account = find_account(user);
-  assert_allowed(*iter_account, user, Action::SET_ACCOUNT_PROPERTY);
-  account_table.modify(iter_account, _self, [&](auto &account) {
-    set_property(account.string_properties, key, value);
-  });
-}
-
-void peerania::set_account_integer_property(eosio::name user, uint8_t key,
-                                            int32_t value) {
-  // Check is key user-changeble
-  auto iter_account = find_account(user);
-  assert_allowed(*iter_account, user, Action::SET_ACCOUNT_PROPERTY);
-  account_table.modify(iter_account, _self, [&](auto &account) {
-    set_property(account.integer_properties, key, value);
-  });
-}
-
+// ACTION BODY
 void peerania::set_account_profile(eosio::name user,
                                    const std::string &ipfs_profile,
                                    const std::string &display_name,
@@ -59,10 +45,44 @@ void peerania::set_account_profile(eosio::name user,
   assert_ipfs(ipfs_avatar);
   assert_display_name(display_name);
   assert_allowed(*iter_account, user, Action::SET_ACCOUNT_PROFILE);
-  account_table.modify(iter_account, _self, [&](auto &account) {
+  update_rating(iter_account, [&](auto &account) {
+    account.reduce_energy(ENERGY_UPDATE_PROFILE);
     account.ipfs_profile = ipfs_profile;
     account.display_name = display_name;
     account.ipfs_avatar = ipfs_avatar;
+  });
+}
+
+void peerania::report_profile(eosio::name user, eosio::name user_to_report) {
+  auto iter_snitch = find_account(user);
+  auto iter_user_to_report = find_account(user_to_report);
+  assert_allowed(*iter_snitch, user_to_report, Action::VOTE_REPORT_PROFILE);
+  update_rating(iter_snitch, [&](auto &account) {
+    account.reduce_energy(ENERGY_REPORT_PROFILE);
+  });
+  update_rating(iter_user_to_report, [&](auto &account) {
+    account.update();
+    eosio::check(!account.is_frozen, "Profile is already frozen");
+    uint16_t total_report_points = 0;
+    for (auto iter_reports = account.reports.begin();
+         iter_reports != account.reports.end(); iter_reports++) {
+      total_report_points += iter_reports->report_points;
+      eosio::check(iter_reports->user != iter_snitch->user,
+                   "You have already reported");
+    }
+    report r;
+    r.report_time = now();
+    r.user = iter_snitch->user;
+    r.report_points = status_moderation_impact(iter_snitch->rating);
+    total_report_points += r.report_points;
+    account.reports.push_back(r);
+    if (total_report_points >= POINTS_TO_FREEZE) {
+      if (account.report_power <
+          MAX_FREEZE_PERIOD_MULTIPLIER)  // Max freeze period is 32 weeks
+        account.report_power += 1;
+      account.last_freeze = r.report_time;
+      account.is_frozen = true;
+    }
   });
 }
 
@@ -77,7 +97,7 @@ void peerania::update_rating_base(
             account.update();
             auto const rating_before = account.rating;
             account_modifying_lambda(account);
-            eosio_assert(account.rating == rating_before,
+            eosio::check(account.rating == rating_before,
                          "Change rating in lambda is forbidden");
           });
     return;
@@ -178,7 +198,7 @@ void peerania::update_rating_base(
 
                          auto const rating_before = account.rating;
                          if (hasLambda) account_modifying_lambda(account);
-                         eosio_assert(account.rating == rating_before,
+                         eosio::check(account.rating == rating_before,
                                       "Change rating in lambda is forbidden");
                        });
 }
@@ -195,6 +215,19 @@ void peerania::update_rating(
 }
 
 void peerania::update_rating(
+    account_index::const_iterator iter_account,
+    const std::function<void(account &)> account_modifying_lambda) {
+  account_table.modify(iter_account, _self,
+                       [account_modifying_lambda](auto &account) {
+                         account.update();
+                         auto const rating_before = account.rating;
+                         account_modifying_lambda(account);
+                         eosio::check(account.rating == rating_before,
+                                      "Change rating in lambda is forbidden");
+                       });
+}
+
+void peerania::update_rating(
     eosio::name user, int rating_change,
     const std::function<void(account &)> account_modifying_lambda) {
   update_rating_base(find_account(user), rating_change,
@@ -208,6 +241,6 @@ void peerania::update_rating(account_index::const_iterator iter_account,
 
 account_index::const_iterator peerania::find_account(eosio::name user) {
   auto iter_user = account_table.find(user.value);
-  eosio_assert(iter_user != account_table.end(), "Account not registered");
+  eosio::check(iter_user != account_table.end(), "Account not registered");
   return iter_user;
 }

@@ -3,6 +3,7 @@ eosfactory/
 eosio.cdt/
 .vscode/
 eos-node/data
+eos-node/protocol_features
 *.wasm
 *.wast
 *.pyc

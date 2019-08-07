@@ -1,18 +1,16 @@
 #pragma once
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/name.hpp>
 #include <string>
 #include "access.hpp"
 #include "account.hpp"
 #include "communities_and_tags.hpp"
 #include "economy.h"
+#include "global_statistics.hpp"
 #include "history.hpp"
 #include "peerania_types.h"
 #include "property.hpp"
 #include "question_container.hpp"
 #include "token_common.hpp"
 #include "utils.hpp"
-#include "global_statistics.hpp"
 
 CONTRACT peerania : public eosio::contract {
  public:
@@ -28,12 +26,6 @@ CONTRACT peerania : public eosio::contract {
   // Register new user
   ACTION registeracc(eosio::name user, std::string display_name,
                      std::string ipfs_profile, std::string ipfs_avatar);
-
-  // Set(or add) property to account
-  ACTION setaccstrprp(eosio::name user, uint8_t key, std::string value);
-
-  // Set(or add) property to account
-  ACTION setaccintprp(eosio::name user, uint8_t key, int32_t value);
 
   // Set user profile (IPFS link)
   ACTION setaccprof(eosio::name user, std::string ipfs_profile,
@@ -115,6 +107,9 @@ CONTRACT peerania : public eosio::contract {
 
   ACTION unfollowcomm(eosio::name user, uint16_t community_id);
 
+  // Report user profile
+  ACTION reportprof(eosio::name user, eosio::name user_to_report);
+
   ACTION init();
 
  protected:
@@ -144,6 +139,10 @@ CONTRACT peerania : public eosio::contract {
       account_index::const_iterator iter_account, int rating_change,
       const std::function<void(account &)> account_modifying_lambda);
 
+  void update_rating(
+      account_index::const_iterator iter_account,
+      const std::function<void(account &)> account_modifying_lambda);
+      
   // private:
   void register_account(eosio::name user, std::string display_name,
                         const std::string &ipfs_profile,
@@ -153,11 +152,7 @@ CONTRACT peerania : public eosio::contract {
                            const std::string &display_name,
                            const std::string &ipfs_avatar);
 
-  void set_account_string_property(eosio::name user, uint8_t key,
-                                   const std::string &value);
-
-  void set_account_integer_property(eosio::name user, uint8_t key,
-                                    int32_t value);
+  void report_profile(eosio::name user, eosio::name user_to_report);
 
   void post_question(eosio::name user, uint16_t community_id,
                      const std::vector<uint32_t> tags, const std::string &title,

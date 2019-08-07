@@ -1,18 +1,14 @@
-#include <eosiolib/name.hpp>
+#include <eosio/name.hpp>
 #include <vector>
-#include "history.hpp"
 #include "account.hpp"
+#include "history.hpp"
 #include "utils.hpp"
 
 template <typename T, typename T_iter_acc>
-void upvote_item(T &item, T_iter_acc iter_account, eosio::name &item_user,
-                 int8_t &user_rating_change, int8_t &caller_rating_change,
-                 const int8_t upvote_cost_user,
-                 const int8_t upvote_cost_caller,
-                 const int8_t downvote_cost_user,
-                 const int8_t downvote_cost_caller) {
-  item_user = item.user;
-  assert_allowed(*iter_account, item_user, Action::UPVOTE);
+void upvote_item(T &item, T_iter_acc iter_account, int8_t &energy,
+                 int8_t &caller_rating, int8_t &target_user_rating,
+                 VoteItem::vote_resources_t item_type) {
+  assert_allowed(*iter_account, item.user, Action::UPVOTE);
   bool is_new;
   auto itr_history =
       get_history_item_iter(item.history, iter_account->user, is_new);
@@ -22,18 +18,21 @@ void upvote_item(T &item, T_iter_acc iter_account, eosio::name &item_user,
     with mark {upvote}*/
     itr_history->set_flag(HISTORY_UPVOTED_FLG);
     item.rating += 1;
-    caller_rating_change += upvote_cost_caller;
-    user_rating_change += upvote_cost_user;
+    caller_rating = item_type.upvote_reward;
+    target_user_rating = item_type.upvoted_reward;
+    energy = item_type.energy_upvote;
   } else {
-    eosio_assert(!(itr_history->is_flag_set(HISTORY_DELETE_VOTED_FLG)), "You couldn't upvote reported item");
+    eosio::check(!(itr_history->is_flag_set(HISTORY_DELETE_VOTED_FLG)),
+                 "You couldn't upvote reported item");
     if (itr_history->is_flag_set(HISTORY_UPVOTED_FLG)) {
       /*The item was upvoted by user, but user call
       upvote again, this action remove upvote(now
       user has no upvote/dovnvote effect to item)*/
       item.rating -= 1;
       itr_history->remove_flag(HISTORY_UPVOTED_FLG);
-      caller_rating_change -= upvote_cost_caller;
-      user_rating_change -= upvote_cost_user;
+      caller_rating = -item_type.upvote_reward;
+      target_user_rating = -item_type.upvoted_reward;
+      energy = ENERGY_FORUM_VOTE_CHANGE;
     } else {
       if (itr_history->is_flag_set(HISTORY_DOWNVOTED_FLG)) {
         /*The item was downvoted by user, but after user
@@ -41,14 +40,17 @@ void upvote_item(T &item, T_iter_acc iter_account, eosio::name &item_user,
         {remove downvote} + {upvote}*/
         item.rating += 2;
         itr_history->remove_flag(HISTORY_DOWNVOTED_FLG);
-        caller_rating_change += upvote_cost_caller - downvote_cost_caller;
-        user_rating_change += upvote_cost_user - downvote_cost_user;
+        caller_rating = item_type.upvote_reward - item_type.downvote_reward;
+        target_user_rating =
+            item_type.upvoted_reward - item_type.downvoted_reward;
+        energy = ENERGY_FORUM_VOTE_CHANGE;
       } else {
         // There was item in history but it is not ralated
         // to upvoting / downvoting(simple upvote)
         item.rating += 1;
-        caller_rating_change += upvote_cost_caller;
-        user_rating_change += upvote_cost_user;
+        caller_rating = item_type.upvote_reward;
+        target_user_rating = item_type.upvoted_reward;
+        energy = item_type.energy_upvote;
       }
       itr_history->set_flag(HISTORY_UPVOTED_FLG);
     }
@@ -58,14 +60,10 @@ void upvote_item(T &item, T_iter_acc iter_account, eosio::name &item_user,
 }
 
 template <typename T, typename T_iter_acc>
-void downvote_item(T &item, T_iter_acc iter_account, eosio::name &item_user,
-                   int8_t &user_rating_change, int8_t &caller_rating_change,
-                   const int8_t upvote_cost_user,
-                   const int8_t upvote_cost_caller,
-                   const int8_t downvote_cost_user,
-                   const int8_t downvote_cost_caller) {
-  item_user = item.user;
-  assert_allowed(*iter_account, item_user, Action::DOWNVOTE);
+void downvote_item(T &item, T_iter_acc iter_account, int8_t &energy,
+                   int8_t &caller_rating, int8_t &target_user_rating,
+                   VoteItem::vote_resources_t item_type) {
+  assert_allowed(*iter_account, item.user, Action::DOWNVOTE);
   bool is_new;
   auto itr_history =
       get_history_item_iter(item.history, iter_account->user, is_new);
@@ -75,17 +73,19 @@ void downvote_item(T &item, T_iter_acc iter_account, eosio::name &item_user,
     with mark {downvote}*/
     itr_history->set_flag(HISTORY_DOWNVOTED_FLG);
     item.rating -= 1;
-    caller_rating_change += downvote_cost_caller;
-    user_rating_change += downvote_cost_user;
+    caller_rating += item_type.downvote_reward;
+    target_user_rating += item_type.downvoted_reward;
+    energy = item_type.energy_downvote;
   } else {
     if (itr_history->is_flag_set(HISTORY_DOWNVOTED_FLG)) {
       /*The item was downvoted by user, but user call
       downvote again, this action remove downvote(now
       user has no upvote/dovnvote effect to item)*/
-      item.rating += 1;
       itr_history->remove_flag(HISTORY_DOWNVOTED_FLG);
-      caller_rating_change -= downvote_cost_caller;
-      user_rating_change -= downvote_cost_user;
+      item.rating += 1;
+      caller_rating -= item_type.downvote_reward;
+      target_user_rating -= item_type.downvoted_reward;
+      energy = ENERGY_FORUM_VOTE_CHANGE;
     } else {
       if (itr_history->is_flag_set(HISTORY_UPVOTED_FLG)) {
         /*The item was upvoted by user, but after user
@@ -93,14 +93,16 @@ void downvote_item(T &item, T_iter_acc iter_account, eosio::name &item_user,
         {remove upvote} + {downvote}*/
         item.rating -= 2;
         itr_history->remove_flag(HISTORY_UPVOTED_FLG);
-        caller_rating_change += downvote_cost_caller - upvote_cost_caller;
-        user_rating_change += downvote_cost_user - upvote_cost_user;
+        caller_rating += item_type.downvote_reward;
+        target_user_rating += item_type.downvoted_reward - item_type.upvoted_reward;
+        energy = item_type.energy_downvote;
       } else {
         // There was item in history but it is not ralated
         // to upvoting / downvoting (simple downwote)
         item.rating -= 1;
-        caller_rating_change += downvote_cost_caller;
-        user_rating_change += downvote_cost_user;
+        caller_rating += item_type.downvote_reward;
+        target_user_rating += item_type.downvoted_reward;
+        energy = item_type.energy_downvote;
       }
       itr_history->set_flag(HISTORY_DOWNVOTED_FLG);
     }
@@ -111,17 +113,18 @@ void downvote_item(T &item, T_iter_acc iter_account, eosio::name &item_user,
 
 // Help function check history
 template <typename T>
-bool set_deletion_votes_and_history(T &item, const account &user, uint16_t limit) {
+bool set_deletion_votes_and_history(T &item, const account &user,
+                                    uint16_t limit) {
   // Do not allow vote for deletion your own item
   assert_allowed(user, item.user, Action::VOTE_FOR_DELETION);
   bool is_new;
-  auto itr_history =
-      get_history_item_iter(item.history, user.user, is_new);
+  auto itr_history = get_history_item_iter(item.history, user.user, is_new);
   if (is_new) {
     itr_history->set_flag(HISTORY_DELETE_VOTED_FLG);
   } else {
-    eosio_assert(!(itr_history->is_flag_set(HISTORY_UPVOTED_FLG)), "Can't report upvoted item");
-    eosio_assert(!(itr_history->is_flag_set(HISTORY_DELETE_VOTED_FLG)),
+    eosio::check(!(itr_history->is_flag_set(HISTORY_UPVOTED_FLG)),
+                 "Can't report upvoted item");
+    eosio::check(!(itr_history->is_flag_set(HISTORY_DELETE_VOTED_FLG)),
                  "Already voted for deletion!");
     itr_history->set_flag(HISTORY_DELETE_VOTED_FLG);
   }

@@ -9,3 +9,5 @@ eos-node/protocol_features
 *.pyc
 *.abi
 src/unittests/contracts/__pycache__
+!stub/eosio.bios/eosio.bios.abi
+!stub/eosio.bios/eosio.bios.wasm

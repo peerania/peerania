@@ -33,6 +33,7 @@ then
 else
     eosio-cpp -abigen -o $PEERANHA_PATH/peerania.wasm $PEERANHA_PATH/peerania.cpp -I$UTILS_PATH -R$PEERANHA_PATH/rc
     eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peerania.token.wasm $PEERANHA_TOKEN_PATH/peerania.token.cpp -I$UTILS_PATH
+
 fi
 
 echo -e "\e[92mCompilation done! :)\e[0m"

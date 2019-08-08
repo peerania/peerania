@@ -1,5 +1,4 @@
 #define DEBUG
-
 #include <eosio/eosio.hpp>
 #include <eosio/name.hpp>
 #include <string>

@@ -42,7 +42,6 @@ void peerania::report_forum_item(eosio::name user, uint64_t question_id,
                                  uint16_t answer_id, uint16_t comment_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
-
   int snitch_reduce_energy_value = ENERGY_REPORT_COMMENT;
   int user_rating_change = 0;
   // Remember old correct_answer_id to detect correct answer_deletion

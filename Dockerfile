@@ -21,7 +21,7 @@ ENV EOSIO_BUILD_DIR /eosio.contracts/build/
 
 RUN apt install python3 -y
 RUN apt install python3-pip -y
-RUN pip3 install termcolor
+RUN pip3 install termcolorс
 RUN pip3 install requests
 
 CMD ["peerania/eos-node/run"]

@@ -114,6 +114,7 @@ const int REPORT_POINTS_COMMENT = 3;
 #define MIN_FREEZE_PERIOD 302400           // 3.5 Days
 #define REPORT_RESET_PERIOD 2592000        // 30 Days
 #define REPORT_POWER_RESET_PERIOD 10368000 // 120 Days
+
 #define POINTS_TO_FREEZE 90
 #define MODERATION_POINTS_REPORT_PROFILE 2
 #define MAX_FREEZE_PERIOD_MULTIPLIER 6
@@ -148,3 +149,4 @@ const vote_resources_t answer = {
     .energy_downvote = ENERGY_DOWNVOTE_ANSWER,
 };
 } // namespace VoteItem
+

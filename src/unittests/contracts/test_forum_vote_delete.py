@@ -6,7 +6,6 @@ from unittest import main
 defs = {**load_defines('./src/contracts/peerania/economy.h'),
         **load_defines('./src/contracts/peerania/question_container.hpp')}
 
-
 class ForumreportforumTests(peeraniatest.PeeraniaTest):
     def test_vote_delete_comment(self):
         begin('Test vote for question comment')

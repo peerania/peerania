@@ -581,7 +581,7 @@ class RatingRewardsTests(peeraniatest.PeeraniaTest):
         self.assertTrue(compare(self.account_e, self.table(
             'account', 'allaccounts'), buf_var, ignore_excess=True))
         for key, value in buf_var.items():
-            print(key, self.var[key], value)
+            #print(key, self.var[key], value)
             self.assertTrue(self.var[key] == value)
 
     def get_stub_suggested_tags(self):

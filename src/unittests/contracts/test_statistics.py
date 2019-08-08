@@ -254,9 +254,12 @@ class StatisticUserCommunityTagTests(peeraniatest.PeeraniaTest):
         question = self.table('question', 'allquestions')[0]
         self.action('mrkascorrect', {
                     'user': 'alice', 'question_id': question['id'], 'answer_id': question['answers'][0]['id']}, alice, "Alice mark Bob answer as correct")
-        ted = self.register_ted_account(3000, 3)  # man who will delte
-        self.action('votedelete', {
-                    'user': 'ted', 'question_id': question['id'], 'answer_id': 0, 'comment_id': 0}, ted, "Ted delete alice question")
+        ted = self.register_ted_account(10000, 3)  # man who will delte
+        dan = self.register_dan_account(10000) # man who helps delete
+        self.action('reportforum', {
+                    'user': 'ted', 'question_id': question['id'], 'answer_id': 0, 'comment_id': 0}, ted, "Ted report alice question")
+        self.action('reportforum', {
+                    'user': 'dan', 'question_id': question['id'], 'answer_id': 0, 'comment_id': 0}, dan, "Dan also report alice question")
         accounts = ["#ignoreorder",{
             'user': 'alice',
             'questions_asked': 0,
@@ -272,7 +275,7 @@ class StatisticUserCommunityTagTests(peeraniatest.PeeraniaTest):
             'questions_asked': 0,
             'answers_given': 0,
             'correct_answers': 0
-        }]
+        }, {'user': 'dan'}]
         self.assertTrue(accounts, compare(self.table('account', 'allaccounts'), {}, True))
         for comm in self.table('communities', 'allcomm'):
             self.assertTrue(comm['answers_given'] == 0)
@@ -293,8 +296,8 @@ class StatisticUserCommunityTagTests(peeraniatest.PeeraniaTest):
         question = self.table('question', 'allquestions')[0]
         self.action('mrkascorrect', {
                     'user': 'alice', 'question_id': question['id'], 'answer_id': question['answers'][0]['id']}, alice, "Alice mark Bob answer as correct")
-        ted = self.register_ted_account(3000, 3)  # man who will delte
-        self.action('votedelete', {
+        ted = self.register_ted_account(10000, 3)  # man who will delte
+        self.action('reportforum', {
                     'user': 'ted', 'question_id': question['id'], 'answer_id': question['answers'][0]['id'], 'comment_id': 0}, ted, "Ted delete alice question")
         accounts = ["#ignoreorder",{
             'user': 'alice',
@@ -330,9 +333,12 @@ class StatisticUserCommunityTagTests(peeraniatest.PeeraniaTest):
         self.action('postanswer', {'user': 'bob', 'question_id': question['id'], 'ipfs_link': 'AQ->BA'},
                     bob, 'Bob answering Alice')
         question = self.table('question', 'allquestions')[0]
-        ted = self.register_ted_account(3000, 3)  # man who will delte
-        self.action('votedelete', {
-                    'user': 'ted', 'question_id': question['id'], 'answer_id': 0, 'comment_id': 0}, ted, "Ted delete alice question")
+        ted = self.register_ted_account(10000, 3)  # man who will delte
+        dan = self.register_dan_account(10000) # man who helps delete
+        self.action('reportforum', {
+                    'user': 'ted', 'question_id': question['id'], 'answer_id': 0, 'comment_id': 0}, ted, "Ted report alice question")
+        self.action('reportforum', {
+                    'user': 'dan', 'question_id': question['id'], 'answer_id': 0, 'comment_id': 0}, dan, "Dan also report alice question")
         accounts = ["#ignoreorder",{
             'user': 'alice',
             'questions_asked': 0,
@@ -348,7 +354,7 @@ class StatisticUserCommunityTagTests(peeraniatest.PeeraniaTest):
             'questions_asked': 0,
             'answers_given': 0,
             'correct_answers': 0
-        }]
+        }, {'user': 'dan'}]
         self.assertTrue(accounts, compare(self.table('account', 'allaccounts'), {}, True))
         for comm in self.table('communities', 'allcomm'):
             self.assertTrue(comm['answers_given'] == 0)
@@ -367,8 +373,8 @@ class StatisticUserCommunityTagTests(peeraniatest.PeeraniaTest):
         self.action('postanswer', {'user': 'bob', 'question_id': question['id'], 'ipfs_link': 'AQ->BA'},
                     bob, 'Bob answering Alice')
         question = self.table('question', 'allquestions')[0]
-        ted = self.register_ted_account(3000, 3)  # man who will delte
-        self.action('votedelete', {
+        ted = self.register_ted_account(10000, 3)  # man who will delte
+        self.action('reportforum', {
                     'user': 'ted', 'question_id': question['id'], 'answer_id': question['answers'][0]['id'], 'comment_id': 0}, ted, "Ted delete alice question")
         accounts = ["#ignoreorder",{
             'user': 'alice',

@@ -89,10 +89,10 @@ void peerania::mrkascorrect(eosio::name user, uint64_t question_id,
   mark_answer_as_correct(user, question_id, answer_id);
 }
 
-void peerania::votedelete(eosio::name user, uint64_t question_id,
+void peerania::reportforum(eosio::name user, uint64_t question_id,
                           uint16_t answer_id, uint16_t comment_id) {
   require_auth(user);
-  vote_for_deletion(user, question_id, answer_id, comment_id);
+  report_forum_item(user, question_id, answer_id, comment_id);
 }
 
 // Tags and communities
@@ -163,6 +163,6 @@ EOSIO_DISPATCH(
     peerania,
     (registeracc)(setaccprof)(postquestion)(
         postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(modanswer)(
-        modquestion)(modcomment)(upvote)(downvote)(mrkascorrect)(votedelete)(
+        modquestion)(modcomment)(upvote)(downvote)(mrkascorrect)(reportforum)(
         crtag)(crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(
         unfollowcomm)(init))

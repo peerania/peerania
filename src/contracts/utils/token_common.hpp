@@ -1,6 +1,5 @@
 #pragma once
 #include <eosio/eosio.hpp>
-#include <token_common.hpp>
 #include "peerania_types.h"
 
 //Couldn't redefine it

@@ -3,18 +3,37 @@
 set -e
 #compile
 
-contract='peerania'
+PEERANHA_CONTRACT='peerania'
+PEERANHA_TOKEN_CONTRACT='peerania.tkn'
 
-if [ "$1" = "debug" ]
+PEERANHA_PATH='./src/contracts/peerania'
+PEERANHA_TOKEN_PATH='./src/contracts/peerania.token'
+
+UTILS_PATH='./src/contracts/utils/'
+
+for i in "$@"
+do
+case $i in
+    -d|--debug)
+    DEBUG=1
+    shift
+    ;;
+    *)
+    echo "Error: Unrecognized option ${i%=*}"
+    exit
+    ;;
+esac
+done
+
+if [ $DEBUG ]
 then
     echo -e "\e[31mCompiling debug contract!!!\e[0m"
-    eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania_debug.cpp -I./src/contracts/utils/ -R./src/contracts/peerania/rc --contract=$contract
-
-    eosio-cpp -o ./src/contracts/peerania.token/peerania.token.wasm ./src/contracts/peerania.token/peerania.token_debug.cpp -I./src/contracts/utils/
+    eosio-cpp -abigen -o $PEERANHA_PATH/peerania.wasm $PEERANHA_PATH/peerania_debug.cpp -I$UTILS_PATH -R$PEERANHA_PATH/rc
+    eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peerania.token.wasm $PEERANHA_TOKEN_PATH/peerania.token_debug.cpp -I$UTILS_PATH
 else
-    eosio-cpp -o ./src/contracts/peerania/peerania.wasm ./src/contracts/peerania/peerania.cpp -I./src/contracts/utils/ -R./src/contracts/peerania/rc --contract=$contract
+    eosio-cpp -abigen -o $PEERANHA_PATH/peerania.wasm $PEERANHA_PATH/peerania.cpp -I$UTILS_PATH -R$PEERANHA_PATH/rc
+    eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peerania.token.wasm $PEERANHA_TOKEN_PATH/peerania.token.cpp -I$UTILS_PATH
 
-    eosio-cpp -o ./src/contracts/peerania.token/peerania.token.wasm ./src/contracts/peerania.token/peerania.token.cpp -I./src/contracts/utils/
 fi
 
 echo -e "\e[92mCompilation done! :)\e[0m"

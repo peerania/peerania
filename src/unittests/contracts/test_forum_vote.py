@@ -211,9 +211,9 @@ class ForumVoteTests(peeraniatest.PeeraniaTest):
         bob = self.register_bob_account()
         carol = self.register_carol_account()
         (e, var) = self._create_basic_hierarchy(alice, bob)
-        self.action('votedelete', {
+        self.action('reportforum', {
             'user': 'carol', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0}, carol, "Carol report alice question")
-        self.action('votedelete', {
+        self.action('reportforum', {
             'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0}, carol, "Carol report bob answer")
 
         self.failed_action('upvote', {'user': 'carol', 'question_id': var['aq'], 'answer_id': 0},

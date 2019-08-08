@@ -1,11 +1,18 @@
 #pragma once
 #include <eosio/name.hpp>
 // Limit to delte
-namespace DeletionVotes {
-const int DELETION_VOTES_QUESTION = 1700;
-const int DELETION_VOTES_ANSWER = 1500;
-const int DELETION_VOTES_COMMENT = 1000;
-}  // namespace DeletionVotes
+namespace ForumReportPoints
+{
+#ifndef DEBUG
+const int REPORT_POINTS_QUESTION = 150;
+const int REPORT_POINTS_ANSWER = 125;
+const int REPORT_POINTS_COMMENT = 50;
+#else
+const int REPORT_POINTS_QUESTION = 7;
+const int REPORT_POINTS_ANSWER = 5;
+const int REPORT_POINTS_COMMENT = 3;
+#endif
+} // namespace ForumReportPoints
 
 #define ANSWER_ACCEPTED_AS_CORRECT_REWARD 15
 #define UPVOTE_QUESTION_REWARD 0
@@ -100,19 +107,22 @@ const int DELETION_VOTES_COMMENT = 1000;
 #define STATUS6_ENERGY 350
 
 // Account period
-#define ACCOUNT_STAT_RESET_PERIOD 259200  // 3 Days
+#define ACCOUNT_STAT_RESET_PERIOD 259200 // 3 Days
 #define BAN_RATING_INCREMENT_PER_PERIOD 6
 
 // Account report reset time
-#define MIN_FREEZE_PERIOD 302400            // 3.5 Days
-#define REPORT_RESET_PERIOD 2592000         // 30 Days
-#define REPORT_POWER_RESET_PERIOD 10368000  // 120 Days
+#define MIN_FREEZE_PERIOD 302400           // 3.5 Days
+#define REPORT_RESET_PERIOD 2592000        // 30 Days
+#define REPORT_POWER_RESET_PERIOD 10368000 // 120 Days
+
 #define POINTS_TO_FREEZE 90
 #define MODERATION_POINTS_REPORT_PROFILE 2
 #define MAX_FREEZE_PERIOD_MULTIPLIER 6
 
-namespace VoteItem {
-struct vote_resources_t {
+namespace VoteItem
+{
+struct vote_resources_t
+{
   const int upvote_reward;
   const int downvote_reward;
   const int upvoted_reward;
@@ -138,4 +148,5 @@ const vote_resources_t answer = {
     .energy_upvote = ENERGY_UPVOTE_ANSWER,
     .energy_downvote = ENERGY_DOWNVOTE_ANSWER,
 };
-}  // namespace VoteItem
+} // namespace VoteItem
+

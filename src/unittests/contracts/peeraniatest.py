@@ -115,6 +115,22 @@ def get_tag_scope(community_id):
 def time_sec():
     return round(time())
 
+def get_moderation_impact(rating):
+    if rating < 99:
+        return 0
+    elif rating < 499:
+        return 1
+    elif rating < 999:
+        return 2
+    elif rating < 2499:
+        return 3
+    elif rating < 4999:
+        return 4
+    elif rating < 9999:
+        return 5
+    else:
+        return 6
+
 
 def get_period_scope(time):
     alphabet = 'abcdefjhijklmnopqrstuvwxyz'

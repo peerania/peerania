@@ -1,4 +1,3 @@
-#include <eosio/asset.hpp>
 #include <eosio/eosio.hpp>
 #include <eosio/name.hpp>
 #include <string>
@@ -9,10 +8,6 @@
 #define INFLATION_PERIOD 2  // 52 periods(52 weeks)
 #undef POOL_REDUSE
 #define POOL_REDUSE 100000
-
-#include "peerania_types.h"
-
-#include "token_common.hpp"
 
 #undef EOSIO_DISPATCH
 #define EOSIO_DISPATCH(MEMBER, TYPES)

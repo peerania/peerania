@@ -3,9 +3,8 @@
  *  @copyright defined in eos/LICENSE.txt
  */
 #pragma once
-
 #include <eosio/eosio.hpp>
-#include <eosio/system.hpp>
+#include <eosio/name.hpp>
 #include <string>
 #include "peerania.token.period.hpp"
 #include "peerania_types.h"

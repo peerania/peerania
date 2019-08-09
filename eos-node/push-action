@@ -1,7 +1,7 @@
+#!/usr/bin/env bash
 set -ex
 
 cleos push action peerania.dev init '{}' -p alice
-
 
 cleos push action peerania.dev registeracc '{"user": "alice", "display_name": "Alice", "ipfs_profile": "QmYBPXQMG32aUVqtMuptyR4dzgjykmBozyuDbvRGXxc1DK", "ipfs_avatar": "QmfTVC4eMMQ5vXT1HVpCcquwpJ6DQ7tCPQMyhTbMjHvXVx"}' -p alice
 sleep 1
@@ -14,8 +14,8 @@ cleos push action peerania.dev registeracc '{"user": "dan", "display_name": "Dan
 cleos push action peerania.dev registeracc '{"user": "frank", "display_name": "Frank", "ipfs_profile": "Qmc7Cq35A27VN4ft9UfbQ4D5azGA6g2GKTEAyC6sZjsDK9", "ipfs_avatar": "QmfTVC4eMMQ5vXT1HVpCcquwpJ6DQ7tCPQMyhTbMjHvXVx"}' -p frank
 sleep 1
 cleos push action peerania.dev registeracc '{"user": "user1", "display_name": "Roman", "ipfs_profile": "QmYBPXQMG32aUVqtMuptyR4dzgjykmBozyuDbvRGXxc1DK", "ipfs_avatar": "QmfTVC4eMMQ5vXT1HVpCcquwpJ6DQ7tCPQMyhTbMjHvXVx"}' -p user1
-cleos push action peerania.dev setaccrtmpc '{"user": "bob", "rating": 3500, "moderation_points": 10}' -p bob
-cleos push action peerania.dev setaccrtmpc '{"user": "user1", "rating": 4000, "moderation_points": 100}' -p user1
+cleos push action peerania.dev setaccrten '{"user": "bob", "rating": 3500, "energy": 100}' -p bob
+cleos push action peerania.dev setaccrten '{"user": "user1", "rating": 4000, "energy": 100}' -p user1
 cleos push action peerania.dev followcomm '{"user": "user1", "community_id": "1"}' -p user1
 cleos push action peerania.dev crcommunity '{"user": "bob", "name": "JJQJQJ", "ipfs_description": "Qme1CiDMWNNYqRLxzXmsP8GSngUfoi34juTKBSmSVHGFCE", "suggested_tags": [
     {"name": "TAG1", "ipfs_description": "QmZrh8RVZwmX8H1DCUgNZ486U9HKsApkFLnzCf5sP9Aa1M"},

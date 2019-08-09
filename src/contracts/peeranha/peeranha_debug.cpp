@@ -38,17 +38,17 @@
 
 #undef EOSIO_DISPATCH
 #define EOSIO_DISPATCH(MEMBER, TYPES)
-#include "peerania.cpp"
+#include "peeranha.cpp"
 
 extern time
     START_PERIOD_TIME;  // We need mechanism which change it once on deploy
 extern int PERIOD_LENGTH;
-class[[eosio::contract("peerania")]] peerania_d : public peerania {
-  using peerania::peerania;
+class[[eosio::contract("peeranha")]] peeranha_d : public peeranha {
+  using peeranha::peeranha;
 
  public:
   struct [[
-    eosio::table("constants"), eosio::contract("peerania")
+    eosio::table("constants"), eosio::contract("peeranha")
   ]] constants {
     uint64_t id;
     time start_period_time;
@@ -60,9 +60,9 @@ class[[eosio::contract("peerania")]] peerania_d : public peerania {
 
   const uint64_t scope_all_constants = eosio::name("allconstants").value;
 
-  peerania_d(eosio::name receiver, eosio::name code,
+  peeranha_d(eosio::name receiver, eosio::name code,
              eosio::datastream<const char *> ds)
-      : peerania(receiver, code, ds) {
+      : peeranha(receiver, code, ds) {
     PERIOD_LENGTH = 3;
     // Initializte some constants for debug
     // could be moved to a separate method
@@ -201,9 +201,9 @@ extern "C" {
 void apply(uint64_t receiver, uint64_t code, uint64_t action) {
   if (code == receiver) {
     switch (action) {
-      EOSIO_DISPATCH_HELPER(peerania_d, (chnguserrt)(resettables)(setaccrten))
+      EOSIO_DISPATCH_HELPER(peeranha_d, (chnguserrt)(resettables)(setaccrten))
       EOSIO_DISPATCH_HELPER(
-          peerania,
+          peeranha,
           (registeracc)(setaccprof)(postquestion)(
               postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(
               modanswer)(modquestion)(modcomment)(upvote)(downvote)(

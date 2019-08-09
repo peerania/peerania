@@ -1,11 +1,11 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
-economy = load_defines('src/contracts/peerania/economy.h')
+economy = load_defines('src/contracts/peeranha/economy.h')
 
-class AccountModerationTests(peeraniatest.PeeraniaTest):
+class AccountModerationTests(peeranhatest.peeranhaTest):
     def test_report_user(self):
         begin('Test report user')
         alice = self.register_alice_account()

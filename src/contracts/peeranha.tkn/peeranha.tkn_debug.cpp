@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "peerania.token.period.hpp"
+#include "peeranha.tkn.period.hpp"
 #undef INFLATION_PERIOD
 #define INFLATION_PERIOD 2  // 52 periods(52 weeks)
 #undef POOL_REDUSE
@@ -11,7 +11,7 @@
 
 #undef EOSIO_DISPATCH
 #define EOSIO_DISPATCH(MEMBER, TYPES)
-#include "peerania.token.cpp"
+#include "peeranha.tkn.cpp"
 
 extern time
     START_PERIOD_TIME;  // We need mechanism which change it once on deploy
@@ -19,7 +19,7 @@ extern int PERIOD_LENGTH;
 namespace eosio {
 
 using std::string;
-class[[eosio::contract("peerania.tkn")]] token_d : public token {
+class[[eosio::contract("peeranha.tkn")]] token_d : public token {
   using token::token;
 
  public:
@@ -29,13 +29,13 @@ class[[eosio::contract("peerania.tkn")]] token_d : public token {
     PERIOD_LENGTH = 3;
     // Initializte some constants for debug
     // could be moved to a separate method
-    constants_index all_constants_table(peerania_main, scope_all_constants);
+    constants_index all_constants_table(peeranha_main, scope_all_constants);
     auto settings = all_constants_table.rbegin();
     if (settings != all_constants_table.rend())
       START_PERIOD_TIME = settings->start_period_time;
   }
   struct [[
-    eosio::table("constants"), eosio::contract("peerania")
+    eosio::table("constants"), eosio::contract("peeranha")
   ]] constants {
     uint64_t id;
     time start_period_time;

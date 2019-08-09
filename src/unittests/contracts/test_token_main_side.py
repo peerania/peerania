@@ -1,11 +1,11 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 from threading import Timer
 
 
-class TestTokenIntegration(peeraniatest.PeeraniaTest):
+class TestTokenIntegration(peeranhatest.peeranhaTest):
     PERIOD_LENGTH = 3
 
     def test_simple_rating_up(self):

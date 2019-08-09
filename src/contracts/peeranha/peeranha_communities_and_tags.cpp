@@ -1,6 +1,6 @@
-#include "peerania.hpp"
+#include "peeranha.hpp"
 
-void peerania::update_community_statistics(uint16_t community_id,
+void peeranha::update_community_statistics(uint16_t community_id,
                                            int8_t questions_asked,
                                            int8_t answers_given,
                                            int8_t correct_answers,
@@ -17,7 +17,7 @@ void peerania::update_community_statistics(uint16_t community_id,
                          });
 }
 
-void peerania::update_tags_statistics(uint16_t community_id,
+void peeranha::update_tags_statistics(uint16_t community_id,
                                       std::vector<uint32_t> tags_id,
                                       int8_t questions_asked) {
   tag_table_index tag_table(_self, get_tag_scope(community_id));
@@ -31,17 +31,17 @@ void peerania::update_tags_statistics(uint16_t community_id,
   }
 }
 
-void peerania::assert_community_exist(uint16_t community_id) {
+void peeranha::assert_community_exist(uint16_t community_id) {
   community_table_index community_table(_self, scope_all_communities);
   eosio::check(community_table.find(community_id) != community_table.end(),
                "Community not found");
 }
 
-uint64_t peerania::get_tag_scope(uint16_t community_id) {
+uint64_t peeranha::get_tag_scope(uint16_t community_id) {
   return scope_all_communities + community_id;
 }
 
-void peerania::create_community(
+void peeranha::create_community(
     eosio::name user, const std::string &name,
     const std::string &ipfs_description,
     const std::vector<suggest_tag> &suggested_tags) {
@@ -69,7 +69,7 @@ void peerania::create_community(
       });
 }
 
-void peerania::create_tag(eosio::name user, uint16_t commuinty_id,
+void peeranha::create_tag(eosio::name user, uint16_t commuinty_id,
                           const std::string &name,
                           const std::string &ipfs_description) {
   assert_tag_name(name);
@@ -91,7 +91,7 @@ void peerania::create_tag(eosio::name user, uint16_t commuinty_id,
   });
 }
 
-void peerania::vote_create_community(eosio::name user, uint32_t community_id) {
+void peeranha::vote_create_community(eosio::name user, uint32_t community_id) {
   auto iter_account = find_account(user);
   assert_allowed(*iter_account, user, Action::VOTE_CREATE_COMMUNITY);
   update_rating(iter_account, [](auto &account) {
@@ -168,7 +168,7 @@ void peerania::vote_create_community(eosio::name user, uint32_t community_id) {
   }
 }
 
-void peerania::vote_create_tag(eosio::name user, uint16_t community_id,
+void peeranha::vote_create_tag(eosio::name user, uint16_t community_id,
                                uint32_t tag_id) {
   auto iter_account = find_account(user);
   assert_allowed(*iter_account, user, Action::VOTE_CREATE_TAG);
@@ -214,7 +214,7 @@ void peerania::vote_create_tag(eosio::name user, uint16_t community_id,
   }
 }
 
-void peerania::vote_delete_community(eosio::name user, uint32_t community_id) {
+void peeranha::vote_delete_community(eosio::name user, uint32_t community_id) {
   auto iter_account = find_account(user);
   assert_allowed(*iter_account, user, Action::VOTE_DELETE_COMMUNITY);
   update_rating(iter_account, 0, [](auto &account) {
@@ -268,7 +268,7 @@ void peerania::vote_delete_community(eosio::name user, uint32_t community_id) {
   }
 }
 
-void peerania::vote_delete_tag(eosio::name user, uint16_t community_id,
+void peeranha::vote_delete_tag(eosio::name user, uint16_t community_id,
                                uint32_t tag_id) {
   auto iter_account = find_account(user);
   assert_allowed(*iter_account, user, Action::VOTE_DELETE_TAG);
@@ -316,7 +316,7 @@ void peerania::vote_delete_tag(eosio::name user, uint16_t community_id,
   }
 }
 
-void peerania::follow_community(eosio::name user, uint16_t community_id) {
+void peeranha::follow_community(eosio::name user, uint16_t community_id) {
   update_community_statistics(community_id, 0, 0, 0, 1);
   auto iter_account = find_account(user);
   eosio::check(
@@ -330,7 +330,7 @@ void peerania::follow_community(eosio::name user, uint16_t community_id) {
   });
 }
 
-void peerania::unfollow_community(eosio::name user, uint16_t community_id) {
+void peeranha::unfollow_community(eosio::name user, uint16_t community_id) {
   update_community_statistics(community_id, 0, 0, 0, -1);
   auto iter_account = find_account(user);
   update_rating(iter_account, [community_id](auto &account) {

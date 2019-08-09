@@ -1,11 +1,11 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
-economy = load_defines('src/contracts/peerania/economy.h')
+economy = load_defines('src/contracts/peeranha/economy.h')
 
-class ForumFeedTests(peeraniatest.PeeraniaTest):
+class ForumFeedTests(peeranhatest.peeranhaTest):
     def test_un_follow_community(self):
         begin('Test follow community, unfollow community')
         alice = self.register_alice_account()
@@ -40,7 +40,7 @@ class ForumFeedTests(peeraniatest.PeeraniaTest):
 
 
     def test_un_follow_not_registered_failed(self):
-        begin('Test follow community, unfollow community without peerania account', True)
+        begin('Test follow community, unfollow community without peeranha account', True)
         alice = self.get_non_registered_alice()
         self.failed_action('unfollowcomm', {'user': alice, 'community_id': 1}, alice, 'Alice attempt to call unfollow without account', 'assert')
         self.failed_action('followcomm', {'user': alice, 'community_id': 1}, alice, 'Alice attempt to call follow without account', 'assert')

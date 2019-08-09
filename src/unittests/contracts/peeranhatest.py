@@ -8,15 +8,15 @@ PERIOD = 604800
 monday_1_october_2018 = 1538341200
 
 
-class PeeraniaTest(EOSTest):
+class peeranhaTest(EOSTest):
     DEFAULT_RATING = 200
     DEFAULT_ENERGY = 50
     WAIT_FOR_NEW_BLOCK = 0.51
     contracts = {}
 
     def setUp(self):
-        self.action('create', {'issuer': 'peerania.tkn', 'maximum_supply': '100000000.000000 PEER'},
-                    'peerania.tkn', 'Create token PEER', contract='token')
+        self.action('create', {'issuer': 'peeranha.tkn', 'maximum_supply': '100000000.000000 PEER'},
+                    'peeranha.tkn', 'Create token PEER', contract='token')
         self.action('init', {}, self.get_contract_deployer(
             self.get_default_contract()), 'Init contract')
 

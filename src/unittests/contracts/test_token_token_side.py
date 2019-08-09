@@ -1,5 +1,5 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 from threading import Timer
@@ -11,7 +11,7 @@ POOL_REDUSE = 100000
 START_POOL = 200000
 
 SCOPE = '......2mcp2p'
-class TestTokenIntegration(peeraniatest.PeeraniaTest):
+class TestTokenIntegration(peeranhatest.peeranhaTest):
 
     def test_pick_up_future_reward_failed(self):
         begin("Test call pick up reward with period is not yet come", True)
@@ -131,7 +131,7 @@ class TestTokenIntegration(peeraniatest.PeeraniaTest):
                     else:
                         self.failed_action('pickupreward', {'user': name, 'period': period_id-1},
                                 name, name + ' pick up his reward for ' + str(period_id-1) + ' preiod', 'assert',contract='token')
-                residue = self.table('accounts', 'peerania.dev', contract='token')[0]["balance"]
+                residue = self.table('accounts', 'peeranha.dev', contract='token')[0]["balance"]
                 self._compare_rewards(0, residue, 2*period_id)
                 info('Period: ' + str(period_id-1))
                 info('Pool residue: ' + str(residue))

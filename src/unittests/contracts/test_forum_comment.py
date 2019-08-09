@@ -1,9 +1,9 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
-economy = load_defines('src/contracts/peerania/economy.h')
+economy = load_defines('src/contracts/peeranha/economy.h')
 
 
 def cbody(user, question_id, a_id=0, ipfs='', c_id=-1):
@@ -17,7 +17,7 @@ def cbody(user, question_id, a_id=0, ipfs='', c_id=-1):
     return ret
 
 
-class ForumCommentTests(peeraniatest.PeeraniaTest):
+class ForumCommentTests(peeranhatest.peeranhaTest):
 
     def test_register_comment(self):
         begin('Register comment')

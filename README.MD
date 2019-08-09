@@ -1,11 +1,11 @@
-# Peerania - Decentralized Professional Q&A Platform
+# peeranha - Decentralized Professional Q&A Platform
 
 ## Environment Setup
 
 ### Clone all repository and dependencies
 
-1. `git clone https://github.com/peerania/peerania.git`
-1. `cd peerania`
+1. `git clone https://github.com/peeranha/peeranha.git`
+1. `cd peeranha`
 1. Clone dependencies by running script `./clone`
 
 ### Build and install EOS
@@ -24,7 +24,7 @@ Follow the instructions on https://github.com/EOSIO/eosio.cdt
 
 ## Smart Contracts
 
-Smart contracts are located in folder *src/contracts/peerania*  
+Smart contracts are located in folder *src/contracts/peeranha*  
 
 Run `./compile` script to compile the contracts  
 Run `./test` script to compile and execute unit tests

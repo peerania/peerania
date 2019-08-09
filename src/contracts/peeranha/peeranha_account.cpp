@@ -1,6 +1,6 @@
-#include "peerania.hpp"
+#include "peeranha.hpp"
 
-void peerania::register_account(eosio::name user, std::string display_name,
+void peeranha::register_account(eosio::name user, std::string display_name,
                                 const std::string &ipfs_profile,
                                 const std::string &ipfs_avatar) {
   eosio::check(account_table.find(user.value) == account_table.end(),
@@ -36,7 +36,7 @@ void peerania::register_account(eosio::name user, std::string display_name,
 }
 
 // ACTION BODY
-void peerania::set_account_profile(eosio::name user,
+void peeranha::set_account_profile(eosio::name user,
                                    const std::string &ipfs_profile,
                                    const std::string &display_name,
                                    const std::string &ipfs_avatar) {
@@ -53,7 +53,7 @@ void peerania::set_account_profile(eosio::name user,
   });
 }
 
-void peerania::report_profile(eosio::name user, eosio::name user_to_report) {
+void peeranha::report_profile(eosio::name user, eosio::name user_to_report) {
   auto iter_snitch = find_account(user);
   auto iter_user_to_report = find_account(user_to_report);
   assert_allowed(*iter_snitch, user_to_report, Action::VOTE_REPORT_PROFILE);
@@ -86,7 +86,7 @@ void peerania::report_profile(eosio::name user, eosio::name user_to_report) {
   });
 }
 
-void peerania::update_rating_base(
+void peeranha::update_rating_base(
     account_index::const_iterator iter_account, int rating_change,
     const std::function<void(account &)> account_modifying_lambda,
     bool hasLambda) {
@@ -203,18 +203,18 @@ void peerania::update_rating_base(
                        });
 }
 
-void peerania::update_rating(eosio::name user, int rating_change) {
+void peeranha::update_rating(eosio::name user, int rating_change) {
   update_rating_base(find_account(user), rating_change, nullptr, false);
 }
 
-void peerania::update_rating(
+void peeranha::update_rating(
     account_index::const_iterator iter_account, int rating_change,
     const std::function<void(account &)> account_modifying_lambda) {
   update_rating_base(iter_account, rating_change, account_modifying_lambda,
                      true);
 }
 
-void peerania::update_rating(
+void peeranha::update_rating(
     account_index::const_iterator iter_account,
     const std::function<void(account &)> account_modifying_lambda) {
   account_table.modify(iter_account, _self,
@@ -227,19 +227,19 @@ void peerania::update_rating(
                        });
 }
 
-void peerania::update_rating(
+void peeranha::update_rating(
     eosio::name user, int rating_change,
     const std::function<void(account &)> account_modifying_lambda) {
   update_rating_base(find_account(user), rating_change,
                      account_modifying_lambda, true);
 }
 
-void peerania::update_rating(account_index::const_iterator iter_account,
+void peeranha::update_rating(account_index::const_iterator iter_account,
                              int rating_change) {
   update_rating_base(iter_account, rating_change, nullptr, false);
 }
 
-account_index::const_iterator peerania::find_account(eosio::name user) {
+account_index::const_iterator peeranha::find_account(eosio::name user) {
   auto iter_user = account_table.find(user.value);
   eosio::check(iter_user != account_table.end(), "Account not registered");
   return iter_user;

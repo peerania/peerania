@@ -1,6 +1,6 @@
-[submodule "peerania-contracts"]
-	path = peerania-contracts
-	url = git@github.com:peerania/peerania-contracts
-[submodule "peerania-app"]
-	path = peerania-app
-	url = git@github.com:peerania/peerania-app
+[submodule "peeranha-contracts"]
+	path = peeranha-contracts
+	url = git@github.com:peeranha/peeranha-contracts
+[submodule "peeranha-app"]
+	path = peeranha-app
+	url = git@github.com:peeranha/peeranha-app

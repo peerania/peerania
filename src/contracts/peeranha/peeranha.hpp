@@ -6,17 +6,17 @@
 #include "economy.h"
 #include "global_statistics.hpp"
 #include "history.hpp"
-#include "peerania_types.h"
+#include "peeranha_types.h"
 #include "property.hpp"
 #include "question_container.hpp"
 #include "token_common.hpp"
 #include "utils.hpp"
 
-CONTRACT peerania : public eosio::contract {
+CONTRACT peeranha : public eosio::contract {
  public:
   const int version = 1;
 
-  peerania(eosio::name receiver, eosio::name code,
+  peeranha(eosio::name receiver, eosio::name code,
            eosio::datastream<const char *> ds)
       : contract(receiver, code, ds),
         account_table(receiver, scope_all_accounts),

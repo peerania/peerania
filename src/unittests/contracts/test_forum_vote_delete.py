@@ -1,12 +1,12 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
-defs = {**load_defines('./src/contracts/peerania/economy.h'),
-        **load_defines('./src/contracts/peerania/question_container.hpp')}
+defs = {**load_defines('./src/contracts/peeranha/economy.h'),
+        **load_defines('./src/contracts/peeranha/question_container.hpp')}
 
-class ForumreportforumTests(peeraniatest.PeeraniaTest):
+class ForumreportforumTests(peeranhatest.peeranhaTest):
     def test_vote_delete_comment(self):
         begin('Test vote for question comment')
         (alice, bob, carol) = self._init_all_accounts()

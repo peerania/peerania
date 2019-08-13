@@ -3,7 +3,7 @@
 #include <eosio/name.hpp>
 
 struct [[
-  eosio::table("globalstat"), eosio::contract("peerania")
+  eosio::table("globalstat"), eosio::contract("peeranha")
 ]] globalstat {
   uint64_t version;
   // mandatory fields

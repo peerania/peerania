@@ -1,4 +1,4 @@
-#include "peerania.token.hpp"
+#include "peeranha.tkn.hpp"
 
 namespace eosio {
 
@@ -146,7 +146,7 @@ void token::close(name user, const symbol& symbol) {
 }
 
 asset token::get_inflation(uint16_t period) {
-  const symbol sym = symbol(peerania_asset_symbol, 6);
+  const symbol sym = symbol(peeranha_asset_symbol, 6);
   int64_t reward_pool =
       1000000ULL * (START_POOL - (period / INFLATION_PERIOD) * POOL_REDUSE);
   if (reward_pool < 0) reward_pool = 0;
@@ -180,7 +180,7 @@ void token::pickupreward(name user, const uint16_t period) {
     auto existing = statstable.find(sym.code().raw());
     const auto& st = *existing;
     statstable.modify(st, _self, [&](auto& s) { s.supply += quantity; });
-    add_balance(peerania_main, quantity, _self);
+    add_balance(peeranha_main, quantity, _self);
     iter_total_reward = total_reward_table.emplace(
         _self, [&quantity, period](auto& total_reward_item) {
           total_reward_item.period = period;
@@ -188,12 +188,12 @@ void token::pickupreward(name user, const uint16_t period) {
         });
   }
 
-  period_rating_index period_rating_table(peerania_main, user.value);
+  period_rating_index period_rating_table(peeranha_main, user.value);
   auto period_rating = period_rating_table.find(period);
   eosio::check(period_rating != period_rating_table.end(),
                "No reward for you in this period");
 
-  total_rating_index total_rating_table(peerania_main, scope_all_periods);
+  total_rating_index total_rating_table(peeranha_main, scope_all_periods);
   auto total_rating = total_rating_table.find(period);
   eosio::check(total_rating != total_rating_table.end(),
                "Fatal internal error");
@@ -206,7 +206,7 @@ void token::pickupreward(name user, const uint16_t period) {
     reward.reward = user_reward;
   });
   // Subbalance
-  accounts from_acnts(_self, peerania_main.value);
+  accounts from_acnts(_self, peeranha_main.value);
   const auto& from = from_acnts.get(user_reward.symbol.code().raw(),
                                     "no balance object found");
   eosio::check(from.balance.amount >= user_reward.amount, "overdrawn balance");

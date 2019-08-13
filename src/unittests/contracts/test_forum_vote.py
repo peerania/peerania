@@ -1,11 +1,11 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
-economy = load_defines('./src/contracts/peerania/economy.h')
+economy = load_defines('./src/contracts/peeranha/economy.h')
 
-class ForumVoteTests(peeraniatest.PeeraniaTest):
+class ForumVoteTests(peeranhatest.peeranhaTest):
     def test_vote_question(self):
         begin('Test vote question')
         alice = self.register_alice_account()

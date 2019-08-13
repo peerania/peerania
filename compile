@@ -3,11 +3,11 @@
 set -e
 #compile
 
-PEERANHA_CONTRACT='peerania'
-PEERANHA_TOKEN_CONTRACT='peerania.tkn'
+PEERANHA_CONTRACT='peeranha'
+PEERANHA_TOKEN_CONTRACT='peeranha.tkn'
 
-PEERANHA_PATH='./src/contracts/peerania'
-PEERANHA_TOKEN_PATH='./src/contracts/peerania.token'
+PEERANHA_PATH='./src/contracts/peeranha'
+PEERANHA_TOKEN_PATH='./src/contracts/peeranha.tkn'
 
 UTILS_PATH='./src/contracts/utils/'
 
@@ -28,12 +28,11 @@ done
 if [ $DEBUG ]
 then
     echo -e "\e[31mCompiling debug contract!!!\e[0m"
-    eosio-cpp -abigen -o $PEERANHA_PATH/peerania.wasm $PEERANHA_PATH/peerania_debug.cpp -I$UTILS_PATH -R$PEERANHA_PATH/rc
-    eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peerania.token.wasm $PEERANHA_TOKEN_PATH/peerania.token_debug.cpp -I$UTILS_PATH
+    eosio-cpp -abigen -o $PEERANHA_PATH/peeranha.wasm $PEERANHA_PATH/peeranha_debug.cpp -I$UTILS_PATH -R$PEERANHA_PATH/rc
+    eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peeranha.tkn.wasm $PEERANHA_TOKEN_PATH/peeranha.tkn_debug.cpp -I$UTILS_PATH
 else
-    eosio-cpp -abigen -o $PEERANHA_PATH/peerania.wasm $PEERANHA_PATH/peerania.cpp -I$UTILS_PATH -R$PEERANHA_PATH/rc
-    eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peerania.token.wasm $PEERANHA_TOKEN_PATH/peerania.token.cpp -I$UTILS_PATH
-
+    eosio-cpp -abigen -o $PEERANHA_PATH/peeranha.wasm $PEERANHA_PATH/peeranha.cpp -I$UTILS_PATH -R$PEERANHA_PATH/rc
+    eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peeranha.tkn.wasm $PEERANHA_TOKEN_PATH/peeranha.tkn.cpp -I$UTILS_PATH
 fi
 
 echo -e "\e[92mCompilation done! :)\e[0m"

@@ -3,7 +3,7 @@
 #include <eosio/eosio.hpp>
 #include <string>
 #include "economy.h"
-#include "peerania_types.h"
+#include "peeranha_types.h"
 #include "property.hpp"
 #include "status.hpp"
 
@@ -13,7 +13,7 @@ struct report {
   uint8_t report_points;
 };
 
-struct [[ eosio::table("account"), eosio::contract("peerania") ]] account {
+struct [[ eosio::table("account"), eosio::contract("peeranha") ]] account {
   eosio::name user;
   // mandatory fields
   std::string display_name;

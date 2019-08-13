@@ -1,12 +1,12 @@
-#include "peerania.hpp"
+#include "peeranha.hpp"
 
-question_index::const_iterator peerania::find_question(uint64_t question_id) {
+question_index::const_iterator peeranha::find_question(uint64_t question_id) {
   auto iter_question = question_table.find(question_id);
   eosio::check(iter_question != question_table.end(), "Question not found!");
   return iter_question;
 }
 
-void peerania::post_question(eosio::name user, uint16_t community_id,
+void peeranha::post_question(eosio::name user, uint16_t community_id,
                              const std::vector<uint32_t> tags,
                              const std::string &title,
                              const std::string &ipfs_link) {
@@ -41,7 +41,7 @@ void peerania::post_question(eosio::name user, uint16_t community_id,
   update_tags_statistics(community_id, tags, 1);
 }
 
-void peerania::post_answer(eosio::name user, uint64_t question_id,
+void peeranha::post_answer(eosio::name user, uint64_t question_id,
                            const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
@@ -77,7 +77,7 @@ void peerania::post_answer(eosio::name user, uint64_t question_id,
   });
 }
 
-void peerania::remove_user_question(eosio::name user, uint64_t question_id) {
+void peeranha::remove_user_question(eosio::name user, uint64_t question_id) {
   user_questions_index user_questions_table(_self, user.value);
   auto iter_user_question = user_questions_table.find(question_id);
   eosio::check(iter_user_question != user_questions_table.end(),
@@ -87,7 +87,7 @@ void peerania::remove_user_question(eosio::name user, uint64_t question_id) {
                "Address not erased properly");
 }
 
-void peerania::remove_user_answer(eosio::name user, uint64_t question_id) {
+void peeranha::remove_user_answer(eosio::name user, uint64_t question_id) {
   user_answers_index user_answers_table(_self, user.value);
   auto iter_user_answer = user_answers_table.find(question_id);
   eosio::check(iter_user_answer != user_answers_table.end(),
@@ -97,7 +97,7 @@ void peerania::remove_user_answer(eosio::name user, uint64_t question_id) {
                "Address not erased properly");
 }
 
-void peerania::post_comment(eosio::name user, uint64_t question_id,
+void peeranha::post_comment(eosio::name user, uint64_t question_id,
                             uint16_t answer_id, const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
@@ -126,7 +126,7 @@ void peerania::post_comment(eosio::name user, uint64_t question_id,
   });
 }
 
-void peerania::delete_question(eosio::name user, uint64_t question_id) {
+void peeranha::delete_question(eosio::name user, uint64_t question_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
   assert_allowed(*iter_account, iter_question->user, Action::DELETE_QUESTION);
@@ -144,7 +144,7 @@ void peerania::delete_question(eosio::name user, uint64_t question_id) {
   });
 }
 
-void peerania::delete_answer(eosio::name user, uint64_t question_id,
+void peeranha::delete_answer(eosio::name user, uint64_t question_id,
                              uint16_t answer_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
@@ -164,7 +164,7 @@ void peerania::delete_answer(eosio::name user, uint64_t question_id,
   });
 }
 
-void peerania::delete_comment(eosio::name user, uint64_t question_id,
+void peeranha::delete_comment(eosio::name user, uint64_t question_id,
                               uint16_t answer_id, uint64_t comment_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
@@ -189,7 +189,7 @@ void peerania::delete_comment(eosio::name user, uint64_t question_id,
   });
 }
 
-void peerania::modify_question(eosio::name user, uint64_t question_id,
+void peeranha::modify_question(eosio::name user, uint64_t question_id,
                                uint16_t community_id,
                                const std::vector<uint32_t> &tags,
                                const std::string &title,
@@ -221,7 +221,7 @@ void peerania::modify_question(eosio::name user, uint64_t question_id,
   });
 }
 
-void peerania::modify_answer(eosio::name user, uint64_t question_id,
+void peeranha::modify_answer(eosio::name user, uint64_t question_id,
                              uint16_t answer_id, const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
@@ -239,7 +239,7 @@ void peerania::modify_answer(eosio::name user, uint64_t question_id,
   });
 }
 
-void peerania::modify_comment(eosio::name user, uint64_t question_id,
+void peeranha::modify_comment(eosio::name user, uint64_t question_id,
                               uint16_t answer_id, uint16_t comment_id,
                               const std::string &ipfs_link) {
   assert_ipfs(ipfs_link);
@@ -270,7 +270,7 @@ void peerania::modify_comment(eosio::name user, uint64_t question_id,
     account.reduce_energy(ENERGY_MODIFY_COMMENT);
   });
 }
-void peerania::mark_answer_as_correct(eosio::name user, uint64_t question_id,
+void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
                                       uint16_t answer_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);

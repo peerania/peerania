@@ -1,10 +1,10 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
 
-class StatisticUserCommunityTagTests(peeraniatest.PeeraniaTest):
+class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
 
     def test_ask_question(self):
         begin('Test ask question')

@@ -1,7 +1,7 @@
-#include "peerania.hpp"
-#include "peerania_vote_hlp.hpp"
+#include "peeranha.hpp"
+#include "peeranha_vote_hlp.hpp"
 
-void peerania::vote_forum_item(eosio::name user, uint64_t question_id,
+void peeranha::vote_forum_item(eosio::name user, uint64_t question_id,
                                uint16_t answer_id, bool is_upvote) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
@@ -38,7 +38,7 @@ void peerania::vote_forum_item(eosio::name user, uint64_t question_id,
   update_rating(target_user, target_user_rating_change);
 }
 
-void peerania::report_forum_item(eosio::name user, uint64_t question_id,
+void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
                                  uint16_t answer_id, uint16_t comment_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);

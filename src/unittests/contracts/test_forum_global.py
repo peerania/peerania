@@ -1,10 +1,10 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
 
-class ForumGlobalTests(peeraniatest.PeeraniaTest):
+class ForumGlobalTests(peeranhatest.peeranhaTest):
     def test_forum_global(self):
         begin('This is a large positive test that verifies the correctness of the contract algorithms.')
         alice = self.register_alice_account()

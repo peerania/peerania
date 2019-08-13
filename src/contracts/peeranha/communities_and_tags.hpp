@@ -23,7 +23,7 @@ struct suggest_tag {
 
 const uint64_t scope_all_communities = eosio::name("allcomm").value;
 
-struct [[eosio::table("crcommtb"), eosio::contract("peerania")]] crcommtb {
+struct [[eosio::table("crcommtb"), eosio::contract("peeranha")]] crcommtb {
   uint32_t id;
   eosio::name creator;
   std::string name;
@@ -36,7 +36,7 @@ struct [[eosio::table("crcommtb"), eosio::contract("peerania")]] crcommtb {
 };
 typedef eosio::multi_index<"crcommtb"_n, crcommtb> create_community_index;
 
-struct [[ eosio::table("crtagtb"), eosio::contract("peerania") ]] crtagtb {
+struct [[ eosio::table("crtagtb"), eosio::contract("peeranha") ]] crtagtb {
   uint32_t id;
   eosio::name creator;
   std::string name;
@@ -47,7 +47,7 @@ struct [[ eosio::table("crtagtb"), eosio::contract("peerania") ]] crtagtb {
 };
 typedef eosio::multi_index<"crtagtb"_n, crtagtb> create_tag_index;
 
-struct [[eosio::table("tags"), eosio::contract("peerania")]] tags {
+struct [[eosio::table("tags"), eosio::contract("peeranha")]] tags {
   uint32_t id;
   std::string name;
   std::string ipfs_description;
@@ -56,7 +56,7 @@ struct [[eosio::table("tags"), eosio::contract("peerania")]] tags {
 };
 typedef eosio::multi_index<"tags"_n, tags> tag_table_index;
 
-struct [[eosio::table("communities"), eosio::contract("peerania")]] communities {
+struct [[eosio::table("communities"), eosio::contract("peeranha")]] communities {
   uint16_t id;
   std::string name;
   std::string ipfs_description;

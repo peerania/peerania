@@ -1,10 +1,10 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
 
-class UserQuestionsAndAnswersTablesTests(peeraniatest.PeeraniaTest):
+class UserQuestionsAndAnswersTablesTests(peeranhatest.peeranhaTest):
 
     def test_delete_own_item(self):
         begin('Test user questions and answers tables when delete own item')

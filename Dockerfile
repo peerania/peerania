@@ -1,10 +1,10 @@
 FROM ubuntu:18.04
 
-ADD eos-node peerania/eos-node
-ADD src peerania/src
-ADD compile peerania/compile
-ADD test peerania/test
-ADD config.json peerania/config.json
+ADD eos-node peeranha/eos-node
+ADD src peeranha/src
+ADD compile peeranha/compile
+ADD test peeranha/test
+ADD config.json peeranha/config.json
 
 RUN apt update
 RUN apt install wget -y
@@ -19,7 +19,7 @@ ENV EOSIO_BUILD_DIR /eosio.contracts/build/
 
 RUN apt install python3 -y
 RUN apt install python3-pip -y
-RUN pip3 install termcolorс
+RUN pip3 install termcolor
 RUN pip3 install requests
 
-CMD ["peerania/eos-node/run"]
+CMD ["peeranha/eos-node/run"]

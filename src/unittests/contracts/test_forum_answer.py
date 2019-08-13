@@ -1,11 +1,11 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
-economy = load_defines('src/contracts/peerania/economy.h')
+economy = load_defines('src/contracts/peeranha/economy.h')
 
-class ForumAnswerTests(peeraniatest.PeeraniaTest):
+class ForumAnswerTests(peeranhatest.peeranhaTest):
 
     def test_register_answer(self):
         begin('Test register new answer')

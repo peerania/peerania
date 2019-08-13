@@ -1,12 +1,12 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import compare
 from time import sleep
 from unittest import main
 
-economy = load_defines('src/contracts/peerania/economy.h')
+economy = load_defines('src/contracts/peeranha/economy.h')
 
-class AccountManagementTests(peeraniatest.PeeraniaTest):
+class AccountManagementTests(peeranhatest.peeranhaTest):
 
     def test_register_user(self):
         begin('Testing registration of new user Alice')

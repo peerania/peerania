@@ -1,12 +1,12 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
-defs = load_defines('./src/contracts/peerania/economy.h')
+defs = load_defines('./src/contracts/peeranha/economy.h')
 
 
-class ForumRatingRewardsTests(peeraniatest.PeeraniaTest):
+class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
 
     def test_post_question(self):
         begin('Testing assertion rating for question post')

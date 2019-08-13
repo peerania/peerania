@@ -10,7 +10,7 @@ jobs:
           at: ~/ws
       - checkout:
           path:
-            "peerania"
+            "peeranha"
   deploy:
     docker:
       - image: eosio/eos-dev:v1.1.1

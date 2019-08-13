@@ -1,11 +1,11 @@
-import peeraniatest
-from peeraniatest import *
+import peeranhatest
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 # NOT IMPLEMENTED YET
 
 
-class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
+class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
 
     def test_modify_question(self):
         begin("Testing work of tags and communities, when question modified")
@@ -188,7 +188,7 @@ class TagsAndCommunitiesTests(peeraniatest.PeeraniaTest):
     def test_energy_point_limit(self):
         begin('Test energy points assert', True)
         defs = load_defines(
-            './src/contracts/peerania/economy.h')
+            './src/contracts/peeranha/economy.h')
         alice = self.register_alice_account(
             10000, defs['ENERGY_CREATE_COMMUNITY'])
         bob = self.register_bob_account(

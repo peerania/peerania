@@ -1,15 +1,15 @@
-import peeraniatest
+import peeranhatest
 import requests
 from termcolor import cprint
-from peeraniatest import *
+from peeranhatest import *
 from jsonutils import *
 from unittest import main
 from random import randint
 from time import sleep
 
-economy = load_defines('src/contracts/peerania/economy.h')
+economy = load_defines('src/contracts/peeranha/economy.h')
 
-class FrumStatusLimitsTests(peeraniatest.PeeraniaTest):
+class FrumStatusLimitsTests(peeranhatest.peeranhaTest):
 
     def test_energy_timer(self):
         begin('Test energy restore')

@@ -6,20 +6,20 @@
 #include <eosio/eosio.hpp>
 #include <eosio/name.hpp>
 #include <string>
-#include "peerania.token.period.hpp"
-#include "peerania_types.h"
+#include "peeranha.tkn.period.hpp"
+#include "peeranha_types.h"
 #include "token_common.hpp"
 
 namespace eosio {
 
 using std::string;
 
-class[[eosio::contract("peerania.tkn")]] token : public contract {
+class[[eosio::contract("peeranha.tkn")]] token : public contract {
  public:
   token(eosio::name receiver, eosio::name code,
         eosio::datastream<const char*> ds)
       : contract(receiver, code, ds){};
-  name peerania_main = name("peerania.dev");
+  name peeranha_main = name("peeranha.dev");
   [[eosio::action]] void create(name issuer, asset maximum_supply);
 
   [[eosio::action]] void issue(name to, asset quantity, string memo);
@@ -49,7 +49,7 @@ class[[eosio::contract("peerania.tkn")]] token : public contract {
   }
 
  protected:
-  const string peerania_asset_symbol = "PEER";
+  const string peeranha_asset_symbol = "PEER";
 
   struct [[eosio::table]] account {
     asset balance;

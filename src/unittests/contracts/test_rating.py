@@ -457,12 +457,10 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
         t = self.table('crtagtb', get_tag_scope(1))
         for i in range(3):
             if i < 2:
-                print(var['bob_rt'])
                 self.assertTrue(var['bob_rt'] == defs['CREATE_TAG_ALLOWED'])
                 self.action('vtdeltag', {
                             'user': voters[i], 'community_id': 1, 'tag_id': t[0]['id']}, voters[i], f'{voters[i]} vote delete tag')
             else:
-                print(var['bob_rt'])
                 self.assertTrue(
                     var['bob_rt'] == defs['CREATE_TAG_ALLOWED'] + defs['TAG_DELETED_REWARD'])
             self.assertTrue(var['alice_rt'] ==

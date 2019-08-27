@@ -7,13 +7,11 @@ import os
 import signal
 from time import sleep
 
-verbose = False
-
-
 class EOSTest(unittest.TestCase):
     WAIT_FOR_NEW_BLOCK = 0.51
     contracts = {}
     accounts = []
+    verbose = True
 
     def run(self, result=None):
         """ Stop after first error """
@@ -46,7 +44,7 @@ class EOSTest(unittest.TestCase):
             to_execute.append(
                 'cleos create account eosio {0} {1} {1}'.format(user['name'], user['public-key']))
         if 'verbose' in cls.config:
-            verbose = cls.config['verbose']
+            cls.verbose = cls.config['verbose']
         if cls.config['terminal'] == False:
             cls.eosnode = subprocess.Popen('cd {}; {}'.format(
                 cls.config['eos-node'], './run'), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
@@ -61,7 +59,7 @@ class EOSTest(unittest.TestCase):
                 p = requests.post('http://127.0.0.1:8888/v1/chain/get_info')
                 if p.status_code == 200:
                     cprint('Node succesfully started!', color='cyan')
-                    if verbose:
+                    if cls.verbose:
                         cprint('Node info:\n{}'.format(
                             p.json()), color='yellow')
                     break
@@ -74,7 +72,7 @@ class EOSTest(unittest.TestCase):
         for command in to_execute:
             with subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as process:
                 process.wait()
-                if(verbose):
+                if(cls.verbose):
                     out, err = process.communicate()
                     print('command: ' + command)
                     print(out.decode())
@@ -107,7 +105,7 @@ class EOSTest(unittest.TestCase):
                 input()
             self.assertTrue(transaction.returncode == 0)
         cprint('  OK', color='green')
-        if verbose:
+        if self.verbose:
             print(out.decode())
 
     def failed_action(self, action_name, action_body, action_auth, action_text, errormsg='', wait=False, contract=None):
@@ -135,7 +133,7 @@ class EOSTest(unittest.TestCase):
             self.assertTrue(errormsg in out.decode())
         cprint('Get correct error', end='',  color='yellow')
         cprint('  OK', color='green')
-        if verbose:
+        if self.verbose:
             print(out.decode())
 
     def wait(self, secs=None):
@@ -162,7 +160,7 @@ class EOSTest(unittest.TestCase):
             data['key_type'] = keyType
         with requests.post('http://127.0.0.1:8888/v1/chain/get_table_rows', json.dumps(data)) as t:
             if t.status_code == 200:
-                if verbose:
+                if self.verbose:
                     cprint('Fetch from "{}" with scope "{}":\n{}'.format(
                         table, scope, t.json()), color='yellow')
                 tb = t.json()

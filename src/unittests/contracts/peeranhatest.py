@@ -15,7 +15,7 @@ class peeranhaTest(EOSTest):
     contracts = {}
 
     def setUp(self):
-        self.action('create', {'issuer': 'peeranha.tkn', 'maximum_supply': '100000000.000000 PEER'},
+        self.action('create', {'issuer': 'peeranha.tkn', 'maximum_supply': '100.000000 PEER'},
                     'peeranha.tkn', 'Create token PEER', contract='token')
         self.action('init', {}, self.get_contract_deployer(
             self.get_default_contract()), 'Init contract')

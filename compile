@@ -28,7 +28,7 @@ done
 if [ $DEBUG ]
 then
     echo -e "\e[31mCompiling debug contract!!!\e[0m"
-    eosio-cpp -abigen -o $PEERANHA_PATH/peeranha.wasm $PEERANHA_PATH/peeranha_debug.cpp -I$UTILS_PATH -R$PEERANHA_PATH/rc
+    #eosio-cpp -abigen -o $PEERANHA_PATH/peeranha.wasm $PEERANHA_PATH/peeranha_debug.cpp -I$UTILS_PATH -R$PEERANHA_PATH/rc
     eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peeranha.tkn.wasm $PEERANHA_TOKEN_PATH/peeranha.tkn_debug.cpp -I$UTILS_PATH
 else
     eosio-cpp -abigen -o $PEERANHA_PATH/peeranha.wasm $PEERANHA_PATH/peeranha.cpp -I$UTILS_PATH -R$PEERANHA_PATH/rc

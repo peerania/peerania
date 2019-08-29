@@ -2,20 +2,17 @@
 set -ex
 
 cleos push action peeranha.dev init '{}' -p alice
+cleos push action peeranha.tkn create '{"issuer": "peeranha.tkn", "maximum_supply": "100000000.000000 PEER"}' -p peeranha.tkn
 
 cleos push action peeranha.dev registeracc '{"user": "alice", "display_name": "Alice", "ipfs_profile": "QmYBPXQMG32aUVqtMuptyR4dzgjykmBozyuDbvRGXxc1DK", "ipfs_avatar": "QmfTVC4eMMQ5vXT1HVpCcquwpJ6DQ7tCPQMyhTbMjHvXVx"}' -p alice
-sleep 1
 cleos push action peeranha.dev registeracc '{"user": "bob", "display_name": "Bobby", "ipfs_profile": "QmYBPXQMG32aUVqtMuptyR4dzgjykmBozyuDbvRGXxc1DK", "ipfs_avatar": "QmfTVC4eMMQ5vXT1HVpCcquwpJ6DQ7tCPQMyhTbMjHvXVx"}' -p bob
-sleep 1
 cleos push action peeranha.dev registeracc '{"user": "carol", "display_name": "Carol", "ipfs_profile": "Qmc7Cq35A27VN4ft9UfbQ4D5azGA6g2GKTEAyC6sZjsDK9", "ipfs_avatar": "QmfTVC4eMMQ5vXT1HVpCcquwpJ6DQ7tCPQMyhTbMjHvXVx"}' -p carol
-sleep 1
 cleos push action peeranha.dev registeracc '{"user": "ted", "display_name": "Ted", "ipfs_profile": "Qmc7Cq35A27VN4ft9UfbQ4D5azGA6g2GKTEAyC6sZjsDK9", "ipfs_avatar": "QmfTVC4eMMQ5vXT1HVpCcquwpJ6DQ7tCPQMyhTbMjHvXVx"}' -p ted
 cleos push action peeranha.dev registeracc '{"user": "dan", "display_name": "Dan", "ipfs_profile": "Qmc7Cq35A27VN4ft9UfbQ4D5azGA6g2GKTEAyC6sZjsDK9", "ipfs_avatar": "QmfTVC4eMMQ5vXT1HVpCcquwpJ6DQ7tCPQMyhTbMjHvXVx"}' -p dan
 cleos push action peeranha.dev registeracc '{"user": "frank", "display_name": "Frank", "ipfs_profile": "Qmc7Cq35A27VN4ft9UfbQ4D5azGA6g2GKTEAyC6sZjsDK9", "ipfs_avatar": "QmfTVC4eMMQ5vXT1HVpCcquwpJ6DQ7tCPQMyhTbMjHvXVx"}' -p frank
-sleep 1
 cleos push action peeranha.dev registeracc '{"user": "user1", "display_name": "Roman", "ipfs_profile": "QmYBPXQMG32aUVqtMuptyR4dzgjykmBozyuDbvRGXxc1DK", "ipfs_avatar": "QmfTVC4eMMQ5vXT1HVpCcquwpJ6DQ7tCPQMyhTbMjHvXVx"}' -p user1
-cleos push action peeranha.dev setaccrten '{"user": "bob", "rating": 3500, "energy": 100}' -p bob
-cleos push action peeranha.dev setaccrten '{"user": "user1", "rating": 4000, "energy": 100}' -p user1
+cleos push action peeranha.dev setaccrten '{"user": "bob", "rating": 3500, "energy": 200}' -p bob
+cleos push action peeranha.dev setaccrten '{"user": "user1", "rating": 4000, "energy": 200}' -p user1
 cleos push action peeranha.dev followcomm '{"user": "user1", "community_id": "1"}' -p user1
 cleos push action peeranha.dev crcommunity '{"user": "bob", "name": "JJQJQJ", "ipfs_description": "Qme1CiDMWNNYqRLxzXmsP8GSngUfoi34juTKBSmSVHGFCE", "suggested_tags": [
     {"name": "TAG1", "ipfs_description": "QmZrh8RVZwmX8H1DCUgNZ486U9HKsApkFLnzCf5sP9Aa1M"},
@@ -27,8 +24,15 @@ cleos push action peeranha.dev crtag '{"user": "bob", "community_id": 1, "name":
 
 for i in {1..10}
 do
-    cleos push action peeranha.dev postquestion '{"user":"user1", "title":"Q'$i'1", "community_id": 1, "tags": [1, 2], "ipfs_link":"QmZrh8RVZwmX8H1DCUgNZ486U9HKsApkFLnzCf5sP9Aa1M"}' -p user1
+    cleos push action peeranha.dev chnguserrt '{"user": "alice", "rating_change": '$(( 5*$i ))'}' -p bob
+    cleos push action peeranha.dev chnguserrt '{"user": "user1", "rating_change": '$(( 10*$i ))'}' -p user1
+    cleos push action peeranha.dev postquestion '{"user":"alice", "title":"Q'$i'1", "community_id": 1, "tags": [1, 2], "ipfs_link":"QmZrh8RVZwmX8H1DCUgNZ486U9HKsApkFLnzCf5sP9Aa1M"}' -p alice
     cleos push action peeranha.dev postquestion '{"user":"user1", "title":"Q'$i'2", "community_id": 1, "tags": [1, 2], "ipfs_link":"QmZrh8RVZwmX8H1DCUgNZ486U9HKsApkFLnzCf5sP9Aa1M"}' -p user1
     cleos push action peeranha.dev postquestion '{"user":"user1", "title":"Q'$i'3", "community_id": 1, "tags": [1, 2], "ipfs_link":"QmZrh8RVZwmX8H1DCUgNZ486U9HKsApkFLnzCf5sP9Aa1M"}' -p user1
+    if [[ i -gt 2 ]]
+    then
+        cleos push action peeranha.tkn pickupreward '{"user": "alice", "period": '$(( $i - 2 ))'}' -p alice
+        cleos push action peeranha.tkn pickupreward '{"user": "user1", "period": '$(( $i - 2 ))'}' -p user1
+    fi
     sleep 3
 done

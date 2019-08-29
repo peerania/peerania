@@ -3,15 +3,19 @@
 #include <string>
 #include <vector>
 
-#include "peeranha.tkn.period.hpp"
+#include "economy.hpp"
 #undef INFLATION_PERIOD
-#define INFLATION_PERIOD 2  // 52 periods(52 weeks)
-#undef POOL_REDUSE
-#define POOL_REDUSE 100000
+#define INFLATION_PERIOD 2  // 2 secs
+#undef POOL_REDUSE_COEFFICIENT
+#define POOL_REDUSE_COEFFICIENT 0.5
+#undef START_POOL
+#define START_POOL 40
 
 #undef EOSIO_DISPATCH
 #define EOSIO_DISPATCH(MEMBER, TYPES)
 #include "peeranha.tkn.cpp"
+
+#include "peeranha.tkn.period.hpp"
 
 extern time
     START_PERIOD_TIME;  // We need mechanism which change it once on deploy
@@ -35,7 +39,7 @@ class[[eosio::contract("peeranha.tkn")]] token_d : public token {
       START_PERIOD_TIME = settings->start_period_time;
   }
   struct [[
-    eosio::table("constants"), eosio::contract("peeranha")
+    eosio::table("constants"), eosio::contract("peeranha.tkn")
   ]] constants {
     uint64_t id;
     time start_period_time;
@@ -62,8 +66,6 @@ class[[eosio::contract("peeranha.tkn")]] token_d : public token {
       while (iter_to_acnts != to_acnts.end()) {
         iter_to_acnts = to_acnts.erase(iter_to_acnts);
       }
-
-      eosio::print("remove data for ", iter_acc->user);
       period_reward_index period_reward_table(_self, iter_acc->user.value);
       auto iter_period_reward = period_reward_table.begin();
       while (iter_period_reward != period_reward_table.end()) {
@@ -73,7 +75,7 @@ class[[eosio::contract("peeranha.tkn")]] token_d : public token {
       iter_acc = allaccs_table.erase(iter_acc);
     }
 
-    const symbol sym = symbol("PEER", 6);
+    const symbol sym = symbol("PEER", TOKEN_PRECISION);
     stats statstable(_self, sym.code().raw());
     auto existing = statstable.find(sym.code().raw());
     statstable.erase(existing);
@@ -83,8 +85,13 @@ class[[eosio::contract("peeranha.tkn")]] token_d : public token {
     while (iter_total_reward != total_reward_table.end()) {
       iter_total_reward = total_reward_table.erase(iter_total_reward);
     }
-  };
 
+    auto dbginfl_table = dbginfl_index(_self, _self.value);
+    auto iter_dbginf_table = dbginfl_table.begin();
+    while (iter_dbginf_table != dbginfl_table.end()) {
+      iter_dbginf_table = dbginfl_table.erase(iter_dbginf_table);
+    }
+  };
 
   // Stub I think about it later!!!!
   void pickupreward(name user, const uint16_t period) {
@@ -93,6 +100,26 @@ class[[eosio::contract("peeranha.tkn")]] token_d : public token {
     if (allaccs_table.find(user.value) == allaccs_table.end())
       allaccs_table.emplace(_self, [user](auto& a) { a.user = user; });
     t.pickupreward(user, period);
+  }
+
+  struct [[
+    eosio::table("dbginfl"), eosio::contract("peeranha.tkn")
+  ]] dbginfl {
+    uint64_t id;
+    asset inflation;
+    uint64_t primary_key() const { return id; }
+  };
+
+  typedef eosio::multi_index<eosio::name("dbginfl"), dbginfl>
+    dbginfl_index;
+
+  [[eosio::action("mapcrrwpool")]] void mapcrrwpool(uint64_t id, uint16_t period, int total_rating){
+    auto dbginfl_table = dbginfl_index(_self, scope_all_constants);
+    auto inflation = create_reward_pool(period, total_rating);
+    dbginfl_table.emplace(_self, [inflation, id](auto &dbginfl){
+      dbginfl.id = id;
+      dbginfl.inflation = inflation;
+    });
   }
 };
 
@@ -104,7 +131,7 @@ void apply(uint64_t receiver, uint64_t code, uint64_t action) {
     switch (action) {
       EOSIO_DISPATCH_HELPER(eosio::token_d,
                             (create)(issue)(transfer)(open)(close)(retire)(
-                                pickupreward)(resettables))
+                                pickupreward)(resettables)(mapcrrwpool))
     }
   }
 }

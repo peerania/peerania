@@ -27,7 +27,6 @@ class FrumStatusLimitsTests(peeranhatest.peeranhaTest):
         info('All stats restored')
         self.action('followcomm', {'user': alice, 'community_id': 2}, alice, 'Call stub action')
         e[0]['energy'] = economy['STATUS2_ENERGY'] - economy['ENERGY_FOLLOW_COMMUNITY']
-        print(self.table('account', 'allaccounts'))
         self.assertTrue(compare(e, self.table('account', 'allaccounts'), var, True))
 
 

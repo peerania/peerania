@@ -6,10 +6,6 @@
 
 #include <string>
 
-#define INFLATION_PERIOD 52 //52 periods(52 weeks)
-#define START_POOL 200000
-#define POOL_REDUSE 25000
-
 // scoped by user
 struct [[eosio::table("periodreward"), eosio::contract("peeranha.tkn")]] periodreward {
   uint16_t period;

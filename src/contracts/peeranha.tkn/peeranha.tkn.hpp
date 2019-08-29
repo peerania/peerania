@@ -68,6 +68,8 @@ protected:
     asset max_supply;
     asset user_supply;
     asset user_max_supply;
+    asset funding_supply;
+    asset funding_max_supply;
     name issuer;
 
     uint64_t primary_key() const { return supply.symbol.code().raw(); }
@@ -79,8 +81,8 @@ protected:
   void sub_balance(name user, asset value);
   void add_balance(name user, asset value, name ram_payer);
 
-  asset get_inflation(uint16_t period, int total_rating);
-  asset get_reward(asset total_reward, int rating_to_reward, int total_rating);
+  asset create_reward_pool(uint16_t period, int total_rating);
+  asset get_user_reward(asset total_reward, int rating_to_reward, int total_rating);
 };
 
 } // namespace eosio

@@ -63,11 +63,11 @@ class TestTokenIntegration(peeranhatest.peeranhaTest):
             },
         ]
         for i in range(len(data)):
-            self.action('mapgetinfl', {'id': i, 'period': data[i]['period'], 'total_rating': data[i]['total_rating']},
+            self.action('mapcrrwpool', {'id': i, 'period': data[i]['period'], 'total_rating': data[i]['total_rating']},
                            'alice', f'Test with data {data[i]}', contract='token')
-        received = self.table('dbginfl', 'allconstants', contract='token')
-        for i in range(len(data)):
-            self._compare_rewards(data[i]['expected'], received[i]['inflation'])
+            self._compare_rewards(data[0]['expected'], self.table('dbginfl', 'allconstants', contract='token')[0]['inflation'])
+            self.action('resettables', {}, 'alice', 'Reset')
+            self.wait()
         end()
 
     def test_pick_up_reward_another_owner_failed(self):
@@ -195,6 +195,8 @@ class TestTokenIntegration(peeranhatest.peeranhaTest):
                             user_reward[i] += user_reward_this_period
                             info(
                                 f'{all_users[i]} pick up {user_reward_this_period}')
+                            print(user_reward[i], self.table(
+                                'accounts', name, contract='token')[0]["balance"])
                             self._compare_rewards(user_reward[i], self.table(
                                 'accounts', name, contract='token')[0]["balance"])
                     else:

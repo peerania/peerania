@@ -113,9 +113,9 @@ class[[eosio::contract("peeranha.tkn")]] token_d : public token {
   typedef eosio::multi_index<eosio::name("dbginfl"), dbginfl>
     dbginfl_index;
 
-  [[eosio::action("mapgetinfl")]] void mapgetinfl(uint64_t id, uint16_t period, int total_rating){
+  [[eosio::action("mapcrrwpool")]] void mapcrrwpool(uint64_t id, uint16_t period, int total_rating){
     auto dbginfl_table = dbginfl_index(_self, scope_all_constants);
-    auto inflation = get_inflation(period, total_rating);
+    auto inflation = create_reward_pool(period, total_rating);
     dbginfl_table.emplace(_self, [inflation, id](auto &dbginfl){
       dbginfl.id = id;
       dbginfl.inflation = inflation;
@@ -131,7 +131,7 @@ void apply(uint64_t receiver, uint64_t code, uint64_t action) {
     switch (action) {
       EOSIO_DISPATCH_HELPER(eosio::token_d,
                             (create)(issue)(transfer)(open)(close)(retire)(
-                                pickupreward)(resettables)(mapgetinfl))
+                                pickupreward)(resettables)(mapcrrwpool))
     }
   }
 }

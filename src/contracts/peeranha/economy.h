@@ -150,3 +150,26 @@ const vote_resources_t answer = {
 };
 } // namespace VoteItem
 
+// Status 
+
+#define STATUS0(X) \
+  case 0 ... 99:   \
+    return (X)
+#define STATUS1(X)  \
+  case 100 ... 499: \
+    return (X)
+#define STATUS2(X)  \
+  case 500 ... 999: \
+    return (X)
+#define STATUS3(X)    \
+  case 1000 ... 2499: \
+    return (X)
+#define STATUS4(X)    \
+  case 2500 ... 4999: \
+    return (X)
+#define STATUS5(X)    \
+  case 5000 ... 9999: \
+    return (X)
+#define STATUS6(X) \
+  default:         \
+    return (X)

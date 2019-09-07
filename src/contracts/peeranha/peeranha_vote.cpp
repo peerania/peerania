@@ -58,9 +58,9 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
           if (apply_to_answer(comment_id)) {
             // Delete question
             // Question could not be deleted inside modify lambda
-            // set_deletion_votes_and_history - modify question
+            // set_report_points_and_history - modify question
             snitch_reduce_energy_value = ENERGY_REPORT_QUESTION;
-            delete_question = set_deletion_votes_and_history(
+            delete_question = set_report_points_and_history(
                 question, *iter_account,
                 ForumReportPoints::REPORT_POINTS_QUESTION);
             if (delete_question) {
@@ -73,7 +73,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
             // Delete comment to question by vote (answer_id == 0)
             auto iter_comment = find_comment(question, comment_id);
 
-            if (set_deletion_votes_and_history(
+            if (set_report_points_and_history(
                     *iter_comment, *iter_account,
                     ForumReportPoints::REPORT_POINTS_COMMENT)) {
               item_user = iter_comment->user;
@@ -87,7 +87,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
         if (apply_to_answer(comment_id)) {
           // Delete answer to question by vote (comment_id == 0)
           snitch_reduce_energy_value = ENERGY_REPORT_ANSWER;
-          if (set_deletion_votes_and_history(
+          if (set_report_points_and_history(
                   *iter_answer, *iter_account,
                   ForumReportPoints::REPORT_POINTS_ANSWER)) {
             // Get for mark as correct
@@ -106,7 +106,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
         } else {
           // Delete comment to answer
           auto iter_comment = find_comment(*iter_answer, comment_id);
-          if (set_deletion_votes_and_history(
+          if (set_report_points_and_history(
                   *iter_comment, *iter_account,
                   ForumReportPoints::REPORT_POINTS_COMMENT)) {
             item_user = iter_comment->user;

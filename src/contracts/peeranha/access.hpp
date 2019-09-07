@@ -2,6 +2,8 @@
 #include <eosio/eosio.hpp>
 #include "account.hpp"
 #include "economy.h"
+#include "peeranha_types.h"
+#include "property.hpp"
 
 enum Action {
   MODIFY_QUESTION,
@@ -18,7 +20,7 @@ enum Action {
   UPVOTE,
   DOWNVOTE,
   MARK_ANSWER_AS_CORRECT,
-  VOTE_FOR_DELETION,
+  REPORT_FORUM_ITEM,
   VOTE_FOR_MODERATION,
   CREATE_TAG,
   CREATE_COMMUNITY,
@@ -29,89 +31,94 @@ enum Action {
   VOTE_REPORT_PROFILE,
 };
 
+void check_rating(const account &acc, const int rating, const char *msg) {
+  if (!acc.has_moderation_flag(MODERATOR_FLG_IGNORE_RATING))
+    eosio::check(acc.rating >= rating, msg);
+}
+
 void assert_allowed(const account &action_caller, eosio::name data_user,
                     Action action) {
   switch (action) {
     case POST_QUESTION:
       eosio::check(action_caller.user == data_user,
                    "Internal function call error");
-      eosio::check(action_caller.rating >= POST_QUESTION_ALLOWED,
+      check_rating(action_caller, POST_QUESTION_ALLOWED,
                    "You can't post question!");
       break;
     case POST_ANSWER:
       if (action_caller.user == data_user)
-        eosio::check(action_caller.rating >= POST_ANSWER_OWN_ALLOWED,
+        check_rating(action_caller, POST_ANSWER_OWN_ALLOWED,
                      "You can't post answer to your question");
       else
-        eosio::check(action_caller.rating >= POST_ANSWER_ALLOWED,
+        check_rating(action_caller, POST_ANSWER_ALLOWED,
                      "You can't post answer to this question");
       break;
     case POST_COMMENT:
       if (action_caller.user == data_user)
-        eosio::check(action_caller.rating >= POST_COMMENT_OWN_ALLOWED,
+        check_rating(action_caller, POST_COMMENT_OWN_ALLOWED,
                      "You can't post comment for your item");
       else
-        eosio::check(action_caller.rating >= POST_COMMENT_ALLOWED,
+        check_rating(action_caller, POST_COMMENT_ALLOWED,
                      "You can't post comment for this item");
       break;
     case UPVOTE:
       eosio::check(action_caller.user != data_user,
                    "You cant upvote for your own items");
-      eosio::check(action_caller.rating >= UPVOTE_ALLOWED,
+      check_rating(action_caller, UPVOTE_ALLOWED,
                    "Your rating is too small to upvote");
       break;
     case DOWNVOTE:
       eosio::check(action_caller.user != data_user,
                    "You cant downvote for your own items");
-      eosio::check(action_caller.rating >= DOWNVOTE_ALLOWED,
+      check_rating(action_caller, DOWNVOTE_ALLOWED,
                    "Your rating is too small to downvote");
       break;
-    case VOTE_FOR_DELETION:
+    case REPORT_FORUM_ITEM:
       eosio::check(action_caller.user != data_user,
                    "You cant vote for deletion of your own items");
-      eosio::check(action_caller.rating >= VOTE_FOR_DELETION_ALLOWED,
+      check_rating(action_caller, VOTE_FOR_DELETION_ALLOWED,
                    "Your rating is too small to put deletion flag");
       break;
     case CREATE_COMMUNITY:
       eosio::check(action_caller.user == data_user,
                    "Internal function call error");
-      eosio::check(action_caller.rating >= CREATE_COMMUNITY_ALLOWED,
+      check_rating(action_caller, CREATE_COMMUNITY_ALLOWED,
                    "Your rating is too small to create community!");
       break;
     case CREATE_TAG:
       eosio::check(action_caller.user == data_user,
                    "Internal function call error");
-      eosio::check(action_caller.rating >= CREATE_TAG_ALLOWED,
+      check_rating(action_caller, CREATE_TAG_ALLOWED,
                    "Your rating is too small to create tag!");
       break;
     case VOTE_CREATE_COMMUNITY:
       eosio::check(action_caller.user == data_user,
                    "Internal function call error");
-      eosio::check(action_caller.rating >= VOTE_CREATE_COMMUNITY_ALLOWED,
+     check_rating(action_caller, VOTE_CREATE_COMMUNITY_ALLOWED,
                    "Your rating is too small to vote community!");
       break;
     case VOTE_CREATE_TAG:
       eosio::check(action_caller.user == data_user,
                    "Internal function call error");
-      eosio::check(action_caller.rating >= VOTE_CREATE_TAG_ALLOWED,
+      check_rating(action_caller, VOTE_CREATE_TAG_ALLOWED,
                    "Your rating is too small to vote tag!");
       break;
     case VOTE_DELETE_COMMUNITY:
       eosio::check(action_caller.user == data_user,
                    "Internal function call error");
-      eosio::check(action_caller.rating >= VOTE_DELETE_COMMUNITY_ALLOWED,
+      check_rating(action_caller, VOTE_DELETE_COMMUNITY_ALLOWED,
                    "Your rating is too small to vote for community deletion!");
       break;
     case VOTE_DELETE_TAG:
       eosio::check(action_caller.user == data_user,
                    "Internal function call error");
-      eosio::check(action_caller.rating >= VOTE_DELETE_TAG_ALLOWED,
+      check_rating(action_caller, VOTE_DELETE_TAG_ALLOWED,
                    "Your rating is too small to vote for tag deletion!");
       break;
     case VOTE_REPORT_PROFILE:
       eosio::check(action_caller.user != data_user,
                    "You can't report own profile");
-      eosio::check(action_caller.rating >= REPORT_PROFILE_ALLOWED,
+      check_rating(action_caller, REPORT_PROFILE_ALLOWED,
                    "Your rating is too small to report profile");
       break;
     default:

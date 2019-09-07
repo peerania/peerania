@@ -89,8 +89,9 @@ class EOSTest(unittest.TestCase):
         else:
             stop()
 
-    def action(self, action_name, action_body, action_auth, action_text, wait=False, contract=None):
-        cprint(action_text, end='', color='yellow')
+    def action(self, action_name, action_body, action_auth, action_text, wait=False, contract=None, suppress_output=False):
+        if not suppress_output or self.verbose:
+            cprint(action_text, end='', color='yellow')
         if contract is None:
             contract = self.config['default-contract']
         cleos_cmd = "cleos push action {} {} '{}' -p {}".format(
@@ -104,7 +105,7 @@ class EOSTest(unittest.TestCase):
             if(wait):
                 input()
             self.assertTrue(transaction.returncode == 0)
-        cprint('  OK', color='green')
+        if not suppress_output or self.verbose: cprint('  OK', color='green')
         if self.verbose:
             print(out.decode())
 

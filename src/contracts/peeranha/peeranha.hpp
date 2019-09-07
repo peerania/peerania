@@ -110,6 +110,9 @@ CONTRACT peeranha : public eosio::contract {
   // Report user profile
   ACTION reportprof(eosio::name user, eosio::name user_to_report);
 
+  // Action give moderator flags
+  ACTION givemoderflg(eosio::name user, int flags);
+
   ACTION init();
 
  protected:
@@ -238,4 +241,6 @@ CONTRACT peeranha : public eosio::contract {
   void follow_community(eosio::name user, uint16_t community_id);
 
   void unfollow_community(eosio::name user, uint16_t community_id);
+
+  void give_moderator_flag(eosio::name user, int flags);
 };

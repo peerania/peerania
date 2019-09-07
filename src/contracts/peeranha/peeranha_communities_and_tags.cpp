@@ -45,16 +45,52 @@ void peeranha::create_community(
     eosio::name user, const std::string &name,
     const std::string &ipfs_description,
     const std::vector<suggest_tag> &suggested_tags) {
-  assert_community_name(name);
   auto iter_account = find_account(user);
-  update_rating(iter_account, 0, [](auto &account) {
-    account.reduce_energy(ENERGY_CREATE_COMMUNITY);
-  });
-  assert_allowed(*iter_account, user, Action::CREATE_COMMUNITY);
+  assert_community_name(name);
   assert_ipfs(ipfs_description);
   eosio::check(suggested_tags.size() >= MIN_SUGGESTED_TAG &&
                    suggested_tags.size() <= MAX_SUGGESTED_TAG,
                "Invalid tag count");
+  if (iter_account->has_moderation_flag(MODERATOR_FLG_CREATE_COMMUNITY)) {
+    // Directly create new community with tags
+    community_table_index community_table(_self, scope_all_communities);
+    uint16_t community_pk = get_direct_pk(community_table, MAX_COMMUNITY_ID);
+    community_table.emplace(_self, [&](auto &community) {
+      community.id = community_pk;
+      community.name = name;
+      community.ipfs_description = ipfs_description;
+      community.creation_time = now();
+      community.questions_asked = 0;
+      community.answers_given = 0;
+      community.correct_answers = 0;
+      community.users_subscribed = 0;
+    });
+    tag_table_index tag_table(_self, get_tag_scope(community_pk));
+    for (auto suggested_tag_iter = suggested_tags.begin();
+         suggested_tag_iter != suggested_tags.end(); suggested_tag_iter++) {
+      uint32_t tag_pk = get_direct_pk(tag_table, MAX_TAG_ID);
+      tag_table.emplace(_self, [&suggested_tag_iter, tag_pk](auto &tag) {
+        tag.id = tag_pk;
+        tag.name = suggested_tag_iter->name;
+        tag.ipfs_description = suggested_tag_iter->ipfs_description;
+        tag.questions_asked = 0;
+      });
+    }
+    global_stat_index global_stat_table(_self, scope_all_stat);
+    auto iter_global_stat = global_stat_table.rbegin();
+    eosio::check(iter_global_stat != global_stat_table.rend() &&
+                     iter_global_stat->version == version,
+                 "Init contract first");
+    global_stat_table.modify(
+        --global_stat_table.end(), _self,
+        [](auto &global_stat) { global_stat.communities_count += 1; });
+    return;
+    // End
+  }
+  update_rating(iter_account, 0, [](auto &account) {
+    account.reduce_energy(ENERGY_CREATE_COMMUNITY);
+  });
+  assert_allowed(*iter_account, user, Action::CREATE_COMMUNITY);
   create_community_index create_community_table(_self, scope_all_communities);
   create_community_table.emplace(
       _self, [&iter_account, &name, &ipfs_description, &create_community_table,
@@ -69,18 +105,29 @@ void peeranha::create_community(
       });
 }
 
-void peeranha::create_tag(eosio::name user, uint16_t commuinty_id,
+void peeranha::create_tag(eosio::name user, uint16_t community_id,
                           const std::string &name,
                           const std::string &ipfs_description) {
-  assert_tag_name(name);
-  assert_community_exist(commuinty_id);
   auto iter_account = find_account(user);
+  assert_tag_name(name);
+  assert_community_exist(community_id);
+  assert_ipfs(ipfs_description);
+  if (iter_account->has_moderation_flag(MODERATOR_FLG_CREATE_TAG)) {
+    tag_table_index tag_table(_self, get_tag_scope(community_id));
+    uint32_t tag_pk = get_direct_pk(tag_table, MAX_TAG_ID);
+    tag_table.emplace(_self, [&](auto &tag) {
+      tag.id = tag_pk;
+      tag.name = name;
+      tag.ipfs_description = ipfs_description;
+      tag.questions_asked = 0;
+    });
+    return;
+  }
   update_rating(iter_account, [](auto &account) {
     account.reduce_energy(ENERGY_CREATE_TAG);
   });
   assert_allowed(*iter_account, user, Action::CREATE_TAG);
-  assert_ipfs(ipfs_description);
-  create_tag_index create_tag_table(_self, get_tag_scope(commuinty_id));
+  create_tag_index create_tag_table(_self, get_tag_scope(community_id));
   create_tag_table.emplace(_self, [&iter_account, &name, &ipfs_description,
                                    &create_tag_table](auto &new_tag) {
     new_tag.id =

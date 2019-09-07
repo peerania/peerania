@@ -1,11 +1,25 @@
 #pragma once
-#include <eosio/system.hpp>
 #include <eosio/eosio.hpp>
+#include <eosio/system.hpp>
 #include <string>
 #include "economy.h"
 #include "peeranha_types.h"
 #include "property.hpp"
-#include "status.hpp"
+#include "token_common.hpp"
+
+#define MIN_DISPLAY_NAME_LEN 3
+#define MAX_DISPLAY_NAME_LEN 20
+
+#define PROPERTY_MODERATOR_FLAGS 48
+#define MODERATOR_FLG_INFINITE_ENERGY (1 << 0)
+#define MODERATOR_FLG_INFINITE_IMPACT (1 << 1)
+#define MODERATOR_FLG_IGNORE_RATING (1 << 2)
+#define MODERATOR_FLG_CREATE_COMMUNITY (1 << 3)
+#define MODERATOR_FLG_CREATE_TAG (1 << 4)
+
+#define MODERATION_IMPACT_INFINITE 255
+#define MODERATION_AVAILABLE_PERIOD 31536000  // One year
+
 
 struct report {
   eosio::name user;
@@ -35,45 +49,14 @@ struct [[ eosio::table("account"), eosio::contract("peeranha") ]] account {
   time last_freeze;
   bool is_frozen;
 
-  void update() {
-    time current_time = now();
-    uint16_t current_period = (current_time - registration_time) / ACCOUNT_STAT_RESET_PERIOD;
-    uint16_t periods_have_passed = current_period - last_update_period;
-    if (periods_have_passed > 0) {
-      if (rating <= 0) {
-        rating += periods_have_passed * BAN_RATING_INCREMENT_PER_PERIOD;
-        if (rating > 0) rating = 1;
-      } else {
-        energy = status_energy(rating);
-      }
-      last_update_period = current_period;
-    }
+  void update();
 
-    if (is_frozen) {
-      if ((current_time - last_freeze) >=
-          (MIN_FREEZE_PERIOD * (1 << (report_power - 1)))) {
-        reports.clear();
-        is_frozen = false;
-        last_freeze = current_time;
-      }
-    } else {
-      if (report_power != 0 &&
-          (current_time - last_freeze) >= REPORT_POWER_RESET_PERIOD) {
-        report_power = 0;
-      }
-      auto iter_report = reports.begin();
-      while (iter_report != reports.end() &&
-             current_time - iter_report->report_time >= REPORT_RESET_PERIOD) {
-        iter_report = reports.erase(iter_report);
-      }
-    }
-  }
+  void reduce_energy(uint8_t value);
 
-  void reduce_energy(uint8_t value){
-    eosio::check(energy >= value, "Not enought energy!");
-    energy -= value;
-  }
-
+  uint16_t get_status_energy() const;
+  uint8_t  get_status_moderation_impact() const;
+  bool has_moderation_flag(int mask) const;  
+  
   uint64_t primary_key() const { return user.value; }
   uint64_t rating_rkey() const { return (1ULL << 32) - rating; }
   uint64_t registration_time_key() const { return registration_time; }
@@ -87,14 +70,7 @@ struct [[ eosio::table("account"), eosio::contract("peeranha") ]] account {
           is_frozen))
 };
 
-#define MIN_DISPLAY_NAME_LEN 3
-#define MAX_DISPLAY_NAME_LEN 20
-
-void assert_display_name(const std::string &display_name) {
-  eosio::check(display_name.length() >= MIN_DISPLAY_NAME_LEN &&
-                   display_name.length() <= MAX_DISPLAY_NAME_LEN,
-               "The display name too short.");
-}
+void assert_display_name(const std::string &display_name);
 
 const uint64_t scope_all_accounts = eosio::name("allaccounts").value;
 typedef eosio::multi_index<
@@ -105,3 +81,6 @@ typedef eosio::multi_index<
                       eosio::const_mem_fun<account, uint64_t,
                                            &account::registration_time_key>>>
     account_index;
+
+// Stub solution:( no ability to compile correctly
+#include "account.cpp"

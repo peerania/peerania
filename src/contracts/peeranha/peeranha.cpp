@@ -146,6 +146,11 @@ void peeranha::reportprof(eosio::name user, eosio::name user_to_report){
   report_profile(user, user_to_report);
 }
 
+void peeranha::givemoderflg(eosio::name user, int flags){
+  require_auth(_self);
+  give_moderator_flag(user, flags);
+}
+
 void peeranha::init(){
   global_stat_index global_stat_table(_self, scope_all_stat);
   auto iter_global_stat = global_stat_table.rbegin();
@@ -158,11 +163,10 @@ void peeranha::init(){
   });
 }
 
-
 EOSIO_DISPATCH(
     peeranha,
     (registeracc)(setaccprof)(postquestion)(
         postanswer)(postcomment)(delquestion)(delanswer)(delcomment)(modanswer)(
         modquestion)(modcomment)(upvote)(downvote)(mrkascorrect)(reportforum)(
         crtag)(crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(
-        unfollowcomm)(init))
+        unfollowcomm)(givemoderflg)(init))

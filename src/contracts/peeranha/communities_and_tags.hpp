@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include "history.hpp"
-#include "status.hpp"
 
 #define ID_CREATE_COMMUNITY 0
 

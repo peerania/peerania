@@ -16,15 +16,22 @@ class peeranhaTest(EOSTest):
 
     def setUp(self):
         self.action('create', {'issuer': 'peeranha.tkn', 'maximum_supply': '100.000000 PEER'},
-                    'peeranha.tkn', 'Create token PEER', contract='token')
-        self.action('init', {}, self.get_contract_deployer(
-            self.get_default_contract()), 'Init contract')
+                    'peeranha.tkn', 'Create token PEER', contract='token', suppress_output=True)
+        admin = self.get_contract_deployer(self.get_default_contract())
+        self.action('init', {}, admin, 'Init contract', suppress_output=True)
+        self.action('registeracc', {'user': admin, 'display_name': 'admin', 'ipfs_profile': 'undefined', 'ipfs_avatar': 'undefined'},
+            admin, 'Register admin account', suppress_output=True)
+        self.action('givemoderflg', {'user': admin, 'flags': 31}, admin, "Give admin permisson", suppress_output=True)
+        for i in range(3):
+            self.action('crcommunity', {'user': admin, 'name': f'Community {i+1}', 'ipfs_description': 'undefined', 'suggested_tags': 
+                [{'name': f'Community {i+1} tag {j+1}', 'ipfs_description': 'undefined'} for j in range(6)]}, admin, f'Create community {i+1}', suppress_output=True)
+        self.action('setaccrten', {'user': admin, 'rating': -1, 'energy': -1}, admin, 'Delete admin account', suppress_output=True)
 
     def tearDown(self):
         self.action('resettables', {}, self.get_contract_deployer(
-            'token'), 'Reset all token tables', contract='token')
+            'token'), 'Reset all token tables', contract='token', suppress_output=True)
         self.action('resettables', {}, self.get_contract_deployer(
-            self.get_default_contract()), 'Reset all tables')
+            self.get_default_contract()), 'Reset all tables', suppress_output=True)
         self.wait(1)
 
     def get_non_registered_alice(self):

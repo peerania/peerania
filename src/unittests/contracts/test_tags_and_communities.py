@@ -17,20 +17,20 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         pupularity1 = [1, 2, 2, 1, 1, 0]
         for i in range(6):
             self.assertTrue(t[i]['questions_asked'] == pupularity1[i])
-        self.action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [0, 3, 5], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 4, 6], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                     'Alice modify own question')
-        e[1]['tags'] = [0, 3, 5]
+        e[1]['tags'] = [1, 4, 6]
         self.assertTrue(compare(e, self.table(
             'question', 'allquestions'), var, True))
         pupularity1 = [2, 1, 1, 1, 0, 1]
         t = self.table('tags', get_tag_scope(c[0]['id']))
         for i in range(6):
             self.assertTrue(t[i]['questions_asked'] == pupularity1[i])
-        self.action('modquestion', {'user': 'bob', 'question_id': var['bq'], 'community_id': 2, 'tags': [0, 2], 'title': 'Title bob question', 'ipfs_link': 'BQ'}, bob,
+        self.action('modquestion', {'user': 'bob', 'question_id': var['bq'], 'community_id': 2, 'tags': [1, 3], 'title': 'Title bob question', 'ipfs_link': 'BQ'}, bob,
                     'Bob modify own question')
         c = self.table('communities', 'allcomm')
         e[2]['community_id'] = c[1]['id']
-        e[2]['tags'] = [0, 2]
+        e[2]['tags'] = [1, 3]
         self.assertTrue(compare(e, self.table(
             'question', 'allquestions'), var, True))
         pupularity1 = [1, 0, 0, 1, 0, 1]
@@ -147,7 +147,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
             else:
                 self.assertTrue(self.table(
                     'crtagtb', get_tag_scope(1)) == [])
-                self.assertTrue({'id': 6, 'name': 'bob tag', 'ipfs_description': 'BCM',
+                self.assertTrue({'id': 7, 'name': 'bob tag', 'ipfs_description': 'BCM',
                                  'questions_asked': 0} in self.table('tags', get_tag_scope(1)))
             self.action('vtcrcomm', {
                         'user': voters[i], 'community_id': c[0]['id']}, voters[i], f'{voters[i]} vote create community')
@@ -424,21 +424,21 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
     def _create_basic_hierarchy(self):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [1, 2, 3, 4], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [2, 3, 4, 5], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                     'Alice asking question')
-        self.action('postquestion', {'user': 'bob', 'community_id': 1, 'tags': [0, 1, 2], 'title': 'Title bob question', 'ipfs_link': 'BQ'}, bob,
+        self.action('postquestion', {'user': 'bob', 'community_id': 1, 'tags': [1, 2, 3], 'title': 'Title bob question', 'ipfs_link': 'BQ'}, bob,
                     'Bob asking question')
         e = ['#ignoreorder', {
             'id': '#var aq',
             'community_id': 1,
-            'tags': [1, 2, 3, 4],
+            'tags': [2, 3, 4, 5],
             'user': 'alice',
             'title': 'Title alice question',
             'ipfs_link': 'AQ'
         }, {
             'id': '#var bq',
             'community_id': 1,
-            'tags': [0, 1, 2],
+            'tags': [1, 2, 3],
             'user': 'bob',
             'title': 'Title bob question',
             'ipfs_link': 'BQ'

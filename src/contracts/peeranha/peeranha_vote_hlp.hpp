@@ -113,10 +113,10 @@ void downvote_item(T &item, T_iter_acc iter_account, int8_t &energy,
 
 // Help function check history
 template <typename T>
-bool set_deletion_votes_and_history(T &item, const account &user,
+bool set_report_points_and_history(T &item, const account &user,
                                     uint16_t limit) {
   // Do not allow vote for deletion your own item
-  assert_allowed(user, item.user, Action::VOTE_FOR_DELETION);
+  assert_allowed(user, item.user, Action::REPORT_FORUM_ITEM);
   bool is_new;
   auto itr_history = get_history_item_iter(item.history, user.user, is_new);
   if (is_new) {
@@ -130,7 +130,7 @@ bool set_deletion_votes_and_history(T &item, const account &user,
   }
   int current_question_report_points =
       get_property_d(item.properties, PROPERTY_REPORT_POINTS, 0);
-  int snitch_report_points = status_moderation_impact(user.rating);
+  int snitch_report_points = user.get_status_moderation_impact();
   if (current_question_report_points + snitch_report_points > limit) return true;
   set_property_d(item.properties, PROPERTY_REPORT_POINTS,
                  current_question_report_points + snitch_report_points, 0);

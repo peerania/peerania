@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include "history.hpp"
-#include "status.hpp"
 #include "property.hpp"
 #include "account.hpp"
 

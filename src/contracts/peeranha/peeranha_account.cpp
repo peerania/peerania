@@ -19,7 +19,7 @@ void peeranha::register_account(eosio::name user, std::string display_name,
     account.registration_time = current_time;
     account.last_update_period = 0;
     account.ipfs_avatar = ipfs_avatar;
-    account.energy = status_energy(RATING_ON_CREATE);
+    account.energy = account.get_status_energy();
     account.report_power = 0;
     account.last_freeze = current_time;
     account.is_frozen = false;
@@ -73,7 +73,7 @@ void peeranha::report_profile(eosio::name user, eosio::name user_to_report) {
     report r;
     r.report_time = now();
     r.user = iter_snitch->user;
-    r.report_points = status_moderation_impact(iter_snitch->rating);
+    r.report_points = iter_snitch->get_status_moderation_impact();
     total_report_points += r.report_points;
     account.reports.push_back(r);
     if (total_report_points >= POINTS_TO_FREEZE) {
@@ -83,6 +83,13 @@ void peeranha::report_profile(eosio::name user, eosio::name user_to_report) {
       account.last_freeze = r.report_time;
       account.is_frozen = true;
     }
+  });
+}
+
+void peeranha::give_moderator_flag(eosio::name user, int flags){
+  auto iter_account = find_account(user);
+  update_rating(iter_account, [flags](auto &account){
+    set_property_d(account.integer_properties, PROPERTY_MODERATOR_FLAGS, flags, 0);
   });
 }
 

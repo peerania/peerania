@@ -4,25 +4,31 @@ const ScatterJS = require("@scatterjs/core").default;
 const ScatterEOS = require("@scatterjs/eosjs2").default;
 const { JsonRpc, Api, Serialize } = require("eosjs");
 const { TextEncoder, TextDecoder } = require(`util`);
+const dotenv = require("dotenv");
 
 require("isomorphic-fetch");
-require("dotenv").config();
 
 ScatterJS.plugins(new ScatterEOS());
 
 const args = process.argv.slice(2);
 const pathToFiles = args[0];
+const envType = args[1];
 
-const BLOCKCHAIN_NAME = "eos";
-const DEFAULT_EOS_PERMISSION = "active";
-const SCATTER_APP_NAME = "Peeranha";
+const envPath = path.resolve(`.env.${envType}`);
+const env = dotenv.config({ path: envPath }).parsed;
+
+if (!env) {
+  throw new Error(
+    "You have to specify correct type of .env file by the 2d parameter (prod, test, local)"
+  );
+}
 
 const network = ScatterJS.Network.fromJson({
-  blockchain: BLOCKCHAIN_NAME,
-  protocol: process.env.EOS_SCATTER_PROTOCOL,
-  host: process.env.EOS_SCATTER_HOST,
-  port: process.env.EOS_SCATTER_PORT,
-  chainId: process.env.EOS_CHAIN_ID
+  blockchain: env.BLOCKCHAIN_NAME,
+  protocol: env.EOS_SCATTER_PROTOCOL,
+  host: env.EOS_SCATTER_HOST,
+  port: env.EOS_SCATTER_PORT,
+  chainId: env.EOS_CHAIN_ID
 });
 
 const rpc = new JsonRpc(network.fullhost());
@@ -56,61 +62,68 @@ abi = abiDefinition.fields.reduce(
 
 abiDefinition.serialize(buffer, abi);
 
-ScatterJS.connect(SCATTER_APP_NAME, { network }).then(async connected => {
-  if (!connected) {
-    throw new Error("Scatter is not installed");
-  }
-
-  const eos = ScatterJS.eos(network, Api, { rpc });
-
-  await ScatterJS.logout();
-
-  const id = await ScatterJS.login();
-
-  if (!id) {
-    throw new Error("No identity");
-  }
-
-  const account = ScatterJS.account(BLOCKCHAIN_NAME);
-
-  await eos.transact(
-    {
-      actions: [
-        {
-          account: "eosio",
-          name: "setcode",
-          authorization: [
-            {
-              actor: account.name,
-              permission: DEFAULT_EOS_PERMISSION
-            }
-          ],
-          data: {
-            account: account.name,
-            vmtype: 0,
-            vmversion: 0,
-            code: wasm
-          }
-        },
-        {
-          account: "eosio",
-          name: "setabi",
-          authorization: [
-            {
-              actor: account.name,
-              permission: DEFAULT_EOS_PERMISSION
-            }
-          ],
-          data: {
-            account: account.name,
-            abi: Buffer.from(buffer.asUint8Array()).toString(`hex`)
-          }
-        }
-      ]
-    },
-    {
-      blocksBehind: 3,
-      expireSeconds: 30
+ScatterJS.connect(env.SCATTER_APP_NAME, { network })
+  .then(async connected => {
+    if (!connected) {
+      throw new Error("Scatter is not installed");
     }
-  );
-});
+
+    const eos = ScatterJS.eos(network, Api, { rpc });
+
+    await ScatterJS.logout();
+
+    const id = await ScatterJS.login();
+
+    if (!id) {
+      throw new Error("No identity");
+    }
+
+    const account = ScatterJS.account(env.BLOCKCHAIN_NAME);
+
+    await eos.transact(
+      {
+        actions: [
+          {
+            account: "eosio",
+            name: "setcode",
+            authorization: [
+              {
+                actor: account.name,
+                permission: env.DEFAULT_EOS_PERMISSION
+              }
+            ],
+            data: {
+              account: account.name,
+              vmtype: 0,
+              vmversion: 0,
+              code: wasm
+            }
+          },
+          {
+            account: "eosio",
+            name: "setabi",
+            authorization: [
+              {
+                actor: account.name,
+                permission: env.DEFAULT_EOS_PERMISSION
+              }
+            ],
+            data: {
+              account: account.name,
+              abi: Buffer.from(buffer.asUint8Array()).toString(`hex`)
+            }
+          }
+        ]
+      },
+      {
+        blocksBehind: 3,
+        expireSeconds: 30
+      }
+    );
+
+    process.exit();
+  })
+  .catch(err => {
+    console.log(err);
+    process.exit(1);
+  });

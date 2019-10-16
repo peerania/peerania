@@ -71,7 +71,7 @@ const baseEnv = dotenv.config({ path: path.resolve(__dirname, ".env.common") }).
 const env = { ...stageEnv, ...baseEnv };
 
 function compile(stage) {
-  const child = spawn("./compile", [`--stage=${stage.contractStage}`], { cwd: path.resolve(__dirname, "../..") });
+  const child = spawn("docker-compose", [`run`, `-w`, `/peeranha`, `eosio`, `./compile`, `--stage=${stage.contractStage}`], { cwd: path.resolve(__dirname, "../../..") });
   child.stdout.on('data', (chunk) => {
     console.log(chunk.toString());
   });
@@ -184,7 +184,7 @@ async function deploy(stage, env) {
     },
     {
       blocksBehind: 3,
-      expireSeconds: 30
+      expireSeconds: 90
     }
   );
   if (contract.additionalActions.length != 0)

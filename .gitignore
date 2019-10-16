@@ -13,3 +13,4 @@ eos-node/deploy-contracts/node_modules/package-lock.json
 src/unittests/contracts/__pycache__
 !stub/eosio.bios/eosio.bios.abi
 !stub/eosio.bios/eosio.bios.wasm
+eos-node/deploy-contracts/package-lock.json

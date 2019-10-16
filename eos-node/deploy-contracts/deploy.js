@@ -15,7 +15,7 @@ ScatterJS.plugins(new ScatterEOS());
 const stages = {
   "local": {
     env: "local",
-    contractStage: "test",
+    contractStage: "debug",
     name: "LOCAL",
   },
   "test": {
@@ -42,13 +42,27 @@ const accounts = {
     pathToFiles: path.resolve(__dirname, "../../src/contracts/peeranha.main"),
     wasm: "peeranha.main.wasm",
     abi: "peeranha.main.abi",
-    name: "MAIN"
+    name: "MAIN",
+    additionalActions: [
+      {
+        account: "peeranhamain",
+        name: 'init',
+        authorization: [
+          {
+            actor: "peeranhamain",
+            permission: "active"
+          }
+        ],
+        data: {},
+      }
+    ]
   },
   "peeranhatken": {
     pathToFiles: path.resolve(__dirname, "../../src/contracts/peeranha.token"),
     wasm: "peeranha.token.wasm",
     abi: "peeranha.token.abi",
     name: "TOKEN",
+    additionalActions: []
   }
 };
 
@@ -126,51 +140,61 @@ async function deploy(stage, env) {
   await ScatterJS.login();
   const account = ScatterJS.account(env.BLOCKCHAIN_NAME);
   const contract = accounts[account.name];
-  if (!contract){
-      throw "Invalid account";
+  if (!contract) {
+    throw "Invalid account";
   }
   console.log(`Deplying ${contract.name} on stage ${stage.name}(${stage.contractStage} contract)`);
   const { wasm, abi } = await loadContract(api, contract);
+
+  const deployActions = [
+    {
+      account: "eosio",
+      name: "setcode",
+      authorization: [
+        {
+          actor: account.name,
+          permission: env.DEFAULT_EOS_PERMISSION
+        }
+      ],
+      data: {
+        account: account.name,
+        vmtype: 0,
+        vmversion: 0,
+        code: wasm
+      }
+    },
+    {
+      account: "eosio",
+      name: "setabi",
+      authorization: [
+        {
+          actor: account.name,
+          permission: env.DEFAULT_EOS_PERMISSION
+        }
+      ],
+      data: {
+        account: account.name,
+        abi,
+      }
+    },
+  ]
   await eos.transact(
     {
-      actions: [
-        {
-          account: "eosio",
-          name: "setcode",
-          authorization: [
-            {
-              actor: account.name,
-              permission: env.DEFAULT_EOS_PERMISSION
-            }
-          ],
-          data: {
-            account: account.name,
-            vmtype: 0,
-            vmversion: 0,
-            code: wasm
-          }
-        },
-        {
-          account: "eosio",
-          name: "setabi",
-          authorization: [
-            {
-              actor: account.name,
-              permission: env.DEFAULT_EOS_PERMISSION
-            }
-          ],
-          data: {
-            account: account.name,
-            abi,
-          }
-        }
-      ]
+      actions: deployActions,
     },
     {
       blocksBehind: 3,
       expireSeconds: 30
     }
   );
+  if (contract.additionalActions.length != 0)
+    await eos.transact({
+      actions: contract.additionalActions,
+    },
+    {
+      blocksBehind: 3,
+      expireSeconds: 30
+    });
 }
 
 deploy(stage, env).then(() => {

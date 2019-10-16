@@ -188,7 +188,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
     def test_energy_point_limit(self):
         begin('Test energy points assert', True)
         defs = load_defines(
-            './src/contracts/peeranha/economy.h')
+            './src/contracts/peeranha.main/economy.h')
         alice = self.register_alice_account(
             10000, defs['ENERGY_CREATE_COMMUNITY'])
         bob = self.register_bob_account(

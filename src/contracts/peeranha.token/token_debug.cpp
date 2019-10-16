@@ -13,9 +13,9 @@
 
 #undef EOSIO_DISPATCH
 #define EOSIO_DISPATCH(MEMBER, TYPES)
-#include "peeranha.tkn.cpp"
+#include "token.cpp"
 
-#include "peeranha.tkn.period.hpp"
+#include "token_period.hpp"
 
 extern time
     START_PERIOD_TIME;  // We need mechanism which change it once on deploy
@@ -23,7 +23,7 @@ extern int PERIOD_LENGTH;
 namespace eosio {
 
 using std::string;
-class[[eosio::contract("peeranha.tkn")]] token_d : public token {
+class[[eosio::contract("peeranha.token")]] token_d : public token {
   using token::token;
 
  public:
@@ -39,7 +39,7 @@ class[[eosio::contract("peeranha.tkn")]] token_d : public token {
       START_PERIOD_TIME = settings->start_period_time;
   }
   struct [[
-    eosio::table("constants"), eosio::contract("peeranha.tkn")
+    eosio::table("constants"), eosio::contract("peeranha.token")
   ]] constants {
     uint64_t id;
     time start_period_time;
@@ -51,7 +51,9 @@ class[[eosio::contract("peeranha.tkn")]] token_d : public token {
 
   const uint64_t scope_all_constants = eosio::name("allconstants").value;
 
-  struct [[eosio::table("allaccs")]] allaccs {
+  struct [[
+    eosio::table("allaccs"), eosio::contract("peeranha.token")
+  ]] allaccs {
     name user;
     uint64_t primary_key() const { return user.value; }
   };
@@ -103,20 +105,20 @@ class[[eosio::contract("peeranha.tkn")]] token_d : public token {
   }
 
   struct [[
-    eosio::table("dbginfl"), eosio::contract("peeranha.tkn")
+    eosio::table("dbginfl"), eosio::contract("peeranha.token")
   ]] dbginfl {
     uint64_t id;
     asset inflation;
     uint64_t primary_key() const { return id; }
   };
 
-  typedef eosio::multi_index<eosio::name("dbginfl"), dbginfl>
-    dbginfl_index;
+  typedef eosio::multi_index<eosio::name("dbginfl"), dbginfl> dbginfl_index;
 
-  [[eosio::action("mapcrrwpool")]] void mapcrrwpool(uint64_t id, uint16_t period, int total_rating){
+  [[eosio::action("mapcrrwpool")]] void mapcrrwpool(
+      uint64_t id, uint16_t period, int total_rating) {
     auto dbginfl_table = dbginfl_index(_self, scope_all_constants);
     auto inflation = create_reward_pool(period, total_rating);
-    dbginfl_table.emplace(_self, [inflation, id](auto &dbginfl){
+    dbginfl_table.emplace(_self, [inflation, id](auto& dbginfl) {
       dbginfl.id = id;
       dbginfl.inflation = inflation;
     });

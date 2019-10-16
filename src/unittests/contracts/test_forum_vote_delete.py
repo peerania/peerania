@@ -3,8 +3,8 @@ from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
-defs = {**load_defines('./src/contracts/peeranha/economy.h'),
-        **load_defines('./src/contracts/peeranha/question_container.hpp')}
+defs = {**load_defines('./src/contracts/peeranha.main/economy.h'),
+        **load_defines('./src/contracts/peeranha.main/question_container.hpp')}
 
 class ForumreportforumTests(peeranhatest.peeranhaTest):
     def test_vote_delete_comment(self):

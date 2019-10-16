@@ -1,22 +1,22 @@
 {
-    "verbose": false,
+    "verbose": true,
     "eos-node": "./eos-node/",
     "terminal": false,
     "default-contract": "main",
     "contracts": [
         {
             "name": "main",
-            "deployer": "peeranha.dev",
+            "deployer": "peeranhamain",
             "private-key": "5JUnu1jgVifdznEHpc9eVedpLXsyDPwu69xziMm9ZvbRSkVKEda",
             "public-key": "EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b",
-            "contract": "./src/contracts/peeranha"
+            "contract": "./src/contracts/peeranha.main"
         },
         {
             "name": "token",
-            "deployer": "peeranha.tkn",
+            "deployer": "peeranhatken",
             "private-key": "5KPAPHaUa23exGa3cZUPUiH5BTX8Go4weazdfKwVpfkTmo3gwBp",
             "public-key": "EOS5vJrxF9aA7ohME7FFQaK2YAMgWUFRaTL4rX3wAJdsafBhwuwYN",
-            "contract": "./src/contracts/peeranha.tkn"
+            "contract": "./src/contracts/peeranha.token"
         }
     ],
     "users": [

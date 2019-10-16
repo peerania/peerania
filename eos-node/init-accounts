@@ -12,11 +12,11 @@ cleos set contract eosio $EOSIO_BUILD_DIR/contracts/eosio.bios -p eosio
 
 #import private key for code account and create account
 cleos wallet import --private-key 5JUnu1jgVifdznEHpc9eVedpLXsyDPwu69xziMm9ZvbRSkVKEda
-cleos create account eosio peeranha.dev EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b
+cleos create account eosio peeranhamain EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY83UTELZtNMRz1b
 
 #import private key for code account and create account
 cleos wallet import --private-key 5KP8Xo8Y7LKeGaQuCYzWbmmizEGNChpyE1XtWjQkVBRe8Jqi85T
-cleos create account eosio peeranha.tkn EOS6csGrgrBFxWeC1mJQ1ZGBN1sA4sQRMVieaCGSLxSaZn4DgkuuG EOS6csGrgrBFxWeC1mJQ1ZGBN1sA4sQRMVieaCGSLxSaZn4DgkuuG
+cleos create account eosio peeranhatken EOS6csGrgrBFxWeC1mJQ1ZGBN1sA4sQRMVieaCGSLxSaZn4DgkuuG EOS6csGrgrBFxWeC1mJQ1ZGBN1sA4sQRMVieaCGSLxSaZn4DgkuuG
 
 #import private key for user1 account and create account
 cleos wallet import --private-key 5JV2aCujE9j5dUkFKJGtyzeTsgMAHCovQ8QhxKHd9eZpJDfMDmZ

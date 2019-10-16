@@ -25,7 +25,7 @@ esac
 done
 
 if [ -z $NO_COMPILE ] ; then
-    ./compile -d
+    ./compile -s=debug
 fi
 
 
@@ -53,5 +53,5 @@ then
         fi
     done
 else
-    python3 -m unittest discover -s $path -p $files
+    python3 -m unittest discover -s $path -p $files -f
 fi

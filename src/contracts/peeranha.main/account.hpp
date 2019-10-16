@@ -27,7 +27,7 @@ struct report {
   uint8_t report_points;
 };
 
-struct [[ eosio::table("account"), eosio::contract("peeranha") ]] account {
+struct [[ eosio::table("account"), eosio::contract("peeranha.main") ]] account {
   eosio::name user;
   // mandatory fields
   std::string display_name;

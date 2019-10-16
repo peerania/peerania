@@ -3,7 +3,7 @@ from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
-economy = load_defines('src/contracts/peeranha/economy.h')
+economy = load_defines('src/contracts/peeranha.main/economy.h')
 
 MODERATOR_FLG_INFINITE_ENERGY = 1 << 0
 MODERATOR_FLG_INFINITE_IMPACT = 1 << 1

@@ -4,6 +4,8 @@ eosio.cdt/
 .vscode/
 eos-node/data
 eos-node/protocol_features
+eos-node/deploy-contracts/node_modules/
+eos-node/deploy-contracts/node_modules/package-lock.json
 *.wasm
 *.wast
 *.pyc
@@ -11,3 +13,4 @@ eos-node/protocol_features
 src/unittests/contracts/__pycache__
 !stub/eosio.bios/eosio.bios.abi
 !stub/eosio.bios/eosio.bios.wasm
+eos-node/deploy-contracts/package-lock.json

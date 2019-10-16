@@ -3,27 +3,47 @@
 set -e
 #compile
 
-PEERANHA_CONTRACT='peeranha'
-PEERANHA_TOKEN_CONTRACT='peeranha.tkn'
+PEERANHA_MAIN_CONTRACT='main'
+PEERANHA_TOKEN_CONTRACT='token'
 
-PEERANHA_PATH='./src/contracts/peeranha'
-PEERANHA_TOKEN_PATH='./src/contracts/peeranha.tkn'
+PEERANHA_MAIN_PATH='./src/contracts/peeranha.main'
+PEERANHA_TOKEN_PATH='./src/contracts/peeranha.token'
 
 UTILS_PATH='./src/contracts/utils/'
 
 COMPILE_MAIN=1
 COMPILE_TOKEN=1
 
+PROD=0
+DEBUG=1
+TEST=3
+
+STAGE=$PROD
+
 for i in "$@"
 do
 case $i in
-    -d|--debug)
-    DEBUG=1
+    -s=*|--stage=*)
+    case "${i#*=}" in
+        "prod")
+        STAGE=$PROD
+        ;;
+        "test")
+        STAGE=$TEST
+        ;;
+        "debug")
+        STAGE=$DEBUG
+        ;;
+        *)
+        echo "Error: Invalid stage ${i#*=}"
+        exit 1
+        ;;
+    esac
     shift
     ;;
     -n=*|--no-compile=*)
     case "${i#*=}" in
-        $PEERANHA_CONTRACT)
+        $PEERANHA_MAIN_CONTRACT)
         COMPILE_MAIN=0
         ;;
         $PEERANHA_TOKEN_CONTRACT)
@@ -31,14 +51,14 @@ case $i in
         ;;
         *)
         echo "Error: Invalid contract name fo no-compile flag ${i#*=}"
-        exit
+        exit 1
         ;;
     esac
     shift
     ;;
     *)
     echo "Error: Unrecognized option ${i%=*}"
-    exit
+    exit 1
     ;;
 esac
 done
@@ -46,29 +66,44 @@ done
 if [ $COMPILE_MAIN -eq 0 ] && [ $COMPILE_TOKEN -eq 0 ]
 then
     echo "Error: nothing to do"
-    exit
+    exit 1
 fi
 
-if [ $DEBUG ]
-then
-    echo -e "\e[31mCompiling debug contract!!!\e[0m"
+case $STAGE in
+    $PROD)
+    echo -e "\e[32mCompiling production contract!!!\e[0m"
     if [ $COMPILE_MAIN -eq 1 ] 
     then
-        eosio-cpp -abigen -o $PEERANHA_PATH/peeranha.wasm $PEERANHA_PATH/peeranha_debug.cpp -I$UTILS_PATH -R$PEERANHA_PATH/rc
+        eosio-cpp -abigen -o $PEERANHA_MAIN_PATH/peeranha.main.wasm $PEERANHA_MAIN_PATH/peeranha.cpp -I$UTILS_PATH -R$PEERANHA_MAIN_PATH/rc
     fi
     if [ $COMPILE_TOKEN -eq 1 ] 
     then
-        eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peeranha.tkn.wasm $PEERANHA_TOKEN_PATH/peeranha.tkn_debug.cpp -I$UTILS_PATH
+        eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peeranha.token.wasm $PEERANHA_TOKEN_PATH/token.cpp -I$UTILS_PATH
     fi
-else
+    ;;
+    $DEBUG)
+    echo -e "\e[91mCompiling debug contract!!!\e[0m"
     if [ $COMPILE_MAIN -eq 1 ] 
     then
-        eosio-cpp -abigen -o $PEERANHA_PATH/peeranha.wasm $PEERANHA_PATH/peeranha.cpp -I$UTILS_PATH -R$PEERANHA_PATH/rc
+        eosio-cpp -abigen -o $PEERANHA_MAIN_PATH/peeranha.main.wasm $PEERANHA_MAIN_PATH/peeranha_debug.cpp -I$UTILS_PATH -R$PEERANHA_MAIN_PATH/rc
     fi
     if [ $COMPILE_TOKEN -eq 1 ] 
     then
-        eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peeranha.tkn.wasm $PEERANHA_TOKEN_PATH/peeranha.tkn.cpp -I$UTILS_PATH
+        eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peeranha.token.wasm $PEERANHA_TOKEN_PATH/token_debug.cpp -I$UTILS_PATH
     fi
-fi
+    ;;
+    $TEST)
+    echo -e "\e[93mCompiling test contract!!!\e[0m"
+    if [ $COMPILE_MAIN -eq 1 ] 
+    then
+        eosio-cpp -abigen -abigen_output=$PEERANHA_MAIN_PATH/peeranha.main.abi -o=$PEERANHA_MAIN_PATH/peeranha.main.wasm $PEERANHA_MAIN_PATH/peeranha_test.cpp -I$UTILS_PATH -R$PEERANHA_MAIN_PATH/rc
+    fi
+    if [ $COMPILE_TOKEN -eq 1 ] 
+    then
+        eosio-cpp -abigen -abigen_output=$PEERANHA_TOKEN_PATH/peeranha.token.abi -o=$PEERANHA_TOKEN_PATH/peeranha.token.wasm $PEERANHA_TOKEN_PATH/token_test.cpp -I$UTILS_PATH
+    fi
+    ;;
+esac
+
 
 echo -e "\e[92mCompilation done! :)\e[0m"

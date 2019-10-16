@@ -4,7 +4,7 @@ from jsonutils import compare
 from time import sleep
 from unittest import main
 
-economy = load_defines('src/contracts/peeranha/economy.h')
+economy = load_defines('src/contracts/peeranha.main/economy.h')
 
 class AccountManagementTests(peeranhatest.peeranhaTest):
 

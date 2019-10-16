@@ -42,7 +42,7 @@
 extern time
     START_PERIOD_TIME;  // We need mechanism which change it once on deploy
 extern int PERIOD_LENGTH;
-class[[eosio::contract("peeranha")]] peeranha_d : public peeranha {
+class[[eosio::contract("peeranha.main")]] peeranha_debug : public peeranha {
   using peeranha::peeranha;
 
  public:
@@ -59,7 +59,7 @@ class[[eosio::contract("peeranha")]] peeranha_d : public peeranha {
 
   const uint64_t scope_all_constants = eosio::name("allconstants").value;
 
-  peeranha_d(eosio::name receiver, eosio::name code,
+  peeranha_debug(eosio::name receiver, eosio::name code,
              eosio::datastream<const char *> ds)
       : peeranha(receiver, code, ds) {
     PERIOD_LENGTH = 3;
@@ -177,7 +177,7 @@ extern "C" {
 void apply(uint64_t receiver, uint64_t code, uint64_t action) {
   if (code == receiver) {
     switch (action) {
-      EOSIO_DISPATCH_HELPER(peeranha_d, (chnguserrt)(resettables)(setaccrten))
+      EOSIO_DISPATCH_HELPER(peeranha_debug, (chnguserrt)(resettables)(setaccrten))
       EOSIO_DISPATCH_HELPER(
           peeranha,
           (registeracc)(setaccprof)(postquestion)(postanswer)(postcomment)(

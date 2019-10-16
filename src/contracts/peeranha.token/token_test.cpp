@@ -5,7 +5,7 @@
 
 #include "economy.hpp"
 #undef INFLATION_PERIOD
-#define INFLATION_PERIOD 84            // 1 week 84 periods with 2 hor duration
+#define INFLATION_PERIOD 84            // 1 week 84 periods with 2 hours duration
 #undef POOL_REDUSE_COEFFICIENT      
 #define POOL_REDUSE_COEFFICIENT 0.8
 #undef START_POOL

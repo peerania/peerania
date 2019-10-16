@@ -7,7 +7,7 @@ from unittest import main
 from random import randint
 from time import sleep
 
-economy = load_defines('src/contracts/peeranha/economy.h')
+economy = load_defines('src/contracts/peeranha.main/economy.h')
 
 class FrumStatusLimitsTests(peeranhatest.peeranhaTest):
 

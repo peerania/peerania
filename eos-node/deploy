@@ -3,5 +3,5 @@ set -ex
 
 EOS_NODE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-cleos set contract peeranha.dev $EOS_NODE_DIR/../src/contracts/peeranha -p dev4peeranha
-cleos set contract peeranha.tkn $EOS_NODE_DIR/../src/contracts/peeranha.tkn -p tkn4peeranha
+cleos set contract peeranhamain $EOS_NODE_DIR/../src/contracts/peeranha.main
+cleos set contract peeranhatken $EOS_NODE_DIR/../src/contracts/peeranha.token

@@ -5,11 +5,11 @@
 
 #include "economy.hpp"
 #undef INFLATION_PERIOD
-#define INFLATION_PERIOD 2  // 2 secs
-#undef POOL_REDUSE_COEFFICIENT
-#define POOL_REDUSE_COEFFICIENT 0.5
+#define INFLATION_PERIOD 84            // 1 week 84 periods with 2 hor duration
+#undef POOL_REDUSE_COEFFICIENT      
+#define POOL_REDUSE_COEFFICIENT 0.8
 #undef START_POOL
-#define START_POOL 40
+#define START_POOL 350
 
 #undef EOSIO_DISPATCH
 #define EOSIO_DISPATCH(MEMBER, TYPES)
@@ -30,7 +30,7 @@ class[[eosio::contract("peeranha.token")]] token_d : public token {
   token_d(eosio::name receiver, eosio::name code,
           eosio::datastream<const char*> ds)
       : token(receiver, code, ds) {
-    PERIOD_LENGTH = 3;
+    PERIOD_LENGTH = 7200;  // 2 hours
     // Initializte some constants for debug
     // could be moved to a separate method
     constants_index all_constants_table(peeranha_main, scope_all_constants);
@@ -112,13 +112,13 @@ class[[eosio::contract("peeranha.token")]] token_d : public token {
     uint64_t primary_key() const { return id; }
   };
 
-  typedef eosio::multi_index<eosio::name("dbginfl"), dbginfl> dbginfl_index;
+  typedef eosio::multi_index<eosio::name("dbginfl"), dbginfl>
+    dbginfl_index;
 
-  [[eosio::action("mapcrrwpool")]] void mapcrrwpool(
-      uint64_t id, uint16_t period, int total_rating) {
+  [[eosio::action("mapcrrwpool")]] void mapcrrwpool(uint64_t id, uint16_t period, int total_rating){
     auto dbginfl_table = dbginfl_index(_self, scope_all_constants);
     auto inflation = create_reward_pool(period, total_rating);
-    dbginfl_table.emplace(_self, [inflation, id](auto& dbginfl) {
+    dbginfl_table.emplace(_self, [inflation, id](auto &dbginfl){
       dbginfl.id = id;
       dbginfl.inflation = inflation;
     });

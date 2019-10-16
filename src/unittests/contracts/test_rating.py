@@ -8,7 +8,7 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
 
     def test_account_create_rating(self):
         begin('Test rating value for new account')
-        defs = load_defines('./src/contracts/peeranha/economy.h')
+        defs = load_defines('./src/contracts/peeranha.main/economy.h')
         alice = self.get_non_registered_alice()
         self.action('registeracc', {'user': 'alice', 'display_name': 'test',
                                     'ipfs_profile': 'test',
@@ -211,7 +211,7 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
 
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(self.forum_e, t, self.var, True))
-        self.defs = {**load_defines('./src/contracts/peeranha/economy.h')}
+        self.defs = {**load_defines('./src/contracts/peeranha.main/economy.h')}
         self.account_e = ['#ignoreorder',
                           {'user': 'alice', 'energy': '#var alice_energy',
                            'rating': '#var alice_rating'},
@@ -387,8 +387,8 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
 
     def test_tag_or_community_created_reward(self):
         begin('Reward when tag or community created')
-        defs = {**load_defines('./src/contracts/peeranha/economy.h'),
-                **load_defines('./src/contracts/peeranha/communities_and_tags.hpp')}
+        defs = {**load_defines('./src/contracts/peeranha.main/economy.h'),
+                **load_defines('./src/contracts/peeranha.main/communities_and_tags.hpp')}
         alice = self.register_alice_account(
             defs['CREATE_COMMUNITY_ALLOWED'], defs['ENERGY_CREATE_COMMUNITY'])
         bob = self.register_bob_account(
@@ -432,8 +432,8 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
 
     def test_tag_or_community_deleted_reward(self):
         begin('Reward when tag or community deleted')
-        defs = {**load_defines('./src/contracts/peeranha/economy.h'),
-                **load_defines('./src/contracts/peeranha/communities_and_tags.hpp')}
+        defs = {**load_defines('./src/contracts/peeranha.main/economy.h'),
+                **load_defines('./src/contracts/peeranha.main/communities_and_tags.hpp')}
         alice = self.register_alice_account(
             defs['CREATE_COMMUNITY_ALLOWED'], defs['ENERGY_CREATE_COMMUNITY'])
         bob = self.register_bob_account(
@@ -549,8 +549,8 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(self.forum_e, t, self.var, True))
 
-        self.defs = {**load_defines('./src/contracts/peeranha/economy.h'),
-                     **load_defines('./src/contracts/peeranha/question_container.hpp')}
+        self.defs = {**load_defines('./src/contracts/peeranha.main/economy.h'),
+                     **load_defines('./src/contracts/peeranha.main/question_container.hpp')}
         self.account_e = ['#ignoreorder',
                           {'user': 'alice', 'energy': '#var alice_energy',
                            'rating': '#var alice_rating'},

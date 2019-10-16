@@ -1,4 +1,4 @@
-#include "peeranha.tkn.hpp"
+#include "token.hpp"
 #include "economy.hpp"
 
 namespace eosio {

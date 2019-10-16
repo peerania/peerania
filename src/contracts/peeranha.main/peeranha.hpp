@@ -12,7 +12,7 @@
 #include "token_common.hpp"
 #include "utils.hpp"
 
-CONTRACT peeranha : public eosio::contract {
+class [[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
  public:
   const int version = 1;
 

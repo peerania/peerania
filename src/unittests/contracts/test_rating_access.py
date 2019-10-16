@@ -3,7 +3,7 @@ from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
-defs = load_defines('./src/contracts/peeranha/economy.h')
+defs = load_defines('./src/contracts/peeranha.main/economy.h')
 
 
 class ForumRatingRewardsTests(peeranhatest.peeranhaTest):

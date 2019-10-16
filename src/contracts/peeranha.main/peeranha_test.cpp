@@ -5,7 +5,7 @@
 #include "economy.h"
 
 #undef ACCOUNT_STAT_RESET_PERIOD
-#define ACCOUNT_STAT_RESET_PERIOD 3  // 3 sec
+#define ACCOUNT_STAT_RESET_PERIOD 1800  // 30 min
 
 #undef VOTES_TO_CREATE_COMMUNITY
 #define VOTES_TO_CREATE_COMMUNITY 4
@@ -20,12 +20,10 @@
 #undef REPORT_RESET_PERIOD
 #undef REPORT_POWER_RESET_PERIOD
 #undef POINTS_TO_FREEZE
-#undef MODERATION_POINTS_REPORT_PROFILE
-#define MIN_FREEZE_PERIOD 3
-#define REPORT_RESET_PERIOD 2
-#define REPORT_POWER_RESET_PERIOD 4
-#define POINTS_TO_FREEZE 10
-#define MODERATION_POINTS_REPORT_PROFILE 2
+#define MIN_FREEZE_PERIOD 7200 // 2 hour
+#define REPORT_RESET_PERIOD 7200 // 2 hour
+#define REPORT_POWER_RESET_PERIOD 14400 // 4 hour
+#define POINTS_TO_FREEZE 20
 
 #include "access.hpp"
 #include "account.hpp"
@@ -42,7 +40,7 @@
 extern time
     START_PERIOD_TIME;  // We need mechanism which change it once on deploy
 extern int PERIOD_LENGTH;
-class[[eosio::contract("peeranha.main")]] peeranha_debug : public peeranha {
+class [[eosio::contract("peeranha.main")]] peeranha_test : public peeranha {
   using peeranha::peeranha;
 
  public:
@@ -59,10 +57,10 @@ class[[eosio::contract("peeranha.main")]] peeranha_debug : public peeranha {
 
   const uint64_t scope_all_constants = eosio::name("allconstants").value;
 
-  peeranha_debug(eosio::name receiver, eosio::name code,
+  peeranha_test(eosio::name receiver, eosio::name code,
              eosio::datastream<const char *> ds)
       : peeranha(receiver, code, ds) {
-    PERIOD_LENGTH = 3;
+    PERIOD_LENGTH = 7200;  // 2 hours
     // Initializte some constants for debug
     // could be moved to a separate method
     constants_index all_constants_table(_self, scope_all_constants);
@@ -177,7 +175,7 @@ extern "C" {
 void apply(uint64_t receiver, uint64_t code, uint64_t action) {
   if (code == receiver) {
     switch (action) {
-      EOSIO_DISPATCH_HELPER(peeranha_debug, (chnguserrt)(resettables)(setaccrten))
+      EOSIO_DISPATCH_HELPER(peeranha_test, (chnguserrt)(resettables)(setaccrten))
       EOSIO_DISPATCH_HELPER(
           peeranha,
           (registeracc)(setaccprof)(postquestion)(postanswer)(postcomment)(

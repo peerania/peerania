@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -ex
+
+#create wallet with name eosio
+cleos wallet create --name default --to-console
+
+#import private key for system eosio account
+cleos wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
+
+#loading bios contract 
+cleos set contract eosio $EOSIO_BUILD_DIR/contracts/eosio.bios -p eosio
+
+cleos create account eosio peeranhamain EOS81bXDrRSHdWMA9cB6e1v9nkB4RwJKVNTNKQaHAMGR2TXgSjX1v EOS6WLUMzFnzmf2KAZi4CcnPkS7w1rxBEyyWmXsBgqEbRcpaWz7WF
+
+cleos create account eosio peeranhatken EOS5TJPtQXZrTz1V9nJ6r1tLgdJsaoWXWgVY1vdT9Ssep8syYmzv1 EOS7Xi7jhSgf9h449iJMRa4HkRZA9aW13mpjpf6R943vJ5LVJ5qu6

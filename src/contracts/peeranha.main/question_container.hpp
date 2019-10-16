@@ -52,7 +52,7 @@ struct answer {
   uint16_t bkey() const { return id; }
 };
 
-struct [[eosio::table("question"), eosio::contract("peeranha")]] question {
+struct [[eosio::table("question"), eosio::contract("peeranha.main")]] question {
   uint64_t id;
   uint16_t community_id;
   std::vector<uint32_t> tags;
@@ -108,13 +108,13 @@ std::vector<comment>::iterator find_comment(T &item, uint16_t comment_id) {
   return iter_comment;
 }
 
-struct [[eosio::table("usrquestions"), eosio::contract("peeranha")]] usrquestions {
+struct [[eosio::table("usrquestions"), eosio::contract("peeranha.main")]] usrquestions {
   uint64_t question_id;
   uint64_t primary_key() const { return question_id; }
 };
 typedef eosio::multi_index<"usrquestions"_n, usrquestions> user_questions_index;
 
-struct [[eosio::table("usranswers"), eosio::contract("peeranha")]] usranswers {
+struct [[eosio::table("usranswers"), eosio::contract("peeranha.main")]] usranswers {
   uint64_t question_id;
   uint16_t answer_id;
   uint64_t primary_key() const { return question_id; }

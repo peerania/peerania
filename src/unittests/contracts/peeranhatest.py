@@ -5,7 +5,7 @@ from time import time
 
 
 PERIOD = 604800
-monday_1_october_2018 = 1538341200
+monday_1_october_2019 = 1569888000
 
 
 class peeranhaTest(EOSTest):
@@ -15,8 +15,8 @@ class peeranhaTest(EOSTest):
     contracts = {}
 
     def setUp(self):
-        self.action('create', {'issuer': 'peeranha.tkn', 'maximum_supply': '100.000000 PEER'},
-                    'peeranha.tkn', 'Create token PEER', contract='token', suppress_output=True)
+        self.action('create', {'issuer': 'peeranhatken', 'maximum_supply': '100.000000 PEER'},
+                    'peeranhatken', 'Create token PEER', contract='token', suppress_output=True)
         admin = self.get_contract_deployer(self.get_default_contract())
         self.action('init', {}, admin, 'Init contract', suppress_output=True)
         self.action('registeracc', {'user': admin, 'display_name': 'admin', 'ipfs_profile': 'undefined', 'ipfs_avatar': 'undefined'},
@@ -141,7 +141,7 @@ def get_moderation_impact(rating):
 
 def get_period_scope(time):
     alphabet = 'abcdefjhijklmnopqrstuvwxyz'
-    time -= monday_1_october_2018
+    time -= monday_1_october_2019
     week_number = time // PERIOD
     scope = ''
     while week_number != 0:

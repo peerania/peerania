@@ -3,7 +3,6 @@
 #include "peeranha_types.h"
 
 #if STAGE == 1
-//Couldn't redefine it
 int PERIOD_LENGTH = 7200;                // 2 hours
 time START_PERIOD_TIME = 1575406800UL;  // Tuesday, 3 December 2019 г., 21:00:00
 #else

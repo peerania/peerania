@@ -18,11 +18,16 @@ const stages = {
     contractStage: "debug",
     name: "LOCAL",
   },
-  "test": {
-    env: "test",
+  "eos.test": {
+    env: "eos.test",
     contractStage: "test",
     name: "TEST",
   },
+  "telos.test": {
+    env: "telos.test",
+    contractStage: "test",
+    name: "TEST TELOS",
+  }
   // "prod": {
   //   env: "prod",
   //   contractStage: "prod",
@@ -62,7 +67,22 @@ const accounts = {
     wasm: "peeranha.token.wasm",
     abi: "peeranha.token.abi",
     name: "TOKEN",
-    additionalActions: []
+    additionalActions: [
+      {
+        account: "peeranhatken",
+        name: "create",
+        authorization: [
+          {
+            actor: "peeranhatken",
+            permission: "active"
+          }
+        ],
+        data: {
+          issuer: "peeranhatken", 
+          maximum_supply: '5000.000000 PEER'
+        },
+      }
+    ]
   }
 };
 
@@ -71,6 +91,7 @@ const baseEnv = dotenv.config({ path: path.resolve(__dirname, ".env.common") }).
 const env = { ...stageEnv, ...baseEnv };
 
 function compile(stage) {
+  /*
   const child = spawn("docker-compose", [`run`, `-w`, `/peeranha`, `eosio`, `./compile`, `--stage=${stage.contractStage}`], { cwd: path.resolve(__dirname, "../../..") });
   child.stdout.on('data', (chunk) => {
     console.log(chunk.toString());
@@ -87,6 +108,7 @@ function compile(stage) {
         reject("Compilation failed");
     });
   });
+  */
 }
 
 async function loadContract(api, contract) {
@@ -143,6 +165,7 @@ async function deploy(stage, env) {
   if (!contract) {
     throw "Invalid account";
   }
+
   console.log(`Deplying ${contract.name} on stage ${stage.name}(${stage.contractStage} contract)`);
   const { wasm, abi } = await loadContract(api, contract);
 
@@ -187,6 +210,7 @@ async function deploy(stage, env) {
       expireSeconds: 90
     }
   );
+  
   if (contract.additionalActions.length != 0)
     await eos.transact({
       actions: contract.additionalActions,

@@ -103,8 +103,8 @@ class TestTokenIntegration(peeranhatest.peeranhaTest):
             for user in period['users']:
                 #Bottleneck place
                 #How to synchronize period end in contract with test class
-                pause = self.PERIOD_LENGTH / (len(user['rating_change']) + 2)
-                tick_in = pause / 5
+                pause = self.PERIOD_LENGTH / (len(user['rating_change']) + 3)
+                tick_in = pause / 6
                 for rating_change in user['rating_change']:
                     user_rating[user['name']] += rating_change
                     Timer(tick_in, self._update_rating,
@@ -141,6 +141,7 @@ class TestTokenIntegration(peeranhatest.peeranhaTest):
                         self.assertTrue(this_week['rating_to_award'] == 0)
                 else:
                     info(name + ' reward rating is 0')
+                    print(this_week['rating_to_award'], user)
                     self.assertTrue(this_week['rating_to_award'] == 0)
             e_total_rating.append(self._build_total_rating_element(period_id))
             total_get = self._fing_item_with_period(

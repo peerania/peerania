@@ -25,26 +25,26 @@ class [[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
   // Register new user
   ACTION registeracc(eosio::name user, std::string display_name,
-                     std::string ipfs_profile, std::string ipfs_avatar);
+                     IpfsHash ipfs_profile, IpfsHash ipfs_avatar);
 
   // Set user profile (IPFS link)
-  ACTION setaccprof(eosio::name user, std::string ipfs_profile,
-                    std::string display_name, std::string ipfs_avatar);
+  ACTION setaccprof(eosio::name user, IpfsHash ipfs_profile,
+                    std::string display_name, IpfsHash ipfs_avatar);
 
   // Post question
   ACTION postquestion(eosio::name user, uint16_t community_id,
                       std::vector<uint32_t> tags, std::string title,
-                      std::string ipfs_link);
+                      IpfsHash ipfs_link);
 
   // Post answer(answer question)
   ACTION postanswer(eosio::name user, uint64_t question_id,
-                    std::string ipfs_link);
+                    IpfsHash ipfs_link);
 
   // Post comment
   // If the answer_id set to 0 comment question, otherwise comment question
   // with passed answer_id
   ACTION postcomment(eosio::name user, uint64_t question_id, uint16_t answer_id,
-                     std::string ipfs_link);
+                     IpfsHash ipfs_link);
 
   // Delete question
   ACTION delquestion(eosio::name user, uint64_t question_id);
@@ -59,15 +59,15 @@ class [[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
   // Modify question
   ACTION modquestion(eosio::name user, uint64_t question_id,
                      uint16_t community_id, std::vector<uint32_t> tags,
-                     std::string title, std::string ipfs_link);
+                     std::string title, IpfsHash ipfs_link);
 
   // Modify answer
   ACTION modanswer(eosio::name user, uint64_t question_id, uint16_t answer_id,
-                   std::string ipfs_link);
+                   IpfsHash ipfs_link);
 
   // Modify comment
   ACTION modcomment(eosio::name user, uint64_t question_id, uint16_t answer_id,
-                    uint16_t comment_id, std::string ipfs_link);
+                    uint16_t comment_id, IpfsHash ipfs_link);
 
   // Upvote question/answer
   ACTION upvote(eosio::name user, uint64_t question_id, uint16_t answer_id);
@@ -89,11 +89,11 @@ class [[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
   // Tags and communities
   ACTION crcommunity(eosio::name user, std::string name,
-                     std::string ipfs_description,
+                     IpfsHash ipfs_description,
                      std::vector<suggest_tag> suggested_tags);
 
   ACTION crtag(eosio::name user, uint16_t community_id, std::string name,
-               std::string ipfs_description);
+               IpfsHash ipfs_description);
 
   ACTION vtcrcomm(eosio::name user, uint32_t community_id);
 
@@ -107,13 +107,29 @@ class [[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
   ACTION unfollowcomm(eosio::name user, uint16_t community_id);
 
+  // Perform update to account
+  ACTION updateacc(eosio::name user);
+
   // Report user profile
   ACTION reportprof(eosio::name user, eosio::name user_to_report);
 
   // Action give moderator flags
   ACTION givemoderflg(eosio::name user, int flags);
 
+#ifdef SUPERFLUOUS_INDEX
+  // Delete @count@ items from superfluous index tebles
+  ACTION freeindex(int count);
+#endif
+
   ACTION init();
+
+#if STAGE == 1 
+ACTION setaccrten(eosio::name user, int rating, int16_t energy);
+
+ACTION resettables();
+
+ACTION chnguserrt(eosio::name user, int16_t rating_change);
+#endif
 
  protected:
   question_index question_table;
@@ -127,7 +143,7 @@ class [[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
   void update_rating_base(
       account_index::const_iterator iter_account, int rating_change,
       const std::function<void(account &)> account_modifying_lambda,
-      bool hasLambda);
+      bool hasLambda, bool zero_rating_forbidden);
 
   void update_rating(eosio::name user, int rating_change);
 
@@ -148,24 +164,24 @@ class [[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
       
   // private:
   void register_account(eosio::name user, std::string display_name,
-                        const std::string &ipfs_profile,
-                        const std::string &ipfs_avatar);
+                        const IpfsHash &ipfs_profile,
+                        const IpfsHash &ipfs_avatar);
 
-  void set_account_profile(eosio::name user, const std::string &ipfs_profile,
+  void set_account_profile(eosio::name user, const IpfsHash &ipfs_profile,
                            const std::string &display_name,
-                           const std::string &ipfs_avatar);
+                           const IpfsHash &ipfs_avatar);
 
   void report_profile(eosio::name user, eosio::name user_to_report);
 
   void post_question(eosio::name user, uint16_t community_id,
                      const std::vector<uint32_t> tags, const std::string &title,
-                     const std::string &ipfs_link);
+                     const IpfsHash &ipfs_link);
 
   void post_answer(eosio::name user, uint64_t question_id,
-                   const std::string &ipfs_link);
+                   const IpfsHash &ipfs_link);
 
   void post_comment(eosio::name user, uint64_t question_id, uint16_t answer_id,
-                    const std::string &ipfs_link);
+                    const IpfsHash &ipfs_link);
 
   void delete_question(eosio::name user, uint64_t question_id);
 
@@ -177,21 +193,21 @@ class [[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
   void modify_question(eosio::name user, uint64_t question_id,
                        uint16_t community_id, const std::vector<uint32_t> &tags,
-                       const std::string &title, const std::string &ipfs_link);
+                       const std::string &title, const IpfsHash &ipfs_link);
 
   void modify_answer(eosio::name user, uint64_t question_id, uint16_t answer_id,
-                     const std::string &ipfs_link);
+                     const IpfsHash &ipfs_link);
 
   void modify_comment(eosio::name user, uint64_t question_id,
                       uint16_t answer_id, uint16_t comment_id,
-                      const std::string &ipfs_link);
+                      const IpfsHash &ipfs_link);
 
   void create_community(eosio::name user, const std::string &name,
-                        const std::string &ipfs_description,
+                        const IpfsHash &ipfs_description,
                         const std::vector<suggest_tag> &suggested_tags);
 
   void create_tag(eosio::name user, uint16_t commuinty_id,
-                  const std::string &name, const std::string &ipfs_description);
+                  const std::string &name, const IpfsHash &ipfs_description);
 
   void vote_create_community(eosio::name user, uint32_t community_id);
 
@@ -205,7 +221,7 @@ class [[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
   void create_community_or_tag(account_index::const_iterator iter_account,
                                uint64_t scope, const std::string &name,
-                               const std::string &ipfs_description);
+                               const IpfsHash &ipfs_description);
 
   void vote_create_comm_or_tag(
       account_index::const_iterator iter_account, uint32_t id, uint64_t scope,
@@ -233,14 +249,16 @@ class [[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                               int8_t questions_asked);
 
   void assert_community_exist(uint16_t community_id);
-
+#ifdef SUPERFLUOUS_INDEX
   void remove_user_question(eosio::name user, uint64_t question_id);
 
   void remove_user_answer(eosio::name user, uint64_t question_id);
-
+#endif
   void follow_community(eosio::name user, uint16_t community_id);
 
   void unfollow_community(eosio::name user, uint16_t community_id);
+
+  void update_account(eosio::name user);
 
   void give_moderator_flag(eosio::name user, int flags);
 };

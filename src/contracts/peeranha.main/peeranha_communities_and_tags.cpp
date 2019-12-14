@@ -43,7 +43,7 @@ uint64_t peeranha::get_tag_scope(uint16_t community_id) {
 
 void peeranha::create_community(
     eosio::name user, const std::string &name,
-    const std::string &ipfs_description,
+    const IpfsHash &ipfs_description,
     const std::vector<suggest_tag> &suggested_tags) {
   auto iter_account = find_account(user);
   assert_community_name(name);
@@ -107,7 +107,7 @@ void peeranha::create_community(
 
 void peeranha::create_tag(eosio::name user, uint16_t community_id,
                           const std::string &name,
-                          const std::string &ipfs_description) {
+                          const IpfsHash &ipfs_description) {
   auto iter_account = find_account(user);
   assert_tag_name(name);
   assert_community_exist(community_id);

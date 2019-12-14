@@ -52,7 +52,7 @@ class AccountModerationTests(peeranhatest.peeranhaTest):
         alice = self.register_alice_account(100, 0)
         self._give_moderator_flag(alice, MODERATOR_FLG_INFINITE_ENERGY)
         for i in range(10):
-            self.action('postquestion', {'user': 'alice', 'title': f'AQ{i}', 'ipfs_link': 'undef', 'community_id': 1, 'tags': [1]}, alice,
+            self.action('postquestion', {'user': 'alice', 'title': f'AQ{i}', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1]}, alice,
                         f'Register {i} question from alice')
         end()
 
@@ -61,15 +61,15 @@ class AccountModerationTests(peeranhatest.peeranhaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'undef', 'ipfs_link': 'undef',  'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'undefined', 'ipfs_link': 'undefined',  'community_id': 1, 'tags': [1]}, alice,
                     'Register question from alice')
         AQ_id = self.table('question', 'allquestions')[0]['id']
-        self.action('postanswer', {'user': 'bob', 'question_id': AQ_id, 'ipfs_link': 'undef'},
+        self.action('postanswer', {'user': 'bob', 'question_id': AQ_id, 'ipfs_link': 'undefined'},
                     bob, 'Register Bob answer to Alice')
         AQ_BA_id = self.table('question', 'allquestions')[
             0]['answers'][0]['id']
         self.action('postcomment', {'user': 'carol', 'question_id': AQ_id, 'answer_id': AQ_BA_id,
-                                    'ipfs_link': 'undef'}, carol, 'Register Carol comment to Bob answer')
+                                    'ipfs_link': 'undefined'}, carol, 'Register Carol comment to Bob answer')
         AQ_BA_CC_id = self.table('question', 'allquestions')[
             0]['answers'][0]['comments'][0]['id']
         ted = self.register_ted_account()

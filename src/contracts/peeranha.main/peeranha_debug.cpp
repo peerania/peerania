@@ -60,7 +60,7 @@ class[[eosio::contract("peeranha.main")]] peeranha_debug : public peeranha {
   const uint64_t scope_all_constants = eosio::name("allconstants").value;
 
   peeranha_debug(eosio::name receiver, eosio::name code,
-             eosio::datastream<const char *> ds)
+                 eosio::datastream<const char *> ds)
       : peeranha(receiver, code, ds) {
     PERIOD_LENGTH = 3;
     // Initializte some constants for debug
@@ -100,7 +100,7 @@ class[[eosio::contract("peeranha.main")]] peeranha_debug : public peeranha {
       while (iter_period_rating != period_rating_table.end()) {
         iter_period_rating = period_rating_table.erase(iter_period_rating);
       }
-
+#ifdef SUPERFLUOUS_INDEX
       // clean user_questions table
       user_questions_index user_questions_table(_self,
                                                 iter_account->user.value);
@@ -115,6 +115,7 @@ class[[eosio::contract("peeranha.main")]] peeranha_debug : public peeranha {
       while (iter_user_answers != user_answers_table.end()) {
         iter_user_answers = user_answers_table.erase(iter_user_answers);
       }
+#endif
       // remove user
       iter_account = account_table.erase(iter_account);
     }
@@ -177,7 +178,8 @@ extern "C" {
 void apply(uint64_t receiver, uint64_t code, uint64_t action) {
   if (code == receiver) {
     switch (action) {
-      EOSIO_DISPATCH_HELPER(peeranha_debug, (chnguserrt)(resettables)(setaccrten))
+      EOSIO_DISPATCH_HELPER(peeranha_debug,
+                            (chnguserrt)(resettables)(setaccrten))
       EOSIO_DISPATCH_HELPER(
           peeranha,
           (registeracc)(setaccprof)(postquestion)(postanswer)(postcomment)(

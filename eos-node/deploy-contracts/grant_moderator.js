@@ -14,8 +14,12 @@ const stages = {
     env: "local",
     name: "LOCAL",
   },
-  "test": {
-    env: "test",
+  "eos.test": {
+    env: "eos.test",
+    name: "TEST",
+  },
+  "telos.test": {
+    env: "telos.test",
     name: "TEST",
   },
   // "prod": {
@@ -38,7 +42,7 @@ if (!targetAccount) {
 }
 
 const moderatorFlag = parseInt(stages[process.argv[4]] || "31", 10);
-if (moderatorFlag > 31 || moderatorFlag < 0){
+if (moderatorFlag > 31 || moderatorFlag < 0) {
   console.log("Invalid mogerator flag! Flug must be between [0..31]");
   process.exit(1);
 }
@@ -78,9 +82,11 @@ async function grantModerator() {
   }
   await eos.transact(
     {
-      actions: [{
+      actions: [
+        /*
+        {
         account: mainAccountName,
-        name: 'givemoderflg',
+        name: 'setaccrten',
         authorization: [
           {
             actor: mainAccountName,
@@ -88,10 +94,26 @@ async function grantModerator() {
           }
         ],
         data: {
-          "user": targetAccount,
-          "flags": moderatorFlag
+          "user": "yuliachorno2",
+          "energy": "125",
+          "rating": "2811",
         },
-      }],
+      }*/
+        {
+          account: mainAccountName,
+          name: 'givemoderflg',
+          authorization: [
+            {
+              actor: mainAccountName,
+              permission: env.DEFAULT_EOS_PERMISSION
+            }
+          ],
+          data: {
+            "user": "dsasfdvcbvnb",
+            "flags": "31"
+          }
+        }
+      ],
     },
     {
       blocksBehind: 3,

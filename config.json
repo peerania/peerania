@@ -1,5 +1,5 @@
 {
-    "verbose": true,
+    "verbose": false,
     "eos-node": "./eos-node/",
     "terminal": false,
     "default-contract": "main",

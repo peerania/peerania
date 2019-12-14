@@ -1,8 +1,8 @@
 #include "peeranha.hpp"
 
 void peeranha::register_account(eosio::name user, std::string display_name,
-                                const std::string &ipfs_profile,
-                                const std::string &ipfs_avatar) {
+                                const IpfsHash &ipfs_profile,
+                                const IpfsHash &ipfs_avatar) {
   eosio::check(account_table.find(user.value) == account_table.end(),
                "Account already exists");
   assert_display_name(display_name);
@@ -37,9 +37,9 @@ void peeranha::register_account(eosio::name user, std::string display_name,
 
 // ACTION BODY
 void peeranha::set_account_profile(eosio::name user,
-                                   const std::string &ipfs_profile,
+                                   const IpfsHash &ipfs_profile,
                                    const std::string &display_name,
-                                   const std::string &ipfs_avatar) {
+                                   const IpfsHash &ipfs_avatar) {
   auto iter_account = find_account(user);
   assert_ipfs(ipfs_profile);
   assert_ipfs(ipfs_avatar);
@@ -86,18 +86,25 @@ void peeranha::report_profile(eosio::name user, eosio::name user_to_report) {
   });
 }
 
-void peeranha::give_moderator_flag(eosio::name user, int flags){
+void peeranha::update_account(eosio::name user) {
   auto iter_account = find_account(user);
-  update_rating(iter_account, [flags](auto &account){
-    set_property_d(account.integer_properties, PROPERTY_MODERATOR_FLAGS, flags, 0);
+  update_rating_base(iter_account, 0, [](auto &acc) { acc.update(); }, true,
+                     false);
+}
+
+void peeranha::give_moderator_flag(eosio::name user, int flags) {
+  auto iter_account = find_account(user);
+  update_rating(iter_account, [flags](auto &account) {
+    set_property_d(account.integer_properties, PROPERTY_MODERATOR_FLAGS, flags,
+                   0);
   });
 }
 
 void peeranha::update_rating_base(
     account_index::const_iterator iter_account, int rating_change,
     const std::function<void(account &)> account_modifying_lambda,
-    bool hasLambda) {
-  if (rating_change == 0) {
+    bool hasLambda, bool zero_rating_forbidden) {
+  if (rating_change == 0 && zero_rating_forbidden) {
     if (hasLambda)
       account_table.modify(
           iter_account, _self, [account_modifying_lambda](auto &account) {
@@ -127,7 +134,22 @@ void peeranha::update_rating_base(
 
   int rating_to_award_change = 0;
   const int pay_out_rating = iter_account->pay_out_rating;
+
+  // Very bad code.
   auto iter_previous_week_rating = period_rating_table.find(current_period - 1);
+  if (iter_previous_week_rating == period_rating_table.end()) {
+    auto riter_previous_week_rating = period_rating_table.rbegin();
+    if (!is_first_transaction_on_this_week) {
+      riter_previous_week_rating++;
+    }
+    if (riter_previous_week_rating == period_rating_table.rend())
+      iter_previous_week_rating = period_rating_table.end();
+    else
+      iter_previous_week_rating =
+          period_rating_table.find(riter_previous_week_rating->period);
+  }
+  // Very bad code ends
+
   // Test 1(no information about previous week)
   if (iter_previous_week_rating != period_rating_table.end()) {
     int paid_out_rating = pay_out_rating - rating_to_award;
@@ -211,14 +233,14 @@ void peeranha::update_rating_base(
 }
 
 void peeranha::update_rating(eosio::name user, int rating_change) {
-  update_rating_base(find_account(user), rating_change, nullptr, false);
+  update_rating_base(find_account(user), rating_change, nullptr, false, true);
 }
 
 void peeranha::update_rating(
     account_index::const_iterator iter_account, int rating_change,
     const std::function<void(account &)> account_modifying_lambda) {
   update_rating_base(iter_account, rating_change, account_modifying_lambda,
-                     true);
+                     true, true);
 }
 
 void peeranha::update_rating(
@@ -238,12 +260,12 @@ void peeranha::update_rating(
     eosio::name user, int rating_change,
     const std::function<void(account &)> account_modifying_lambda) {
   update_rating_base(find_account(user), rating_change,
-                     account_modifying_lambda, true);
+                     account_modifying_lambda, true, true);
 }
 
 void peeranha::update_rating(account_index::const_iterator iter_account,
                              int rating_change) {
-  update_rating_base(iter_account, rating_change, nullptr, false);
+  update_rating_base(iter_account, rating_change, nullptr, false, true);
 }
 
 account_index::const_iterator peeranha::find_account(eosio::name user) {

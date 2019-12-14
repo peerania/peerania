@@ -12,7 +12,8 @@ void peeranha::vote_forum_item(eosio::name user, uint64_t question_id,
   question_table.modify(
       iter_question, _self,
       [answer_id, is_upvote, iter_account, &target_user,
-       &target_user_rating_change, &caller_rating_change, &energy](auto &question) {
+       &target_user_rating_change, &caller_rating_change,
+       &energy](auto &question) {
         if (apply_to_question(answer_id)) {
           target_user = question.user;
           if (is_upvote)
@@ -20,21 +21,22 @@ void peeranha::vote_forum_item(eosio::name user, uint64_t question_id,
                         target_user_rating_change, VoteItem::question);
           else
             downvote_item(question, iter_account, energy, caller_rating_change,
-                        target_user_rating_change, VoteItem::question);
+                          target_user_rating_change, VoteItem::question);
         } else {
           auto iter_answer = find_answer(question, answer_id);
           target_user = iter_answer->user;
           if (is_upvote)
-            upvote_item(*iter_answer, iter_account, energy, caller_rating_change,
-                        target_user_rating_change, VoteItem::answer);
+            upvote_item(*iter_answer, iter_account, energy,
+                        caller_rating_change, target_user_rating_change,
+                        VoteItem::answer);
           else
-            downvote_item(*iter_answer, iter_account, energy, caller_rating_change,
-                        target_user_rating_change, VoteItem::answer);
+            downvote_item(*iter_answer, iter_account, energy,
+                          caller_rating_change, target_user_rating_change,
+                          VoteItem::answer);
         }
       });
-  update_rating(iter_account, caller_rating_change, [energy](auto &account){
-    account.reduce_energy(energy);
-  });
+  update_rating(iter_account, caller_rating_change,
+                [energy](auto &account) { account.reduce_energy(energy); });
   update_rating(target_user, target_user_rating_change);
 }
 
@@ -53,7 +55,8 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
   question_table.modify(
       iter_question, _self,
       [&iter_account, answer_id, comment_id, &delete_question,
-       &user_rating_change, &item_user, &delete_answer, &snitch_reduce_energy_value](auto &question) {
+       &user_rating_change, &item_user, &delete_answer,
+       &snitch_reduce_energy_value](auto &question) {
         if (apply_to_question(answer_id)) {
           if (apply_to_answer(comment_id)) {
             // Delete question
@@ -62,11 +65,11 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
             snitch_reduce_energy_value = ENERGY_REPORT_QUESTION;
             delete_question = set_report_points_and_history(
                 question, *iter_account,
-                ForumReportPoints::REPORT_POINTS_QUESTION);
+                REPORT_POINTS_QUESTION);
             if (delete_question) {
               item_user = question.user;
-              user_rating_change -=
-                  upvote_count(question.history) * VoteItem::question.upvoted_reward;
+              user_rating_change -= upvote_count(question.history) *
+                                    VoteItem::question.upvoted_reward;
               user_rating_change += QUESTION_DELETED_REWARD;
             }
           } else {
@@ -75,7 +78,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
 
             if (set_report_points_and_history(
                     *iter_comment, *iter_account,
-                    ForumReportPoints::REPORT_POINTS_COMMENT)) {
+                    REPORT_POINTS_COMMENT)) {
               item_user = iter_comment->user;
               user_rating_change += COMMENT_DELETED_REWARD;
               question.comments.erase(iter_comment);
@@ -89,15 +92,15 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
           snitch_reduce_energy_value = ENERGY_REPORT_ANSWER;
           if (set_report_points_and_history(
                   *iter_answer, *iter_account,
-                  ForumReportPoints::REPORT_POINTS_ANSWER)) {
+                  REPORT_POINTS_ANSWER)) {
             // Get for mark as correct
             item_user = iter_answer->user;
             if (question.correct_answer_id == iter_answer->id) {
               user_rating_change -= ANSWER_ACCEPTED_AS_CORRECT_REWARD;
               question.correct_answer_id = EMPTY_ANSWER_ID;
             }
-            user_rating_change -=
-                upvote_count(iter_answer->history) * VoteItem::answer.upvoted_reward;
+            user_rating_change -= upvote_count(iter_answer->history) *
+                                  VoteItem::answer.upvoted_reward;
             user_rating_change += ANSWER_DELETED_REWARD;
             question.answers.erase(iter_answer);
             delete_answer = true;
@@ -108,7 +111,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
           auto iter_comment = find_comment(*iter_answer, comment_id);
           if (set_report_points_and_history(
                   *iter_comment, *iter_account,
-                  ForumReportPoints::REPORT_POINTS_COMMENT)) {
+                  REPORT_POINTS_COMMENT)) {
             item_user = iter_comment->user;
             user_rating_change += COMMENT_DELETED_REWARD;
             iter_answer->comments.erase(iter_comment);
@@ -117,7 +120,9 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
       });
   bool is_correct_answer_deleted = false;
   if (delete_answer) {
+#ifdef SUPERFLUOUS_INDEX
     remove_user_answer(item_user, iter_question->id);
+#endif
     is_correct_answer_deleted =
         iter_question->correct_answer_id != old_correct_answer_id;
     if (is_correct_answer_deleted) {
@@ -133,13 +138,16 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
         iter_question->correct_answer_id == EMPTY_ANSWER_ID ? 0 : -1, 0);
     update_tags_statistics(iter_question->community_id, iter_question->tags,
                            -1);
+#ifdef SUPERFLUOUS_INDEX
     remove_user_question(iter_question->user, iter_question->id);
+#endif
     if (iter_question->correct_answer_id != EMPTY_ANSWER_ID)
       user_rating_change -= ACCEPT_ANSWER_AS_CORRECT_REWARD;
     for (auto answer = iter_question->answers.begin();
          answer != iter_question->answers.end(); answer++) {
       int rating_change = 0;
-      rating_change -= upvote_count(answer->history) * VoteItem::answer.upvoted_reward;
+      rating_change -=
+          upvote_count(answer->history) * VoteItem::answer.upvoted_reward;
       bool is_correct_answer = false;
       if (answer->id == iter_question->correct_answer_id) {
         rating_change -= ANSWER_ACCEPTED_AS_CORRECT_REWARD;
@@ -150,7 +158,9 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
                       account.answers_given -= 1;
                       if (is_correct_answer) account.correct_answers -= 1;
                     });
+#ifdef SUPERFLUOUS_INDEX
       remove_user_answer(answer->user, iter_question->id);
+#endif
     }
     question_table.erase(iter_question);
     eosio::check(iter_question != question_table.end(),

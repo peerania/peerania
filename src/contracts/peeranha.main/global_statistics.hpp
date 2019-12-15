@@ -2,6 +2,8 @@
 #include <eosio/eosio.hpp>
 #include <eosio/name.hpp>
 
+
+// Singleton
 struct [[
   eosio::table("globalstat"), eosio::contract("peeranha.main")
 ]] globalstat {

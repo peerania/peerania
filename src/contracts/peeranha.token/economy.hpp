@@ -3,15 +3,21 @@
 #include <eosio/eosio.hpp>
 #include <cmath>
 
+#if STAGE == 1
+#define INFLATION_PERIOD 12 //12 periods (1)
+#define START_POOL 350
+#define POOL_REDUSE_COEFFICIENT 0.8f
+#define RATING_TOKEN_COFICIENT 7
+#else
 #define INFLATION_PERIOD 52 //52 periods(52 weeks)
 #define START_POOL 30000
 #define POOL_REDUSE_COEFFICIENT 0.9f
+#define RATING_TOKEN_COFICIENT 8
+#endif
 
 #define USER_SHARES 60
 
-#define RATING_TOKEN_COFICIENT 8
 
-#define MAX_SUPPLY 100000000
 
 #define TOKEN_PRECISION 6
 

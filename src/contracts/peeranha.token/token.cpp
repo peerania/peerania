@@ -16,7 +16,7 @@ void token::create(name issuer, asset maximum_supply) {
 
   statstable.emplace(_self, [&](auto &s) {
     s.supply.symbol = maximum_supply.symbol;
-    s.max_supply = maximum_supply * (100 - USER_SHARES) / 100;
+    s.max_supply = maximum_supply;
     s.user_supply.symbol = maximum_supply.symbol;
     s.user_max_supply = maximum_supply * USER_SHARES / 100;
     s.funding_supply.symbol = maximum_supply.symbol;
@@ -78,7 +78,9 @@ void token::retire(asset quantity, string memo) {
                "symbol precision mismatch");
 
   statstable.modify(st, same_payer,
-                    [&](auto &s) { s.funding_supply -= quantity; });
+                    [&](auto &s) {
+                      s.funding_supply -= quantity; 
+                      });
 
   sub_balance(st.issuer, quantity);
 }
@@ -167,21 +169,21 @@ asset token::create_reward_pool(uint16_t period, int total_rating) {
   if (reward_pool > inflation_reward_pool) {
     reward_pool = inflation_reward_pool;
   }
-  const int64_t remaining_user_supply = st->user_max_supply.amount - st->user_supply.amount;
+  const int64_t remaining_user_supply =
+      st->user_max_supply.amount - st->user_supply.amount;
   if (reward_pool > remaining_user_supply) {
     reward_pool = remaining_user_supply;
   }
   auto quantity = asset(reward_pool, sym);
-  statstable.modify(st, _self,
-                    [&quantity](auto &s) { 
-                      s.supply += quantity;
-                      s.user_supply += quantity; 
-                      });
+  statstable.modify(st, _self, [&quantity](auto &s) {
+    s.supply += quantity;
+    s.user_supply += quantity;
+  });
   return quantity;
 }
 
 asset token::get_user_reward(asset total_reward, int rating_to_reward,
-                        int total_rating) {
+                             int total_rating) {
   return total_reward * rating_to_reward / total_rating;
 }
 
@@ -219,7 +221,7 @@ void token::pickupreward(name user, const uint16_t period) {
                "No reward for you in this period");
   asset user_reward =
       get_user_reward(iter_total_reward->total_reward,
-                 period_rating->rating_to_award, total_rating_to_reward);
+                      period_rating->rating_to_award, total_rating_to_reward);
   period_reward_table.emplace(user, [user_reward, period](auto &reward) {
     reward.period = period;
     reward.reward = user_reward;
@@ -227,7 +229,40 @@ void token::pickupreward(name user, const uint16_t period) {
   add_balance(user, user_reward, user);
 }
 
+#if STAGE == 1
+void token::resettables(std::vector<eosio::name> allaccs) {
+  require_auth(_self);
+  for (auto iter_acc = allaccs.begin(); iter_acc != allaccs.end(); iter_acc++) {
+    accounts to_acnts(_self, iter_acc->value);
+    auto iter_to_acnts = to_acnts.begin();
+    while (iter_to_acnts != to_acnts.end()) {
+      iter_to_acnts = to_acnts.erase(iter_to_acnts);
+    }
+    period_reward_index period_reward_table(_self, iter_acc->value);
+    auto iter_period_reward = period_reward_table.begin();
+    while (iter_period_reward != period_reward_table.end()) {
+      iter_period_reward = period_reward_table.erase(iter_period_reward);
+    }
+  }
+
+  const symbol sym = symbol("PEER", TOKEN_PRECISION);
+  stats statstable(_self, sym.code().raw());
+  auto existing = statstable.find(sym.code().raw());
+  statstable.erase(existing);
+
+  total_reward_index total_reward_table(_self, scope_all_periods);
+  auto iter_total_reward = total_reward_table.begin();
+  while (iter_total_reward != total_reward_table.end()) {
+    iter_total_reward = total_reward_table.erase(iter_total_reward);
+  }
+};
+#endif
+
 }  // namespace eosio
 
 EOSIO_DISPATCH(eosio::token,
-               (create)(issue)(transfer)(open)(close)(retire)(pickupreward))
+               (create)(issue)(transfer)(open)(close)(retire)(pickupreward)
+#if STAGE == 1 
+               (resettables)
+#endif
+               )

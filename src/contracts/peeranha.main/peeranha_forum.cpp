@@ -9,7 +9,7 @@ question_index::const_iterator peeranha::find_question(uint64_t question_id) {
 void peeranha::post_question(eosio::name user, uint16_t community_id,
                              const std::vector<uint32_t> tags,
                              const std::string &title,
-                             const std::string &ipfs_link) {
+                             const IpfsHash &ipfs_link) {
   assert_ipfs(ipfs_link);
   assert_title(title);
   auto iter_account = find_account(user);
@@ -32,17 +32,18 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
     question.ipfs_link = ipfs_link;
     question.post_time = now();
   });
-
+#ifdef SUPERFLUOUS_INDEX
   user_questions_index user_questions_table(_self, user.value);
   user_questions_table.emplace(_self, [question_id](auto &usr_question) {
     usr_question.question_id = question_id;
   });
+#endif
   update_community_statistics(community_id, 1, 0, 0, 0);
   update_tags_statistics(community_id, tags, 1);
 }
 
 void peeranha::post_answer(eosio::name user, uint64_t question_id,
-                           const std::string &ipfs_link) {
+                           const IpfsHash &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
@@ -65,18 +66,21 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
                           answer_id = new_answer.id;
                         });
 
+#ifdef SUPERFLUOUS_INDEX
   user_answers_index user_answers_table(_self, user.value);
   user_answers_table.emplace(_self, [question_id, answer_id](auto &usr_answer) {
     usr_answer.question_id = question_id;
     usr_answer.answer_id = answer_id;
   });
+#endif
+
   update_community_statistics(iter_question->community_id, 0, 1, 0, 0);
   update_rating(iter_account, POST_ANSWER_REWARD, [](auto &account) {
     account.reduce_energy(ENERGY_POST_ANSWER);
     account.answers_given += 1;
   });
 }
-
+#ifdef SUPERFLUOUS_INDEX
 void peeranha::remove_user_question(eosio::name user, uint64_t question_id) {
   user_questions_index user_questions_table(_self, user.value);
   auto iter_user_question = user_questions_table.find(question_id);
@@ -96,9 +100,10 @@ void peeranha::remove_user_answer(eosio::name user, uint64_t question_id) {
   eosio::check(iter_user_answer != user_answers_table.end(),
                "Address not erased properly");
 }
+#endif
 
 void peeranha::post_comment(eosio::name user, uint64_t question_id,
-                            uint16_t answer_id, const std::string &ipfs_link) {
+                            uint16_t answer_id, const IpfsHash &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
@@ -137,7 +142,9 @@ void peeranha::delete_question(eosio::name user, uint64_t question_id) {
   question_table.erase(iter_question);
   eosio::check(iter_question != question_table.end(),
                "Address not erased properly");
+#ifdef SUPERFLUOUS_INDEX
   remove_user_question(user, question_id);
+#endif
   update_rating(iter_account, DELETE_OWN_QUESTION_REWARD, [](auto &account) {
     account.reduce_energy(ENERGY_DELETE_QUESTION);
     account.questions_asked -= 1;
@@ -156,7 +163,9 @@ void peeranha::delete_answer(eosio::name user, uint64_t question_id,
         assert_allowed(*iter_account, iter_answer->user, Action::DELETE_ANSWER);
         question.answers.erase(iter_answer);
       });
+#ifdef SUPERFLUOUS_INDEX
   remove_user_answer(user, question_id);
+#endif
   update_community_statistics(iter_question->community_id, 0, -1, 0, 0);
   update_rating(iter_account, DELETE_OWN_ANSWER_REWARD, [](auto &account) {
     account.reduce_energy(ENERGY_DELETE_ANSWER);
@@ -193,7 +202,7 @@ void peeranha::modify_question(eosio::name user, uint64_t question_id,
                                uint16_t community_id,
                                const std::vector<uint32_t> &tags,
                                const std::string &title,
-                               const std::string &ipfs_link) {
+                               const IpfsHash &ipfs_link) {
   assert_ipfs(ipfs_link);
   assert_title(title);
   auto iter_account = find_account(user);
@@ -222,7 +231,7 @@ void peeranha::modify_question(eosio::name user, uint64_t question_id,
 }
 
 void peeranha::modify_answer(eosio::name user, uint64_t question_id,
-                             uint16_t answer_id, const std::string &ipfs_link) {
+                             uint16_t answer_id, const IpfsHash &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
@@ -241,7 +250,7 @@ void peeranha::modify_answer(eosio::name user, uint64_t question_id,
 
 void peeranha::modify_comment(eosio::name user, uint64_t question_id,
                               uint16_t answer_id, uint16_t comment_id,
-                              const std::string &ipfs_link) {
+                              const IpfsHash &ipfs_link) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);

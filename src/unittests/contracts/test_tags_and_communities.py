@@ -109,18 +109,18 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
     def test_create_tag_or_community_str_assert(self):
         begin('Test input string parameters limits')
         alice = self.register_alice_account(10000, 200)
-        self.failed_action('crcommunity', {'user': 'alice', 'name': ''.join(['a' for i in range(26)]), 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
+        self.failed_action('crcommunity', {'user': 'alice', 'name': ''.join(['a' for i in range(51)]), 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
                            'Alice attempt to create community winth name length > 25', 'assert')
-        self.failed_action('crtag', {'user': 'alice', 'community_id': 1, 'name': ''.join(['a' for i in range(16)]), 'ipfs_description': 'Alice tag description'}, alice,
-                           'Alice attempt to create tag winth name length > 15', 'assert')
+        self.failed_action('crtag', {'user': 'alice', 'community_id': 1, 'name': ''.join(['a' for i in range(31)]), 'ipfs_description': 'Alice tag description'}, alice,
+                           'Alice attempt to create tag winth name length > 30', 'assert')
         self.failed_action('crcommunity', {'user': 'alice', 'name': 'Hi? mark', 'ipfs_description': ''.join(['a' for i in range(65)]), 'suggested_tags': self.get_stub_suggested_tags()}, alice,
                            'Alice attempt to create community with invalid IPFS', 'assert')
         self.failed_action('crtag', {'user': 'alice', 'community_id': 1, 'name': 'Hi? mark', 'ipfs_description': ''.join(['a' for i in range(65)])}, alice,
                            'Alice attempt to create tag with invalid IPFS', 'assert')
-        self.action('crcommunity', {'user': 'alice', 'name': ''.join(['a' for i in range(25)]), 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
-                    'Alice create community winth name length 25')
-        self.action('crtag', {'user': 'alice', 'community_id': 1, 'name': ''.join(['a' for i in range(15)]), 'ipfs_description': 'Alice tag description'}, alice,
-                    'Alice create tag winth name length 15')
+        self.action('crcommunity', {'user': 'alice', 'name': ''.join(['a' for i in range(50)]), 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
+                    'Alice create community winth name length 50')
+        self.action('crtag', {'user': 'alice', 'community_id': 1, 'name': ''.join(['a' for i in range(30)]), 'ipfs_description': 'Alice tag description'}, alice,
+                    'Alice create tag winth name length 30')
         end()
 
     def test_create_community_and_tag(self):

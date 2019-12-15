@@ -131,7 +131,7 @@ bool set_report_points_and_history(T &item, const account &user,
   int current_question_report_points =
       get_property_d(item.properties, PROPERTY_REPORT_POINTS, 0);
   int snitch_report_points = user.get_status_moderation_impact();
-  if (current_question_report_points + snitch_report_points > limit) return true;
+  if (current_question_report_points + snitch_report_points >= limit) return true;
   set_property_d(item.properties, PROPERTY_REPORT_POINTS,
                  current_question_report_points + snitch_report_points, 0);
   return false;

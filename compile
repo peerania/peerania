@@ -69,38 +69,40 @@ then
     exit 1
 fi
 
+ADDITIONAL_FLAGS="-DSUPERFLUOUS_INDEX"
+
 case $STAGE in
     $PROD)
     echo -e "\e[32mCompiling production contract!!!\e[0m"
     if [ $COMPILE_MAIN -eq 1 ] 
     then
-        eosio-cpp -abigen -o $PEERANHA_MAIN_PATH/peeranha.main.wasm $PEERANHA_MAIN_PATH/peeranha.cpp -I$UTILS_PATH -R$PEERANHA_MAIN_PATH/rc
+        eosio-cpp -abigen -o $PEERANHA_MAIN_PATH/peeranha.main.wasm $PEERANHA_MAIN_PATH/peeranha.cpp -I$UTILS_PATH -R$PEERANHA_MAIN_PATH/rc $ADDITIONAL_FLAGS
     fi
     if [ $COMPILE_TOKEN -eq 1 ] 
     then
-        eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peeranha.token.wasm $PEERANHA_TOKEN_PATH/token.cpp -I$UTILS_PATH
+        eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peeranha.token.wasm $PEERANHA_TOKEN_PATH/token.cpp -I$UTILS_PATH $ADDITIONAL_FLAGS
     fi
     ;;
     $DEBUG)
     echo -e "\e[91mCompiling debug contract!!!\e[0m"
     if [ $COMPILE_MAIN -eq 1 ] 
     then
-        eosio-cpp -abigen -o $PEERANHA_MAIN_PATH/peeranha.main.wasm $PEERANHA_MAIN_PATH/peeranha_debug.cpp -I$UTILS_PATH -R$PEERANHA_MAIN_PATH/rc
+        eosio-cpp -abigen -o $PEERANHA_MAIN_PATH/peeranha.main.wasm $PEERANHA_MAIN_PATH/peeranha_debug.cpp -I$UTILS_PATH -R$PEERANHA_MAIN_PATH/rc -DSTAGE=2 $ADDITIONAL_FLAGS
     fi
     if [ $COMPILE_TOKEN -eq 1 ] 
     then
-        eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peeranha.token.wasm $PEERANHA_TOKEN_PATH/token_debug.cpp -I$UTILS_PATH
+        eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peeranha.token.wasm $PEERANHA_TOKEN_PATH/token_debug.cpp -I$UTILS_PATH -DSTAGE=2 $ADDITIONAL_FLAGS
     fi
     ;;
     $TEST)
     echo -e "\e[93mCompiling test contract!!!\e[0m"
     if [ $COMPILE_MAIN -eq 1 ] 
     then
-        eosio-cpp -abigen -abigen_output=$PEERANHA_MAIN_PATH/peeranha.main.abi -o=$PEERANHA_MAIN_PATH/peeranha.main.wasm $PEERANHA_MAIN_PATH/peeranha_test.cpp -I$UTILS_PATH -R$PEERANHA_MAIN_PATH/rc
+        eosio-cpp -abigen -abigen_output=$PEERANHA_MAIN_PATH/peeranha.main.abi -o=$PEERANHA_MAIN_PATH/peeranha.main.wasm $PEERANHA_MAIN_PATH/peeranha.cpp -I$UTILS_PATH -R$PEERANHA_MAIN_PATH/rc -DSTAGE=1 $ADDITIONAL_FLAGS
     fi
     if [ $COMPILE_TOKEN -eq 1 ] 
     then
-        eosio-cpp -abigen -abigen_output=$PEERANHA_TOKEN_PATH/peeranha.token.abi -o=$PEERANHA_TOKEN_PATH/peeranha.token.wasm $PEERANHA_TOKEN_PATH/token_test.cpp -I$UTILS_PATH
+        eosio-cpp -abigen -abigen_output=$PEERANHA_TOKEN_PATH/peeranha.token.abi -o=$PEERANHA_TOKEN_PATH/peeranha.token.wasm $PEERANHA_TOKEN_PATH/token.cpp -I$UTILS_PATH -DSTAGE=1 $ADDITIONAL_FLAGS
     fi
     ;;
 esac

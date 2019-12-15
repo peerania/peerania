@@ -17,17 +17,26 @@ const stages = {
     env: "local",
     contractStage: "debug",
     name: "LOCAL",
+    maxSupply: "350.000000 PEER",
   },
-  "test": {
-    env: "test",
+  "eos.test": {
+    env: "eos.test",
     contractStage: "test",
-    name: "TEST",
+    name: "TEST EOS",
+    maxSupply: "5000.000000 PEER",
   },
-  // "prod": {
-  //   env: "prod",
-  //   contractStage: "prod",
-  //   name: "PROD",
-  // }
+  "telos.test": {
+    env: "telos.test",
+    contractStage: "test",
+    name: "TEST TELOS",
+    maxSupply: "5000.000000 PEER"
+  },
+  "prod": {
+    env: "prod",
+    contractStage: "prod",
+    name: "PROD",
+    maxSupply: "1000000.000000 PEER"
+  }
 }
 
 const stage = stages[process.argv[2]];
@@ -62,7 +71,22 @@ const accounts = {
     wasm: "peeranha.token.wasm",
     abi: "peeranha.token.abi",
     name: "TOKEN",
-    additionalActions: []
+    additionalActions: [
+      {
+        account: "peeranhatken",
+        name: "create",
+        authorization: [
+          {
+            actor: "peeranhatken",
+            permission: "active"
+          }
+        ],
+        data: {
+          issuer: "peeranhatken", 
+          maximum_supply: maxSupply
+        },
+      }
+    ]
   }
 };
 
@@ -143,6 +167,7 @@ async function deploy(stage, env) {
   if (!contract) {
     throw "Invalid account";
   }
+
   console.log(`Deplying ${contract.name} on stage ${stage.name}(${stage.contractStage} contract)`);
   const { wasm, abi } = await loadContract(api, contract);
 
@@ -187,6 +212,7 @@ async function deploy(stage, env) {
       expireSeconds: 90
     }
   );
+  
   if (contract.additionalActions.length != 0)
     await eos.transact({
       actions: contract.additionalActions,

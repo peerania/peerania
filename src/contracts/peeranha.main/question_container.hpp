@@ -2,9 +2,10 @@
 #include <eosio/eosio.hpp>
 #include <string>
 #include <vector>
+#include "IpfsHash.hpp"
+#include "account.hpp"
 #include "history.hpp"
 #include "property.hpp"
-#include "account.hpp"
 
 // Answer id starts from FORUM_INDEX_START
 #define EMPTY_ANSWER_ID 0
@@ -33,33 +34,39 @@ struct comment {
   uint16_t id;
   time post_time;
   eosio::name user;
-  std::string ipfs_link;
+  IpfsHash ipfs_link;
   std::vector<int_key_value> properties;
   std::vector<history_item> history;
   uint16_t bkey() const { return id; }
+  EOSLIB_SERIALIZE(comment,
+                   (id)(post_time)(user)(ipfs_link)(properties)(history))
 };
 
 struct answer {
   uint16_t id;
   time post_time;
   eosio::name user;
-  std::string ipfs_link;
+  IpfsHash ipfs_link;
   std::vector<comment> comments;
   // additional info
   int16_t rating = 0;
   std::vector<int_key_value> properties;
   std::vector<history_item> history;
   uint16_t bkey() const { return id; }
+  EOSLIB_SERIALIZE(answer, (id)(post_time)(user)(ipfs_link)(comments)(rating)(
+                               properties)(history))
 };
 
-struct [[eosio::table("question"), eosio::contract("peeranha.main")]] question {
+struct [[
+  eosio::table("question"), eosio::contract("peeranha.main")
+]] question {
   uint64_t id;
   uint16_t community_id;
   std::vector<uint32_t> tags;
   time post_time;
   eosio::name user;
   std::string title;
-  std::string ipfs_link;
+  IpfsHash ipfs_link;
   std::vector<answer> answers;
   std::vector<comment> comments;
   // additionl info
@@ -108,21 +115,29 @@ std::vector<comment>::iterator find_comment(T &item, uint16_t comment_id) {
   return iter_comment;
 }
 
-struct [[eosio::table("usrquestions"), eosio::contract("peeranha.main")]] usrquestions {
+#ifdef SUPERFLUOUS_INDEX
+struct [[
+  eosio::table("usrquestions"),
+  eosio::contract("peeranha.main")
+]] usrquestions {
   uint64_t question_id;
   uint64_t primary_key() const { return question_id; }
 };
 typedef eosio::multi_index<"usrquestions"_n, usrquestions> user_questions_index;
 
-struct [[eosio::table("usranswers"), eosio::contract("peeranha.main")]] usranswers {
+struct [[
+  eosio::table("usranswers"), eosio::contract("peeranha.main")
+]] usranswers {
   uint64_t question_id;
   uint16_t answer_id;
   uint64_t primary_key() const { return question_id; }
 };
 typedef eosio::multi_index<"usranswers"_n, usranswers> user_answers_index;
+#endif
+
 
 inline void assert_title(const std::string &title) {
-  eosio::check(title.size() > 2 && title.size() < 129, "Invalid title length");
+  assert_readble_string(title, 3, 256, "Invalid title length");
 }
 
 /*

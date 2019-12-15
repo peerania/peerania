@@ -35,7 +35,7 @@ const stages = {
     env: "prod",
     contractStage: "prod",
     name: "PROD",
-    maxSupply: "1000000.000000 PEER"
+    maxSupply: "100000000.000000 PEER"
   }
 }
 

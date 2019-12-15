@@ -83,7 +83,7 @@ const accounts = {
         ],
         data: {
           issuer: "peeranhatken", 
-          maximum_supply: maxSupply
+          maximum_supply: stage.maxSupply
         },
       }
     ]
@@ -168,7 +168,7 @@ async function deploy(stage, env) {
     throw "Invalid account";
   }
 
-  console.log(`Deplying ${contract.name} on stage ${stage.name}(${stage.contractStage} contract)`);
+  console.log(`Deploying ${contract.name} on stage ${stage.name}(${stage.contractStage} contract)`);
   const { wasm, abi } = await loadContract(api, contract);
 
   const deployActions = [

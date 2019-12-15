@@ -1,18 +1,17 @@
 #pragma once
 #include <eosio/name.hpp>
+
 // Limit to delte
-namespace ForumReportPoints
-{
-#ifndef DEBUG
-const int REPORT_POINTS_QUESTION = 150;
-const int REPORT_POINTS_ANSWER = 125;
-const int REPORT_POINTS_COMMENT = 50;
+#if STAGE == 1
+#define REPORT_POINTS_QUESTION 7
+#define REPORT_POINTS_ANSWER 5
+#define REPORT_POINTS_COMMENT 3
 #else
-const int REPORT_POINTS_QUESTION = 7;
-const int REPORT_POINTS_ANSWER = 5;
-const int REPORT_POINTS_COMMENT = 3;
+#define REPORT_POINTS_QUESTION 150
+#define REPORT_POINTS_ANSWER 125
+#define REPORT_POINTS_COMMENT 50
 #endif
-} // namespace ForumReportPoints
+
 
 #define ANSWER_ACCEPTED_AS_CORRECT_REWARD 15
 #define UPVOTE_QUESTION_REWARD 0
@@ -25,10 +24,22 @@ const int REPORT_POINTS_COMMENT = 3;
 #define ANSWER_DOWNVOTED_REWARD -2
 
 // Stub solution
+#if STAGE == 1
+
+#define VOTES_TO_CREATE_COMMUNITY 4
+#define VOTES_TO_DELETE_COMMUNITY -3
+#define VOTES_TO_CREATE_TAG 3
+#define VOTES_TO_DELETE_TAG -2
+
+#else
+
 #define VOTES_TO_CREATE_COMMUNITY 100
 #define VOTES_TO_DELETE_COMMUNITY -35
 #define VOTES_TO_CREATE_TAG 10
 #define VOTES_TO_DELETE_TAG -10
+
+#endif
+
 
 #define POST_QUESTION_REWARD 0
 #define POST_ANSWER_REWARD 0
@@ -56,6 +67,7 @@ const int REPORT_POINTS_COMMENT = 3;
 #define UPVOTE_ALLOWED 35
 #define DOWNVOTE_ALLOWED 100
 #define VOTE_FOR_DELETION_ALLOWED 100
+
 
 #define CREATE_TAG_ALLOWED 500
 #define CREATE_COMMUNITY_ALLOWED 2500
@@ -106,6 +118,24 @@ const int REPORT_POINTS_COMMENT = 3;
 #define STATUS5_ENERGY 300
 #define STATUS6_ENERGY 350
 
+
+#if STAGE==1 
+
+// Account period
+#define ACCOUNT_STAT_RESET_PERIOD 1800 // 30 Minutes
+#define BAN_RATING_INCREMENT_PER_PERIOD 6
+
+// Account report reset time
+#define MIN_FREEZE_PERIOD 7200           // 2 hour
+#define REPORT_RESET_PERIOD 7200         // 2 hour
+#define REPORT_POWER_RESET_PERIOD 14400  // 4 hour
+
+#define POINTS_TO_FREEZE 9
+#define MODERATION_POINTS_REPORT_PROFILE 2
+#define MAX_FREEZE_PERIOD_MULTIPLIER 6
+
+#else
+
 // Account period
 #define ACCOUNT_STAT_RESET_PERIOD 259200 // 3 Days
 #define BAN_RATING_INCREMENT_PER_PERIOD 6
@@ -118,6 +148,8 @@ const int REPORT_POINTS_COMMENT = 3;
 #define POINTS_TO_FREEZE 90
 #define MODERATION_POINTS_REPORT_PROFILE 2
 #define MAX_FREEZE_PERIOD_MULTIPLIER 6
+
+#endif
 
 namespace VoteItem
 {

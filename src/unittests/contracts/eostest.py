@@ -7,6 +7,31 @@ import os
 import signal
 from time import sleep
 
+def replace_ipfs_with_bytearray(obj):
+    if isinstance(obj, dict):
+        for k in obj:
+            if k.startswith('ipfs_'):
+                obj[k] = [x for x in obj[k].encode()]
+            else:
+                replace_ipfs_with_bytearray(obj[k])
+    elif isinstance(obj, list):
+        for item in obj:
+            replace_ipfs_with_bytearray(item)
+    return obj
+
+def replace_bytearr_with_ipfs(obj):
+    if isinstance(obj, dict):
+        for k in obj:
+            if k.startswith('ipfs_'):
+                obj[k] = bytearray(obj[k]).decode('utf8')
+            else:
+                replace_bytearr_with_ipfs(obj[k])
+    elif isinstance(obj, list):
+        for item in obj:
+            replace_bytearr_with_ipfs(item)
+    return obj
+
+
 class EOSTest(unittest.TestCase):
     WAIT_FOR_NEW_BLOCK = 0.51
     contracts = {}
@@ -94,6 +119,7 @@ class EOSTest(unittest.TestCase):
             cprint(action_text, end='', color='yellow')
         if contract is None:
             contract = self.config['default-contract']
+        replace_ipfs_with_bytearray(action_body)
         cleos_cmd = "cleos push action {} {} '{}' -p {}".format(
             self.contracts[contract], action_name, json.dumps(action_body), action_auth)
         out = None
@@ -113,6 +139,7 @@ class EOSTest(unittest.TestCase):
         cprint(action_text + ' - Error expected', color='yellow')
         if contract is None:
             contract = self.config['default-contract']
+        replace_ipfs_with_bytearray(action_body)
         cleos_cmd = "cleos push action {} {} '{}' -p {}".format(
             self.contracts[contract], action_name, json.dumps(action_body), action_auth)
         if(wait):
@@ -165,6 +192,7 @@ class EOSTest(unittest.TestCase):
                     cprint('Fetch from "{}" with scope "{}":\n{}'.format(
                         table, scope, t.json()), color='yellow')
                 tb = t.json()
+                replace_bytearr_with_ipfs(tb)
                 if not ignoreMore:
                     self.assertFalse(tb['more'])
                 return tb['rows']

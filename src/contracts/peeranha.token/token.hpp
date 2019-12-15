@@ -52,6 +52,10 @@ public:
     return ac.balance;
   }
 
+#if STAGE == 1
+  [[eosio::action]] void resettables(std::vector<eosio::name> allaccs);
+#endif
+
 protected:
   const string peeranha_asset_symbol = "PEER";
 

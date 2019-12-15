@@ -88,18 +88,18 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
     def test_title_length_assert_failed(self):
         begin('Test register and modify title length assert ', True)
         alice = self.register_alice_account()
-        self.failed_action('postquestion', {'user': alice, 'title': 'Te', 'ipfs_link': 'Alice ipfs', 'community_id': 1, 'tags':[1]}, alice,
-                           'Register question with title len=2', 'assert')
-        self.failed_action('postquestion', {'user': alice, 'title':  "".join('a' for x in range(129)), 'ipfs_link': 'Alice ipfs', 'community_id': 1, 'tags':[1]}, alice,
+        self.failed_action('postquestion', {'user': alice, 'title': 'T', 'ipfs_link': 'Alice ipfs', 'community_id': 1, 'tags':[1]}, alice,
+                           'Register question with title len=1', 'assert')
+        self.failed_action('postquestion', {'user': alice, 'title':  "".join('a' for x in range(257)), 'ipfs_link': 'Alice ipfs', 'community_id': 1, 'tags':[1]}, alice,
                            'Register question with title len=129', 'assert')
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
-        self.failed_action('modquestion', {'user': alice, 'question_id': var['q1'], 'title': 'Te', 'ipfs_link': 'Alice ipfs', 'community_id': 1, 'tags':[1]}, alice,
-                           'Modify question, set title with len=2', 'assert')
-        self.failed_action('modquestion', {'user': alice, 'question_id': var['q1'], 'title':  "".join('a' for x in range(129)), 'ipfs_link': 'Alice ipfs', 'community_id': 1, 'tags':[1]}, alice,
-                           'Modify question, set title with len=129', 'assert')
+        self.failed_action('modquestion', {'user': alice, 'question_id': var['q1'], 'title': 'T', 'ipfs_link': 'Alice ipfs', 'community_id': 1, 'tags':[1]}, alice,
+                           'Modify question, set title with len=1', 'assert')
+        self.failed_action('modquestion', {'user': alice, 'question_id': var['q1'], 'title':  "".join('a' for x in range(257)), 'ipfs_link': 'Alice ipfs', 'community_id': 1, 'tags':[1]}, alice,
+                           'Modify question, set title with len=257', 'assert')
         end()
 
     def test_delete_question_another_auth_failed(self):

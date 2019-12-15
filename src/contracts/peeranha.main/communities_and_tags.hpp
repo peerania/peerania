@@ -17,7 +17,7 @@
 
 struct suggest_tag {
   std::string name;
-  std::string ipfs_description;
+  IpfsHash ipfs_description;
 };
 
 const uint64_t scope_all_communities = eosio::name("allcomm").value;
@@ -26,7 +26,7 @@ struct [[eosio::table("crcommtb"), eosio::contract("peeranha.main")]] crcommtb {
   uint32_t id;
   eosio::name creator;
   std::string name;
-  std::string ipfs_description;
+  IpfsHash ipfs_description;
   time creation_time;
   std::vector<eosio::name> upvotes;
   std::vector<eosio::name> downvotes;
@@ -39,7 +39,7 @@ struct [[ eosio::table("crtagtb"), eosio::contract("peeranha.main") ]] crtagtb {
   uint32_t id;
   eosio::name creator;
   std::string name;
-  std::string ipfs_description;
+  IpfsHash ipfs_description;
   std::vector<eosio::name> upvotes;
   std::vector<eosio::name> downvotes;
   uint64_t primary_key() const { return id; }
@@ -49,7 +49,7 @@ typedef eosio::multi_index<"crtagtb"_n, crtagtb> create_tag_index;
 struct [[eosio::table("tags"), eosio::contract("peeranha.main")]] tags {
   uint32_t id;
   std::string name;
-  std::string ipfs_description;
+  IpfsHash ipfs_description;
   uint32_t questions_asked;
   uint64_t primary_key() const { return id; }
 };
@@ -58,7 +58,7 @@ typedef eosio::multi_index<"tags"_n, tags> tag_table_index;
 struct [[eosio::table("communities"), eosio::contract("peeranha.main")]] communities {
   uint16_t id;
   std::string name;
-  std::string ipfs_description;
+  IpfsHash ipfs_description;
   time creation_time;
   uint32_t questions_asked = 0;
   uint32_t answers_given = 0;
@@ -68,10 +68,10 @@ struct [[eosio::table("communities"), eosio::contract("peeranha.main")]] communi
 };
 typedef eosio::multi_index<"communities"_n, communities> community_table_index;
 
-void assert_tag_name(const std::string name) {
-  eosio::check(name.size() >= 2 && name.size() <= 15, "Invalid tag name");
+inline void assert_tag_name(const std::string name) {
+  assert_readble_string(name, 2, 30, "Invalid tag name");
 }
 
-void assert_community_name(const std::string name) {
-  eosio::check(name.size() >= 2 && name.size() <= 25, "Invalid community name");
+inline void assert_community_name(const std::string name) {
+  assert_readble_string(name, 2, 50, "Invalid community name");
 }

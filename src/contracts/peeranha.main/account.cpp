@@ -1,9 +1,7 @@
 #include "account.hpp"
 
 void assert_display_name(const std::string &display_name) {
-  eosio::check(display_name.length() >= MIN_DISPLAY_NAME_LEN &&
-                   display_name.length() <= MAX_DISPLAY_NAME_LEN,
-               "The display name too short.");
+  assert_readble_string(display_name, 3, 40, "Invalid dispaly name");
 }
 
 void account::reduce_energy(uint8_t value) {

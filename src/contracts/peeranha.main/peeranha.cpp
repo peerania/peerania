@@ -293,4 +293,4 @@ EOSIO_DISPATCH(peeranha,
 #if STAGE == 1
                        (chnguserrt)(resettables)(setaccrten)
 #endif
-                           (init))
+                           (init)(payforcpu))

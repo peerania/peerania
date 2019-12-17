@@ -10,7 +10,7 @@
 #define RATING_TOKEN_COFICIENT 7
 #else
 #define INFLATION_PERIOD 52 //52 periods(52 weeks)
-#define START_POOL 300000
+#define START_POOL 100000
 #define POOL_REDUSE_COEFFICIENT 0.9f
 #define RATING_TOKEN_COFICIENT 10
 #endif

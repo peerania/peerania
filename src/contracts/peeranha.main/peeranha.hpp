@@ -123,6 +123,8 @@ class [[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
   ACTION init();
 
+  ACTION payforcpu(){};
+
 #if STAGE == 1 
 ACTION setaccrten(eosio::name user, int rating, int16_t energy);
 

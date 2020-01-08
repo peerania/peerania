@@ -9,6 +9,7 @@
 #include "token_period.hpp"
 #include "peeranha_types.h"
 #include "token_common.hpp"
+#include "account.hpp"
 
 namespace eosio
 {
@@ -36,6 +37,10 @@ public:
   [[eosio::action]] void close(name user, const symbol &symbol);
 
   [[eosio::action]] void pickupreward(name user, const uint16_t period);
+
+  [[eosio::action]] void inviteuser(name inviter, name invited_user);
+
+  [[eosio::action]] void rewardrefer(name invited_user);
 
   static asset get_supply(name token_contract_account, symbol_code sym_code)
   {
@@ -82,6 +87,20 @@ protected:
 
     uint64_t primary_key() const { return supply.symbol.code().raw(); }
   };
+
+  // scoped by allinvited
+  const uint64_t all_invited = name("allinvited").value; 
+  struct [[
+    eosio::table("invited"), , eosio::contract("peeranha.token")
+  ]] invited_users
+  {
+    name invited_user;
+    name inviter;
+    asset common_reward;
+
+    uint64_t primary_key() const { return invited_user.value; }
+  };
+  typedef eosio::multi_index<"invited"_n, invited_users> invited_users_index;
 
   typedef eosio::multi_index<"accounts"_n, account> accounts;
   typedef eosio::multi_index<"stat"_n, currency_stats> stats;

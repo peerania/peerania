@@ -7,7 +7,7 @@ from threading import Timer
 PERIOD_LENGTH = 3
 
 INFLATION_PERIOD = 2
-RATING_TOKEN_COFICIENT = 8
+RATING_TOKEN_COEFFICIENT = 8
 POOL_REDUSE_COEFFICIENT = 0.5
 START_POOL = 40
 TOTAL_USER_SUPPLY = 60
@@ -144,7 +144,7 @@ class TestTokenIntegration(peeranhatest.peeranhaTest):
     def _get_inflation(self, total_rating_to_reward, period_id, issued_reward):
         max_inflation = START_POOL * \
             (POOL_REDUSE_COEFFICIENT) ** (period_id // INFLATION_PERIOD)
-        user_iflation = total_rating_to_reward * RATING_TOKEN_COFICIENT
+        user_iflation = total_rating_to_reward * RATING_TOKEN_COEFFICIENT
         remaining_tokens = TOTAL_USER_SUPPLY - float(issued_reward[:-5])
         return min(max_inflation, user_iflation, remaining_tokens)
 

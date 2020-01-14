@@ -188,8 +188,7 @@ asset token::get_user_reward(asset total_reward, int rating_to_reward,
 void token::pickupreward(name user, const uint16_t period) {
   require_auth(user);
   time current_time = now();
-  eosio::check(get_period(current_time) > period,
-               "This period isn't ended yet!");
+  eosio::check(get_period(current_time) > period, "This period isn't ended yet!");
 
   period_reward_index period_reward_table(_self, user.value);
   // Ensure that there is no records in period_reward_table for this period,
@@ -232,14 +231,19 @@ void token::inviteuser(name inviter, name invited_user) {
 
   account_index account_table(peeranha_main, scope_all_accounts);
   auto iter_account_invited_user = account_table.find(invited_user.value);
-  eosio::check(iter_account_invited_user == account_table.end(), "Invited user already registred");
+  eosio::check(iter_account_invited_user == account_table.end(),
+               "Invited user already registred");
 
-  eosio::check(inviter != invited_user, "Can't invite self");
+  auto iter_account_inviter = account_table.find(inviter.value);
+  eosio::check(iter_account_inviter != account_table.end(),
+               "Inviter isn't registed");
+
+  //eosio::check(inviter != invited_user, "Can't invite self");
   invited_users_index invited_users_table(_self, all_invited);
   auto iter_invited_user = invited_users_table.find(invited_user.value);
   eosio::check(iter_invited_user == invited_users_table.end(),
                "This user already invited");
-               const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+  const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
   invited_users_table.emplace(
       _self, [inviter, invited_user, sym](auto &inviter_invited_user) {
         inviter_invited_user.inviter = inviter;
@@ -253,8 +257,9 @@ void token::rewardrefer(name invited_user) {
   invited_users_index invited_users_table(_self, all_invited);
   auto iter_invited_user = invited_users_table.find(invited_user.value);
   eosio::check(iter_invited_user != invited_users_table.end(),
-               "This user already invited");
-  eosio::check(iter_invited_user->common_reward.amount == 0, "This users already rewarded");
+               "This user isn't invited");
+  eosio::check(iter_invited_user->common_reward.amount == 0,
+               "This users already rewarded");
 
   const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
   auto quantity = asset(int64_to_peer(REFERAL_REWARD), sym);
@@ -273,22 +278,25 @@ void token::rewardrefer(name invited_user) {
 
   account_index account_table(peeranha_main, scope_all_accounts);
   auto iter_account_invited_user = account_table.find(invited_user.value);
-  eosio::check(iter_account_invited_user->pay_out_rating > REFERAL_TARGET_RATING_REACHED, "Invited user douesn't reached required rating");
+  eosio::check(
+      iter_account_invited_user->pay_out_rating >= REFERAL_TARGET_RATING_REACHED,
+      "Invited user douesn't reached required rating");
 
   statstable.modify(st, _self, [&quantity](auto &s) {
     s.supply += quantity;
     s.user_supply += quantity;
   });
-  invited_users_table.modify(iter_invited_user, _self, [quantity](auto &inviter_invited_user) {
-    inviter_invited_user.common_reward = quantity;
-  });
+  invited_users_table.modify(iter_invited_user, _self,
+                             [quantity](auto &inviter_invited_user) {
+                               inviter_invited_user.common_reward = quantity;
+                             });
   auto inviter_supply = quantity * REFERAL_SPLIT_COEFFICIENT / 100;
 
   add_balance(iter_invited_user->inviter, inviter_supply, _self);
   add_balance(invited_user, quantity - inviter_supply, _self);
 }
 
-#if STAGE == 1
+#if STAGE == 1 || STAGE == 2
 void token::resettables(std::vector<eosio::name> allaccs) {
   require_auth(_self);
   for (auto iter_acc = allaccs.begin(); iter_acc != allaccs.end(); iter_acc++) {
@@ -314,14 +322,30 @@ void token::resettables(std::vector<eosio::name> allaccs) {
   while (iter_total_reward != total_reward_table.end()) {
     iter_total_reward = total_reward_table.erase(iter_total_reward);
   }
+
+  invited_users_index invited_users_table(_self, all_invited);
+  auto iter_invited_user = invited_users_table.begin();
+  while (iter_invited_user != invited_users_table.end()) {
+    iter_invited_user = invited_users_table.erase(iter_invited_user);
+  }
+#if STAGE == 2
+  auto dbginfl_table = dbginfl_index(_self, _self.value);
+  auto iter_dbginf_table = dbginfl_table.begin();
+  while (iter_dbginf_table != dbginfl_table.end()) {
+    iter_dbginf_table = dbginfl_table.erase(iter_dbginf_table);
+  }
+#endif
 };
 #endif
 
 }  // namespace eosio
 
 EOSIO_DISPATCH(eosio::token,
-               (create)(issue)(transfer)(open)(close)(retire)(pickupreward)
-#if STAGE == 1
+               (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)(rewardrefer)
+#if STAGE == 1 || STAGE == 2
                    (resettables)
+#if STAGE == 2
+                       (mapcrrwpool)
+#endif
 #endif
 )

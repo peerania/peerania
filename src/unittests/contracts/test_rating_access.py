@@ -15,7 +15,7 @@ class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
         self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'community_id': 1, 'ipfs_link': 'AQ', 'tags': [1, 2, 3]}, alice,
                     'Register question from alice')
         self.action('setaccrten', {
-                    'user': 'alice', 'rating': defs['POST_QUESTION_ALLOWED'] - 1, 'energy': defs['ENERGY_POST_QUESTION']}, alice, "Reduce alice rating for 1")
+                    'user': 'alice', 'rating': defs['POST_QUESTION_ALLOWED'] - 1, 'energy': defs['ENERGY_POST_QUESTION']}, self.admin, "Reduce alice rating for 1")
         self.failed_action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ2', 'community_id': 1, 'tags': [1, 2, 3]}, alice,
                            'Attempt to register question from alice', 'assert')
         end()
@@ -30,12 +30,12 @@ class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
             defs['POST_ANSWER_ALLOWED'] - 1, defs['ENERGY_POST_ANSWER'])
         (e, var) = self._create_simple_hierarchy(alice, bob)
         self.action('setaccrten', {'user': 'alice', 'rating': defs['POST_ANSWER_OWN_ALLOWED'] - 1,
-                                   'energy': defs['ENERGY_POST_ANSWER']}, alice, "Set alice rating to { POST_ANSWR_OWN_ALLOWED - 1 }")
+                                   'energy': defs['ENERGY_POST_ANSWER']}, self.admin, "Set alice rating to { POST_ANSWR_OWN_ALLOWED - 1 }")
         self.failed_action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'AQ->AA failed'},
                            alice, 'Attemp to register Alice answer to Alice', 'assert')
         self.wait()  # why???
         self.action('setaccrten', {'user': 'alice', 'rating': defs['POST_ANSWER_OWN_ALLOWED'],
-                                   'energy': defs['ENERGY_POST_ANSWER']*2}, alice, "Set alice rating to { POST_ANSWR_OWN_ALLOWED }")
+                                   'energy': defs['ENERGY_POST_ANSWER']*2}, self.admin, "Set alice rating to { POST_ANSWR_OWN_ALLOWED }")
         self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'AQ->AA'},
                     alice, 'Register Alice answer to Alice')
         self.failed_action('postanswer', {'user': 'carol', 'question_id': var['aq'], 'ipfs_link': 'AQ->CA'},
@@ -52,9 +52,9 @@ class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
             defs['POST_COMMENT_ALLOWED'] - 1, defs['ENERGY_POST_COMMENT'])
         (e, var) = self._create_simple_hierarchy(alice, bob)
         self.action('setaccrten', {'user': 'alice', 'rating': defs['POST_COMMENT_OWN_ALLOWED'] - 1,
-                                   'energy': defs['ENERGY_POST_COMMENT']}, alice, "Set alice rating to { POST_COMMENT_OWN_ALLOWED - 1 }")
+                                   'energy': defs['ENERGY_POST_COMMENT']}, self.admin, "Set alice rating to { POST_COMMENT_OWN_ALLOWED - 1 }")
         self.action('setaccrten', {'user': 'bob', 'rating': defs['POST_COMMENT_OWN_ALLOWED'] - 1,
-                                   'energy': defs['ENERGY_POST_COMMENT']}, bob, "Set bob rating to { POST_COMMENT_OWN_ALLOWED - 1 }")
+                                   'energy': defs['ENERGY_POST_COMMENT']}, self.admin, "Set bob rating to { POST_COMMENT_OWN_ALLOWED - 1 }")
         self.failed_action('postcomment', {'user': 'alice', 'question_id': var['aq'], 'answer_id': var[
                            'aq_ba'], 'ipfs_link': 'test'}, alice, 'Alice attempt to comment bob answer', 'assert')
         self.failed_action('postcomment', {
@@ -67,11 +67,11 @@ class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
                            'user': 'carol', 'question_id': var['aq'], 'answer_id': 0, 'ipfs_link': 'test'}, carol, 'Carol attempt to comment alice question', 'assert')
         self.wait()  # why should I wait?
         self.action('setaccrten', {'user': 'alice', 'rating': defs['POST_COMMENT_OWN_ALLOWED'],
-                                   'energy': defs['ENERGY_POST_COMMENT']*2}, alice, "Set alice rating to { POST_COMMENT_OWN_ALLOWED }")
+                                   'energy': defs['ENERGY_POST_COMMENT']*2}, self.admin, "Set alice rating to { POST_COMMENT_OWN_ALLOWED }")
         self.action('setaccrten', {'user': 'bob', 'rating': defs['POST_COMMENT_OWN_ALLOWED'],
-                                   'energy': defs['ENERGY_POST_COMMENT']}, bob, "Set bob rating to { POST_COMMENT_OWN_ALLOWED }")
+                                   'energy': defs['ENERGY_POST_COMMENT']}, self.admin, "Set bob rating to { POST_COMMENT_OWN_ALLOWED }")
         self.action('setaccrten', {'user': 'carol', 'rating': defs['POST_COMMENT_ALLOWED'],
-                                   'energy': defs['ENERGY_POST_COMMENT']*2}, carol, "Set carol rating to { POST_COMMENT_ALLOWED }")
+                                   'energy': defs['ENERGY_POST_COMMENT']*2}, self.admin, "Set carol rating to { POST_COMMENT_ALLOWED }")
         self.action('postcomment', {
                     'user': 'alice', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'ipfs_link': 'AQ->BA->AC'}, alice, 'Alice comment bob answer')
         self.action('postcomment', {
@@ -98,7 +98,7 @@ class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
         self.failed_action('upvote', {'user': 'carol', 'question_id': var['aq'], 'answer_id': var[
                            'aq_ba']}, carol, 'Carol attempt to upvote Alice question -> Bob answer', 'assert')
         self.action('setaccrten', {
-                    'user': 'carol', 'rating': defs['UPVOTE_ALLOWED'], 'energy': defs['ENERGY_UPVOTE_QUESTION'] + defs['ENERGY_UPVOTE_ANSWER']}, carol, "Set carol rating to { UPVOTE_ALLOWED }")
+                    'user': 'carol', 'rating': defs['UPVOTE_ALLOWED'], 'energy': defs['ENERGY_UPVOTE_QUESTION'] + defs['ENERGY_UPVOTE_ANSWER']}, self.admin, "Set carol rating to { UPVOTE_ALLOWED }")
         self.wait()
         self.action('upvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': 0}, carol, 'Carol upvote Alice question')
@@ -119,12 +119,12 @@ class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
         self.failed_action('downvote', {'user': 'carol', 'question_id': var['aq'], 'answer_id': var[
                            'aq_ba']}, carol, 'Carol attempt to downvote Alice question -> Bob answer', 'assert')
         self.action('setaccrten', {'user': 'carol', 'rating': defs['DOWNVOTE_ALLOWED'],
-                                   'energy': defs['ENERGY_DOWNVOTE_QUESTION']}, carol, "Set carol rating to { DOWNVOTE_ALLOWED }")
+                                   'energy': defs['ENERGY_DOWNVOTE_QUESTION']}, self.admin, "Set carol rating to { DOWNVOTE_ALLOWED }")
         self.wait()
         self.action('downvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': 0}, carol, 'Carol downvote Alice question')
         self.action('setaccrten', {'user': 'carol', 'rating': defs['DOWNVOTE_ALLOWED'],
-                                   'energy': defs['ENERGY_DOWNVOTE_ANSWER']}, carol, "Set carol rating to { DOWNVOTE_ALLOWED }")
+                                   'energy': defs['ENERGY_DOWNVOTE_ANSWER']}, self.admin, "Set carol rating to { DOWNVOTE_ALLOWED }")
         self.action('downvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': var['aq_ba']}, carol, 'Carol downvote Alice question -> Bob answer')
         end()

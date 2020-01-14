@@ -82,7 +82,7 @@ class TestTokenIntegration(peeranhatest.peeranhaTest):
 
     def _update_rating(self, user, rating_change):
         self.action('chnguserrt', {
-            'user': user, 'rating_change': rating_change}, user, user + ' rating change ' + str(rating_change))
+            'user': user, 'rating_change': rating_change}, self.admin, user + ' rating change ' + str(rating_change))
 
     def _run_scenario(self, rating_change_scenario):
         all_users = [self.register_alice_account(10, 10),
@@ -141,7 +141,6 @@ class TestTokenIntegration(peeranhatest.peeranhaTest):
                         self.assertTrue(this_week['rating_to_award'] == 0)
                 else:
                     info(name + ' reward rating is 0')
-                    print(this_week['rating_to_award'], user)
                     self.assertTrue(this_week['rating_to_award'] == 0)
             e_total_rating.append(self._build_total_rating_element(period_id))
             total_get = self._fing_item_with_period(

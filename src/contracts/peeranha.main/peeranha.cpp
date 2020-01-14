@@ -179,7 +179,7 @@ void peeranha::freeindex(int size) {
 }
 #endif
 
-#if STAGE == 1
+#if STAGE == 1 || STAGE == 2
 void peeranha::setaccrten(eosio::name user, int rating, int16_t energy) {
   require_auth(_self);
   auto itr = find_account(user);
@@ -259,6 +259,15 @@ void peeranha::resettables() {
   auto iter_question = question_table.begin();
   while (iter_question != question_table.end())
     iter_question = question_table.erase(iter_question);
+
+#if STAGE == 2
+  // clean constants
+  constants_index all_constants_table(_self, scope_all_constants);
+  auto iter_constants = all_constants_table.begin();
+  while (iter_constants != all_constants_table.end()) {
+    iter_constants = all_constants_table.erase(iter_constants);
+  }
+#endif
 }
 
 void peeranha::chnguserrt(eosio::name user, int16_t rating_change) {
@@ -285,12 +294,12 @@ EOSIO_DISPATCH(peeranha,
                    delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(
                    modcomment)(upvote)(downvote)(mrkascorrect)(reportforum)(
                    crtag)(crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(
-                   followcomm)(unfollowcomm)(updateacc)(givemoderflg)
+                   followcomm)(unfollowcomm)(reportprof)(updateacc)(givemoderflg)
 #ifdef SUPERFLUOUS_INDEX
                    (freeindex)
 #endif
 
-#if STAGE == 1
+#if STAGE == 1 || STAGE == 2
                        (chnguserrt)(resettables)(setaccrten)
 #endif
                            (init)(payforcpu))

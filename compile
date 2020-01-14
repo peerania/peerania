@@ -87,11 +87,11 @@ case $STAGE in
     echo -e "\e[91mCompiling debug contract!!!\e[0m"
     if [ $COMPILE_MAIN -eq 1 ] 
     then
-        eosio-cpp -abigen -o $PEERANHA_MAIN_PATH/peeranha.main.wasm $PEERANHA_MAIN_PATH/peeranha_debug.cpp -I$UTILS_PATH -R$PEERANHA_MAIN_PATH/rc -DSTAGE=2 $ADDITIONAL_FLAGS
+        eosio-cpp -abigen -o $PEERANHA_MAIN_PATH/peeranha.main.wasm $PEERANHA_MAIN_PATH/peeranha.cpp -I$UTILS_PATH -R$PEERANHA_MAIN_PATH/rc -DSTAGE=2 $ADDITIONAL_FLAGS
     fi
     if [ $COMPILE_TOKEN -eq 1 ] 
     then
-        eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peeranha.token.wasm $PEERANHA_TOKEN_PATH/token_debug.cpp -I$UTILS_PATH -DSTAGE=2 $ADDITIONAL_FLAGS
+        eosio-cpp -abigen -o $PEERANHA_TOKEN_PATH/peeranha.token.wasm $PEERANHA_TOKEN_PATH/token.cpp -I$UTILS_PATH -DSTAGE=2 $ADDITIONAL_FLAGS
     fi
     ;;
     $TEST)

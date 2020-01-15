@@ -10,6 +10,7 @@
 #include "peeranha_types.h"
 #include "token_period.hpp"
 
+
 namespace eosio {
 
 using std::string;
@@ -53,6 +54,7 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
   [[eosio::action]] void rewardrefer(name invited_user);
 
   static asset get_supply(name token_contract_account, symbol_code sym_code) {
+
     stats statstable(token_contract_account, sym_code.raw());
     const auto &st = statstable.get(sym_code.raw());
     return st.supply;
@@ -111,6 +113,7 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
   struct [[
     eosio::table("invited"), , eosio::contract("peeranha.token")
   ]] invited_users {
+
     name invited_user;
     name inviter;
     asset common_reward;

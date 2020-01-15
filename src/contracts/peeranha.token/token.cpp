@@ -231,6 +231,7 @@ void token::inviteuser(name inviter, name invited_user) {
 
   account_index account_table(peeranha_main, scope_all_accounts);
   auto iter_account_invited_user = account_table.find(invited_user.value);
+
   eosio::check(iter_account_invited_user == account_table.end(),
                "Invited user already registred");
 
@@ -239,11 +240,14 @@ void token::inviteuser(name inviter, name invited_user) {
                "Inviter isn't registed");
 
   //eosio::check(inviter != invited_user, "Can't invite self");
+
   invited_users_index invited_users_table(_self, all_invited);
   auto iter_invited_user = invited_users_table.find(invited_user.value);
   eosio::check(iter_invited_user == invited_users_table.end(),
                "This user already invited");
+
   const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+
   invited_users_table.emplace(
       _self, [inviter, invited_user, sym](auto &inviter_invited_user) {
         inviter_invited_user.inviter = inviter;
@@ -278,18 +282,22 @@ void token::rewardrefer(name invited_user) {
 
   account_index account_table(peeranha_main, scope_all_accounts);
   auto iter_account_invited_user = account_table.find(invited_user.value);
+
   eosio::check(
       iter_account_invited_user->pay_out_rating >= REFERAL_TARGET_RATING_REACHED,
       "Invited user douesn't reached required rating");
+
 
   statstable.modify(st, _self, [&quantity](auto &s) {
     s.supply += quantity;
     s.user_supply += quantity;
   });
+  
   invited_users_table.modify(iter_invited_user, _self,
                              [quantity](auto &inviter_invited_user) {
                                inviter_invited_user.common_reward = quantity;
                              });
+
   auto inviter_supply = quantity * REFERAL_SPLIT_COEFFICIENT / 100;
 
   add_balance(iter_invited_user->inviter, inviter_supply, _self);
@@ -297,6 +305,7 @@ void token::rewardrefer(name invited_user) {
 }
 
 #if STAGE == 1 || STAGE == 2
+
 void token::resettables(std::vector<eosio::name> allaccs) {
   require_auth(_self);
   for (auto iter_acc = allaccs.begin(); iter_acc != allaccs.end(); iter_acc++) {
@@ -347,5 +356,6 @@ EOSIO_DISPATCH(eosio::token,
 #if STAGE == 2
                        (mapcrrwpool)
 #endif
+
 #endif
 )

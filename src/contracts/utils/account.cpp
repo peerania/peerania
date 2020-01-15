@@ -66,11 +66,13 @@ bool is_moderation_availble() {
   auto settings = all_constants_table.rbegin();
   time START_PERIOD_TIME = settings->start_period_time;
 #endif
+
   return now() < START_PERIOD_TIME + MODERATION_AVAILABLE_PERIOD;
 }
 
 bool account::has_moderation_flag(int mask) const {
   if (is_moderation_availble()) {
+
     int moderator_flags =
         get_property_d(integer_properties, PROPERTY_MODERATOR_FLAGS, 0);
     return moderator_flags & mask;

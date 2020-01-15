@@ -29,6 +29,8 @@
 #define USER_SHARES 60
 
 #define REFERAL_SPLIT_COEFFICIENT 50  // The percentage passing to inviter
+
+
 #define REFERAL_TARGET_RATING_REACHED 35
 
 #define TOKEN_PRECISION 6

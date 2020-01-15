@@ -1,0 +1,79 @@
+#pragma once
+
+#define PROPERTY_MODERATOR_FLAGS 48
+#define MODERATOR_FLG_INFINITE_ENERGY (1 << 0)
+#define MODERATOR_FLG_INFINITE_IMPACT (1 << 1)
+#define MODERATOR_FLG_IGNORE_RATING (1 << 2)
+#define MODERATOR_FLG_CREATE_COMMUNITY (1 << 3)
+#define MODERATOR_FLG_CREATE_TAG (1 << 4)
+
+#define MODERATION_IMPACT_INFINITE 255
+
+#if STAGE == 1
+#define MODERATION_AVAILABLE_PERIOD 1209600 // 2 week
+#else
+#define MODERATION_AVAILABLE_PERIOD 31536000  // One year
+#endif
+
+
+#define STATUS0(X) \
+  case 0 ... 99:   \
+    return (X)
+#define STATUS1(X)  \
+  case 100 ... 499: \
+    return (X)
+#define STATUS2(X)  \
+  case 500 ... 999: \
+    return (X)
+#define STATUS3(X)    \
+  case 1000 ... 2499: \
+    return (X)
+#define STATUS4(X)    \
+  case 2500 ... 4999: \
+    return (X)
+#define STATUS5(X)    \
+  case 5000 ... 9999: \
+    return (X)
+#define STATUS6(X) \
+  default:         \
+    return (X)
+
+#define STATUS0_ENERGY 300
+#define STATUS1_ENERGY 600
+#define STATUS2_ENERGY 900
+#define STATUS3_ENERGY 1200
+#define STATUS4_ENERGY 1500
+#define STATUS5_ENERGY 1800
+#define STATUS6_ENERGY 2100
+
+#if STAGE==1 
+
+// Account period
+#define ACCOUNT_STAT_RESET_PERIOD 1800 // 30 Minutes
+#define BAN_RATING_INCREMENT_PER_PERIOD 6
+
+// Account report reset time
+#define MIN_FREEZE_PERIOD 7200           // 2 hour
+#define REPORT_RESET_PERIOD 7200         // 2 hour
+#define REPORT_POWER_RESET_PERIOD 14400  // 4 hour
+
+#define POINTS_TO_FREEZE 9
+#define MODERATION_POINTS_REPORT_PROFILE 2
+#define MAX_FREEZE_PERIOD_MULTIPLIER 6
+
+#else
+
+// Account period
+#define ACCOUNT_STAT_RESET_PERIOD 259200 // 3 Days
+#define BAN_RATING_INCREMENT_PER_PERIOD 6
+
+// Account report reset time
+#define MIN_FREEZE_PERIOD 302400           // 3.5 Days
+#define REPORT_RESET_PERIOD 2592000        // 30 Days
+#define REPORT_POWER_RESET_PERIOD 10368000 // 120 Days
+
+#define POINTS_TO_FREEZE 90
+#define MODERATION_POINTS_REPORT_PROFILE 2
+#define MAX_FREEZE_PERIOD_MULTIPLIER 6
+
+#endif

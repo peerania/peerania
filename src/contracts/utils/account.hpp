@@ -2,26 +2,11 @@
 #include <eosio/eosio.hpp>
 #include <eosio/system.hpp>
 #include <string>
-#include "economy.h"
 #include "peeranha_types.h"
 #include "property.hpp"
 #include "token_common.hpp"
 #include "IpfsHash.hpp"
-
-#define PROPERTY_MODERATOR_FLAGS 48
-#define MODERATOR_FLG_INFINITE_ENERGY (1 << 0)
-#define MODERATOR_FLG_INFINITE_IMPACT (1 << 1)
-#define MODERATOR_FLG_IGNORE_RATING (1 << 2)
-#define MODERATOR_FLG_CREATE_COMMUNITY (1 << 3)
-#define MODERATOR_FLG_CREATE_TAG (1 << 4)
-
-#define MODERATION_IMPACT_INFINITE 255
-
-#if STAGE == 1
-#define MODERATION_AVAILABLE_PERIOD 1209600 // 2 week
-#else
-#define MODERATION_AVAILABLE_PERIOD 31536000  // One year
-#endif
+#include "account_economy.h"
 
 struct report {
   eosio::name user;
@@ -33,7 +18,6 @@ struct given_answer {
   uint64_t question_id;
   uint16_t answer;
 };
-
 
 struct [[ eosio::table("account"), eosio::contract("peeranha.main") ]] account {
   eosio::name user;

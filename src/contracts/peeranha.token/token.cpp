@@ -78,9 +78,7 @@ void token::retire(asset quantity, string memo) {
                "symbol precision mismatch");
 
   statstable.modify(st, same_payer,
-                    [&](auto &s) {
-                      s.funding_supply -= quantity; 
-                      });
+                    [&](auto &s) { s.funding_supply -= quantity; });
 
   sub_balance(st.issuer, quantity);
 }
@@ -165,7 +163,7 @@ asset token::create_reward_pool(uint16_t period, int total_rating) {
        ++inflation_period) {
     inflation_reward_pool *= POOL_REDUSE_COEFFICIENT;
   }
-  int64_t reward_pool = int64_to_peer(total_rating * RATING_TOKEN_COFICIENT);
+  int64_t reward_pool = int64_to_peer(total_rating * RATING_TOKEN_COEFFICIENT);
   if (reward_pool > inflation_reward_pool) {
     reward_pool = inflation_reward_pool;
   }
@@ -229,6 +227,67 @@ void token::pickupreward(name user, const uint16_t period) {
   add_balance(user, user_reward, user);
 }
 
+void token::inviteuser(name inviter, name invited_user) {
+  require_auth(invited_user);
+
+  account_index account_table(peeranha_main, scope_all_accounts);
+  auto iter_account_invited_user = account_table.find(invited_user.value);
+  eosio::check(iter_account_invited_user == account_table.end(), "Invited user already registred");
+
+  eosio::check(inviter != invited_user, "Can't invite self");
+  invited_users_index invited_users_table(_self, all_invited);
+  auto iter_invited_user = invited_users_table.find(invited_user.value);
+  eosio::check(iter_invited_user == invited_users_table.end(),
+               "This user already invited");
+               const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+  invited_users_table.emplace(
+      _self, [inviter, invited_user, sym](auto &inviter_invited_user) {
+        inviter_invited_user.inviter = inviter;
+        inviter_invited_user.invited_user = invited_user;
+        inviter_invited_user.common_reward.symbol = sym;
+      });
+}
+
+void token::rewardrefer(name invited_user) {
+  require_auth(invited_user);
+  invited_users_index invited_users_table(_self, all_invited);
+  auto iter_invited_user = invited_users_table.find(invited_user.value);
+  eosio::check(iter_invited_user != invited_users_table.end(),
+               "This user already invited");
+  eosio::check(iter_invited_user->common_reward.amount == 0, "This users already rewarded");
+
+  const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+  auto quantity = asset(int64_to_peer(REFERAL_REWARD), sym);
+  stats statstable(_self, sym.code().raw());
+
+  auto existing = statstable.find(sym.code().raw());
+  eosio::check(existing != statstable.end(),
+               "token with symbol does not exist, create token before issue");
+  const auto &st = *existing;
+
+  eosio::check(quantity.symbol == st.supply.symbol,
+               "symbol precision mismatch");
+  eosio::check(
+      quantity.amount <= st.user_max_supply.amount - st.user_supply.amount,
+      "quantity exceeds available supply");
+
+  account_index account_table(peeranha_main, scope_all_accounts);
+  auto iter_account_invited_user = account_table.find(invited_user.value);
+  eosio::check(iter_account_invited_user->pay_out_rating > REFERAL_TARGET_RATING_REACHED, "Invited user douesn't reached required rating");
+
+  statstable.modify(st, _self, [&quantity](auto &s) {
+    s.supply += quantity;
+    s.user_supply += quantity;
+  });
+  invited_users_table.modify(iter_invited_user, _self, [quantity](auto &inviter_invited_user) {
+    inviter_invited_user.common_reward = quantity;
+  });
+  auto inviter_supply = quantity * REFERAL_SPLIT_COEFFICIENT / 100;
+
+  add_balance(iter_invited_user->inviter, inviter_supply, _self);
+  add_balance(invited_user, quantity - inviter_supply, _self);
+}
+
 #if STAGE == 1
 void token::resettables(std::vector<eosio::name> allaccs) {
   require_auth(_self);
@@ -262,7 +321,7 @@ void token::resettables(std::vector<eosio::name> allaccs) {
 
 EOSIO_DISPATCH(eosio::token,
                (create)(issue)(transfer)(open)(close)(retire)(pickupreward)
-#if STAGE == 1 
-               (resettables)
+#if STAGE == 1
+                   (resettables)
 #endif
-               )
+)

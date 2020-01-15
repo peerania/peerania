@@ -66,7 +66,7 @@ class TestTokenIntegration(peeranhatest.peeranhaTest):
             self.action('mapcrrwpool', {'id': i, 'period': data[i]['period'], 'total_rating': data[i]['total_rating']},
                            'alice', f'Test with data {data[i]}', contract='token')
             self._compare_rewards(data[0]['expected'], self.table('dbginfl', 'allconstants', contract='token')[0]['inflation'])
-            self.action('resettables', {}, 'alice', 'Reset')
+            self.action('resettables', {}, self.admin, 'Reset')
             self.wait()
         end()
 
@@ -108,7 +108,7 @@ class TestTokenIntegration(peeranhatest.peeranhaTest):
         bob = self.register_bob_account(10, 10)
         for i in range(4):
             self.action('chnguserrt', {'user': alice, 'rating_change': 1},
-                        alice, alice + ' rating change 1')
+                        self.admin, alice + ' rating change 1')
             if i == 2:
                 self.failed_action('pickupreward', {'user': alice, 'period': i},
                                    alice, alice + ' attempt to pickup reward this period ' + str(i) + ' preiod', 'assert', contract='token')
@@ -170,11 +170,12 @@ class TestTokenIntegration(peeranhatest.peeranhaTest):
         user_reward = [0, 0, 0]
         total_reward = 0
         issued_reward = '0 PEER'
+        #sleep(PERIOD_LENGTH)
         for period in rating_change_scenario:
             info(f'Period {period_id} started')
             for i in range(3):
                 self.action('chnguserrt', {'user': all_users[i], 'rating_change': period[i]},
-                            all_users[i], all_users[i] + ' rating change ' + str(period[i]))
+                            self.admin, all_users[i] + ' rating change ' + str(period[i]))
                 if(period[i] != 0):
                     e_user_rating[i].append(
                         self._build_rating_element(period_id, all_users[i]))
@@ -195,8 +196,6 @@ class TestTokenIntegration(peeranhatest.peeranhaTest):
                             user_reward[i] += user_reward_this_period
                             info(
                                 f'{all_users[i]} pick up {user_reward_this_period}')
-                            print(user_reward[i], self.table(
-                                'accounts', name, contract='token')[0]["balance"])
                             self._compare_rewards(user_reward[i], self.table(
                                 'accounts', name, contract='token')[0]["balance"])
                     else:

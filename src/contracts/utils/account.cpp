@@ -61,13 +61,20 @@ uint16_t account::get_status_energy() const {
 }
 
 bool is_moderation_availble() {
+#if STAGE == 2
+  constants_index all_constants_table("peeranhamain"_n, scope_all_constants);
+  auto settings = all_constants_table.rbegin();
+  time START_PERIOD_TIME = settings->start_period_time;
+#endif
+
   return now() < START_PERIOD_TIME + MODERATION_AVAILABLE_PERIOD;
 }
 
 bool account::has_moderation_flag(int mask) const {
   if (is_moderation_availble()) {
-    int moderator_flags = get_property_d(
-        integer_properties, PROPERTY_MODERATOR_FLAGS, 0);
+
+    int moderator_flags =
+        get_property_d(integer_properties, PROPERTY_MODERATOR_FLAGS, 0);
     return moderator_flags & mask;
   }
   return false;

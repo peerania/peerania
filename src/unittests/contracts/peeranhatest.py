@@ -10,10 +10,10 @@ monday_1_october_2019 = 1569888000
 
 class peeranhaTest(EOSTest):
     DEFAULT_RATING = 200
-    DEFAULT_ENERGY = 50
+    DEFAULT_ENERGY = 300
     WAIT_FOR_NEW_BLOCK = 0.51
     contracts = {}
-
+    
     def setUp(self):
         self.action('create', {'issuer': 'peeranhatken', 'maximum_supply': '100.000000 PEER'},
                     'peeranhatken', 'Create token PEER', contract='token', suppress_output=True)
@@ -26,9 +26,10 @@ class peeranhaTest(EOSTest):
             self.action('crcommunity', {'user': admin, 'name': f'Community {i+1}', 'ipfs_description': 'undefined', 'suggested_tags': 
                 [{'name': f'Community {i+1} tag {j+1}', 'ipfs_description': 'undefined'} for j in range(6)]}, admin, f'Create community {i+1}', suppress_output=True)
         self.action('setaccrten', {'user': admin, 'rating': -1, 'energy': -1}, admin, 'Delete admin account', suppress_output=True)
+        self.admin = admin
 
     def tearDown(self):
-        self.action('resettables', {}, self.get_contract_deployer(
+        self.action('resettables', {'allaccs': ['alice', 'bob', 'carol', 'ted', 'dan', 'frank']}, self.get_contract_deployer(
             'token'), 'Reset all token tables', contract='token', suppress_output=True)
         self.action('resettables', {}, self.get_contract_deployer(
             self.get_default_contract()), 'Reset all tables', suppress_output=True)
@@ -82,7 +83,7 @@ class peeranhaTest(EOSTest):
         if energy is None:
             energy = self.DEFAULT_ENERGY
         self.action('setaccrten', {'user': str(user), 'rating': rating, 'energy': energy},
-                    user, 'Set {} rating to {} and give {} energy'.format(str(user), rating, energy))
+                    self.admin, 'Set {} rating to {} and give {} energy'.format(str(user), rating, energy))
         return user
 
 
@@ -96,7 +97,7 @@ def get_expected_account_body(user):
         'rating': '#var ' + str(user) + '_rating',
         'string_properties': [],
         'integer_properties': [],
-        'energy': 50,  # probably better to load from defines
+        'energy': 300,  # probably better to load from defines
         'reports': [],
         'report_power': 0,
         'is_frozen': False,

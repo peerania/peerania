@@ -1,8 +1,7 @@
 #pragma once
-#include <eosio/name.hpp>
 
 // Limit to delte
-#if STAGE == 1
+#if STAGE == 1 || STAGE == 2
 #define REPORT_POINTS_QUESTION 7
 #define REPORT_POINTS_ANSWER 5
 #define REPORT_POINTS_COMMENT 3
@@ -24,7 +23,7 @@
 #define ANSWER_DOWNVOTED_REWARD -2
 
 // Stub solution
-#if STAGE == 1
+#if STAGE == 1 || STAGE == 2
 
 #define VOTES_TO_CREATE_COMMUNITY 4
 #define VOTES_TO_DELETE_COMMUNITY -3

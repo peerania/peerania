@@ -7,7 +7,10 @@ from unittest import main
 from random import randint
 from time import sleep
 
-economy = load_defines('src/contracts/peeranha.main/economy.h')
+economy = {
+    **load_defines('src/contracts/peeranha.main/economy.h'),
+    **load_defines('src/contracts/utils/account_economy.h')
+}
 
 class FrumStatusLimitsTests(peeranhatest.peeranhaTest):
 
@@ -21,7 +24,7 @@ class FrumStatusLimitsTests(peeranhatest.peeranhaTest):
         self.action('followcomm', {'user': alice, 'community_id': 1}, alice, 'Call stub action')
         e = [{'user': 'alice', 'energy': economy['STATUS1_ENERGY'] - economy['ENERGY_FOLLOW_COMMUNITY']}]
         self.assertTrue(compare(e, self.table('account', 'allaccounts'), var, True))
-        self.action('setaccrten', {'user': alice, 'rating': 999, 'energy': 0}, alice, 'Took all moderation points, give 999 rating')
+        self.action('setaccrten', {'user': alice, 'rating': 999, 'energy': 0}, self.admin, 'Took all moderation points, give 999 rating')
         info('Wait until period ends')
         sleep(3)
         info('All stats restored')

@@ -324,7 +324,8 @@ void token::resettables(std::vector<eosio::name> allaccs) {
   const symbol sym = symbol("PEER", TOKEN_PRECISION);
   stats statstable(_self, sym.code().raw());
   auto existing = statstable.find(sym.code().raw());
-  statstable.erase(existing);
+  if (existing != statstable.end())
+    statstable.erase(existing);
 
   total_reward_index total_reward_table(_self, scope_all_periods);
   auto iter_total_reward = total_reward_table.begin();

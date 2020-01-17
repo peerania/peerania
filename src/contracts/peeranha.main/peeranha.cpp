@@ -156,6 +156,11 @@ void peeranha::givemoderflg(eosio::name user, int flags) {
   give_moderator_flag(user, flags);
 }
 
+void peeranha::setcommipfs(uint16_t community_id, IpfsHash new_ipfs_link) {
+  require_auth(_self);
+  set_community_ipfs_hash(community_id, new_ipfs_link);
+}
+
 #ifdef SUPERFLUOUS_INDEX
 void peeranha::freeindex(int size) {
   require_auth(_self);
@@ -249,7 +254,7 @@ void peeranha::resettables() {
     iter_community = community_table.erase(iter_community);
   }
 
-  // clean reward total
+  // clean total rating
   auto iter_total_rating = total_rating_table.begin();
   while (iter_total_rating != total_rating_table.end()) {
     iter_total_rating = total_rating_table.erase(iter_total_rating);
@@ -257,9 +262,16 @@ void peeranha::resettables() {
 
   // clean forum
   auto iter_question = question_table.begin();
-  while (iter_question != question_table.end())
+  while (iter_question != question_table.end()) {
     iter_question = question_table.erase(iter_question);
+  }
 
+  // clean global statistics
+  global_stat_index global_stat_table(_self, scope_all_stat);
+  auto iter_global_stat = global_stat_table.begin();
+  while (iter_global_stat != global_stat_table.end()) {
+    iter_global_stat = global_stat_table.erase(iter_global_stat);
+  }
 #if STAGE == 2
   // clean constants
   constants_index all_constants_table(_self, scope_all_constants);
@@ -289,17 +301,18 @@ void peeranha::init() {
   });
 }
 
-EOSIO_DISPATCH(peeranha,
-               (registeracc)(setaccprof)(postquestion)(postanswer)(postcomment)(
-                   delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(
-                   modcomment)(upvote)(downvote)(mrkascorrect)(reportforum)(
-                   crtag)(crcommunity)(vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(
-                   followcomm)(unfollowcomm)(reportprof)(updateacc)(givemoderflg)
+EOSIO_DISPATCH(
+    peeranha,
+    (registeracc)(setaccprof)(postquestion)(postanswer)(postcomment)(
+        delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(modcomment)(
+        upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
+        vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
+        reportprof)(updateacc)(givemoderflg)(setcommipfs)
 #ifdef SUPERFLUOUS_INDEX
-                   (freeindex)
+        (freeindex)
 #endif
 
 #if STAGE == 1 || STAGE == 2
-                       (chnguserrt)(resettables)(setaccrten)
+            (chnguserrt)(resettables)(setaccrten)
 #endif
-                           (init)(payforcpu))
+                (init)(payforcpu))

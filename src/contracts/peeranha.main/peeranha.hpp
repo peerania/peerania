@@ -116,6 +116,10 @@ class [[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
   // Action give moderator flags
   ACTION givemoderflg(eosio::name user, int flags);
 
+  // Action to update hash of community profile IPFS document
+  ACTION setcommipfs(uint16_t community_id,
+                        IpfsHash new_ipfs_link);
+
 #ifdef SUPERFLUOUS_INDEX
   // Delete @count@ items from superfluous index tebles
   ACTION freeindex(int count);
@@ -263,4 +267,6 @@ ACTION chnguserrt(eosio::name user, int16_t rating_change);
   void update_account(eosio::name user);
 
   void give_moderator_flag(eosio::name user, int flags);
+
+  void set_community_ipfs_hash(uint16_t community_id, const IpfsHash &new_ipfs_link);
 };

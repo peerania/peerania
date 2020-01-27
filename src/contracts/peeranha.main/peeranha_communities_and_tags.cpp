@@ -389,3 +389,12 @@ void peeranha::unfollow_community(eosio::name user, uint16_t community_id) {
     account.followed_communities.erase(community);
   });
 }
+
+void peeranha::set_community_ipfs_hash(uint16_t community_id, const IpfsHash &new_ipfs_link){
+  community_table_index community_table(_self, scope_all_communities);
+  auto iter_community = community_table.find(community_id);
+  community_table.modify(iter_community, _self,
+                         [new_ipfs_link](auto &community) {
+                           community.ipfs_description = new_ipfs_link;
+                         });
+}

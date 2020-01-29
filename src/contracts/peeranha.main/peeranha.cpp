@@ -18,9 +18,9 @@ void peeranha::setaccprof(eosio::name user, IpfsHash ipfs_profile,
 
 void peeranha::postquestion(eosio::name user, uint16_t community_id,
                             std::vector<uint32_t> tags, std::string title,
-                            IpfsHash ipfs_link) {
+                            IpfsHash ipfs_link, const uint8_t type) {
   require_auth(user);
-  post_question(user, community_id, tags, title, ipfs_link);
+  post_question(user, community_id, tags, title, ipfs_link, type);
 }
 
 void peeranha::postanswer(eosio::name user, uint64_t question_id,
@@ -159,6 +159,11 @@ void peeranha::givemoderflg(eosio::name user, int flags) {
 void peeranha::setcommipfs(uint16_t community_id, IpfsHash new_ipfs_link) {
   require_auth(_self);
   set_community_ipfs_hash(community_id, new_ipfs_link);
+}
+
+void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating){
+   require_auth(user);
+   change_question_type(user, question_id, type, restore_rating);
 }
 
 #ifdef SUPERFLUOUS_INDEX

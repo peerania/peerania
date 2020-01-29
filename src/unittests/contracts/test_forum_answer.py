@@ -319,7 +319,7 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         end()
 
     def _register_question_action(self, user, ipfs_link, id_var=''):
-        self.action('postquestion', {'user': str(user), 'title': 'title ' + ipfs_link, 'ipfs_link': ipfs_link, 'community_id': 1, 'tags': [1]}, user,
+        self.action('postquestion', {'user': str(user), 'title': 'title ' + ipfs_link, 'ipfs_link': ipfs_link, 'community_id': 1, 'tags': [1], 'type': 0}, user,
                     'Asking question from {} with text "{}"'.format(str(user), ipfs_link))
         return {'id': '#ignore' if id_var == '' else '#var ' + id_var,
                 'user': str(user),

@@ -73,11 +73,11 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
     def test_unique_tag_assert_failed(self):
         begin('Test tag unique constraint', True)
         alice = self.register_alice_account()
-        self.failed_action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [1, 2, 1, 4], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.failed_action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [1, 2, 1, 4], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                            'Alice attempt ask question with tags [1, 2, 1, 4] - 1 is duplicate', 'assert')
         # self.failed_action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
         #                   'Alice attempt to ask question with no tags', 'assert')
-        self.action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                     'Alice ask question')
         var = {}
         self.assertTrue(compare([{'id': '#var aq',
@@ -91,18 +91,18 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
     def test_non_existing_tag_community_failed(self):
         begin('Test register question with not existing tag or community', True)
         alice = self.register_alice_account()
-        self.failed_action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [1, 9], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.failed_action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [1, 9], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                            'Alice attempt ask question with non-existing tag [1, 9] - 9 non-exist', 'assert')
-        self.failed_action('postquestion', {'user': 'alice', 'community_id': 5, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.failed_action('postquestion', {'user': 'alice', 'community_id': 5, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                            'Alice attempt to ask question with non-existing community - 5', 'assert')
-        self.action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                     'Alice ask question')
         var = {}
         self.assertTrue(compare([{'id': '#var aq',
                                   'user': 'alice'}], self.table('question', 'allquestions'), var, True))
         self.failed_action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 9], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                            'Alice attempt to modify own question - set non-existing tag [1, 9] - 9 non-exist', 'assert')
-        self.failed_action('postquestion', {'user': 'alice', 'question_id': var['aq'],  'community_id': 5, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.failed_action('postquestion', {'user': 'alice', 'question_id': var['aq'],  'community_id': 5, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                            'Alice attempt to modify own question - set non-existing community - 5', 'assert')
         end()
 
@@ -424,9 +424,9 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
     def _create_basic_hierarchy(self):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [2, 3, 4, 5], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [2, 3, 4, 5], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                     'Alice asking question')
-        self.action('postquestion', {'user': 'bob', 'community_id': 1, 'tags': [1, 2, 3], 'title': 'Title bob question', 'ipfs_link': 'BQ'}, bob,
+        self.action('postquestion', {'user': 'bob', 'community_id': 1, 'tags': [1, 2, 3], 'title': 'Title bob question', 'ipfs_link': 'BQ', 'type': 0}, bob,
                     'Bob asking question')
         e = ['#ignoreorder', {
             'id': '#var aq',

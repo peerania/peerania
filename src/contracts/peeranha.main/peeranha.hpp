@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <unordered_map>
 #include "access.hpp"
 #include "account.hpp"
 #include "communities_and_tags.hpp"
@@ -50,7 +51,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     // Post question
     ACTION postquestion(eosio::name user, uint16_t community_id,
                         std::vector<uint32_t> tags, std::string title,
-                        IpfsHash ipfs_link);
+                        IpfsHash ipfs_link, uint8_t type);
 
     // Post answer(answer question)
     ACTION postanswer(eosio::name user, uint64_t question_id,
@@ -137,6 +138,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     ACTION setcommipfs(uint16_t community_id,
                         IpfsHash new_ipfs_link);
 
+    ACTION chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating);
+
 #ifdef SUPERFLUOUS_INDEX
     // Delete @count@ items from superfluous index tebles
     ACTION freeindex(int count);
@@ -198,7 +201,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void post_question(eosio::name user, uint16_t community_id,
                        const std::vector<uint32_t> tags,
-                       const std::string &title, const IpfsHash &ipfs_link);
+                       const std::string &title, const IpfsHash &ipfs_link,
+                       const uint8_t type);
 
     void post_answer(eosio::name user, uint64_t question_id,
                      const IpfsHash &ipfs_link);
@@ -287,4 +291,6 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     void give_moderator_flag(eosio::name user, int flags);
 
     void set_community_ipfs_hash(uint16_t community_id, const IpfsHash &new_ipfs_link);
+
+    void change_question_type(eosio::name user, uint64_t question_id, int type, bool restore_rating);
   };

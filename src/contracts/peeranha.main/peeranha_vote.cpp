@@ -14,25 +14,36 @@ void peeranha::vote_forum_item(eosio::name user, uint64_t question_id,
       [answer_id, is_upvote, iter_account, &target_user,
        &target_user_rating_change, &caller_rating_change,
        &energy](auto &question) {
+        auto vote_question_res = VoteItem::question;
+        auto vote_answer_res = VoteItem::answer;
+        switch (get_property_d(
+            question.properties, PROPERTY_QUESTION_TYPE, QUESTION_TYPE_EXPERT)) {
+          case QUESTION_TYPE_GENERAL: {
+            vote_question_res = VoteItem::common_question;
+            vote_answer_res = VoteItem::common_answer;
+          } break;
+          default:
+            break;
+        }
         if (apply_to_question(answer_id)) {
           target_user = question.user;
           if (is_upvote)
             upvote_item(question, iter_account, energy, caller_rating_change,
-                        target_user_rating_change, VoteItem::question);
+                        target_user_rating_change, vote_question_res);
           else
             downvote_item(question, iter_account, energy, caller_rating_change,
-                          target_user_rating_change, VoteItem::question);
+                          target_user_rating_change, vote_question_res);
         } else {
           auto iter_answer = find_answer(question, answer_id);
           target_user = iter_answer->user;
           if (is_upvote)
             upvote_item(*iter_answer, iter_account, energy,
                         caller_rating_change, target_user_rating_change,
-                        VoteItem::answer);
+                        vote_answer_res);
           else
             downvote_item(*iter_answer, iter_account, energy,
                           caller_rating_change, target_user_rating_change,
-                          VoteItem::answer);
+                          vote_answer_res);
         }
       });
   update_rating(iter_account, caller_rating_change,
@@ -64,8 +75,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
             // set_report_points_and_history - modify question
             snitch_reduce_energy_value = ENERGY_REPORT_QUESTION;
             delete_question = set_report_points_and_history(
-                question, *iter_account,
-                REPORT_POINTS_QUESTION);
+                question, *iter_account, REPORT_POINTS_QUESTION);
             if (delete_question) {
               item_user = question.user;
               user_rating_change -= upvote_count(question.history) *
@@ -76,9 +86,8 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
             // Delete comment to question by vote (answer_id == 0)
             auto iter_comment = find_comment(question, comment_id);
 
-            if (set_report_points_and_history(
-                    *iter_comment, *iter_account,
-                    REPORT_POINTS_COMMENT)) {
+            if (set_report_points_and_history(*iter_comment, *iter_account,
+                                              REPORT_POINTS_COMMENT)) {
               item_user = iter_comment->user;
               user_rating_change += COMMENT_DELETED_REWARD;
               question.comments.erase(iter_comment);
@@ -90,9 +99,8 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
         if (apply_to_answer(comment_id)) {
           // Delete answer to question by vote (comment_id == 0)
           snitch_reduce_energy_value = ENERGY_REPORT_ANSWER;
-          if (set_report_points_and_history(
-                  *iter_answer, *iter_account,
-                  REPORT_POINTS_ANSWER)) {
+          if (set_report_points_and_history(*iter_answer, *iter_account,
+                                            REPORT_POINTS_ANSWER)) {
             // Get for mark as correct
             item_user = iter_answer->user;
             if (question.correct_answer_id == iter_answer->id) {
@@ -109,9 +117,8 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
         } else {
           // Delete comment to answer
           auto iter_comment = find_comment(*iter_answer, comment_id);
-          if (set_report_points_and_history(
-                  *iter_comment, *iter_account,
-                  REPORT_POINTS_COMMENT)) {
+          if (set_report_points_and_history(*iter_comment, *iter_account,
+                                            REPORT_POINTS_COMMENT)) {
             item_user = iter_comment->user;
             user_rating_change += COMMENT_DELETED_REWARD;
             iter_answer->comments.erase(iter_comment);

@@ -350,7 +350,7 @@ class ForumVoteTests(peeranhatest.peeranhaTest):
         end()
 
     def _create_basic_hierarchy(self, alice, bob):
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1, 2, 3]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1, 2, 3], 'type': 0}, alice,
                     'Asking question from alice with text "Alice question"')
         e = ['#ignoreorder', {
             'id': '#var aq',
@@ -384,7 +384,7 @@ class ForumVoteTests(peeranhatest.peeranhaTest):
             'post_time': '#ignore',
             'rating': '#var aq_ba_rating',
             'comments': []})
-        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'Bob question', 'community_id': 1, 'tags': [1, 2, 3]}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'Bob question', 'community_id': 1, 'tags': [1, 2, 3], 'type': 0}, bob,
                     'Asking question from bob with text "Bob question"')
         e.append({
             'id': '#var bq',

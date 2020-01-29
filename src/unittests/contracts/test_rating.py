@@ -183,7 +183,7 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
         begin('Mark own answer as correct rating change')
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         self.forum_e = [{
             'id': '#var aq',
@@ -477,9 +477,9 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
-        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'BQ', 'community_id': 1, 'tags': [1]}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'BQ', 'community_id': 1, 'tags': [1], 'type': 0}, bob,
                     'Bob asking question')
         self.forum_e = ['#ignoreorder',
                         {

@@ -27,8 +27,13 @@
 #define PROPERTY_REPORT_POINTS 1
 #define PROPERTY_MODERATION_VOTES 2
 #define PROPERTY_LAST_MODIFIED 3
+#define PROPERTY_QUESTION_TYPE 4
 
 #define MAX_QUESTION_ID 0xfffffffffULL
+
+#define QUESTION_TYPE_EXPERT 0
+#define QUESTION_TYPE_GENERAL 1
+
 
 struct comment {
   uint16_t id;
@@ -138,6 +143,10 @@ typedef eosio::multi_index<"usranswers"_n, usranswers> user_answers_index;
 
 inline void assert_title(const std::string &title) {
   assert_readble_string(title, 3, 256, "Invalid title length");
+}
+
+inline void assert_question_type(int question_type){
+  eosio::check(question_type <= QUESTION_TYPE_GENERAL, "Question type not exists");
 }
 
 /*

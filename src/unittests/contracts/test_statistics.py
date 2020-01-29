@@ -15,7 +15,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
             for tag in self.table('tags', get_tag_scope(comm['id'])):
                 self.assertTrue(tag['questions_asked'] == 0)
             self.assertTrue(comm['questions_asked'] == 0)
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         self.assertTrue(self.table('account', 'allaccounts')
                         [0]['questions_asked'] == 1)
@@ -39,7 +39,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
             'account', 'allaccounts'), 'user', 'bob')['answers_given'] == 0)
         for comm in self.table('communities', 'allcomm'):
             self.assertTrue(comm['answers_given'] == 0)
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         question_id = self.table('question', 'allquestions')[0]['id']
         self.action('postanswer', {'user': 'bob', 'question_id': question_id, 'ipfs_link': 'AQ->BA'},
@@ -58,7 +58,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
             'account', 'allaccounts'), 'user', 'alice')['answers_given'] == 0)
         for comm in self.table('communities', 'allcomm'):
             self.assertTrue(comm['answers_given'] == 0)
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         question_id = self.table('question', 'allquestions')[0]['id']
         self.action('postanswer', {'user': 'alice', 'question_id': question_id, 'ipfs_link': 'AQ->BA'},
@@ -78,7 +78,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
             'account', 'allaccounts'), 'user', 'bob')['correct_answers'] == 0)
         for comm in self.table('communities', 'allcomm'):
             self.assertTrue(comm['correct_answers'] == 0)
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         question = self.table('question', 'allquestions')[0]
         self.action('postanswer', {'user': 'bob', 'question_id': question['id'], 'ipfs_link': 'AQ->BA'},
@@ -100,7 +100,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
             'account', 'allaccounts'), 'user', 'alice')['correct_answers'] == 0)
         for comm in self.table('communities', 'allcomm'):
             self.assertTrue(comm['correct_answers'] == 0)
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         question = self.table('question', 'allquestions')[0]
         self.action('postanswer', {'user': 'alice', 'question_id': question['id'], 'ipfs_link': 'AQ->BA'},
@@ -119,7 +119,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
         begin('Test mark answer as correct change to own')
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         question = self.table('question', 'allquestions')[0]
         self.action('postanswer', {'user': 'bob', 'question_id': question['id'], 'ipfs_link': 'AQ->BA'},
@@ -145,7 +145,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
         begin('Test mark answer as correct change from own')
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         question = self.table('question', 'allquestions')[0]
         self.action('postanswer', {'user': 'bob', 'question_id': question['id'], 'ipfs_link': 'AQ->BA'},
@@ -172,7 +172,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         question = self.table('question', 'allquestions')[0]
         self.action('postanswer', {'user': 'bob', 'question_id': question['id'], 'ipfs_link': 'AQ->BA'},
@@ -213,7 +213,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
     def test_delete_own_question(self):
         begin("Delete own question")
         alice = self.register_alice_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         q = self.table('question', 'allquestions')
         self.action('delquestion', {
@@ -229,7 +229,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
         begin("Delete own question")
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         q = self.table('question', 'allquestions')
         self.action('postanswer', {'user': 'bob', 'question_id': q[0]['id'], 'ipfs_link': 'AQ->BA'},
@@ -246,7 +246,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
         begin("Delete question with correct answer by vote")
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         question = self.table('question', 'allquestions')[0]
         self.action('postanswer', {'user': 'bob', 'question_id': question['id'], 'ipfs_link': 'AQ->BA'},
@@ -288,7 +288,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
         begin("Delete correct answer by vote")
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         question = self.table('question', 'allquestions')[0]
         self.action('postanswer', {'user': 'bob', 'question_id': question['id'], 'ipfs_link': 'AQ->BA'},
@@ -327,7 +327,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
         begin("Delete question by vote")
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         question = self.table('question', 'allquestions')[0]
         self.action('postanswer', {'user': 'bob', 'question_id': question['id'], 'ipfs_link': 'AQ->BA'},
@@ -367,7 +367,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
         begin("Delete answer by vote")
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Alice asking question')
         question = self.table('question', 'allquestions')[0]
         self.action('postanswer', {'user': 'bob', 'question_id': question['id'], 'ipfs_link': 'AQ->BA'},

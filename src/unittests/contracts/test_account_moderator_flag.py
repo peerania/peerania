@@ -52,7 +52,7 @@ class AccountModerationTests(peeranhatest.peeranhaTest):
         alice = self.register_alice_account(100, 0)
         self._give_moderator_flag(alice, MODERATOR_FLG_INFINITE_ENERGY)
         for i in range(10):
-            self.action('postquestion', {'user': 'alice', 'title': f'AQ{i}', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1]}, alice,
+            self.action('postquestion', {'user': 'alice', 'title': f'AQ{i}', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                         f'Register {i} question from alice')
         end()
 
@@ -61,7 +61,7 @@ class AccountModerationTests(peeranhatest.peeranhaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'undefined', 'ipfs_link': 'undefined',  'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'undefined', 'ipfs_link': 'undefined',  'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Register question from alice')
         AQ_id = self.table('question', 'allquestions')[0]['id']
         self.action('postanswer', {'user': 'bob', 'question_id': AQ_id, 'ipfs_link': 'undefined'},

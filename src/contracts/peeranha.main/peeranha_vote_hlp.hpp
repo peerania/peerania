@@ -136,12 +136,3 @@ bool set_report_points_and_history(T &item, const account &user,
                  current_question_report_points + snitch_report_points, 0);
   return false;
 }
-
-// return number of upvotes
-int upvote_count(const std::vector<history_item> &history) {
-  int upvote_count = 0;
-  std::for_each(history.begin(), history.end(), [&upvote_count](auto hst) {
-    if (hst.is_flag_set(HISTORY_UPVOTED_FLG)) upvote_count += 1;
-  });
-  return upvote_count;
-}

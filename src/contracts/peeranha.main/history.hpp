@@ -50,3 +50,12 @@ std::vector<history_item>::iterator get_history_item_iter(
     return itr_history;
   }
 }
+
+// return number of upvotes
+int upvote_count(const std::vector<history_item> &history) {
+  int upvote_count = 0;
+  std::for_each(history.begin(), history.end(), [&upvote_count](auto hst) {
+    if (hst.is_flag_set(HISTORY_UPVOTED_FLG)) upvote_count += 1;
+  });
+  return upvote_count;
+}

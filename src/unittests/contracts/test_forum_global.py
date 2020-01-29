@@ -10,9 +10,9 @@ class ForumGlobalTests(peeranhatest.peeranhaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account(100, 100)
         carol = self.register_carol_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question','ipfs_link': 'Alice question',  'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question','ipfs_link': 'Alice question',  'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Register question from alice')
-        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question','ipfs_link': 'Bob question',  'community_id': 1, 'tags': [1]}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question','ipfs_link': 'Bob question',  'community_id': 1, 'tags': [1], 'type': 0}, bob,
                     'Register question from bob')
         e = ['#ignoreorder', {
             'id': '#var aq',
@@ -279,7 +279,7 @@ class ForumGlobalTests(peeranhatest.peeranhaTest):
         begin('Delete own question with answer', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ',  'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ',  'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Register question from alice')
         e = [{
             'id': '#var aq',
@@ -302,7 +302,7 @@ class ForumGlobalTests(peeranhatest.peeranhaTest):
         begin('Delete own answer marked as correct', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Register question from alice')
         e = [{
             'id': '#var aq',

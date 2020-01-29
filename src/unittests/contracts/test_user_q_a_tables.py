@@ -49,7 +49,7 @@ class UserQuestionsAndAnswersTablesTests(peeranhatest.peeranhaTest):
     def _create_simple_hierarchy(self):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Register question from alice')
         e = [{'id': '#var aq',
               'user': 'alice',

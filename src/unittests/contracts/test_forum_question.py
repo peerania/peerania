@@ -61,7 +61,7 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
     def test_register_question_from_non_existent_account_failed(self):
         begin('Register question from non-regidtered account', True)
         alice = self.get_non_registered_alice()
-        self.failed_action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'test', 'community_id': 1, 'tags':[1]}, alice,
+        self.failed_action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'test', 'community_id': 1, 'tags':[1], 'type': 0}, alice,
                            'Asking question from not registered Alice account', 'assert')
         end()
 
@@ -69,7 +69,7 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
         begin('Call register question with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        self.failed_action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'test', 'community_id': 1, 'tags':[1]}, bob,
+        self.failed_action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'test', 'community_id': 1, 'tags':[1], 'type': 0}, bob,
                            'Attempt to register alice question with bob auth', 'auth')
         end()
 
@@ -88,9 +88,9 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
     def test_title_length_assert_failed(self):
         begin('Test register and modify title length assert ', True)
         alice = self.register_alice_account()
-        self.failed_action('postquestion', {'user': alice, 'title': 'T', 'ipfs_link': 'Alice ipfs', 'community_id': 1, 'tags':[1]}, alice,
+        self.failed_action('postquestion', {'user': alice, 'title': 'T', 'ipfs_link': 'Alice ipfs', 'community_id': 1, 'tags':[1], 'type': 0}, alice,
                            'Register question with title len=1', 'assert')
-        self.failed_action('postquestion', {'user': alice, 'title':  "".join('a' for x in range(257)), 'ipfs_link': 'Alice ipfs', 'community_id': 1, 'tags':[1]}, alice,
+        self.failed_action('postquestion', {'user': alice, 'title':  "".join('a' for x in range(257)), 'ipfs_link': 'Alice ipfs', 'community_id': 1, 'tags':[1], 'type': 0}, alice,
                            'Register question with title len=129', 'assert')
         e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')
@@ -163,7 +163,7 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
 
     def _register_question_action(self, user, ipfs_link, id_var=''):
         tags = [1, 2, 3] if str(user) == 'alice' else [2, 3, 4]
-        self.action('postquestion', {'user': str(user), 'title': 'Title ' + ipfs_link, 'ipfs_link': ipfs_link, 'community_id': 1, 'tags': tags}, user,
+        self.action('postquestion', {'user': str(user), 'title': 'Title ' + ipfs_link, 'ipfs_link': ipfs_link, 'community_id': 1, 'tags': tags, 'type': 0}, user,
                     'Asking question from {} with text "{}"'.format(str(user), ipfs_link))
         return {'id': '#ignore' if id_var == '' else '#var ' + id_var,
                 'user': str(user),

@@ -342,7 +342,7 @@ class ForumCommentTests(peeranhatest.peeranhaTest):
         end()
 
     def _create_basic_hierarchy(self, alice, bob):
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Asking question from alice with text "Alice question"')
         question_e = ['#ignoreorder', {
             'id': '#var aq',
@@ -377,7 +377,7 @@ class ForumCommentTests(peeranhatest.peeranhaTest):
             'ipfs_link': 'Bob answer to alice',
             'post_time': '#ignore',
             'comments': []})
-        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'Bob question',  'community_id': 1, 'tags': [2]}, bob,
+        self.action('postquestion', {'user': 'bob', 'title': 'Title bob question', 'ipfs_link': 'Bob question',  'community_id': 1, 'tags': [2], 'type': 0}, bob,
                     'Asking question from bob with text "Bob question"')
         account_e[2]['energy'] -= economy['ENERGY_POST_QUESTION']
         question_e.append({

@@ -11,7 +11,7 @@
 #define REPORT_POINTS_COMMENT 50
 #endif
 
-
+// EXPERT QUESTION
 #define ANSWER_ACCEPTED_AS_CORRECT_REWARD 15
 #define UPVOTE_QUESTION_REWARD 0
 #define DOWNVOTE_QUESTION_REWARD -1
@@ -21,6 +21,13 @@
 #define ANSWER_UPVOTED_REWARD 10
 #define QUESTION_DOWNVOTED_REWARD -2
 #define ANSWER_DOWNVOTED_REWARD -2
+
+// COMMON QUESTION
+#define COMMON_QUESTION_UPVOTED_REWARD 1
+#define COMMON_ANSWER_UPVOTED_REWARD 1
+#define COMMON_QUESTION_DOWNVOTED_REWARD -1
+#define COMMON_ANSWER_DOWNVOTED_REWARD -1
+
 
 // Stub solution
 #if STAGE == 1 || STAGE == 2
@@ -115,12 +122,12 @@ namespace VoteItem
 {
 struct vote_resources_t
 {
-  const int upvote_reward;
-  const int downvote_reward;
-  const int upvoted_reward;
-  const int downvoted_reward;
-  const int energy_upvote;
-  const int energy_downvote;
+  int upvote_reward;
+  int downvote_reward;
+  int upvoted_reward;
+  int downvoted_reward;
+  int energy_upvote;
+  int energy_downvote;
 };
 
 const vote_resources_t question = {
@@ -137,6 +144,24 @@ const vote_resources_t answer = {
     .downvote_reward = DOWNVOTE_ANSWER_REWARD,
     .upvoted_reward = ANSWER_UPVOTED_REWARD,
     .downvoted_reward = ANSWER_DOWNVOTED_REWARD,
+    .energy_upvote = ENERGY_UPVOTE_ANSWER,
+    .energy_downvote = ENERGY_DOWNVOTE_ANSWER,
+};
+
+const vote_resources_t common_question = {
+    .upvote_reward = UPVOTE_QUESTION_REWARD,
+    .downvote_reward = DOWNVOTE_QUESTION_REWARD,
+    .upvoted_reward = COMMON_QUESTION_UPVOTED_REWARD,
+    .downvoted_reward = COMMON_QUESTION_DOWNVOTED_REWARD,
+    .energy_upvote = ENERGY_UPVOTE_QUESTION,
+    .energy_downvote = ENERGY_DOWNVOTE_QUESTION,
+};
+
+const vote_resources_t common_answer = {
+    .upvote_reward = UPVOTE_ANSWER_REWARD,
+    .downvote_reward = DOWNVOTE_ANSWER_REWARD,
+    .upvoted_reward = COMMON_ANSWER_UPVOTED_REWARD,
+    .downvoted_reward = COMMON_ANSWER_DOWNVOTED_REWARD,
     .energy_upvote = ENERGY_UPVOTE_ANSWER,
     .energy_downvote = ENERGY_DOWNVOTE_ANSWER,
 };

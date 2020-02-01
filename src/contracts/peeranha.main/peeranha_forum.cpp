@@ -9,9 +9,10 @@ question_index::const_iterator peeranha::find_question(uint64_t question_id) {
 void peeranha::post_question(eosio::name user, uint16_t community_id,
                              const std::vector<uint32_t> tags,
                              const std::string &title,
-                             const IpfsHash &ipfs_link) {
+                             const IpfsHash &ipfs_link, const uint8_t type) {
   assert_ipfs(ipfs_link);
   assert_title(title);
+  assert_question_type(type);
   auto iter_account = find_account(user);
   update_rating(iter_account, POST_QUESTION_REWARD, [](auto &account) {
     account.reduce_energy(ENERGY_POST_QUESTION);
@@ -31,6 +32,8 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
     question.title = title;
     question.ipfs_link = ipfs_link;
     question.post_time = now();
+    set_property_d(question.properties, PROPERTY_QUESTION_TYPE, (int)type,
+                   QUESTION_TYPE_EXPERT);
   });
 #ifdef SUPERFLUOUS_INDEX
   user_questions_index user_questions_table(_self, user.value);
@@ -145,10 +148,22 @@ void peeranha::delete_question(eosio::name user, uint64_t question_id) {
 #ifdef SUPERFLUOUS_INDEX
   remove_user_question(user, question_id);
 #endif
-  update_rating(iter_account, DELETE_OWN_QUESTION_REWARD, [](auto &account) {
-    account.reduce_energy(ENERGY_DELETE_QUESTION);
-    account.questions_asked -= 1;
-  });
+  int upvote_mul = QUESTION_UPVOTED_REWARD;
+  switch (get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
+                         QUESTION_TYPE_EXPERT)) {
+    case QUESTION_TYPE_GENERAL:
+      upvote_mul = COMMON_QUESTION_UPVOTED_REWARD;
+      break;
+  }
+  const int rating_change = -upvote_count(iter_question->history) * upvote_mul;
+  update_rating(iter_account,
+                DELETE_OWN_QUESTION_REWARD > rating_change
+                    ? rating_change
+                    : DELETE_OWN_QUESTION_REWARD,
+                [](auto &account) {
+                  account.reduce_energy(ENERGY_DELETE_QUESTION);
+                  account.questions_asked -= 1;
+                });
 }
 
 void peeranha::delete_answer(eosio::name user, uint64_t question_id,
@@ -157,9 +172,20 @@ void peeranha::delete_answer(eosio::name user, uint64_t question_id,
   auto iter_question = find_question(question_id);
   eosio::check(iter_question->correct_answer_id != answer_id,
                "You can't delete this answer");
+  int rating_change;
   question_table.modify(
-      iter_question, _self, [iter_account, answer_id](auto &question) {
+      iter_question, _self,
+      [iter_account, answer_id, &rating_change](auto &question) {
+        int upvote_mul = ANSWER_UPVOTED_REWARD;
+        switch (get_property_d(question.properties, PROPERTY_QUESTION_TYPE,
+                               QUESTION_TYPE_EXPERT)) {
+          case QUESTION_TYPE_GENERAL:
+            upvote_mul = COMMON_ANSWER_UPVOTED_REWARD;
+            break;
+        }
+
         auto iter_answer = find_answer(question, answer_id);
+        rating_change = -upvote_count(iter_answer->history) * upvote_mul;
         assert_allowed(*iter_account, iter_answer->user, Action::DELETE_ANSWER);
         question.answers.erase(iter_answer);
       });
@@ -167,10 +193,14 @@ void peeranha::delete_answer(eosio::name user, uint64_t question_id,
   remove_user_answer(user, question_id);
 #endif
   update_community_statistics(iter_question->community_id, 0, -1, 0, 0);
-  update_rating(iter_account, DELETE_OWN_ANSWER_REWARD, [](auto &account) {
-    account.reduce_energy(ENERGY_DELETE_ANSWER);
-    account.answers_given -= 1;
-  });
+  update_rating(iter_account,
+                DELETE_OWN_ANSWER_REWARD > rating_change
+                    ? rating_change
+                    : DELETE_OWN_ANSWER_REWARD,
+                [](auto &account) {
+                  account.reduce_energy(ENERGY_DELETE_ANSWER);
+                  account.answers_given -= 1;
+                });
 }
 
 void peeranha::delete_comment(eosio::name user, uint64_t question_id,
@@ -281,8 +311,12 @@ void peeranha::modify_comment(eosio::name user, uint64_t question_id,
 }
 void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
                                       uint16_t answer_id) {
-  auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
+  eosio::check(get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
+                              QUESTION_TYPE_EXPERT) == QUESTION_TYPE_EXPERT,
+               "The queston isn't expert question");
+
+  auto iter_account = find_account(user);
   assert_allowed(*iter_account, iter_question->user,
                  Action::MARK_ANSWER_AS_CORRECT);
   if (answer_id != EMPTY_ANSWER_ID) {
@@ -374,4 +408,75 @@ void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
   question_table.modify(iter_question, _self, [answer_id](auto &question) {
     question.correct_answer_id = answer_id;
   });
+}
+
+void peeranha::change_question_type(eosio::name user, uint64_t question_id, int type, bool restore_rating) {
+  assert_question_type(type);
+  auto iter_moderator = find_account(user);
+  eosio::check(
+      iter_moderator->has_moderation_flag(MODERATOR_FLG_CHANGE_QUESTION_STATUS),
+      "You don't have permission to change qustion status");
+
+  auto iter_question = find_question(question_id);
+  eosio::check(get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
+                              QUESTION_TYPE_EXPERT) != type,
+               "The question already has this type");
+
+  std::map<uint64_t, int> rating_change;
+
+  question_table.modify(
+      iter_question, _self,
+      [restore_rating, type, &rating_change](auto &question) {
+        set_property_d(question.properties, PROPERTY_QUESTION_TYPE, type,
+                       QUESTION_TYPE_EXPERT);
+        if (!restore_rating) return;
+
+        int question_owner_rating_change = 0;
+        for_each(question.history.begin(), question.history.end(),
+                 [&question_owner_rating_change](auto history_item) {
+                   if (history_item.is_flag_set(HISTORY_UPVOTED_FLG)) {
+                     question_owner_rating_change +=
+                         COMMON_QUESTION_UPVOTED_REWARD -
+                         QUESTION_UPVOTED_REWARD;
+                   }
+                 });
+        rating_change[question.user.value] = question_owner_rating_change;
+        for_each(
+            question.answers.begin(), question.answers.end(),
+            [&rating_change, &question,
+             question_owner_rating_change](auto answer_item) {
+              int answer_owner_rating_change;
+              if (answer_item.user == question.user) {
+                answer_owner_rating_change = question_owner_rating_change;
+              } else if (question.correct_answer_id == answer_item.id) {
+                answer_owner_rating_change = -ANSWER_ACCEPTED_AS_CORRECT_REWARD;
+              } else {
+                answer_owner_rating_change = 0;
+              }
+              for_each(answer_item.history.begin(), answer_item.history.end(),
+                       [&answer_owner_rating_change](auto history_item) {
+                         if (history_item.is_flag_set(HISTORY_UPVOTED_FLG)) {
+                           answer_owner_rating_change +=
+                               COMMON_ANSWER_UPVOTED_REWARD -
+                               ANSWER_UPVOTED_REWARD;
+                         }
+                       });
+              rating_change[answer_item.user.value] =
+                  answer_owner_rating_change;
+            });
+      });
+  auto iter_correct_answer =
+      binary_find(iter_question->answers.begin(), iter_question->answers.end(),
+                  iter_question->correct_answer_id);
+
+  for (std::pair<uint64_t, int> user_rating_change : rating_change) {
+    if (iter_correct_answer->user.value == user_rating_change.first) {
+      update_rating(eosio::name(user_rating_change.first),
+                    user_rating_change.second,
+                    [](auto &account) { account.correct_answers -= 1; });
+    } else {
+      update_rating(eosio::name(user_rating_change.first),
+                    user_rating_change.second);
+    }
+  }
 }

@@ -12,11 +12,11 @@ class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
         begin('Testing assertion rating for question post')
         alice = self.register_alice_account(
             defs['POST_QUESTION_ALLOWED'], defs['ENERGY_POST_QUESTION'])
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'community_id': 1, 'ipfs_link': 'AQ', 'tags': [1, 2, 3]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'community_id': 1, 'ipfs_link': 'AQ', 'tags': [1, 2, 3], 'type': 0}, alice,
                     'Register question from alice')
         self.action('setaccrten', {
                     'user': 'alice', 'rating': defs['POST_QUESTION_ALLOWED'] - 1, 'energy': defs['ENERGY_POST_QUESTION']}, self.admin, "Reduce alice rating for 1")
-        self.failed_action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ2', 'community_id': 1, 'tags': [1, 2, 3]}, alice,
+        self.failed_action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ2', 'community_id': 1, 'tags': [1, 2, 3], 'type': 0}, alice,
                            'Attempt to register question from alice', 'assert')
         end()
 
@@ -202,7 +202,7 @@ class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
         end()
 
     def _create_simple_hierarchy(self, alice, bob):
-        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1, 2, 3]}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1, 2, 3], 'type': 0}, alice,
                     'Register question from alice')
         e = [{
             'id': '#var aq',

@@ -68,6 +68,17 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
       [&iter_account, answer_id, comment_id, &delete_question,
        &user_rating_change, &item_user, &delete_answer,
        &snitch_reduce_energy_value](auto &question) {
+        auto vote_question_res = VoteItem::question;
+        auto vote_answer_res = VoteItem::answer;
+        switch (get_property_d(
+            question.properties, PROPERTY_QUESTION_TYPE, QUESTION_TYPE_EXPERT)) {
+          case QUESTION_TYPE_GENERAL: {
+            vote_question_res = VoteItem::common_question;
+            vote_answer_res = VoteItem::common_answer;
+          } break;
+          default:
+            break;
+        }
         if (apply_to_question(answer_id)) {
           if (apply_to_answer(comment_id)) {
             // Delete question
@@ -79,7 +90,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
             if (delete_question) {
               item_user = question.user;
               user_rating_change -= upvote_count(question.history) *
-                                    VoteItem::question.upvoted_reward;
+                                    vote_question_res.upvoted_reward;
               user_rating_change += QUESTION_DELETED_REWARD;
             }
           } else {
@@ -108,7 +119,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
               question.correct_answer_id = EMPTY_ANSWER_ID;
             }
             user_rating_change -= upvote_count(iter_answer->history) *
-                                  VoteItem::answer.upvoted_reward;
+                                  vote_answer_res.upvoted_reward;
             user_rating_change += ANSWER_DELETED_REWARD;
             question.answers.erase(iter_answer);
             delete_answer = true;

@@ -427,11 +427,13 @@ void peeranha::change_question_type(eosio::name user, uint64_t question_id,
                "Restore rating not allowed when switch to EXPERT");
 
   std::map<uint64_t, int> rating_change;
+
   question_table.modify(
       iter_question, _self,
       [restore_rating, type, &rating_change](auto &question) {
         set_property_d(question.properties, PROPERTY_QUESTION_TYPE, type,
                        QUESTION_TYPE_EXPERT);
+        
         if (!restore_rating) {
           if (type == QUESTION_TYPE_GENERAL)
             question.correct_answer_id = EMPTY_ANSWER_ID;
@@ -476,6 +478,7 @@ void peeranha::change_question_type(eosio::name user, uint64_t question_id,
             });
         if (type == QUESTION_TYPE_GENERAL)
             question.correct_answer_id = EMPTY_ANSWER_ID;
+
       });
   auto iter_correct_answer =
       binary_find(iter_question->answers.begin(), iter_question->answers.end(),

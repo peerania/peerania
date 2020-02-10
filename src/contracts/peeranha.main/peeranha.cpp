@@ -312,7 +312,7 @@ EOSIO_DISPATCH(
         delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(modcomment)(
         upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
-        reportprof)(updateacc)(givemoderflg)(setcommipfs)
+        reportprof)(updateacc)(givemoderflg)(setcommipfs)(chgqsttype)
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)
 #endif

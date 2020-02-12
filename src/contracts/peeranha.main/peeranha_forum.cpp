@@ -410,7 +410,8 @@ void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
   });
 }
 
-void peeranha::change_question_type(eosio::name user, uint64_t question_id, int type, bool restore_rating) {
+void peeranha::change_question_type(eosio::name user, uint64_t question_id,
+                                    int type, bool restore_rating) {
   assert_question_type(type);
   auto iter_moderator = find_account(user);
   eosio::check(
@@ -422,6 +423,9 @@ void peeranha::change_question_type(eosio::name user, uint64_t question_id, int 
                               QUESTION_TYPE_EXPERT) != type,
                "The question already has this type");
 
+  eosio::check(type != QUESTION_TYPE_EXPERT || !restore_rating,
+               "Restore rating not allowed when switch to EXPERT");
+
   std::map<uint64_t, int> rating_change;
 
   question_table.modify(
@@ -429,7 +433,12 @@ void peeranha::change_question_type(eosio::name user, uint64_t question_id, int 
       [restore_rating, type, &rating_change](auto &question) {
         set_property_d(question.properties, PROPERTY_QUESTION_TYPE, type,
                        QUESTION_TYPE_EXPERT);
-        if (!restore_rating) return;
+        
+        if (!restore_rating) {
+          if (type == QUESTION_TYPE_GENERAL)
+            question.correct_answer_id = EMPTY_ANSWER_ID;
+          return;
+        }
 
         int question_owner_rating_change = 0;
         for_each(question.history.begin(), question.history.end(),
@@ -441,6 +450,7 @@ void peeranha::change_question_type(eosio::name user, uint64_t question_id, int 
                    }
                  });
         rating_change[question.user.value] = question_owner_rating_change;
+
         for_each(
             question.answers.begin(), question.answers.end(),
             [&rating_change, &question,
@@ -450,6 +460,8 @@ void peeranha::change_question_type(eosio::name user, uint64_t question_id, int 
                 answer_owner_rating_change = question_owner_rating_change;
               } else if (question.correct_answer_id == answer_item.id) {
                 answer_owner_rating_change = -ANSWER_ACCEPTED_AS_CORRECT_REWARD;
+                rating_change[question.user.value] -=
+                    ACCEPT_ANSWER_AS_CORRECT_REWARD;
               } else {
                 answer_owner_rating_change = 0;
               }
@@ -464,6 +476,9 @@ void peeranha::change_question_type(eosio::name user, uint64_t question_id, int 
               rating_change[answer_item.user.value] =
                   answer_owner_rating_change;
             });
+        if (type == QUESTION_TYPE_GENERAL)
+            question.correct_answer_id = EMPTY_ANSWER_ID;
+
       });
   auto iter_correct_answer =
       binary_find(iter_question->answers.begin(), iter_question->answers.end(),

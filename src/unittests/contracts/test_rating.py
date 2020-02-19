@@ -473,6 +473,31 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
             var['alice_rt'] == defs['CREATE_COMMUNITY_ALLOWED'] + defs['COMMUNITY_DELETED_REWARD'])
         end()
 
+    def test_delete_own_upvoted_item_reward(self):
+        begin('Delete own item reward')
+        (alice, bob, carol) = self._create_basic_hierarchy()
+        self.action('upvote', {
+                    'user': 'bob', 'question_id': self.var['bq'], 'answer_id': self.var['bq_ca']}, bob, "Bob upvote carol answer")
+        self.action('upvote', {
+                    'user': 'alice', 'question_id': self.var['bq'], 'answer_id': self.var['bq_ca']}, alice, "Alice upvote carol answer")
+        self.action('delanswer', {
+                    'user': 'carol', 'question_id': self.var['bq'], 'answer_id': self.var['bq_ca']}, carol, "Delete Bob question->Carol answer")
+
+        self.action('upvote', {
+                    'user': 'carol', 'question_id': self.var['bq'], 'answer_id': 0}, carol, "Carol upvote bob question")
+        self.action('upvote', {
+                    'user': 'alice', 'question_id': self.var['bq'], 'answer_id': 0}, alice, "Alice upvote bob question")
+        self.action('delquestion', {
+                    'user': 'bob', 'question_id': self.var['bq']}, bob, "Delete Bob question")
+
+        self.var['alice_energy'] -= self.defs['ENERGY_UPVOTE_QUESTION'] * 2
+        self.var['bob_rating'] += self.defs['DELETE_OWN_QUESTION_REWARD'] 
+        self.var['bob_energy'] -= self.defs['ENERGY_DELETE_QUESTION'] + self.defs['ENERGY_UPVOTE_QUESTION']
+        self.var['carol_rating'] += self.defs['DELETE_OWN_ANSWER_REWARD'] 
+        self.var['carol_energy'] -= self.defs['ENERGY_DELETE_ANSWER'] + self.defs['ENERGY_UPVOTE_QUESTION']
+        self._verify_acc()
+        end()
+
     def _create_basic_hierarchy(self):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
@@ -579,7 +604,7 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
         self.assertTrue(compare(self.account_e, self.table(
             'account', 'allaccounts'), buf_var, ignore_excess=True))
         for key, value in buf_var.items():
-            #print(key, self.var[key], value)
+            # print(key, self.var[key], value)
             self.assertTrue(self.var[key] == value)
 
     def get_stub_suggested_tags(self):

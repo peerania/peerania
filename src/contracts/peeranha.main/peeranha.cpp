@@ -161,6 +161,11 @@ void peeranha::setcommipfs(uint16_t community_id, IpfsHash new_ipfs_link) {
   set_community_ipfs_hash(community_id, new_ipfs_link);
 }
 
+void peeranha::setcommname(uint16_t community_id, std::string new_name) {
+  require_auth(_self);
+  set_community_name(community_id, new_name);
+}
+
 void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating){
    require_auth(user);
    change_question_type(user, question_id, type, restore_rating);
@@ -312,7 +317,7 @@ EOSIO_DISPATCH(
         delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(modcomment)(
         upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
-        reportprof)(updateacc)(givemoderflg)(setcommipfs)(chgqsttype)
+        reportprof)(updateacc)(givemoderflg)(setcommipfs)(chgqsttype)(setcommname)
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)
 #endif

@@ -138,6 +138,9 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     ACTION setcommipfs(uint16_t community_id,
                         IpfsHash new_ipfs_link);
 
+    ACTION setcommname(uint16_t community_id,
+                        std::string new_name);
+
     ACTION chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating);
 
 #ifdef SUPERFLUOUS_INDEX
@@ -291,6 +294,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     void give_moderator_flag(eosio::name user, int flags);
 
     void set_community_ipfs_hash(uint16_t community_id, const IpfsHash &new_ipfs_link);
+
+    void set_community_name(uint16_t community_id, const std::string &new_name);
 
     void change_question_type(eosio::name user, uint64_t question_id, int type, bool restore_rating);
   };

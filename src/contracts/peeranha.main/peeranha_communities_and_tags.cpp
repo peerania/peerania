@@ -398,3 +398,13 @@ void peeranha::set_community_ipfs_hash(uint16_t community_id, const IpfsHash &ne
                            community.ipfs_description = new_ipfs_link;
                          });
 }
+
+
+void peeranha::set_community_name(uint16_t community_id, const std::string &new_name){
+  community_table_index community_table(_self, scope_all_communities);
+  auto iter_community = community_table.find(community_id);
+  community_table.modify(iter_community, _self,
+                         [new_name](auto &community) {
+                           community.name = new_name;
+                         });
+} 

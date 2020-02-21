@@ -5,16 +5,8 @@ from unittest import main
 
 
 class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
-    def test_mark_as_correct_failed(self):
-        begin('Mark answer as correct', True)
-        (alice, bob, carol) = self._create_basic_hierarchy()
-        ted = self.register_ted_account(10000)
-        self.failed_action('mrkascorrect', {
-            'user': 'alice', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba']}, alice, "Alice attempt to mark Bob answer as correct", "assert")
-        end()
-
-    def test_change_question_type(self):
-        begin('Change question type')
+    def test_change_question_type_to_general(self):
+        begin('Change question type to general')
         (alice, bob, carol) = self._create_basic_hierarchy(0)
         dan = self.register_dan_account()
         self.account_e.append(
@@ -43,15 +35,59 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
             self.defs['ENERGY_UPVOTE_ANSWER']
         self.var['dan_energy'] -= self.defs['ENERGY_UPVOTE_QUESTION'] + \
             self.defs['ENERGY_UPVOTE_ANSWER']
-        self.var['bob_rating'] += 3 * self.defs['COMMON_ANSWER_UPVOTED_REWARD']
+        self.var['bob_rating'] += 3 * self.defs['COMMON_ANSWER_UPVOTED_REWARD'] + \
+            self.defs['COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD']
         self.var['alice_rating'] += 3 * \
-            self.defs['COMMON_QUESTION_UPVOTED_REWARD']
+            self.defs['COMMON_QUESTION_UPVOTED_REWARD'] + self.defs['ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD']
 
         admin = self.get_contract_deployer(self.get_default_contract())
         self.action('givemoderflg', {
                     'user': 'dan', 'flags': 32}, admin, "Give moderator flags to ted")
         self.action('chgqsttype', {
                     'user': 'dan', 'question_id': self.var['aq'], 'type': 1, 'restore_rating': True}, dan, "Change question type to general")
+        self._verify_acc()
+        end()
+
+    def test_change_question_type_to_expert(self):
+        begin('Change question type to expert')
+        (alice, bob, carol) = self._create_basic_hierarchy()
+        dan = self.register_dan_account()
+        self.account_e.append(
+            {'user': 'dan', 'energy': '#var dan_energy', 'rating': '#var dan_rating'})
+        self.assertTrue(compare(self.account_e, self.table(
+            'account', 'allaccounts'), self.var, ignore_excess=True))
+        bob_old_rt = self.var['bob_rating']
+        self.action('mrkascorrect', {
+            'user': 'alice', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba']}, alice, "Alice mark Bob answer as correct")
+        self.action('upvote', {
+                    'user': 'alice', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba']}, alice, "Alice upvote bob answer")
+        self.action('upvote', {
+                    'user': 'bob', 'question_id': self.var['aq'], 'answer_id': 0}, bob, "Bob upvote alice question")
+        self.action('upvote', {
+                    'user': 'carol', 'question_id': self.var['aq'], 'answer_id': 0}, carol, "Carol upvote alice question")
+        self.action('upvote', {
+                    'user': 'carol', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba']}, carol, "Carol upvote bob answer")
+        self.action('upvote', {
+                    'user': 'dan', 'question_id': self.var['aq'], 'answer_id': 0}, dan, "Dan upvote alice question")
+        self.action('upvote', {
+                    'user': 'dan', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba']}, dan, "Dan upvote bob answer")
+        self.var['bob_energy'] -= self.defs['ENERGY_UPVOTE_QUESTION']
+        self.var['alice_energy'] -= self.defs['ENERGY_UPVOTE_ANSWER'] + \
+            self.defs['ENERGY_MARK_ANSWER_AS_CORRECT']
+        self.var['carol_energy'] -= self.defs['ENERGY_UPVOTE_QUESTION'] + \
+            self.defs['ENERGY_UPVOTE_ANSWER']
+        self.var['dan_energy'] -= self.defs['ENERGY_UPVOTE_QUESTION'] + \
+            self.defs['ENERGY_UPVOTE_ANSWER']
+        self.var['bob_rating'] += 3 * self.defs['ANSWER_UPVOTED_REWARD'] + \
+            self.defs['ANSWER_ACCEPTED_AS_CORRECT_REWARD']
+        self.var['alice_rating'] += 3 * \
+            self.defs['QUESTION_UPVOTED_REWARD'] + self.defs['ACCEPT_ANSWER_AS_CORRECT_REWARD']
+
+        admin = self.get_contract_deployer(self.get_default_contract())
+        self.action('givemoderflg', {
+                    'user': 'dan', 'flags': 32}, admin, "Give moderator flags to ted")
+        self.action('chgqsttype', {
+                    'user': 'dan', 'question_id': self.var['aq'], 'type': 0, 'restore_rating': True}, dan, "Change question type to expert")
         self._verify_acc()
         end()
 

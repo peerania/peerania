@@ -24,12 +24,18 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         example = [{'community_id': 1,'top_questions': ['68719476735']}]
         check_table(self, example)
 
-        self.action('addtotopcomm', {
+        self.wait(2)
+        self.failed_action('addtotopcomm', {
+        'user': 'peeranhamain',
+        'community_id': 1,
+        'question_id': 68719476735
+        }, admin, 'again add community 1, question 735')
+
+        self.failed_action('addtotopcomm', {
         'user': 'peeranhamain',
         'community_id': 1,
         'question_id': 11111
         }, admin, 'add a nonexistent question')
-        check_table(self, example)
         end()
 
     def test_remove_question_from_best_communiti(self):
@@ -47,17 +53,24 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
 
         self.action('remfrotopcom', {
             'user': 'peeranhamain',
+            'community_id': 1,
+            'question_id': 68719476731
+            }, admin, 'remove a last question')
+        example = [{'community_id': 1, 'top_questions': ['68719476734', '68719476733', '68719476732']}]
+        check_table(self, example)
+
+        self.action('remfrotopcom', {
+            'user': 'peeranhamain',
             'community_id': 2,
             'question_id': 68719476731
             }, admin, 'remove a question from another community')
         check_table(self, example)
 
-        self.action('remfrotopcom', {
+        self.failed_action('remfrotopcom', {
             'user': 'peeranhamain',
             'community_id': 1,
             'question_id': 1111
             }, admin, 'remove a nonexistent question')
-        check_table(self, example)
         end()
 
     def test_up_top_question(self):
@@ -73,12 +86,11 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         example = [{'community_id': 1, 'top_questions': ['68719476735', '68719476733', '68719476734', '68719476732', '68719476731']}]
         check_table(self, example)
 
-        self.action('upquestion', {
+        self.failed_action('upquestion', {
             'user': 'peeranhamain',
             'community_id': 1,
             'question_id': 68719476735
             }, admin, 'up a first question')
-        check_table(self, example)
 
         self.action('upquestion', {
             'user': 'peeranhamain',
@@ -88,12 +100,11 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         example = [{'community_id': 1, 'top_questions': ['68719476735', '68719476733', '68719476734', '68719476731', '68719476732']}]
         check_table(self, example)
        
-        self.action('upquestion', {
+        self.failed_action('upquestion', {
             'user': 'peeranhamain',
             'community_id': 1,
             'question_id': 1111
             }, admin, 'up a nonexistent question')
-        check_table(self, example)
 
         self.action('remfrotopcom', {
             'user': 'peeranhamain',
@@ -124,19 +135,17 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         example = [{'community_id': 1, 'top_questions': ['68719476734', '68719476735', '68719476732', '68719476733', '68719476731']}]
         check_table(self, example)
 
-        self.action('downquestion', {
+        self.failed_action('downquestion', {
             'user': 'peeranhamain',
             'community_id': 1,
             'question_id': 68719476731
             }, admin, 'down a last question')
-        check_table(self, example)
 
-        self.action('downquestion', {
+        self.failed_action('downquestion', {
             'user': 'peeranhamain',
             'community_id': 1,
             'question_id': 1111
             }, admin, 'down a nonexistent question')
-        check_table(self, example)
 
         self.action('downquestion', {
             'user': 'peeranhamain',
@@ -160,21 +169,19 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         example = [{'community_id': 1, 'top_questions': ['68719476733', '68719476735', '68719476734', '68719476732', '68719476731']}]
         check_table(self, example)
 
-        self.action('movequestion', {
+        self.failed_action('movequestion', {
             'user': 'peeranhamain',
             'community_id': 1,
             'question_id': 68719476734,
             'new_position': -1
             },admin, 'move a question on negative position')
-        check_table(self, example)
 
-        self.action('movequestion', {
+        self.failed_action('movequestion', {
             'user': 'peeranhamain',
             'community_id': 1,
             'question_id': 68719476734,
             'new_position': 0
             },admin, 'move a question on zero position')
-        check_table(self, example)
 
         self.action('movequestion', {
             'user': 'peeranhamain',
@@ -185,13 +192,12 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         example = [{'community_id': 1, 'top_questions': ['68719476733', '68719476735', '68719476732', '68719476731', '68719476734']}]
         check_table(self, example)
 
-        self.action('movequestion', {
+        self.failed_action('movequestion', {
             'user': 'peeranhamain',
             'community_id': 1,
             'question_id': 1111,
             'new_position': 3
             },admin, 'move a nonexistent question')
-        check_table(self, example)
 
         self.action('movequestion', {
             'user': 'peeranhamain',

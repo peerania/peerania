@@ -146,7 +146,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     ACTION addtotopcomm(eosio::name user, uint16_t community_id, uint64_t question_id);
 
-    ACTION remfrotopcom(eosio::name user, uint16_t community_id, uint64_t question_id);
+    ACTION remfrmtopcom(eosio::name user, uint16_t community_id, uint64_t question_id);
 
     ACTION upquestion(eosio::name user, uint16_t community_id, uint64_t question_id);
 

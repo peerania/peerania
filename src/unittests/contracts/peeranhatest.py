@@ -53,7 +53,7 @@ class peeranhaTest(EOSTest):
     def get_non_registered_frank(self):
         return 'frank'
 
-    def _register_question_action(self, user, ipfs_link, id_var=''):
+    def register_question_action(self, user, ipfs_link, id_var=''):
         tags = [1, 2, 3] if str(user) == 'alice' else [2, 3, 4]
         self.action('postquestion', {'user': str(user), 'title': 'Title ' + ipfs_link, 'ipfs_link': ipfs_link, 'community_id': 1, 'tags': tags, 'type': 0}, user,
                     'Asking question from {} with text "{}"'.format(str(user), ipfs_link))

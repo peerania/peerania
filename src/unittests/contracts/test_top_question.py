@@ -3,33 +3,35 @@ from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
-
-
 class TestTopQuestion(peeranhatest.peeranhaTest):  
-
-    
-
-    def test_add_to_top_communiti(self):
-        begin('test add to top communiti')
+    def test_add_to_top_community(self):
+        begin('test add to top community')
         admin = self.get_contract_deployer(self.get_default_contract())
         alice = self.register_alice_account()
-        self._register_question_action(alice, 'Alice question 68719476735')
-    
+        self.register_question_action(alice, 'Alice question 68719476735')
+        question_id = self.table('question', 'allquestions')[0]['id']
+        community_id = self.table('question', 'allquestions')[0]['community_id']
+
+        self.failed_action('addtotopcomm', {
+        'user': 'peeranhamain',
+        'community_id': 2,
+        'question_id': question_id
+        }, admin, 'add a question from another community')
+
         self.action('addtotopcomm', {
         'user': 'peeranhamain',
-        'community_id': 1,
-        'question_id': 68719476735
-        }, admin, 'add community 1, question 735')
-        # t = self.table('question', 'allquestions')
+        'community_id': community_id,
+        'question_id': question_id
+        }, admin, 'add community 1, question ' + str(question_id))
         example = [{'community_id': 1,'top_questions': ['68719476735']}]
         check_table(self, example)
 
         self.wait(2)
         self.failed_action('addtotopcomm', {
         'user': 'peeranhamain',
-        'community_id': 1,
-        'question_id': 68719476735
-        }, admin, 'again add community 1, question 735')
+        'community_id': community_id,
+        'question_id': question_id
+        }, admin, 'again add community 1, question ' + str(question_id))
 
         self.failed_action('addtotopcomm', {
         'user': 'peeranhamain',
@@ -38,12 +40,39 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         }, admin, 'add a nonexistent question')
         end()
 
-    def test_remove_question_from_best_communiti(self):
-        begin('test remove question from best communiti')
+    def test_limit_top_questions(self):
+        begin('test limit top questions')
+        alice = self.register_alice_account()
+        admin = self.get_contract_deployer(self.get_default_contract())
+
+        max_size = 26
+        for w in range(max_size):
+            self.register_question_action(alice, 'Alice question ' + str(68719476735 - w))
+
+            question_id = self.table('question', 'allquestions')[0]['id']
+            community_id = self.table('question', 'allquestions')[0]['community_id']
+            self.action('addtotopcomm', {
+                'user': 'peeranhamain',
+                'community_id': community_id,
+                'question_id': question_id
+                }, admin, 'add community 1, question ' + str(community_id))
+
+        self.register_question_action(alice, 'Alice question ' + str(68719476735 - max_size -1))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        community_id = self.table('question', 'allquestions')[0]['community_id']
+        self.failed_action('addtotopcomm', {
+            'user': 'peeranhamain',
+            'community_id': community_id,
+            'question_id': question_id
+            }, admin, 'add community 1, question ' + str(community_id))
+        end()
+
+    def test_remove_question_from_best_community(self):
+        begin('test remove question from best community')
         admin = self.get_contract_deployer(self.get_default_contract())
         install_table(self)
         
-        self.action('remfrotopcom', {
+        self.action('remfrmtopcom', {
             'user': 'peeranhamain',
             'community_id': 1,
             'question_id': 68719476735
@@ -51,7 +80,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         example = [{'community_id': 1, 'top_questions': ['68719476734', '68719476733', '68719476732', '68719476731']}]
         check_table(self, example)
 
-        self.action('remfrotopcom', {
+        self.action('remfrmtopcom', {
             'user': 'peeranhamain',
             'community_id': 1,
             'question_id': 68719476731
@@ -59,14 +88,14 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         example = [{'community_id': 1, 'top_questions': ['68719476734', '68719476733', '68719476732']}]
         check_table(self, example)
 
-        self.action('remfrotopcom', {
+        self.action('remfrmtopcom', {
             'user': 'peeranhamain',
             'community_id': 2,
             'question_id': 68719476731
             }, admin, 'remove a question from another community')
         check_table(self, example)
 
-        self.failed_action('remfrotopcom', {
+        self.failed_action('remfrmtopcom', {
             'user': 'peeranhamain',
             'community_id': 1,
             'question_id': 1111
@@ -106,7 +135,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'question_id': 1111
             }, admin, 'up a nonexistent question')
 
-        self.action('remfrotopcom', {
+        self.action('remfrmtopcom', {
             'user': 'peeranhamain',
             'community_id': 2,
             'question_id': 68719476731
@@ -215,40 +244,17 @@ def check_table(self, examplee):
 def install_table(self):
     begin('install table')
     admin = self.get_contract_deployer(self.get_default_contract())
-
     alice = self.register_alice_account()
-    self._register_question_action(alice, 'Alice question 68719476735')
-    self._register_question_action(alice, 'Alice question 68719476734')
-    self._register_question_action(alice, 'Alice question 68719476733')
-    self._register_question_action(alice, 'Alice question 68719476732')
-    self._register_question_action(alice, 'Alice question 68719476731')
-    self._register_question_action(alice, 'Alice question 68719476730')
 
-    self.action('addtotopcomm', {
-        'user': 'peeranhamain',
-        'community_id': 1,
-        'question_id': 68719476735
-        }, admin, 'add community 1, question 735')
-    self.action('addtotopcomm', {
-        'user': 'peeranhamain',
-        'community_id': 1,
-        'question_id': 68719476734
-        }, admin, 'add community 1, question 734')       
-    self.action('addtotopcomm', {
-        'user': 'peeranhamain',
-        'community_id': 1,
-        'question_id': 68719476733
-        }, admin, 'add community 1, question 733')
-    self.action('addtotopcomm', {
-        'user': 'peeranhamain',
-        'community_id': 1,
-        'question_id': 68719476732
-        }, admin, 'add community 1, question 732')
-    self.action('addtotopcomm', {
-        'user': 'peeranhamain',
-        'community_id': 1,
-        'question_id': 68719476731
-        }, admin, 'add community 1, question 731')
+    for w in range(5):
+        self.register_question_action(alice, 'Alice question ' + str(68719476735 - w))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        community_id = self.table('question', 'allquestions')[0]['community_id']
+        self.action('addtotopcomm', {
+            'user': 'peeranhamain',
+            'community_id': community_id,
+            'question_id': question_id
+            }, admin, 'add community 1, question ' + str(community_id))
 
     top = self.table('topquestion', 'alltopquest')
     example = [{'community_id': 1, 'top_questions': ['68719476735', '68719476734', '68719476733', '68719476732', '68719476731']}]

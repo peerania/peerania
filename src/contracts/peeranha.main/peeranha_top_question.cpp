@@ -1,13 +1,16 @@
 #include "peeranha.hpp"
 #include <stdint.h>
 
+#define  LIMIT_MAX_QUESTION 25
+
 void peeranha::add_top_question(eosio::name user, uint16_t community_id, uint64_t question_id) {
   top_question_index top_question_table(_self, scope_all_top_questions);
   assert_community_exist(community_id);
 
   question_index question_table(_self, scope_all_questions);      
-  auto _iter_community = question_table.find(question_id);        
-  eosio::check(_iter_community != question_table.end() , "check valid question");
+  auto iter_question = question_table.find(question_id);        
+  eosio::check(iter_question != question_table.end() , "check valid question");
+  eosio::check(iter_question->community_id == community_id , "check question belongs community");
 
   auto iter_community = top_question_table.find(community_id);
   if (iter_community == top_question_table.end()) {
@@ -22,6 +25,7 @@ void peeranha::add_top_question(eosio::name user, uint16_t community_id, uint64_
         iter_community, _self, [question_id](auto &top_question) {
           auto iter_top_question = find(top_question.top_questions.begin(), top_question.top_questions.end(), question_id);
           eosio::check(iter_top_question == top_question.top_questions.end() , "question has already been added");
+          eosio::check(top_question.top_questions.size() <= LIMIT_MAX_QUESTION , "added maximum number of questions");
           top_question.top_questions.push_back(question_id);
         });
   }
@@ -87,6 +91,6 @@ void peeranha::move_question(eosio::name user, uint16_t community_id, uint64_t q
         top_question.top_questions.erase(iter_question);
         auto position = new_position + top_question.top_questions.begin() - 1;
         top_question.top_questions.insert(position, question_id);
-        });
+      });
   }
 }

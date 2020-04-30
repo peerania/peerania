@@ -178,7 +178,7 @@ void peeranha::addtotopcomm(eosio::name user, uint16_t community_id, uint64_t qu
   add_top_question(user, community_id, question_id);
 }
 
-void peeranha::remfrotopcom(eosio::name user, uint16_t community_id, uint64_t question_id){
+void peeranha::remfrmtopcom(eosio::name user, uint16_t community_id, uint64_t question_id){
   require_auth(_self);
   remove_top_question(user, community_id, question_id);
 }
@@ -351,7 +351,7 @@ EOSIO_DISPATCH(
         upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
         reportprof)(updateacc)(givemoderflg)(setcommipfs)(chgqsttype)(setcommname)
-        (addtotopcomm)(remfrotopcom)(upquestion)(downquestion)(movequestion)
+        (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)
 #endif

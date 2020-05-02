@@ -9,8 +9,8 @@ void peeranha::add_top_question(eosio::name user, uint16_t community_id, uint64_
 
   question_index question_table(_self, scope_all_questions);      
   auto iter_question = question_table.find(question_id);        
-  eosio::check(iter_question != question_table.end() , "check valid question");
-  eosio::check(iter_question->community_id == community_id , "check question belongs community");
+  eosio::check(iter_question != question_table.end() , "question not found");
+  eosio::check(iter_question->community_id == community_id , "wrong community, question in another community");
 
   auto iter_community = top_question_table.find(community_id);
   if (iter_community == top_question_table.end()) {

@@ -11,6 +11,7 @@
 #include "property.hpp"
 #include "question_container.hpp"
 #include "utils.hpp"
+#include "property_community.hpp"
 
 #include "token_common.hpp"
 
@@ -134,6 +135,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     // Action give moderator flags
     ACTION givemoderflg(eosio::name user, int flags);
+    
+    ACTION givecommuflp(eosio::name user, int flags, uint16_t community_id);
 
     ACTION setcommipfs(uint16_t community_id,
                         IpfsHash new_ipfs_link);
@@ -292,6 +295,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     void update_account(eosio::name user);
 
     void give_moderator_flag(eosio::name user, int flags);
+
+    void give_moderator_flag(eosio::name user, int flags, uint16_t community_id);
 
     void set_community_ipfs_hash(uint16_t community_id, const IpfsHash &new_ipfs_link);
 

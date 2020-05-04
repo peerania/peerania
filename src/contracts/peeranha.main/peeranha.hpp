@@ -136,7 +136,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     // Action give moderator flags
     ACTION givemoderflg(eosio::name user, int flags);
     
-    ACTION givecommuflp(eosio::name user, int flags, uint16_t community_id);
+    ACTION givecommuflg(eosio::name user, int flags, uint16_t community_id);
 
     ACTION setcommipfs(uint16_t community_id,
                         IpfsHash new_ipfs_link);

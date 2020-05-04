@@ -156,7 +156,7 @@ void peeranha::givemoderflg(eosio::name user, int flags) {
   give_moderator_flag(user, flags);
 }
 
-void peeranha::givecommuflp(eosio::name user, int flags, uint16_t community_id) {
+void peeranha::givecommuflg(eosio::name user, int flags, uint16_t community_id) {
   require_auth(_self);
   give_moderator_flag(user, flags, community_id);
 }
@@ -322,7 +322,7 @@ EOSIO_DISPATCH(
         delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(modcomment)(
         upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
-        reportprof)(updateacc)(givemoderflg)(givecommuflp)(setcommipfs)(chgqsttype)(setcommname)
+        reportprof)(updateacc)(givemoderflg)(givecommuflg)(setcommipfs)(chgqsttype)(setcommname)
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)
 #endif

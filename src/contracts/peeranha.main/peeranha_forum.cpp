@@ -62,7 +62,7 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
   new_answer.ipfs_link = ipfs_link;
   new_answer.post_time = now();
   
-  if(find_account_property_community(user, COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER, iter_question->community_id)){
+  if(official_answer && find_account_property_community(user, COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER, iter_question->community_id)){
     int_key_value key_value;
     key_value.key = PROPERTY_OFFICIAL_ANSWER;
     key_value.value = 1;
@@ -263,32 +263,31 @@ void peeranha::modify_question(eosio::name user, uint64_t question_id,
 }
 
 void peeranha::modify_answer(eosio::name user, uint64_t question_id,
-                             uint16_t answer_id, const IpfsHash &ipfs_link) {
+                             uint16_t answer_id, const IpfsHash &ipfs_link, bool official_answer) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
+  auto community_id = iter_question->community_id;
   question_table.modify(
       iter_question, _self,
-      [iter_account, answer_id, &ipfs_link](auto &question) {
+      [iter_account, answer_id, &ipfs_link, official_answer, community_id, user](auto &question) {
         auto iter_answer = find_answer(question, answer_id);
         assert_allowed(*iter_account, iter_answer->user, Action::MODIFY_ANSWER);
         iter_answer->ipfs_link = ipfs_link;
-
-        bool official_answer = true;
-        auto iter_key = linear_find(iter_answer->properties.begin(), iter_answer->properties.end(), PROPERTY_OFFICIAL_ANSWER);
-        if(official_answer && iter_key == iter_answer->properties.end()){
-          int_key_value key_value;
-          key_value.key = 10;
-          key_value.value = 1;
-          iter_answer->properties.push_back(key_value);
-        }
-        else if(!official_answer && iter_key != iter_answer->properties.end())
-        {
-          iter_answer->properties.erase(iter_key);
-        }
-
-
         set_property(iter_answer->properties, PROPERTY_LAST_MODIFIED, now());
+
+        if(find_account_property_community(user, COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER, community_id)){
+          auto iter_key = linear_find(iter_answer->properties.begin(), iter_answer->properties.end(), PROPERTY_OFFICIAL_ANSWER);
+          if(official_answer && iter_key == iter_answer->properties.end()){
+            int_key_value key_value;
+            key_value.key = 10;
+            key_value.value = 1;
+            iter_answer->properties.push_back(key_value);
+          }
+          else if(!official_answer && iter_key != iter_answer->properties.end()){
+            iter_answer->properties.erase(iter_key);
+          }
+        }
       });
   update_rating(iter_account, 0, [](auto &account) {
     account.reduce_energy(ENERGY_MODIFY_ANSWER);

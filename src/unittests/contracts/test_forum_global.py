@@ -257,7 +257,7 @@ class ForumGlobalTests(peeranhatest.peeranhaTest):
         e[1]['answers'][1]['comments'].append(
             {'id': '#var aq_aa_cc', 'post_time': '#ignore', 'user': 'carol', 'ipfs_link': 'AQ->AA->CC'})
         self.action('modanswer', {'user': 'bob', 'question_id': var['aq'], 'answer_id': var['aq_ba'],
-                                  'ipfs_link': 'AQ->BA updated'}, bob, 'Update Bob answer to Alice question')
+                                  'ipfs_link': 'AQ->BA updated', 'official_answer': False}, bob, 'Update Bob answer to Alice question')
         e[1]['answers'][0]['ipfs_link'] = 'AQ->BA updated'
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))

@@ -114,31 +114,74 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         end()
 
     def test_official_answer(self):
-        begin('Test add flag "official_answer"')
+        begin('Test post answeradd with "official_answer"')
         alice = self.register_alice_account()
         admin = self.get_contract_deployer(self.get_default_contract())
-
-        
+        bob = self.register_bob_account()
         self._register_question_action(alice, 'Alice question 1', 'q1')
         question_id = self.table('question', 'allquestions')[0]['id']
+
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        answers = self.table('question', 'allquestions')[0]['answers'][0]['properties']
+        example = []
+        self.assertTrue(compare(example, answers, ignore_excess=True))
 
         self.action('givecommuflg', {
         'user': alice,
         'flags': COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER,
         'community_id': 1
-        }, admin, 'add a flag COMMUNITY_ADMIN_FLG_CREATE_TAG')
+        }, admin, 'add a flag COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER')
 
-        self.action('postanswer', {'user': str(alice), 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False}, alice,
-                    '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'Register Bob answer to Alice'))
-        answers = self.table('question', 'allquestions')[0]['answers'][0]['properties']
-        print(answers)
+        self.action('postanswer', {'user': str(alice), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, alice,
+                    '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'answer with flag "official_answer"'))
+        answers = self.table('question', 'allquestions')[0]['answers'][1]['properties']
         example = {
             'key': 10,
             'value': 1,
         }
-        print(example)
-
         self.assertTrue(compare(example, answers[0], ignore_excess=True))
+        end()
+
+    def test_modify_official_answer(self):
+        begin('Test modify_answer with "official_answer"')
+        alice = self.register_alice_account(100,100)
+        admin = self.get_contract_deployer(self.get_default_contract())
+        bob = self.register_bob_account()
+        self._register_question_action(alice, 'Alice question 1', 'q1')
+        question_id = self.table('question', 'allquestions')[0]['id']
+
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': False}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer", variable official_answer = False'))
+        answers_id = self.table('question', 'allquestions')[0]['answers'][0]['id']
+        self.action('modanswer', {'user': str(bob), 'question_id': question_id, 'answer_id': answers_id,
+                                  'ipfs_link': 'undefined123', 'official_answer': True}, bob, 'modify answer without flag "official_answer", variable official_answer = True')
+        properties = self.table('question', 'allquestions')[0]['answers'][0]['properties']
+        example = {'key': 10, 'value': 1}
+        self.assertFalse(compare(example, properties[0], ignore_excess=True))
+
+
+        self.action('givecommuflg', {
+        'user': alice,
+        'flags': COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER,
+        'community_id': 1
+        }, admin, 'add a flag COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER')
+
+        self.action('postanswer', {'user': str(alice), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': False}, alice,
+                    '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'answer with flag "official_answer", variable official_answer = False'))
+
+        answers_id = self.table('question', 'allquestions')[0]['answers'][1]['id']
+        self.action('modanswer', {'user': str(alice), 'question_id': question_id, 'answer_id': answers_id,
+                                  'ipfs_link': 'undefined123', 'official_answer': True}, alice, 'modify answer with flag "official_answer", variable official_answer = True')
+        properties = self.table('question', 'allquestions')[0]['answers'][1]['properties']
+        example = {'key': 10, 'value': 1}
+        self.assertTrue(compare(example, properties[0], ignore_excess=True))
+
+        self.action('modanswer', {'user': str(alice), 'question_id': question_id, 'answer_id': answers_id,
+                                  'ipfs_link': 'undefined123', 'official_answer': False}, alice, 'modify answer with flag "official_answer", variable official_answer = false')
+        properties = self.table('question', 'allquestions')[0]['answers'][1]['properties']
+        example = {'key': 10, 'value': 1}
+        self.assertFalse(compare(example, properties[0], ignore_excess=True))
         end()
 
     def test_delete(self):

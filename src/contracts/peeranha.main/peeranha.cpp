@@ -60,9 +60,9 @@ void peeranha::modquestion(eosio::name user, uint64_t question_id,
 }
 
 void peeranha::modanswer(eosio::name user, uint64_t question_id,
-                         uint16_t answer_id, IpfsHash ipfs_link) {
+                         uint16_t answer_id, IpfsHash ipfs_link, bool official_answer) {
   require_auth(user);
-  modify_answer(user, question_id, answer_id, ipfs_link);
+  modify_answer(user, question_id, answer_id, ipfs_link, official_answer);
 }
 void peeranha::modcomment(eosio::name user, uint64_t question_id,
                           uint16_t answer_id, uint16_t comment_id,

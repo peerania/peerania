@@ -48,7 +48,8 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         self.action('modanswer', {'user': 'bob',
                                   'question_id': var['q1_id'],
                                   'answer_id': var['q1_a1_id'],
-                                  'ipfs_link': 'updated IPFS'},
+                                  'ipfs_link': 'updated IPFS',
+                                  'official_answer': False},
                     bob, 'Update Bob answer 1 to Alice question 1, set to "updated IPFS"')
         account_e[1]['energy'] -= economy['ENERGY_POST_QUESTION']
         account_e[2]['energy'] -= economy['ENERGY_POST_ANSWER']
@@ -153,7 +154,8 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         self.failed_action('modanswer', {'user': 'bob',
                                          'question_id': var['q1_id'],
                                          'answer_id': var['q1_a1_id'],
-                                         'ipfs_link': 'test'},
+                                         'ipfs_link': 'test',
+                                         'official_answer': False},
                            carol, 'Attempt to modify bob answer with carol auth', 'auth')
         end()
 
@@ -196,7 +198,8 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         self.failed_action('modanswer', {'user': 'carol',
                                          'question_id': var['q1_id'],
                                          'answer_id': var['q1_a1_id'],
-                                         'ipfs_link': 'test'},
+                                         'ipfs_link': 'test',
+                                         'official_answer': False},
                            carol, 'Attempt to modify bob answer with carol account', 'assert')
         end()
 
@@ -238,7 +241,8 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         self.failed_action('modanswer', {'user': 'bob',
                                          'question_id': var['q1_id'],
                                          'answer_id': var['q1_a1_id'] + 1,
-                                         'ipfs_link': 'updated IPFS'},
+                                         'ipfs_link': 'updated IPFS',
+                                         'official_answer': False},
                            bob, 'Attempt to update non-existent answer', 'assert')
         end()
 
@@ -294,7 +298,8 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         self.failed_action('modanswer', {'user': 'bob',
                                          'question_id': int(var['q1_id']) + 1,
                                          'answer_id': var['q1_a1_id'],
-                                         'ipfs_link': 'updated IPFS'},
+                                         'ipfs_link': 'updated IPFS',
+                                         'official_answer': False},
                            bob, 'Attempt to modify answer of non-existent question', 'assert')
         end()
 

@@ -100,6 +100,56 @@ void peeranha::give_moderator_flag(eosio::name user, int flags) {
   });
 }
 
+void peeranha::give_moderator_flag(eosio::name user, int flags, uint16_t community_id) {
+  assert_community_exist(community_id);
+  property_community_index property_community_table(_self, scope_all_property_community);
+
+  auto iter_user = property_community_table.find(user.value);
+  if (iter_user == property_community_table.end()) {
+    property_community_table.emplace(
+    _self, [user, flags, community_id](auto &property_community) {
+      key_admin_community key_value;
+      property_community.user = user;
+      key_value.community = community_id;
+      key_value.value =  flags;
+      property_community.properties.push_back(key_value);
+    });
+  }
+  else {
+    property_community_table.modify(
+        iter_user, _self, [flags, community_id](auto &property_community) {
+          auto iter_community = linear_find(property_community.properties.begin(), property_community.properties.end(), community_id);
+          if(iter_community == property_community.properties.end()){
+            key_admin_community key_value;
+            key_value.community = community_id;
+            key_value.value =  flags;
+            property_community.properties.push_back(key_value);
+          }
+          else{
+            iter_community->value =  flags; 
+          }
+        });
+  }
+}
+
+int get_property_d_(const std::vector<key_admin_community> &properties, uint16_t key,
+                     int default_value) {
+  auto itr_property = linear_find(properties.begin(), properties.end(), key);
+  if (itr_property == properties.end()) return default_value;
+  return itr_property->value;
+}
+
+bool property_community::has_community_moderation_flag(int mask,  uint16_t community_id) const {
+  if (is_moderation_availble()) {
+
+    int moderator_flags =
+        get_property_d_(properties, community_id, 0);
+    return moderator_flags & mask;
+    // return true;
+  }
+  return false;
+}
+
 void peeranha::update_rating_base(
     account_index::const_iterator iter_account, int rating_change,
     const std::function<void(account &)> account_modifying_lambda,

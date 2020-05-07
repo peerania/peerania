@@ -12,6 +12,7 @@
 #include "question_container.hpp"
 #include "utils.hpp"
 #include "property_community.hpp"
+#include <optional>
 
 #include "token_common.hpp"
 
@@ -56,7 +57,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     // Post answer(answer question)
     ACTION postanswer(eosio::name user, uint64_t question_id,
-                      IpfsHash ipfs_link);
+                      IpfsHash ipfs_link/*, std::optional<int> &official_answer*/);
 
     // Post comment
     // If the answer_id set to 0 comment question, otherwise comment question
@@ -211,7 +212,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                        const uint8_t type);
 
     void post_answer(eosio::name user, uint64_t question_id,
-                     const IpfsHash &ipfs_link);
+                     const IpfsHash &ipfs_link/*, std::optional<int> official_answer*/);
 
     void post_comment(eosio::name user, uint64_t question_id,
                       uint16_t answer_id, const IpfsHash &ipfs_link);

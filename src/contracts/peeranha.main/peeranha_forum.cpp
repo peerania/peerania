@@ -14,8 +14,8 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
   assert_title(title);
   assert_question_type(type);
   auto iter_account = find_account(user);
-  update_rating(iter_account, POST_QUESTION_REWARD, [](auto &account) {
-    account.reduce_energy(ENERGY_POST_QUESTION);
+  update_rating(iter_account, POST_QUESTION_REWARD, [community_id](auto &account) {
+    account.reduce_energy(ENERGY_POST_QUESTION, community_id);
     account.questions_asked += 1;
   });
   assert_allowed(*iter_account, user, Action::POST_QUESTION);
@@ -61,6 +61,13 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
   new_answer.user = user;
   new_answer.ipfs_link = ipfs_link;
   new_answer.post_time = now();
+  
+  if(find_account_property_community(user, COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER, iter_question->community_id)){
+    int_key_value key_value;
+    key_value.key = PROPERTY_OFFICIAL_ANSWER;
+    key_value.value = 1;
+    new_answer.properties.push_back(key_value);
+  }
 
   uint16_t answer_id;
   question_table.modify(iter_question, _self,
@@ -78,8 +85,8 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
 #endif
 
   update_community_statistics(iter_question->community_id, 0, 1, 0, 0);
-  update_rating(iter_account, POST_ANSWER_REWARD, [](auto &account) {
-    account.reduce_energy(ENERGY_POST_ANSWER);
+  update_rating(iter_account, POST_ANSWER_REWARD, [iter_question](auto &account) {
+    account.reduce_energy(ENERGY_POST_ANSWER, iter_question->community_id);
     account.answers_given += 1;
   });
 }
@@ -129,8 +136,8 @@ void peeranha::post_comment(eosio::name user, uint64_t question_id,
           push_new_forum_item(iter_answer->comments, new_comment);
         }
       });
-  update_rating(iter_account, POST_COMMENT_REWARD, [](auto &account) {
-    account.reduce_energy(ENERGY_POST_COMMENT);
+  update_rating(iter_account, POST_COMMENT_REWARD, [iter_question](auto &account) {
+    account.reduce_energy(ENERGY_POST_COMMENT, iter_question->community_id);
   });
 }
 
@@ -266,6 +273,21 @@ void peeranha::modify_answer(eosio::name user, uint64_t question_id,
         auto iter_answer = find_answer(question, answer_id);
         assert_allowed(*iter_account, iter_answer->user, Action::MODIFY_ANSWER);
         iter_answer->ipfs_link = ipfs_link;
+
+        bool official_answer = true;
+        auto iter_key = linear_find(iter_answer->properties.begin(), iter_answer->properties.end(), PROPERTY_OFFICIAL_ANSWER);
+        if(official_answer && iter_key == iter_answer->properties.end()){
+          int_key_value key_value;
+          key_value.key = 10;
+          key_value.value = 1;
+          iter_answer->properties.push_back(key_value);
+        }
+        else if(!official_answer && iter_key != iter_answer->properties.end())
+        {
+          iter_answer->properties.erase(iter_key);
+        }
+
+
         set_property(iter_answer->properties, PROPERTY_LAST_MODIFIED, now());
       });
   update_rating(iter_account, 0, [](auto &account) {

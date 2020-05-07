@@ -24,7 +24,7 @@ void peeranha::postquestion(eosio::name user, uint16_t community_id,
 }
 
 void peeranha::postanswer(eosio::name user, uint64_t question_id,
-                          IpfsHash ipfs_link) {
+                          IpfsHash ipfs_link/*, std::optional<int> &official_answer*/) {
   require_auth(user);
   post_answer(user, question_id, ipfs_link);
 }
@@ -246,6 +246,13 @@ void peeranha::resettables() {
   auto iter_create_community = create_community_table.begin();
   while (iter_create_community != create_community_table.end()) {
     iter_create_community = create_community_table.erase(iter_create_community);
+  }
+
+  // clean create community table
+  property_community_index property_community_table(_self, scope_all_property_community);
+  auto iter_user = property_community_table.begin();
+  while (iter_user != property_community_table.end()) {
+    iter_user = property_community_table.erase(iter_user);
   }
 
   // clean create tags and tags tables

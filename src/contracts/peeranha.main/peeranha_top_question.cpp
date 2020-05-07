@@ -4,7 +4,6 @@
 #define  LIMIT_MAX_QUESTION 25
 
 void peeranha::add_top_question(eosio::name user, uint16_t community_id, uint64_t question_id) {
-  top_question_index top_question_table(_self, scope_all_top_questions);
   assert_community_exist(community_id);
 
   question_index question_table(_self, scope_all_questions);      
@@ -12,6 +11,7 @@ void peeranha::add_top_question(eosio::name user, uint16_t community_id, uint64_
   eosio::check(iter_question != question_table.end() , "question not found");
   eosio::check(iter_question->community_id == community_id , "wrong community, question in another community");
 
+  top_question_index top_question_table(_self, scope_all_top_questions);
   auto iter_community = top_question_table.find(community_id);
   if (iter_community == top_question_table.end()) {
     top_question_table.emplace(
@@ -32,8 +32,8 @@ void peeranha::add_top_question(eosio::name user, uint16_t community_id, uint64_
 }
 
 void peeranha::remove_top_question(eosio::name user, uint16_t community_id, uint64_t question_id){  
-  top_question_index top_question_table(_self, scope_all_top_questions);
   assert_community_exist(community_id);
+  top_question_index top_question_table(_self, scope_all_top_questions);
   auto iter_community = top_question_table.find(community_id);
   if (iter_community != top_question_table.end()) {
     top_question_table.modify(
@@ -46,8 +46,8 @@ void peeranha::remove_top_question(eosio::name user, uint16_t community_id, uint
 }
 
 void peeranha::up_question(eosio::name user, uint16_t community_id, uint64_t question_id){
-  top_question_index top_question_table(_self, scope_all_top_questions);
   assert_community_exist(community_id);
+  top_question_index top_question_table(_self, scope_all_top_questions);
   auto iter_community = top_question_table.find(community_id);
   if (iter_community != top_question_table.end()) {
 
@@ -62,8 +62,8 @@ void peeranha::up_question(eosio::name user, uint16_t community_id, uint64_t que
 }
 
 void peeranha::down_question(eosio::name user, uint16_t community_id, uint64_t question_id){
-  top_question_index top_question_table(_self, scope_all_top_questions);
   assert_community_exist(community_id);
+  top_question_index top_question_table(_self, scope_all_top_questions);
   auto iter_community = top_question_table.find(community_id);
   if (iter_community != top_question_table.end()) {
 
@@ -78,8 +78,8 @@ void peeranha::down_question(eosio::name user, uint16_t community_id, uint64_t q
 }
 
 void peeranha::move_question(eosio::name user, uint16_t community_id, uint64_t question_id,  uint16_t new_position){
-  top_question_index top_question_table(_self, scope_all_top_questions);
   assert_community_exist(community_id);
+  top_question_index top_question_table(_self, scope_all_top_questions);
   auto iter_community = top_question_table.find(community_id);
   
   if (iter_community != top_question_table.end()) {

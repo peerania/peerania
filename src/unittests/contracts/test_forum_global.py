@@ -34,13 +34,13 @@ class ForumGlobalTests(peeranhatest.peeranhaTest):
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
-        self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'Alice answer to herself'},
+        self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'Alice answer to herself', 'official_answer': False},
                     alice, 'Register Alice answer to Alice')
-        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'Bob answer to Alice'},
+        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'Bob answer to Alice', 'official_answer': False},
                     bob, 'Register Bob answer to Alice')
-        self.action('postanswer', {'user': 'carol', 'question_id': var['aq'], 'ipfs_link': 'Carol answer to Alice'},
+        self.action('postanswer', {'user': 'carol', 'question_id': var['aq'], 'ipfs_link': 'Carol answer to Alice', 'official_answer': False},
                     carol, 'Register Carol answer to Alice')
-        self.action('postanswer', {'user': 'carol', 'question_id': var['bq'], 'ipfs_link': 'Carol answer to Bob'},
+        self.action('postanswer', {'user': 'carol', 'question_id': var['bq'], 'ipfs_link': 'Carol answer to Bob', 'official_answer': False},
                     carol, 'Register Carol answer to Bob')
         e[1]['answers'].append({
             'id': '#var aq_aa',
@@ -226,7 +226,7 @@ class ForumGlobalTests(peeranhatest.peeranhaTest):
         info('      |-->Carol comment')
         info('      |-->Alice comment')
         info('       `->Bob comment')
-        self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'Alice answer to herself new'},
+        self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'Alice answer to herself new', 'official_answer': False},
                     alice, 'Register Alice answer to Alice')
         e[1]['answers'].append({
             'id': '#var aq_aa',
@@ -292,7 +292,7 @@ class ForumGlobalTests(peeranhatest.peeranhaTest):
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
-        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'title': 'Title bob question','ipfs_link': 'AQ->BA'},
+        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'title': 'Title bob question','ipfs_link': 'AQ->BA', 'official_answer': False},
                     bob, 'Register Bob answer to Alice question')
         self.failed_action('delquestion', {
             'user': 'alice', 'question_id': var['aq']}, alice, 'Attempt to delete Alice question', 'assert')
@@ -315,7 +315,7 @@ class ForumGlobalTests(peeranhatest.peeranhaTest):
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
-        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'AQ->BA'},
+        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'AQ->BA', 'official_answer': False},
                     bob, 'Register Bob answer to Alice question')
         e[0]['answers'].append({'user': 'bob', 'id': '#var aq_ba'})
         t = self.table('question', 'allquestions')

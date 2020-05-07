@@ -79,7 +79,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         energy = self.table('account', 'allaccounts')[0]['energy']
         self.assertTrue(compare(energy, self.DEFAULT_ENERGY, ignore_excess=True))
 
-        self.action('postanswer', {'user': str(alice), 'question_id': question_id, 'ipfs_link': 'undefined'}, alice,
+        self.action('postanswer', {'user': str(alice), 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False}, alice,
                     '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'Register Alice answer'))
         energy = self.table('account', 'allaccounts')[0]['energy']
         self.assertTrue(compare(energy, self.DEFAULT_ENERGY, ignore_excess=True))
@@ -128,7 +128,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         'community_id': 1
         }, admin, 'add a flag COMMUNITY_ADMIN_FLG_CREATE_TAG')
 
-        self.action('postanswer', {'user': str(alice), 'question_id': question_id, 'ipfs_link': 'undefined'}, alice,
+        self.action('postanswer', {'user': str(alice), 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False}, alice,
                     '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'Register Bob answer to Alice'))
         answers = self.table('question', 'allquestions')[0]['answers'][0]['properties']
         print(answers)
@@ -153,7 +153,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         self.action('postquestion', {'user': 'alice', 'title': 'undefined', 'ipfs_link': 'undefined',  'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Register question from alice')
         question_id = self.table('question', 'allquestions')[0]['id']
-        self.action('postanswer', {'user': 'bob', 'question_id': question_id, 'ipfs_link': 'undefined'},
+        self.action('postanswer', {'user': 'bob', 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False},
                     bob, 'Register Bob answer to Alice')
         answer_id = self.table('question', 'allquestions')[0]['answers'][0]['id']
         self.action('postcomment', {'user': 'carol', 'question_id': question_id, 'answer_id': answer_id,

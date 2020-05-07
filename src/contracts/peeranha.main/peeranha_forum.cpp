@@ -46,7 +46,7 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
 }
 
 void peeranha::post_answer(eosio::name user, uint64_t question_id,
-                           const IpfsHash &ipfs_link) {
+                           const IpfsHash &ipfs_link, bool official_answer) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);

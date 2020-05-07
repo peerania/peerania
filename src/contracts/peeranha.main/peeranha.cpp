@@ -24,9 +24,9 @@ void peeranha::postquestion(eosio::name user, uint16_t community_id,
 }
 
 void peeranha::postanswer(eosio::name user, uint64_t question_id,
-                          IpfsHash ipfs_link/*, std::optional<int> &official_answer*/) {
+                          IpfsHash ipfs_link, bool official_answer) {
   require_auth(user);
-  post_answer(user, question_id, ipfs_link);
+  post_answer(user, question_id, ipfs_link, official_answer);
 }
 
 void peeranha::postcomment(eosio::name user, uint64_t question_id,

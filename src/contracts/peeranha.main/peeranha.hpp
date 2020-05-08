@@ -11,6 +11,7 @@
 #include "property.hpp"
 #include "question_container.hpp"
 #include "utils.hpp"
+#include "top_question.hpp"
 
 #include "token_common.hpp"
 
@@ -142,6 +143,16 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                         std::string new_name);
 
     ACTION chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating);
+
+    ACTION addtotopcomm(eosio::name user, uint16_t community_id, uint64_t question_id);
+
+    ACTION remfrmtopcom(eosio::name user, uint16_t community_id, uint64_t question_id);
+
+    ACTION upquestion(eosio::name user, uint16_t community_id, uint64_t question_id);
+
+    ACTION downquestion(eosio::name user, uint16_t community_id, uint64_t question_id);
+    
+    ACTION movequestion(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t new_position);
 
 #ifdef SUPERFLUOUS_INDEX
     // Delete @count@ items from superfluous index tebles
@@ -298,4 +309,14 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     void set_community_name(uint16_t community_id, const std::string &new_name);
 
     void change_question_type(eosio::name user, uint64_t question_id, int type, bool restore_rating);
+
+    void add_top_question(eosio::name user, uint16_t community_id, uint64_t id_question);
+
+    void remove_top_question(eosio::name user, uint16_t community_id, uint64_t question_id);
+
+    void up_question(eosio::name user, uint16_t community_id, uint64_t question_id);
+
+    void down_question(eosio::name user, uint16_t community_id, uint64_t question_id);
+
+    void move_question(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t newposition);
   };

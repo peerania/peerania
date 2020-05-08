@@ -170,7 +170,7 @@ class EOSTest(unittest.TestCase):
         info('Wait {} sec until new block is generated'.format(secs))
         sleep(secs)
 
-    def table(self, table, scope, upperBound=None, lowerBound=None, limit=10, indexPosition=None, keyType=None, contract=None, ignoreMore=False):
+    def table(self, table, scope, upperBound=None, lowerBound=None, limit=30, indexPosition=None, keyType=None, contract=None, ignoreMore=False): #limit=10
         if contract is None:
             contract = self.config['default-contract']
         data = {'table': table,

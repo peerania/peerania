@@ -11,7 +11,7 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
         begin('Testing registration of new question')
         alice = self.register_alice_account()
         account_e = [get_expected_account_body(alice)]
-        e = [self._register_question_action(alice, 'Alice question 1')]
+        e = [self.register_question_action(alice, 'Alice question 1')]
         t = self.table('question', 'allquestions')
         account_e[0]['energy'] -= economy['ENERGY_POST_QUESTION']
         self.assertTrue(compare(account_e, self.table('account', 'allaccounts'), ignore_excess=True))
@@ -22,7 +22,7 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
         begin('Test modify question')
         alice = self.register_alice_account()
         account_e = [get_expected_account_body(alice)]
-        e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
+        e = [self.register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
@@ -44,7 +44,7 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
         begin('Test delete question')
         alice = self.register_alice_account()
         account_e = [get_expected_account_body(alice)]
-        e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
+        e = [self.register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
@@ -77,7 +77,7 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
         begin('Call modify question with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
+        e = [self.register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
@@ -92,7 +92,7 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
                            'Register question with title len=1', 'assert')
         self.failed_action('postquestion', {'user': alice, 'title':  "".join('a' for x in range(257)), 'ipfs_link': 'Alice ipfs', 'community_id': 1, 'tags':[1], 'type': 0}, alice,
                            'Register question with title len=129', 'assert')
-        e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
+        e = [self.register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
@@ -106,7 +106,7 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
         begin('Call delete question with another user auth', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
+        e = [self.register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
@@ -118,7 +118,7 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
         begin('Modify question of another user', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
+        e = [self.register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
@@ -130,7 +130,7 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
         begin('Delete  question of another user', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
+        e = [self.register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
@@ -142,7 +142,7 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
         begin('Modify non-existent question', True)
         alice = self.register_alice_account()
         bob = self.register_bob_account()
-        e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
+        e = [self.register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
@@ -153,27 +153,13 @@ class ForumQuestionTests(peeranhatest.peeranhaTest):
     def test_delete_non_existent_question_failed(self):
         begin('Delete non-existent question', True)
         alice = self.register_alice_account()
-        e = [self._register_question_action(alice, 'Alice question 1', 'q1')]
+        e = [self.register_question_action(alice, 'Alice question 1', 'q1')]
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
         self.failed_action('delquestion', {
             'user': 'alice', 'question_id': int(var['q1']) + 1}, alice, 'Delete non-existent question', 'assert')
         end()
-
-    def _register_question_action(self, user, ipfs_link, id_var=''):
-        tags = [1, 2, 3] if str(user) == 'alice' else [2, 3, 4]
-        self.action('postquestion', {'user': str(user), 'title': 'Title ' + ipfs_link, 'ipfs_link': ipfs_link, 'community_id': 1, 'tags': tags, 'type': 0}, user,
-                    'Asking question from {} with text "{}"'.format(str(user), ipfs_link))
-        return {'id': '#ignore' if id_var == '' else '#var ' + id_var,
-                'user': str(user),
-                'title': 'Title ' + ipfs_link,
-                'ipfs_link': ipfs_link,
-                'post_time': '#ignore',
-                'community_id': 1,
-                'tags': tags,
-                'answers': [],
-                'comments': []}
 
 
 if __name__ == '__main__':

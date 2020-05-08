@@ -3,6 +3,7 @@
 #include "peeranha_communities_and_tags.cpp"
 #include "peeranha_forum.cpp"
 #include "peeranha_vote.cpp"
+#include "peeranha_top_question.cpp"
 
 void peeranha::registeracc(eosio::name user, std::string display_name,
                            IpfsHash ipfs_profile, IpfsHash ipfs_avatar) {
@@ -176,6 +177,32 @@ void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool
    change_question_type(user, question_id, type, restore_rating);
 }
 
+// add_top_question(uint64_t id_question);
+void peeranha::addtotopcomm(eosio::name user, uint16_t community_id, uint64_t question_id){
+  require_auth(_self);
+  add_top_question(user, community_id, question_id);
+}
+
+void peeranha::remfrmtopcom(eosio::name user, uint16_t community_id, uint64_t question_id){
+  require_auth(_self);
+  remove_top_question(user, community_id, question_id);
+}
+
+void peeranha::upquestion(eosio::name user, uint16_t community_id, uint64_t question_id){
+  require_auth(_self);
+  up_question(user, community_id, question_id);
+}
+
+void peeranha::downquestion(eosio::name user, uint16_t community_id, uint64_t question_id){
+  require_auth(_self);
+  down_question(user, community_id, question_id);
+}
+
+void peeranha::movequestion(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t new_position){
+  require_auth(_self);
+  move_question(user,  community_id, question_id, new_position);
+}
+
 #ifdef SUPERFLUOUS_INDEX
 void peeranha::freeindex(int size) {
   require_auth(_self);
@@ -221,6 +248,12 @@ void peeranha::resettables() {
     auto iter_period_rating = period_rating_table.begin();
     while (iter_period_rating != period_rating_table.end()) {
       iter_period_rating = period_rating_table.erase(iter_period_rating);
+    }
+
+    top_question_index top_question_table(_self, scope_all_top_questions);
+    auto iter_top_question = top_question_table.begin();
+    while (iter_top_question != top_question_table.end()) {
+      iter_top_question = top_question_table.erase(iter_top_question);
     }
 #ifdef SUPERFLUOUS_INDEX
     // clean user_questions table
@@ -329,7 +362,9 @@ EOSIO_DISPATCH(
         delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(modcomment)(
         upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
-        reportprof)(updateacc)(givemoderflg)(givecommuflg)(setcommipfs)(chgqsttype)(setcommname)
+        reportprof)(updateacc)(givemoderflg)(setcommipfs)(chgqsttype)(setcommname)
+        (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
+
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)
 #endif

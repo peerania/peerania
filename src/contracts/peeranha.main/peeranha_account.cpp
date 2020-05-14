@@ -102,6 +102,7 @@ void peeranha::give_moderator_flag(eosio::name user, int flags) {
 
 void peeranha::give_moderator_flag(eosio::name user, int flags, uint16_t community_id) {
   assert_community_exist(community_id);
+  find_account(user);
   property_community_index property_community_table(_self, scope_all_property_community);
 
   auto iter_user = property_community_table.find(user.value);
@@ -130,24 +131,6 @@ void peeranha::give_moderator_flag(eosio::name user, int flags, uint16_t communi
           }
         });
   }
-}
-
-int get_property_d_(const std::vector<key_admin_community> &properties, uint16_t key,
-                     int default_value) {
-  auto itr_property = linear_find(properties.begin(), properties.end(), key);
-  if (itr_property == properties.end()) return default_value;
-  return itr_property->value;
-}
-
-bool property_community::has_community_moderation_flag(int mask,  uint16_t community_id) const {
-  if (is_moderation_availble()) {
-
-    int moderator_flags =
-        get_property_d_(properties, community_id, 0);
-    return moderator_flags & mask;
-    // return true;
-  }
-  return false;
 }
 
 void peeranha::update_rating_base(

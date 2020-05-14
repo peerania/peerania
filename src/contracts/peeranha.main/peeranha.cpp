@@ -177,30 +177,29 @@ void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool
    change_question_type(user, question_id, type, restore_rating);
 }
 
-// add_top_question(uint64_t id_question);
 void peeranha::addtotopcomm(eosio::name user, uint16_t community_id, uint64_t question_id){
-  require_auth(_self);
+  require_auth(user);
   add_top_question(user, community_id, question_id);
 }
 
 void peeranha::remfrmtopcom(eosio::name user, uint16_t community_id, uint64_t question_id){
-  require_auth(_self);
+  require_auth(user);
   remove_top_question(user, community_id, question_id);
 }
 
 void peeranha::upquestion(eosio::name user, uint16_t community_id, uint64_t question_id){
-  require_auth(_self);
-  up_question(user, community_id, question_id);
+  require_auth(user);
+  up_top_question(user, community_id, question_id);
 }
 
 void peeranha::downquestion(eosio::name user, uint16_t community_id, uint64_t question_id){
-  require_auth(_self);
-  down_question(user, community_id, question_id);
+  require_auth(user);
+  down_top_question(user, community_id, question_id);
 }
 
 void peeranha::movequestion(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t new_position){
-  require_auth(_self);
-  move_question(user,  community_id, question_id, new_position);
+  require_auth(user);
+  move_top_question(user,  community_id, question_id, new_position);
 }
 
 #ifdef SUPERFLUOUS_INDEX

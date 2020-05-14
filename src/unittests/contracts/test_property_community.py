@@ -10,15 +10,21 @@ COMMUNITY_ADMIN_FLG_INFINITE_IMPACT = 1 << 1        # 2
 COMMUNITY_ADMIN_FLG_IGNORE_RATING = 1 << 2          # 4
 COMMUNITY_ADMIN_FLG_CREATE_TAG = 1 << 4             # 16
 COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS = 1 << 5 #32
-COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION = 1 << 6
+COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION = 1 << 6    #64
 COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER  = 1 << 7
 
 class TestPropertyCommunity(peeranhatest.peeranhaTest):
-    def test_add_user(self):
+    def test_add_flags(self):
         begin('Test add flags')
         admin = self.get_contract_deployer(self.get_default_contract())
         alice = self.register_alice_account()
         bob = self.register_bob_account()
+
+        self.failed_action('givecommuflg', {
+        'user': alice,
+        'flags': COMMUNITY_ADMIN_FLG_INFINITE_IMPACT,
+        'community_id': 666
+        }, admin, 'add a flag in wrong community')
 
         self.action('givecommuflg', {
         'user': alice,
@@ -58,7 +64,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example, table, ignore_excess=True))
         end()
 
-    def test_create_question(self):
+    def Test_add_flag_energy(self):
         begin('Test add flag energy')
         admin = self.get_contract_deployer(self.get_default_contract())
         alice = self.register_alice_account()
@@ -175,7 +181,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
                                   'ipfs_link': 'undefined123', 'official_answer': True}, alice, 'modify answer with flag "official_answer", variable official_answer = True')
         properties = self.table('question', 'allquestions')[0]['answers'][1]['properties']
         example = {'key': 10, 'value': 1}
-        self.assertTrue(compare(example, properties[0], ignore_excess=True))
+        self.assertTrue(compare(example, properties[1], ignore_excess=True))
 
         self.action('modanswer', {'user': str(alice), 'question_id': question_id, 'answer_id': answers_id,
                                   'ipfs_link': 'undefined123', 'official_answer': False}, alice, 'modify answer with flag "official_answer", variable official_answer = false')

@@ -63,10 +63,7 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
   new_answer.post_time = now();
   
   if(official_answer && find_account_property_community(user, COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER, iter_question->community_id)){
-    int_key_value key_value;
-    key_value.key = PROPERTY_OFFICIAL_ANSWER;
-    key_value.value = 1;
-    new_answer.properties.push_back(key_value);
+    new_answer.properties.push_back(add_official_answer());
   }
 
   uint16_t answer_id;
@@ -83,10 +80,10 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
     usr_answer.answer_id = answer_id;
   });
 #endif
-
+  uint64_t community_id = iter_question->community_id;
   update_community_statistics(iter_question->community_id, 0, 1, 0, 0);
-  update_rating(iter_account, POST_ANSWER_REWARD, [iter_question](auto &account) {
-    account.reduce_energy(ENERGY_POST_ANSWER, iter_question->community_id);
+  update_rating(iter_account, POST_ANSWER_REWARD, [community_id](auto &account) {
+    account.reduce_energy(ENERGY_POST_ANSWER, community_id);
     account.answers_given += 1;
   });
 }
@@ -136,8 +133,9 @@ void peeranha::post_comment(eosio::name user, uint64_t question_id,
           push_new_forum_item(iter_answer->comments, new_comment);
         }
       });
-  update_rating(iter_account, POST_COMMENT_REWARD, [iter_question](auto &account) {
-    account.reduce_energy(ENERGY_POST_COMMENT, iter_question->community_id);
+  uint64_t community_id = iter_question->community_id;
+  update_rating(iter_account, POST_COMMENT_REWARD, [community_id](auto &account) {
+    account.reduce_energy(ENERGY_POST_COMMENT, community_id);
   });
 }
 
@@ -279,10 +277,7 @@ void peeranha::modify_answer(eosio::name user, uint64_t question_id,
         if(find_account_property_community(user, COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER, community_id)){
           auto iter_key = linear_find(iter_answer->properties.begin(), iter_answer->properties.end(), PROPERTY_OFFICIAL_ANSWER);
           if(official_answer && iter_key == iter_answer->properties.end()){
-            int_key_value key_value;
-            key_value.key = 10;
-            key_value.value = 1;
-            iter_answer->properties.push_back(key_value);
+            iter_answer->properties.push_back(add_official_answer());
           }
           else if(!official_answer && iter_key != iter_answer->properties.end()){
             iter_answer->properties.erase(iter_key);

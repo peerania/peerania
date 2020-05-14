@@ -319,9 +319,9 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void remove_top_question(eosio::name user, uint16_t community_id, uint64_t question_id);
 
-    void up_question(eosio::name user, uint16_t community_id, uint64_t question_id);
+    void up_top_question(eosio::name user, uint16_t community_id, uint64_t question_id);
 
-    void down_question(eosio::name user, uint16_t community_id, uint64_t question_id);
+    void down_top_question(eosio::name user, uint16_t community_id, uint64_t question_id);
 
-    void move_question(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t newposition);
+    void move_top_question(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t newposition);
   };

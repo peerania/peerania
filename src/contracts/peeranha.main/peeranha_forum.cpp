@@ -14,8 +14,8 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
   assert_title(title);
   assert_question_type(type);
   auto iter_account = find_account(user);
-  update_rating(iter_account, POST_QUESTION_REWARD, [](auto &account) {
-    account.reduce_energy(ENERGY_POST_QUESTION);
+  update_rating(iter_account, POST_QUESTION_REWARD, [community_id](auto &account) {
+    account.reduce_energy(ENERGY_POST_QUESTION, community_id);
     account.questions_asked += 1;
   });
   assert_allowed(*iter_account, user, Action::POST_QUESTION);
@@ -46,7 +46,7 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
 }
 
 void peeranha::post_answer(eosio::name user, uint64_t question_id,
-                           const IpfsHash &ipfs_link) {
+                           const IpfsHash &ipfs_link, bool official_answer) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
@@ -61,6 +61,10 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
   new_answer.user = user;
   new_answer.ipfs_link = ipfs_link;
   new_answer.post_time = now();
+  
+  if(official_answer && find_account_property_community(user, COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER, iter_question->community_id)){
+    new_answer.properties.push_back(add_official_answer());
+  }
 
   uint16_t answer_id;
   question_table.modify(iter_question, _self,
@@ -76,10 +80,10 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
     usr_answer.answer_id = answer_id;
   });
 #endif
-
+  uint64_t community_id = iter_question->community_id;
   update_community_statistics(iter_question->community_id, 0, 1, 0, 0);
-  update_rating(iter_account, POST_ANSWER_REWARD, [](auto &account) {
-    account.reduce_energy(ENERGY_POST_ANSWER);
+  update_rating(iter_account, POST_ANSWER_REWARD, [community_id](auto &account) {
+    account.reduce_energy(ENERGY_POST_ANSWER, community_id);
     account.answers_given += 1;
   });
 }
@@ -129,8 +133,9 @@ void peeranha::post_comment(eosio::name user, uint64_t question_id,
           push_new_forum_item(iter_answer->comments, new_comment);
         }
       });
-  update_rating(iter_account, POST_COMMENT_REWARD, [](auto &account) {
-    account.reduce_energy(ENERGY_POST_COMMENT);
+  uint64_t community_id = iter_question->community_id;
+  update_rating(iter_account, POST_COMMENT_REWARD, [community_id](auto &account) {
+    account.reduce_energy(ENERGY_POST_COMMENT, community_id);
   });
 }
 
@@ -256,17 +261,28 @@ void peeranha::modify_question(eosio::name user, uint64_t question_id,
 }
 
 void peeranha::modify_answer(eosio::name user, uint64_t question_id,
-                             uint16_t answer_id, const IpfsHash &ipfs_link) {
+                             uint16_t answer_id, const IpfsHash &ipfs_link, bool official_answer) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
+  auto community_id = iter_question->community_id;
   question_table.modify(
       iter_question, _self,
-      [iter_account, answer_id, &ipfs_link](auto &question) {
+      [iter_account, answer_id, &ipfs_link, official_answer, community_id, user](auto &question) {
         auto iter_answer = find_answer(question, answer_id);
         assert_allowed(*iter_account, iter_answer->user, Action::MODIFY_ANSWER);
         iter_answer->ipfs_link = ipfs_link;
         set_property(iter_answer->properties, PROPERTY_LAST_MODIFIED, now());
+
+        if(find_account_property_community(user, COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER, community_id)){
+          auto iter_key = linear_find(iter_answer->properties.begin(), iter_answer->properties.end(), PROPERTY_OFFICIAL_ANSWER);
+          if(official_answer && iter_key == iter_answer->properties.end()){
+            iter_answer->properties.push_back(add_official_answer());
+          }
+          else if(!official_answer && iter_key != iter_answer->properties.end()){
+            iter_answer->properties.erase(iter_key);
+          }
+        }
       });
   update_rating(iter_account, 0, [](auto &account) {
     account.reduce_energy(ENERGY_MODIFY_ANSWER);

@@ -368,13 +368,13 @@ class ForumreportforumTests(peeranhatest.peeranhaTest):
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
-        self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'AQ->AA'},
+        self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'AQ->AA', 'official_answer': False},
                     alice, 'Register Alice answer to Alice')
-        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'AQ->BA'},
+        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'AQ->BA', 'official_answer': False},
                     bob, 'Register Bob answer to Alice')
-        self.action('postanswer', {'user': 'carol', 'question_id': var['aq'], 'ipfs_link': 'AQ->CA'},
+        self.action('postanswer', {'user': 'carol', 'question_id': var['aq'], 'ipfs_link': 'AQ->CA', 'official_answer': False},
                     carol, 'Register Carol answer to Alice')
-        self.action('postanswer', {'user': 'carol', 'question_id': var['bq'], 'ipfs_link': 'BQ->CA'},
+        self.action('postanswer', {'user': 'carol', 'question_id': var['bq'], 'ipfs_link': 'BQ->CA', 'official_answer': False},
                     carol, 'Register Carol answer to Bob')
         e[1]['answers'].append({
             'id': '#var aq_aa',
@@ -533,7 +533,7 @@ class ForumreportforumTests(peeranhatest.peeranhaTest):
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
-        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'AQ->BA'},
+        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'AQ->BA', 'official_answer': False},
                     bob, 'Register Bob answer to Alice')
         e[0]['answers'].append({
             'id': '#var aq_ba',

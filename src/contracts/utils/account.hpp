@@ -7,6 +7,7 @@
 #include "token_common.hpp"
 #include "IpfsHash.hpp"
 #include "account_economy.h"
+#include "property_community.hpp"
 
 struct report {
   eosio::name user;
@@ -44,10 +45,10 @@ struct [[ eosio::table("account"), eosio::contract("peeranha.main") ]] account {
   
   void update();
 
-  void reduce_energy(uint8_t value);
+  void reduce_energy(uint8_t value, uint16_t community_id);
 
   uint16_t get_status_energy() const;
-  uint8_t  get_status_moderation_impact() const;
+  uint8_t  get_status_moderation_impact(uint16_t community_id) const;
   bool has_moderation_flag(int mask) const;  
   
   uint64_t primary_key() const { return user.value; }

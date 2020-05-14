@@ -195,9 +195,9 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
         t = self.table('question', 'allquestions')
         self.var = {}
         self.assertTrue(compare(self.forum_e, t, self.var, True))
-        self.action('postanswer', {'user': 'alice', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->AA'},
+        self.action('postanswer', {'user': 'alice', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->AA', 'official_answer': False},
                     alice, 'Alice answering Alice')
-        self.action('postanswer', {'user': 'bob', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->BA'},
+        self.action('postanswer', {'user': 'bob', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->BA', 'official_answer': False},
                     bob, 'Bob answering Alice')
 
         self.forum_e[0]['answers'].append({
@@ -529,11 +529,11 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
         t = self.table('question', 'allquestions')
         self.var = {}
         self.assertTrue(compare(self.forum_e, t, self.var, True))
-        self.action('postanswer', {'user': 'bob', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->BA'},
+        self.action('postanswer', {'user': 'bob', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->BA', 'official_answer': False},
                     bob, 'Bob answering Alice')
-        self.action('postanswer', {'user': 'carol', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->CA'},
+        self.action('postanswer', {'user': 'carol', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->CA', 'official_answer': False},
                     carol, 'Carol answering Alice')
-        self.action('postanswer', {'user': 'carol', 'question_id': self.var['bq'], 'ipfs_link': 'BQ->CA'},
+        self.action('postanswer', {'user': 'carol', 'question_id': self.var['bq'], 'ipfs_link': 'BQ->CA', 'official_answer': False},
                     carol, 'Carol answering Bob')
         self.forum_e[1]['answers'].append({
             'id': '#var aq_ba',

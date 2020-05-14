@@ -31,14 +31,14 @@ class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
         (e, var) = self._create_simple_hierarchy(alice, bob)
         self.action('setaccrten', {'user': 'alice', 'rating': defs['POST_ANSWER_OWN_ALLOWED'] - 1,
                                    'energy': defs['ENERGY_POST_ANSWER']}, self.admin, "Set alice rating to { POST_ANSWR_OWN_ALLOWED - 1 }")
-        self.failed_action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'AQ->AA failed'},
+        self.failed_action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'AQ->AA failed', 'official_answer': False},
                            alice, 'Attemp to register Alice answer to Alice', 'assert')
         self.wait()  # why???
         self.action('setaccrten', {'user': 'alice', 'rating': defs['POST_ANSWER_OWN_ALLOWED'],
                                    'energy': defs['ENERGY_POST_ANSWER']*2}, self.admin, "Set alice rating to { POST_ANSWR_OWN_ALLOWED }")
-        self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'AQ->AA'},
+        self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'AQ->AA', 'official_answer': False},
                     alice, 'Register Alice answer to Alice')
-        self.failed_action('postanswer', {'user': 'carol', 'question_id': var['aq'], 'ipfs_link': 'AQ->CA'},
+        self.failed_action('postanswer', {'user': 'carol', 'question_id': var['aq'], 'ipfs_link': 'AQ->CA', 'official_answer': False},
                            carol, 'Carol attempt to answer alice', 'assert')
         end()
 
@@ -217,7 +217,7 @@ class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
-        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'AQ->BA'},
+        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'AQ->BA', 'official_answer': False},
                     bob, 'Register Bob answer to Alice')
         e[0]['answers'].append({
             'id': '#var aq_ba',

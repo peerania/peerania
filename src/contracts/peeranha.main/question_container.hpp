@@ -28,6 +28,7 @@
 #define PROPERTY_MODERATION_VOTES 2
 #define PROPERTY_LAST_MODIFIED 3
 #define PROPERTY_QUESTION_TYPE 4
+#define PROPERTY_OFFICIAL_ANSWER 10
 
 #define MAX_QUESTION_ID 0xfffffffffULL
 
@@ -160,3 +161,11 @@ Invariant 2:
   Vector {answers} must contain answer with id equeal {correct_answer_id}
   Used in methood mmark_answer_as_correct
 */
+
+int_key_value add_official_answer()
+{
+  int_key_value key_value;
+  key_value.key = PROPERTY_OFFICIAL_ANSWER;
+  key_value.value = 1;
+  return key_value;
+}

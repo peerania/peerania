@@ -11,6 +11,7 @@
 #include "property.hpp"
 #include "question_container.hpp"
 #include "utils.hpp"
+#include "property_community.hpp"
 #include "top_question.hpp"
 
 #include "token_common.hpp"
@@ -56,7 +57,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     // Post answer(answer question)
     ACTION postanswer(eosio::name user, uint64_t question_id,
-                      IpfsHash ipfs_link);
+                      IpfsHash ipfs_link, bool official_answer);
 
     // Post comment
     // If the answer_id set to 0 comment question, otherwise comment question
@@ -82,7 +83,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     // Modify answer
     ACTION modanswer(eosio::name user, uint64_t question_id, uint16_t answer_id,
-                     IpfsHash ipfs_link);
+                     IpfsHash ipfs_link, bool official_answer);
 
     // Modify comment
     ACTION modcomment(eosio::name user, uint64_t question_id,
@@ -135,6 +136,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     // Action give moderator flags
     ACTION givemoderflg(eosio::name user, int flags);
+    
+    ACTION givecommuflg(eosio::name user, int flags, uint16_t community_id);
 
     ACTION setcommipfs(uint16_t community_id,
                         IpfsHash new_ipfs_link);
@@ -219,7 +222,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                        const uint8_t type);
 
     void post_answer(eosio::name user, uint64_t question_id,
-                     const IpfsHash &ipfs_link);
+                     const IpfsHash &ipfs_link, bool official_answer);
 
     void post_comment(eosio::name user, uint64_t question_id,
                       uint16_t answer_id, const IpfsHash &ipfs_link);
@@ -238,7 +241,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                          const std::string &title, const IpfsHash &ipfs_link);
 
     void modify_answer(eosio::name user, uint64_t question_id,
-                       uint16_t answer_id, const IpfsHash &ipfs_link);
+                       uint16_t answer_id, const IpfsHash &ipfs_link, bool official_answer);
 
     void modify_comment(eosio::name user, uint64_t question_id,
                         uint16_t answer_id, uint16_t comment_id,
@@ -304,6 +307,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void give_moderator_flag(eosio::name user, int flags);
 
+    void give_moderator_flag(eosio::name user, int flags, uint16_t community_id);
+
     void set_community_ipfs_hash(uint16_t community_id, const IpfsHash &new_ipfs_link);
 
     void set_community_name(uint16_t community_id, const std::string &new_name);
@@ -314,9 +319,9 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void remove_top_question(eosio::name user, uint16_t community_id, uint64_t question_id);
 
-    void up_question(eosio::name user, uint16_t community_id, uint64_t question_id);
+    void up_top_question(eosio::name user, uint16_t community_id, uint64_t question_id);
 
-    void down_question(eosio::name user, uint16_t community_id, uint64_t question_id);
+    void down_top_question(eosio::name user, uint16_t community_id, uint64_t question_id);
 
-    void move_question(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t newposition);
+    void move_top_question(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t newposition);
   };

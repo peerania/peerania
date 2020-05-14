@@ -25,9 +25,9 @@ void peeranha::postquestion(eosio::name user, uint16_t community_id,
 }
 
 void peeranha::postanswer(eosio::name user, uint64_t question_id,
-                          IpfsHash ipfs_link) {
+                          IpfsHash ipfs_link, bool official_answer) {
   require_auth(user);
-  post_answer(user, question_id, ipfs_link);
+  post_answer(user, question_id, ipfs_link, official_answer);
 }
 
 void peeranha::postcomment(eosio::name user, uint64_t question_id,
@@ -61,9 +61,9 @@ void peeranha::modquestion(eosio::name user, uint64_t question_id,
 }
 
 void peeranha::modanswer(eosio::name user, uint64_t question_id,
-                         uint16_t answer_id, IpfsHash ipfs_link) {
+                         uint16_t answer_id, IpfsHash ipfs_link, bool official_answer) {
   require_auth(user);
-  modify_answer(user, question_id, answer_id, ipfs_link);
+  modify_answer(user, question_id, answer_id, ipfs_link, official_answer);
 }
 void peeranha::modcomment(eosio::name user, uint64_t question_id,
                           uint16_t answer_id, uint16_t comment_id,
@@ -157,6 +157,11 @@ void peeranha::givemoderflg(eosio::name user, int flags) {
   give_moderator_flag(user, flags);
 }
 
+void peeranha::givecommuflg(eosio::name user, int flags, uint16_t community_id) {
+  require_auth(_self);
+  give_moderator_flag(user, flags, community_id);
+}
+
 void peeranha::setcommipfs(uint16_t community_id, IpfsHash new_ipfs_link) {
   require_auth(_self);
   set_community_ipfs_hash(community_id, new_ipfs_link);
@@ -172,30 +177,29 @@ void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool
    change_question_type(user, question_id, type, restore_rating);
 }
 
-// add_top_question(uint64_t id_question);
 void peeranha::addtotopcomm(eosio::name user, uint16_t community_id, uint64_t question_id){
-  require_auth(_self);
+  require_auth(user);
   add_top_question(user, community_id, question_id);
 }
 
 void peeranha::remfrmtopcom(eosio::name user, uint16_t community_id, uint64_t question_id){
-  require_auth(_self);
+  require_auth(user);
   remove_top_question(user, community_id, question_id);
 }
 
 void peeranha::upquestion(eosio::name user, uint16_t community_id, uint64_t question_id){
-  require_auth(_self);
-  up_question(user, community_id, question_id);
+  require_auth(user);
+  up_top_question(user, community_id, question_id);
 }
 
 void peeranha::downquestion(eosio::name user, uint16_t community_id, uint64_t question_id){
-  require_auth(_self);
-  down_question(user, community_id, question_id);
+  require_auth(user);
+  down_top_question(user, community_id, question_id);
 }
 
 void peeranha::movequestion(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t new_position){
-  require_auth(_self);
-  move_question(user,  community_id, question_id, new_position);
+  require_auth(user);
+  move_top_question(user,  community_id, question_id, new_position);
 }
 
 #ifdef SUPERFLUOUS_INDEX
@@ -276,6 +280,13 @@ void peeranha::resettables() {
     iter_create_community = create_community_table.erase(iter_create_community);
   }
 
+  // clean create community table
+  property_community_index property_community_table(_self, scope_all_property_community);
+  auto iter_user = property_community_table.begin();
+  while (iter_user != property_community_table.end()) {
+    iter_user = property_community_table.erase(iter_user);
+  }
+
   // clean create tags and tags tables
   community_table_index community_table(_self, scope_all_communities);
   auto iter_community = community_table.begin();
@@ -351,7 +362,8 @@ EOSIO_DISPATCH(
         upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
         reportprof)(updateacc)(givemoderflg)(setcommipfs)(chgqsttype)(setcommname)
-        (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)
+        (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
+
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)
 #endif

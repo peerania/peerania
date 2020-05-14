@@ -63,9 +63,9 @@ class UserQuestionsAndAnswersTablesTests(peeranhatest.peeranhaTest):
         self.assertTrue(compare(e, t, var, True))
         self.assertTrue(
             compare([{'question_id': var['aq']}], self.table('usrquestions', alice)))
-        self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'AQ->AA'},
+        self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'AQ->AA', 'official_answer': False},
                     alice, 'Register Alice answer to Alice')
-        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'AQ->BA'},
+        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'AQ->BA', 'official_answer': False},
                     bob, 'Register Bob answer to Alice')
         e[0]['answers'].append({
             'id': '#var aq_aa',

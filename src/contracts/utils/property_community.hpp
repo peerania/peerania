@@ -24,7 +24,6 @@ bool find_account_property_community(eosio::name user, int mask,  uint16_t commu
     auto iter_user = property_community_table.find(user.value);
     if(iter_user == property_community_table.end()) {return false;}
 
-    // return true;
     return iter_user->has_community_moderation_flag(mask, community_id);
 }
 

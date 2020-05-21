@@ -14,13 +14,11 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         question_id = self.table('question', 'allquestions')[0]['id']
         community_id = self.table('question', 'allquestions')[0]['community_id']
 
-        self.action('addtotopcomm', {
+        self.failed_action('addtotopcomm', {
         'user': alice,
         'community_id': community_id,
         'question_id': question_id
         }, alice, 'Alice add top question. Alice has no rights')
-        example = []
-        check_table(self, example)
         self.wait(1)
         
         self.action('givecommuflg', {
@@ -111,13 +109,11 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         bob = self.register_bob_account()
         install_table(self)
         
-        self.action('remfrmtopcom', {
+        self.failed_action('remfrmtopcom', {
             'user': bob,
             'community_id': 1,
             'question_id': 68719476735
             }, bob, 'remove a question without rights')
-        example = [{'community_id': 1, 'top_questions': ['68719476735', '68719476734', '68719476733', '68719476732', '68719476731']}]
-        check_table(self, example)
         self.wait(1)
 
         self.action('givecommuflg', {
@@ -145,7 +141,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         example = [{'community_id': 1, 'top_questions': ['68719476734', '68719476733', '68719476732']}]
         check_table(self, example)
 
-        self.action('remfrmtopcom', {
+        self.failed_action('remfrmtopcom', {
             'user': bob,
             'community_id': 2,
             'question_id': 68719476731
@@ -165,13 +161,11 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         bob = self.register_bob_account()
         install_table(self)
         
-        self.action('upquestion', {
+        self.failed_action('upquestion', {
             'user': bob,
             'community_id': 1,
             'question_id': 68719476733
             }, bob, 'up a question without rights')
-        example = [{'community_id': 1, 'top_questions': ['68719476735', '68719476734', '68719476733', '68719476732', '68719476731']}]
-        check_table(self, example)
         self.wait(1)
 
         self.action('givecommuflg', {
@@ -211,7 +205,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'question_id': 1111
             }, bob, 'up a nonexistent question')
 
-        self.action('remfrmtopcom', {
+        self.failed_action('remfrmtopcom', {
             'user': bob,
             'community_id': 2,
             'question_id': 68719476731
@@ -225,13 +219,11 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         bob = self.register_bob_account()
         install_table(self)
         
-        self.action('downquestion', {
+        self.failed_action('downquestion', {
             'user': bob,
             'community_id': 1,
             'question_id': 68719476733
             }, bob, 'down a question without rights')
-        example = [{'community_id': 1, 'top_questions': ['68719476735', '68719476734', '68719476733', '68719476732', '68719476731']}]
-        check_table(self, example)
         self.wait(1)
 
         self.action('givecommuflg', {
@@ -271,7 +263,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'question_id': 1111
             }, bob, 'down a nonexistent question')
 
-        self.action('downquestion', {
+        self.failed_action('downquestion', {
             'user': bob,
             'community_id': 2,
             'question_id': 68719476732
@@ -285,14 +277,12 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         bob = self.register_bob_account()
         install_table(self)
         
-        self.action('movequestion', {
+        self.failed_action('movequestion', {
             'user': bob,
             'community_id': 1,
             'question_id': 68719476733,
             'new_position': 1
             },bob, 'move question  without rights')
-        example = [{'community_id': 1, 'top_questions': ['68719476735', '68719476734', '68719476733', '68719476732', '68719476731']}]
-        check_table(self, example)
         self.wait(1)
 
         self.action('givecommuflg', {
@@ -308,7 +298,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'user': bob,
             'community_id': 1,
             'question_id': 68719476733,
-            'new_position': 1
+            'new_position': 0
             },bob, 'move question on first position')
         example = [{'community_id': 1, 'top_questions': ['68719476733', '68719476735', '68719476734', '68719476732', '68719476731']}]
         check_table(self, example)
@@ -320,18 +310,11 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'new_position': -1
             },bob, 'move a question on negative position')
 
-        self.failed_action('movequestion', {
-            'user': bob,
-            'community_id': 1,
-            'question_id': 68719476734,
-            'new_position': 0
-            },bob, 'move a question on zero position')
-
         self.action('movequestion', {
             'user': bob,
             'community_id': 1,
             'question_id': 68719476734,
-            'new_position': 5
+            'new_position': 4
             },bob, 'move a question on last position')
         example = [{'community_id': 1, 'top_questions': ['68719476733', '68719476735', '68719476732', '68719476731', '68719476734']}]
         check_table(self, example)
@@ -343,7 +326,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'new_position': 3
             },bob, 'move a nonexistent question')
 
-        self.action('movequestion', {
+        self.failed_action('movequestion', {
             'user': bob,
             'community_id': 2,
             'question_id': 68719476734,

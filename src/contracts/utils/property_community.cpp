@@ -20,11 +20,6 @@ bool is_moderation_availble_() {
 
 
 bool property_community::has_community_moderation_flag(int mask,  uint16_t community_id)const {
-  if (is_moderation_availble_()) {
-
-    int moderator_flags =
-        get_property_d_(properties, community_id, 0);
-    return moderator_flags & mask;
-  }
-  return false;
+  int moderator_flags = get_property_d_(properties, community_id, 0);
+  return moderator_flags & mask;
 }

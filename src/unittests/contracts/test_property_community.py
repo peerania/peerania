@@ -135,12 +135,15 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         'community_id': 1
         }, admin, 'add a flag COMMUNITY_ADMIN_FLG_CREATE_TAG')
         
+        self.wait(1)
         self.action('crtag', {'user': alice, 'name': 'Alice create tag',
                               'ipfs_description': 'undefined', 'community_id': 1}, alice, 'Alice create tag')
         table = self.table('tags', get_tag_scope(1))
         example = {
-            'name': 'Alice tag',
-            'ipfs_description': 'undefined',
+            'id': 7, 
+            'name': 'Alice create tag', 
+            'ipfs_description': 'undefined', 
+            'questions_asked': 0
         }
         self.assertTrue(compare(example, table[6], ignore_excess=True))
         end()

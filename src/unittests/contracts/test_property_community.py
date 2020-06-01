@@ -64,7 +64,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example, table, ignore_excess=True))
         end()
 
-    def Test_add_flag_energy(self):
+    def test_add_flag_energy(self):
         begin('Test add flag energy')
         admin = self.get_contract_deployer(self.get_default_contract())
         alice = self.register_alice_account()
@@ -92,14 +92,40 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         end()
 
 
+    def test_add_flag_change_status(self):
+        begin('Test add flag change question status')
+        alice = self.register_alice_account()
+        admin = self.get_contract_deployer(self.get_default_contract())
+
+        self._register_question_action(alice, 'Alice question 1', 'q1')
+        question_id = self.table('question', 'allquestions')[0]['id']
+
+        self.failed_action('chgqsttype', {
+                    'user': 'alice', 'question_id': question_id, 'type': 1, 'restore_rating': True}, alice, "Change question type to general, don't have permission") 
+        self.failed_action('chgqsttype', {
+                    'user': 'alice', 'question_id': question_id, 'type': 0, 'restore_rating': True}, alice, "Change question type to expert, don't have permission")  
+
+        self.action('givecommuflg', {
+        'user': alice,
+        'flags': COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS,
+        'community_id': 1
+        }, admin, 'add a flag COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS')
+
+        self.action('chgqsttype', {
+                    'user': 'alice', 'question_id': question_id, 'type': 1, 'restore_rating': True}, alice, "Change question type to general")
+        self.action('chgqsttype', {
+                    'user': 'alice', 'question_id': question_id, 'type': 0, 'restore_rating': True}, alice, "Change question type to expert")
+        end()
+
+
     def test_create_tags(self):
         begin('Test add flag "create tag"')
         alice = self.register_alice_account()
         admin = self.get_contract_deployer(self.get_default_contract())
 
         old_table = self.table('tags', get_tag_scope(1))
-        self.action('crtag', {'user': alice, 'name': 'Alice tag, Alice has no rights',
-                              'ipfs_description': 'undefined', 'community_id': 1}, alice, 'Alice create tag, Alice has no rights')
+        self.action('crtag', {'user': alice, 'name': 'Alice create tag',
+                              'ipfs_description': 'undefined', 'community_id': 1}, alice, 'Alice create tag, Alice don t have permission')
         table = self.table('tags', get_tag_scope(1))
         self.assertTrue(compare(old_table, table, ignore_excess=True))
 
@@ -109,7 +135,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         'community_id': 1
         }, admin, 'add a flag COMMUNITY_ADMIN_FLG_CREATE_TAG')
         
-        self.action('crtag', {'user': alice, 'name': 'Alice tag',
+        self.action('crtag', {'user': alice, 'name': 'Alice create tag',
                               'ipfs_description': 'undefined', 'community_id': 1}, alice, 'Alice create tag')
         table = self.table('tags', get_tag_scope(1))
         example = {

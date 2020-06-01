@@ -436,11 +436,12 @@ void peeranha::change_question_type(eosio::name user, uint64_t question_id,
                                     int type, bool restore_rating) {
   assert_question_type(type);
   auto iter_moderator = find_account(user);
-  eosio::check(
-      iter_moderator->has_moderation_flag(MODERATOR_FLG_CHANGE_QUESTION_STATUS),
-      "You don't have permission to change qustion status");
-
   auto iter_question = find_question(question_id);
+  auto community_id = iter_question->community_id;
+  bool global_moderator_flag = iter_moderator->has_moderation_flag(MODERATOR_FLG_CHANGE_QUESTION_STATUS);
+  bool community_moderator_flag = find_account_property_community(user, COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS, community_id);
+  eosio::check(global_moderator_flag || community_moderator_flag,"You don't have permission to change qustion status");
+
   eosio::check(get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
                               QUESTION_TYPE_EXPERT) != type,
                "The question already has this type");

@@ -42,7 +42,7 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
 
         admin = self.get_contract_deployer(self.get_default_contract())
         self.action('givemoderflg', {
-                    'user': 'dan', 'flags': 32}, admin, "Give moderator flags to ted")
+                    'user': 'dan', 'flags': 32}, admin, "Give moderator flags to dan")
         self.action('chgqsttype', {
                     'user': 'dan', 'question_id': self.var['aq'], 'type': 1, 'restore_rating': True}, dan, "Change question type to general")
         self._verify_acc()
@@ -85,7 +85,7 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
 
         admin = self.get_contract_deployer(self.get_default_contract())
         self.action('givemoderflg', {
-                    'user': 'dan', 'flags': 32}, admin, "Give moderator flags to ted")
+                    'user': 'dan', 'flags': 32}, admin, "Give moderator flags to dan")
         self.action('chgqsttype', {
                     'user': 'dan', 'question_id': self.var['aq'], 'type': 0, 'restore_rating': True}, dan, "Change question type to expert")
         self._verify_acc()
@@ -128,7 +128,7 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
 
         admin = self.get_contract_deployer(self.get_default_contract())
         self.action('givemoderflg', {
-                    'user': 'dan', 'flags': 32}, admin, "Give moderator flags to ted")
+                    'user': 'dan', 'flags': 32}, admin, "Give moderator flags to dan")
         self.action('chgqsttype', {
                     'user': 'dan', 'question_id': self.var['aq'], 'type': 1, 'restore_rating': False}, dan, "Change question type to general")
         self._verify_acc()

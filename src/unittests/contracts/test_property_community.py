@@ -64,6 +64,43 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example, table, ignore_excess=True))
         end()
 
+    def test_add_flag_ignore_rating(self):
+        begin('Test add flag ignore rating')
+        alice = self.register_alice_account(0, 100)
+        admin = self.get_contract_deployer(self.get_default_contract())
+
+        self.failed_action('crtag', {'user': alice, 'name': 'Alice create tag',
+                              'ipfs_description': 'undefined', 'community_id': 1}, alice, 'Alice create tag, Alice don t have rating')
+        self.wait(1)
+        self.action('givecommuflg', {
+        'user': alice,
+        'flags': COMMUNITY_ADMIN_FLG_IGNORE_RATING,
+        'community_id': 1
+        }, admin, 'add a flag COMMUNITY_ADMIN_FLG_IGNORE_RATING')
+        self.action('crtag', {'user': alice, 'name': 'Alice create tag',
+                              'ipfs_description': 'undefined', 'community_id': 1}, alice, 'Alice create tag, with flag ignore rating')
+
+        bob = self.register_bob_account(0, 200)
+        t = self.table('crtagtb', get_tag_scope(1))
+        self.failed_action('vtcrtag', {'user': bob, 'community_id': 1,
+                                'tag_id': t[0]['id']}, bob, 'Bob vote create tag, Bob don t have rating')
+        self.failed_action('vtdeltag', {'user': bob, 'community_id': 1,
+                                 'tag_id': t[0]['id']}, bob, 'Bob vote delete tag, Bob don t have rating')
+        self.wait(1)
+
+        self.action('givecommuflg', {
+        'user': bob,
+        'flags': COMMUNITY_ADMIN_FLG_IGNORE_RATING,
+        'community_id': 1
+        }, admin, 'add a flag COMMUNITY_ADMIN_FLG_IGNORE_RATING')
+        self.action('vtcrtag', {'user': bob, 'community_id': 1,
+                                'tag_id': t[0]['id']}, bob, 'Bob vote create tag, with flag ignore rating')
+        self.action('vtdeltag', {'user': bob, 'community_id': 1,
+                                 'tag_id': t[0]['id']}, bob, 'Bob vote delete tag, with flag ignore rating')
+
+        end()
+
+
     def test_add_flag_energy(self):
         begin('Test add flag energy')
         admin = self.get_contract_deployer(self.get_default_contract())

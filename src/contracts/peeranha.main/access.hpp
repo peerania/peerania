@@ -32,10 +32,8 @@ enum Action {
 };
 
 void check_rating(const account &acc, const int rating, const char *msg, uint16_t community_id) {
-  bool community_moderator_flag = false;
   bool global_moderator_flag = acc.has_moderation_flag(MODERATOR_FLG_IGNORE_RATING);
-  if(community_id != 0){
-    community_moderator_flag = find_account_property_community(acc.user, COMMUNITY_ADMIN_FLG_IGNORE_RATING, community_id);}
+  bool community_moderator_flag = (community_id != 0) && find_account_property_community(acc.user, COMMUNITY_ADMIN_FLG_IGNORE_RATING, community_id);
 
   if (global_moderator_flag || community_moderator_flag)
     return;

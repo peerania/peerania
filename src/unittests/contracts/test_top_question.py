@@ -18,7 +18,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         'user': alice,
         'community_id': community_id,
         'question_id': question_id
-        }, alice, 'Alice add top question. Alice has no rights')
+        }, alice, 'Alice add top question. Alice don t have permission')
         self.wait(1)
         
         self.action('givecommuflg', {

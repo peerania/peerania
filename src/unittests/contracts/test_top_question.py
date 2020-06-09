@@ -74,14 +74,14 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
 
         self.action('givecommuflg', {
         'user': alice,
-        'flags': COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION,
+        'flags': 255,
         'community_id': 1
         }, admin, 'add a flag COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION')
         table = self.table('propertycomm', 'allprprtcomm')
-        example = [{'user': 'alice', 'properties': [{'community': 1, 'value': 64}]}]
+        example = [{'user': 'alice', 'properties': [{'community': 1, 'value': 255}]}]
         self.assertTrue(compare(example, table, ignore_excess=True))
 
-        max_size = 26
+        max_size = 101
         for w in range(max_size):
             self.register_question_action(alice, 'Alice question ' + str(68719476735 - w))
 
@@ -152,6 +152,40 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'community_id': 1,
             'question_id': 1111
             }, bob, 'remove a nonexistent question')
+        end()
+
+    def test_delete_top_question(self):
+        begin('test delete top question')
+        admin = self.get_contract_deployer(self.get_default_contract())
+        bob = self.register_bob_account()
+
+        self.action('givecommuflg', {
+        'user': bob,
+        'flags': COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION,
+        'community_id': 1
+        }, admin, 'add a flag COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION')
+
+        e = [self.register_question_action(bob, 'Alice question 1', 'q1')]
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('addtotopcomm', {
+        'user': bob,
+        'community_id': 1,
+        'question_id': question_id
+        }, bob, 'add a question from another community')
+        top = self.table('topquestion', 'alltopquest')
+        print(top)
+        example = [{'community_id': 1, 'top_questions': ['68719476735']}]
+        check_table(self, example)
+        
+
+        t = self.table('question', 'allquestions')
+        var = {}
+        self.assertTrue(compare(e, t, var, True))
+        self.action('delquestion', {
+                    'user': 'bob', 'question_id': var['q1']}, bob, 'Delete Alice question')
+
+        example = [{'community_id': 1, 'top_questions': []}]
+        check_table(self, example)
         end()
 
     def test_up_top_question(self):

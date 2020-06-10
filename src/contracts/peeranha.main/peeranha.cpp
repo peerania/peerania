@@ -25,9 +25,10 @@ void peeranha::postquestion(eosio::name user, uint16_t community_id,
 }
 
 void peeranha::postanswer(eosio::name user, uint64_t question_id,
-                          IpfsHash ipfs_link, bool official_answer) {
+                          IpfsHash ipfs_link, uint8_t official_answer) {
   require_auth(user);
-  post_answer(user, question_id, ipfs_link, official_answer);
+  bool buf_official_answer = official_answer;
+  post_answer(user, question_id, ipfs_link, buf_official_answer);
 }
 
 void peeranha::postcomment(eosio::name user, uint64_t question_id,
@@ -61,9 +62,10 @@ void peeranha::modquestion(eosio::name user, uint64_t question_id,
 }
 
 void peeranha::modanswer(eosio::name user, uint64_t question_id,
-                         uint16_t answer_id, IpfsHash ipfs_link, bool official_answer) {
+                         uint16_t answer_id, IpfsHash ipfs_link, uint8_t official_answer) {
   require_auth(user);
-  modify_answer(user, question_id, answer_id, ipfs_link, official_answer);
+  bool buf_official_answer = official_answer;
+  modify_answer(user, question_id, answer_id, ipfs_link, buf_official_answer);
 }
 void peeranha::modcomment(eosio::name user, uint64_t question_id,
                           uint16_t answer_id, uint16_t comment_id,

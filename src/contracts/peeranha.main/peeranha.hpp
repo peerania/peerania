@@ -57,7 +57,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     // Post answer(answer question)
     ACTION postanswer(eosio::name user, uint64_t question_id,
-                      IpfsHash ipfs_link, bool official_answer);
+                      IpfsHash ipfs_link, uint8_t official_answer);
 
     // Post comment
     // If the answer_id set to 0 comment question, otherwise comment question
@@ -83,7 +83,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     // Modify answer
     ACTION modanswer(eosio::name user, uint64_t question_id, uint16_t answer_id,
-                     IpfsHash ipfs_link, bool official_answer);
+                     IpfsHash ipfs_link, uint8_t official_answer);
 
     // Modify comment
     ACTION modcomment(eosio::name user, uint64_t question_id,

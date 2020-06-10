@@ -147,6 +147,7 @@ void peeranha::delete_question(eosio::name user, uint64_t question_id) {
                "You can't delete not empty question");
   update_community_statistics(iter_question->community_id, -1, 0, 0, 0);
   update_tags_statistics(iter_question->community_id, iter_question->tags, -1);
+  delete_top_question(iter_question->community_id, question_id);
 #ifdef SUPERFLUOUS_INDEX
   remove_user_question(user, question_id);
 #endif

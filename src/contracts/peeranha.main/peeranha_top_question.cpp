@@ -1,7 +1,7 @@
 #include "peeranha.hpp"
 #include <stdint.h>
 
-#define  LIMIT_MAX_QUESTION 25
+#define  LIMIT_MAX_QUESTION 100
 
 void peeranha::add_top_question(eosio::name user, uint16_t community_id, uint64_t question_id) {
   assert_community_exist(community_id);
@@ -41,6 +41,20 @@ void peeranha::remove_top_question(eosio::name user, uint16_t community_id, uint
         auto iter_top_question = find(top_question.top_questions.begin(), top_question.top_questions.end(), question_id);
         eosio::check(iter_top_question != top_question.top_questions.end(), "nonexistent question");
         top_question.top_questions.erase(iter_top_question);
+      });
+  }
+}
+
+void peeranha::delete_top_question(uint16_t community_id, uint64_t question_id){  
+  assert_community_exist(community_id);
+  top_question_index top_question_table(_self, scope_all_top_questions);
+  auto iter_community = top_question_table.find(community_id);
+  if (iter_community != top_question_table.end()) {
+    top_question_table.modify(
+      iter_community, _self, [question_id](auto &top_question) {
+        auto iter_top_question = find(top_question.top_questions.begin(), top_question.top_questions.end(), question_id);
+        if(iter_top_question != top_question.top_questions.end())
+          top_question.top_questions.erase(iter_top_question);
       });
   }
 }

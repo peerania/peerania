@@ -112,7 +112,10 @@ void peeranha::create_tag(eosio::name user, uint16_t community_id,
   assert_tag_name(name);
   assert_community_exist(community_id);
   assert_ipfs(ipfs_description);
-  if (iter_account->has_moderation_flag(MODERATOR_FLG_CREATE_TAG)) {
+
+  bool check_moderator = iter_account->has_moderation_flag(MODERATOR_FLG_CREATE_TAG);
+  bool check_moderator_community = find_account_property_community(user, COMMUNITY_ADMIN_FLG_CREATE_TAG, community_id);
+  if (check_moderator || check_moderator_community) {
     tag_table_index tag_table(_self, get_tag_scope(community_id));
     uint32_t tag_pk = get_direct_pk(tag_table, MAX_TAG_ID);
     tag_table.emplace(_self, [&](auto &tag) {
@@ -123,10 +126,11 @@ void peeranha::create_tag(eosio::name user, uint16_t community_id,
     });
     return;
   }
+  
   update_rating(iter_account, [](auto &account) {
     account.reduce_energy(ENERGY_CREATE_TAG);
   });
-  assert_allowed(*iter_account, user, Action::CREATE_TAG);
+  assert_allowed(*iter_account, user, Action::CREATE_TAG, community_id);
   create_tag_index create_tag_table(_self, get_tag_scope(community_id));
   create_tag_table.emplace(_self, [&iter_account, &name, &ipfs_description,
                                    &create_tag_table](auto &new_tag) {
@@ -218,7 +222,7 @@ void peeranha::vote_create_community(eosio::name user, uint32_t community_id) {
 void peeranha::vote_create_tag(eosio::name user, uint16_t community_id,
                                uint32_t tag_id) {
   auto iter_account = find_account(user);
-  assert_allowed(*iter_account, user, Action::VOTE_CREATE_TAG);
+  assert_allowed(*iter_account, user, Action::VOTE_CREATE_TAG, community_id);
   update_rating(iter_account,
                 [](auto &account) { account.reduce_energy(ENERGY_VOTE_TAG); });
   create_tag_index create_tag_table(_self, get_tag_scope(community_id));
@@ -318,7 +322,7 @@ void peeranha::vote_delete_community(eosio::name user, uint32_t community_id) {
 void peeranha::vote_delete_tag(eosio::name user, uint16_t community_id,
                                uint32_t tag_id) {
   auto iter_account = find_account(user);
-  assert_allowed(*iter_account, user, Action::VOTE_DELETE_TAG);
+  assert_allowed(*iter_account, user, Action::VOTE_DELETE_TAG, community_id);
   update_rating(iter_account, 0,
                 [](auto &account) { account.reduce_energy(ENERGY_VOTE_TAG); });
   create_tag_index create_tag_table(_self, get_tag_scope(community_id));

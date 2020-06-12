@@ -48,7 +48,8 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         self.action('modanswer', {'user': 'bob',
                                   'question_id': var['q1_id'],
                                   'answer_id': var['q1_a1_id'],
-                                  'ipfs_link': 'updated IPFS'},
+                                  'ipfs_link': 'updated IPFS',
+                                  'official_answer': False},
                     bob, 'Update Bob answer 1 to Alice question 1, set to "updated IPFS"')
         account_e[1]['energy'] -= economy['ENERGY_POST_QUESTION']
         account_e[2]['energy'] -= economy['ENERGY_POST_ANSWER']
@@ -104,7 +105,7 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         setvar(q, var)
         self._register_answer_action(
             bob, var['q1_id'], 'Bob answer 1 to Alice question 1', q)
-        self.failed_action('postanswer', {'user': 'bob', 'question_id': var['q1_id'], 'ipfs_link': 'test'}, bob,
+        self.failed_action('postanswer', {'user': 'bob', 'question_id': var['q1_id'], 'ipfs_link': 'test', 'official_answer': False}, bob,
                            'Attempt to register answer for the second time', 'assert')
         end()
 
@@ -117,7 +118,7 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(q, t, var, True))
-        self.failed_action('postanswer', {'user': 'bob', 'question_id': var['q1_id'], 'ipfs_link': 'test'}, bob,
+        self.failed_action('postanswer', {'user': 'bob', 'question_id': var['q1_id'], 'ipfs_link': 'test', 'official_answer': False}, bob,
                            'Attempt to register answer from non-regidtered account', 'assert')
         end()
 
@@ -131,7 +132,7 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(q, t, var, True))
-        self.failed_action('postanswer', {'user': 'carol', 'question_id': var['q1_id'], 'ipfs_link': 'test'}, bob,
+        self.failed_action('postanswer', {'user': 'carol', 'question_id': var['q1_id'], 'ipfs_link': 'test', 'official_answer': False}, bob,
                            'Attempt to register carol answer with bob auth', 'auth')
         end()
 
@@ -153,7 +154,8 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         self.failed_action('modanswer', {'user': 'bob',
                                          'question_id': var['q1_id'],
                                          'answer_id': var['q1_a1_id'],
-                                         'ipfs_link': 'test'},
+                                         'ipfs_link': 'test',
+                                         'official_answer': False},
                            carol, 'Attempt to modify bob answer with carol auth', 'auth')
         end()
 
@@ -196,7 +198,8 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         self.failed_action('modanswer', {'user': 'carol',
                                          'question_id': var['q1_id'],
                                          'answer_id': var['q1_a1_id'],
-                                         'ipfs_link': 'test'},
+                                         'ipfs_link': 'test',
+                                         'official_answer': False},
                            carol, 'Attempt to modify bob answer with carol account', 'assert')
         end()
 
@@ -238,7 +241,8 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         self.failed_action('modanswer', {'user': 'bob',
                                          'question_id': var['q1_id'],
                                          'answer_id': var['q1_a1_id'] + 1,
-                                         'ipfs_link': 'updated IPFS'},
+                                         'ipfs_link': 'updated IPFS',
+                                         'official_answer': False},
                            bob, 'Attempt to update non-existent answer', 'assert')
         end()
 
@@ -273,7 +277,7 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         self.assertTrue(compare(q, t, var, True))
         self.failed_action('postanswer', {'user': 'bob',
                                           'question_id': int(var['q1_id']) + 1,
-                                          'ipfs_link': 'test'}, bob,
+                                          'ipfs_link': 'test', 'official_answer': False}, bob,
                            'Attempt to register answer to non existent question', 'assert')
         end()
 
@@ -294,7 +298,8 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         self.failed_action('modanswer', {'user': 'bob',
                                          'question_id': int(var['q1_id']) + 1,
                                          'answer_id': var['q1_a1_id'],
-                                         'ipfs_link': 'updated IPFS'},
+                                         'ipfs_link': 'updated IPFS',
+                                         'official_answer': False},
                            bob, 'Attempt to modify answer of non-existent question', 'assert')
         end()
 
@@ -330,7 +335,7 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
                 'comments': []}
 
     def _register_answer_action(self, user, question_id, ipfs_link, question_table, id_var=''):
-        self.action('postanswer', {'user': str(user), 'question_id': question_id, 'ipfs_link': ipfs_link}, user,
+        self.action('postanswer', {'user': str(user), 'question_id': question_id, 'ipfs_link': ipfs_link, 'official_answer': False}, user,
                     '{} answer to question with id={}: "{}"'.format(str(user), question_id, ipfs_link))
         for question in question_table:
             if isinstance(question, str):

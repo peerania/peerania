@@ -366,9 +366,9 @@ class ForumVoteTests(peeranhatest.peeranhaTest):
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
-        self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'Alice answer to herself'},
+        self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'Alice answer to herself', 'official_answer': False},
                     alice, ' |-->Answer to alice from alice: "Alice answer to herself"')
-        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'Bob answer to alice'},
+        self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'Bob answer to alice', 'official_answer': False},
                     bob, '  `->Answer to alice from bob: "Bob answer to alice"')
         e[1]['answers'].append({
             'id': '#var aq_aa',
@@ -399,7 +399,7 @@ class ForumVoteTests(peeranhatest.peeranhaTest):
         })
         t = self.table('question', 'allquestions')
         self.assertTrue(compare(e, t, var, True))
-        self.action('postanswer', {'user': 'alice', 'question_id': var['bq'], 'ipfs_link': 'Alice answer to bob'},
+        self.action('postanswer', {'user': 'alice', 'question_id': var['bq'], 'ipfs_link': 'Alice answer to bob', 'official_answer': False},
                     alice, '  `->Answer to bob from alice: "Alice answer to bob"')
         e[2]['answers'].append({
             'id': '#var bq_aa',

@@ -55,6 +55,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
                                  uint16_t answer_id, uint16_t comment_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
+  auto community_id = iter_question->community_id;
   int snitch_reduce_energy_value = ENERGY_REPORT_COMMENT;
   int user_rating_change = 0;
   // Remember old correct_answer_id to detect correct answer_deletion
@@ -76,7 +77,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
 
   question_table.modify(
       iter_question, _self,
-      [&iter_account, answer_id, comment_id, &delete_question,
+      [community_id ,&iter_account, answer_id, comment_id, &delete_question,
        &user_rating_change, &item_user, &delete_answer,
        &snitch_reduce_energy_value, vote_question_res,
        vote_answer_res](auto &question) {
@@ -87,7 +88,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
             // set_report_points_and_history - modify question
             snitch_reduce_energy_value = ENERGY_REPORT_QUESTION;
             delete_question = set_report_points_and_history(
-                question, *iter_account, REPORT_POINTS_QUESTION);
+                question, *iter_account, REPORT_POINTS_QUESTION, community_id);
             if (delete_question) {
               item_user = question.user;
               user_rating_change -= upvote_count(question.history) *
@@ -99,7 +100,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
             auto iter_comment = find_comment(question, comment_id);
 
             if (set_report_points_and_history(*iter_comment, *iter_account,
-                                              REPORT_POINTS_COMMENT)) {
+                                              REPORT_POINTS_COMMENT, community_id)) {
               item_user = iter_comment->user;
               user_rating_change += COMMENT_DELETED_REWARD;
               question.comments.erase(iter_comment);
@@ -112,7 +113,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
           // Delete answer to question by vote (comment_id == 0)
           snitch_reduce_energy_value = ENERGY_REPORT_ANSWER;
           if (set_report_points_and_history(*iter_answer, *iter_account,
-                                            REPORT_POINTS_ANSWER)) {
+                                            REPORT_POINTS_ANSWER, community_id)) {
             // Get for mark as correct
             item_user = iter_answer->user;
             if (question.correct_answer_id == iter_answer->id) {
@@ -130,7 +131,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
           // Delete comment to answer
           auto iter_comment = find_comment(*iter_answer, comment_id);
           if (set_report_points_and_history(*iter_comment, *iter_account,
-                                            REPORT_POINTS_COMMENT)) {
+                                            REPORT_POINTS_COMMENT, community_id)) {
             item_user = iter_comment->user;
             user_rating_change += COMMENT_DELETED_REWARD;
             iter_answer->comments.erase(iter_comment);

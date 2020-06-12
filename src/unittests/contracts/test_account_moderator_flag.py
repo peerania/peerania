@@ -64,7 +64,7 @@ class AccountModerationTests(peeranhatest.peeranhaTest):
         self.action('postquestion', {'user': 'alice', 'title': 'undefined', 'ipfs_link': 'undefined',  'community_id': 1, 'tags': [1], 'type': 0}, alice,
                     'Register question from alice')
         AQ_id = self.table('question', 'allquestions')[0]['id']
-        self.action('postanswer', {'user': 'bob', 'question_id': AQ_id, 'ipfs_link': 'undefined'},
+        self.action('postanswer', {'user': 'bob', 'question_id': AQ_id, 'ipfs_link': 'undefined', 'official_answer': False},
                     bob, 'Register Bob answer to Alice')
         AQ_BA_id = self.table('question', 'allquestions')[
             0]['answers'][0]['id']

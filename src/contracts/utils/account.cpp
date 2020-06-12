@@ -4,15 +4,20 @@ void assert_display_name(const std::string &display_name) {
   assert_readble_string(display_name, 3, 40, "Invalid dispaly name");
 }
 
-void account::reduce_energy(uint8_t value) {
+void account::reduce_energy(uint8_t value, uint16_t community_id = 0) {
   if (has_moderation_flag(MODERATOR_FLG_INFINITE_ENERGY)) {
     return;
+  }
+  if (community_id != 0) {
+    if(find_account_property_community(user, COMMUNITY_ADMIN_FLG_INFINITE_ENERGY, community_id)){
+      return;
+    }  
   }
   eosio::check(energy >= value, "Not enought energy!");
   energy -= value;
 }
 
-void account::update() {
+void account::update() { 
   time current_time = now();
   uint16_t current_period =
       (current_time - registration_time) / ACCOUNT_STAT_RESET_PERIOD;
@@ -80,9 +85,14 @@ bool account::has_moderation_flag(int mask) const {
   return false;
 }
 
-uint8_t account::get_status_moderation_impact() const {
+uint8_t account::get_status_moderation_impact(uint16_t community_id = 0) const {
   if (has_moderation_flag(MODERATOR_FLG_INFINITE_IMPACT))
     return MODERATION_IMPACT_INFINITE;
+
+   if(find_account_property_community(user, COMMUNITY_ADMIN_FLG_INFINITE_IMPACT, community_id)){
+    return MODERATION_IMPACT_INFINITE;
+  }
+
   if (rating < 100) return 0;
   switch (rating) {
     STATUS1(1);

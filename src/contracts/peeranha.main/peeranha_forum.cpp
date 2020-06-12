@@ -14,11 +14,11 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
   assert_title(title);
   assert_question_type(type);
   auto iter_account = find_account(user);
-  update_rating(iter_account, POST_QUESTION_REWARD, [](auto &account) {
-    account.reduce_energy(ENERGY_POST_QUESTION);
+  update_rating(iter_account, POST_QUESTION_REWARD, [community_id](auto &account) {
+    account.reduce_energy(ENERGY_POST_QUESTION, community_id);
     account.questions_asked += 1;
   });
-  assert_allowed(*iter_account, user, Action::POST_QUESTION);
+  assert_allowed(*iter_account, user, Action::POST_QUESTION, community_id);
   uint64_t question_id = get_reversive_pk(question_table, MAX_QUESTION_ID);
   // sort - unique
   for (int i = 0; i < tags.size(); ++i)
@@ -46,13 +46,13 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
 }
 
 void peeranha::post_answer(eosio::name user, uint64_t question_id,
-                           const IpfsHash &ipfs_link) {
+                           const IpfsHash &ipfs_link, bool official_answer) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
   eosio::check(iter_question->answers.size() < MAX_ANSWER_COUNT,
                "For this question reached answer count limit");
-  assert_allowed(*iter_account, iter_question->user, Action::POST_ANSWER);
+  assert_allowed(*iter_account, iter_question->user, Action::POST_ANSWER, iter_question->community_id);
   eosio::check(
       none_of(iter_question->answers.begin(), iter_question->answers.end(),
               [user](const answer &a) { return a.user == user; }),
@@ -61,6 +61,10 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
   new_answer.user = user;
   new_answer.ipfs_link = ipfs_link;
   new_answer.post_time = now();
+  
+  if(official_answer && find_account_property_community(user, COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER, iter_question->community_id)){
+    new_answer.properties.push_back(add_official_answer());
+  }
 
   uint16_t answer_id;
   question_table.modify(iter_question, _self,
@@ -76,10 +80,10 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
     usr_answer.answer_id = answer_id;
   });
 #endif
-
+  uint64_t community_id = iter_question->community_id;
   update_community_statistics(iter_question->community_id, 0, 1, 0, 0);
-  update_rating(iter_account, POST_ANSWER_REWARD, [](auto &account) {
-    account.reduce_energy(ENERGY_POST_ANSWER);
+  update_rating(iter_account, POST_ANSWER_REWARD, [community_id](auto &account) {
+    account.reduce_energy(ENERGY_POST_ANSWER, community_id);
     account.answers_given += 1;
   });
 }
@@ -114,34 +118,36 @@ void peeranha::post_comment(eosio::name user, uint64_t question_id,
   new_comment.user = user;
   new_comment.ipfs_link = ipfs_link;
   new_comment.post_time = now();
+  uint64_t community_id = iter_question->community_id;
   question_table.modify(
       iter_question, _self,
-      [iter_account, answer_id, &new_comment](auto &question) {
+      [iter_account, answer_id, &new_comment, community_id](auto &question) {
         if (apply_to_question(answer_id)) {
-          assert_allowed(*iter_account, question.user, Action::POST_COMMENT);
+          assert_allowed(*iter_account, question.user, Action::POST_COMMENT, community_id);
           push_new_forum_item(question.comments, new_comment);
         } else {
           auto iter_answer = find_answer(question, answer_id);
           auto global_item_user = question.user == iter_account->user
                                       ? question.user
                                       : iter_answer->user;
-          assert_allowed(*iter_account, global_item_user, Action::POST_COMMENT);
+          assert_allowed(*iter_account, global_item_user, Action::POST_COMMENT, community_id);
           push_new_forum_item(iter_answer->comments, new_comment);
         }
       });
-  update_rating(iter_account, POST_COMMENT_REWARD, [](auto &account) {
-    account.reduce_energy(ENERGY_POST_COMMENT);
+  update_rating(iter_account, POST_COMMENT_REWARD, [community_id](auto &account) {
+    account.reduce_energy(ENERGY_POST_COMMENT, community_id);
   });
 }
 
 void peeranha::delete_question(eosio::name user, uint64_t question_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
-  assert_allowed(*iter_account, iter_question->user, Action::DELETE_QUESTION);
+  assert_allowed(*iter_account, iter_question->user, Action::DELETE_QUESTION, iter_question->community_id);
   eosio::check(iter_question->answers.empty(),
                "You can't delete not empty question");
   update_community_statistics(iter_question->community_id, -1, 0, 0, 0);
   update_tags_statistics(iter_question->community_id, iter_question->tags, -1);
+  delete_top_question(iter_question->community_id, question_id);
 #ifdef SUPERFLUOUS_INDEX
   remove_user_question(user, question_id);
 #endif
@@ -170,9 +176,10 @@ void peeranha::delete_answer(eosio::name user, uint64_t question_id,
   eosio::check(iter_question->correct_answer_id != answer_id,
                "You can't delete this answer");
   int rating_change = DELETE_OWN_ANSWER_REWARD;
+  uint16_t community_id = iter_question->community_id;
   question_table.modify(
       iter_question, _self,
-      [iter_account, answer_id, &rating_change](auto &question) {
+      [iter_account, answer_id, &rating_change, community_id](auto &question) {
         int upvote_mul = ANSWER_UPVOTED_REWARD;
         switch (get_property_d(question.properties, PROPERTY_QUESTION_TYPE,
                                QUESTION_TYPE_EXPERT)) {
@@ -183,7 +190,7 @@ void peeranha::delete_answer(eosio::name user, uint64_t question_id,
 
         auto iter_answer = find_answer(question, answer_id);
         rating_change -= upvote_count(iter_answer->history) * upvote_mul;
-        assert_allowed(*iter_account, iter_answer->user, Action::DELETE_ANSWER);
+        assert_allowed(*iter_account, iter_answer->user, Action::DELETE_ANSWER, community_id);
         question.answers.erase(iter_answer);
       });
 #ifdef SUPERFLUOUS_INDEX
@@ -202,19 +209,20 @@ void peeranha::delete_comment(eosio::name user, uint64_t question_id,
                               uint16_t answer_id, uint64_t comment_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
+  uint64_t community_id = iter_question->community_id;
   question_table.modify(
       iter_question, _self,
-      [iter_account, answer_id, comment_id](auto &question) {
+      [iter_account, answer_id, comment_id, community_id](auto &question) {
         if (apply_to_question(answer_id)) {
           auto iter_comment = find_comment(question, comment_id);
           assert_allowed(*iter_account, iter_comment->user,
-                         Action::DELETE_COMMENT);
+                         Action::DELETE_COMMENT, community_id);
           question.comments.erase(iter_comment);
         } else {
           auto iter_answer = find_answer(question, answer_id);
           auto iter_comment = find_comment(*iter_answer, comment_id);
           assert_allowed(*iter_account, iter_comment->user,
-                         Action::DELETE_COMMENT);
+                         Action::DELETE_COMMENT, community_id);
           iter_answer->comments.erase(iter_comment);
         }
       });
@@ -232,7 +240,7 @@ void peeranha::modify_question(eosio::name user, uint64_t question_id,
   assert_title(title);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
-  assert_allowed(*iter_account, iter_question->user, Action::MODIFY_QUESTION);
+  assert_allowed(*iter_account, iter_question->user, Action::MODIFY_QUESTION, community_id);
   for (int i = 0; i < tags.size(); ++i)
     for (int j = i + 1; j < tags.size(); ++j)
       if (tags[i] == tags[j]) eosio::check(false, "Duplicate tag");
@@ -256,17 +264,28 @@ void peeranha::modify_question(eosio::name user, uint64_t question_id,
 }
 
 void peeranha::modify_answer(eosio::name user, uint64_t question_id,
-                             uint16_t answer_id, const IpfsHash &ipfs_link) {
+                             uint16_t answer_id, const IpfsHash &ipfs_link, bool official_answer) {
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
+  auto community_id = iter_question->community_id;
   question_table.modify(
       iter_question, _self,
-      [iter_account, answer_id, &ipfs_link](auto &question) {
+      [iter_account, answer_id, &ipfs_link, official_answer, community_id, user](auto &question) {
         auto iter_answer = find_answer(question, answer_id);
-        assert_allowed(*iter_account, iter_answer->user, Action::MODIFY_ANSWER);
+        assert_allowed(*iter_account, iter_answer->user, Action::MODIFY_ANSWER, community_id);
         iter_answer->ipfs_link = ipfs_link;
         set_property(iter_answer->properties, PROPERTY_LAST_MODIFIED, now());
+
+        if(find_account_property_community(user, COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER, community_id)){
+          auto iter_key = linear_find(iter_answer->properties.begin(), iter_answer->properties.end(), PROPERTY_OFFICIAL_ANSWER);
+          if(official_answer && iter_key == iter_answer->properties.end()){
+            iter_answer->properties.push_back(add_official_answer());
+          }
+          else if(!official_answer && iter_key != iter_answer->properties.end()){
+            iter_answer->properties.erase(iter_key);
+          }
+        }
       });
   update_rating(iter_account, 0, [](auto &account) {
     account.reduce_energy(ENERGY_MODIFY_ANSWER);
@@ -279,14 +298,15 @@ void peeranha::modify_comment(eosio::name user, uint64_t question_id,
   assert_ipfs(ipfs_link);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
+  auto community_id = iter_question->community_id;
   question_table.modify(
       iter_question, _self,
-      [iter_account, answer_id, comment_id, &ipfs_link](auto &question) {
+      [iter_account, answer_id, comment_id, &ipfs_link, community_id](auto &question) {
         time current_time = now();
         if (apply_to_question(answer_id)) {
           auto iter_comment = find_comment(question, comment_id);
           assert_allowed(*iter_account, iter_comment->user,
-                         Action::MODIFY_COMMENT);
+                         Action::MODIFY_COMMENT, community_id);
           iter_comment->ipfs_link = ipfs_link;
           set_property(iter_comment->properties, PROPERTY_LAST_MODIFIED,
                        current_time);
@@ -294,7 +314,7 @@ void peeranha::modify_comment(eosio::name user, uint64_t question_id,
           auto iter_answer = find_answer(question, answer_id);
           auto iter_comment = find_comment(*iter_answer, comment_id);
           assert_allowed(*iter_account, iter_comment->user,
-                         Action::MODIFY_COMMENT);
+                         Action::MODIFY_COMMENT, community_id);
           iter_comment->ipfs_link = ipfs_link;
           set_property(iter_comment->properties, PROPERTY_LAST_MODIFIED,
                        current_time);
@@ -324,7 +344,7 @@ void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
 
   auto iter_account = find_account(user);
   assert_allowed(*iter_account, iter_question->user,
-                 Action::MARK_ANSWER_AS_CORRECT);
+                 Action::MARK_ANSWER_AS_CORRECT, iter_question->community_id);
   if (answer_id != EMPTY_ANSWER_ID) {
     eosio::check(iter_question->correct_answer_id != answer_id,
                  "This answer already marked as correct");
@@ -420,11 +440,13 @@ void peeranha::change_question_type(eosio::name user, uint64_t question_id,
                                     int type, bool restore_rating) {
   assert_question_type(type);
   auto iter_moderator = find_account(user);
-  eosio::check(
-      iter_moderator->has_moderation_flag(MODERATOR_FLG_CHANGE_QUESTION_STATUS),
-      "You don't have permission to change qustion status");
-
   auto iter_question = find_question(question_id);
+  auto community_id = iter_question->community_id;
+  bool global_moderator_flag = iter_moderator->has_moderation_flag(MODERATOR_FLG_CHANGE_QUESTION_STATUS);
+  bool community_moderator_flag = find_account_property_community(user, COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS, community_id);
+  eosio::check(global_moderator_flag || community_moderator_flag,
+        "You don't have permission to change qustion status");
+
   eosio::check(get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
                               QUESTION_TYPE_EXPERT) != type,
                "The question already has this type");

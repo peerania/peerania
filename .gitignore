@@ -14,3 +14,5 @@ src/unittests/contracts/__pycache__
 !stub/eosio.bios/eosio.bios.abi
 !stub/eosio.bios/eosio.bios.wasm
 eos-node/deploy-contracts/package-lock.json
+eos-node/config/protocol_features/BUILTIN-WEBAUTHN_KEY.json
+eos-node/config/protocol_features/BUILTIN-WTMSIG_BLOCK_SIGNATURES.json

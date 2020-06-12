@@ -42,7 +42,7 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
 
         admin = self.get_contract_deployer(self.get_default_contract())
         self.action('givemoderflg', {
-                    'user': 'dan', 'flags': 32}, admin, "Give moderator flags to ted")
+                    'user': 'dan', 'flags': 32}, admin, "Give moderator flags to dan")
         self.action('chgqsttype', {
                     'user': 'dan', 'question_id': self.var['aq'], 'type': 1, 'restore_rating': True}, dan, "Change question type to general")
         self._verify_acc()
@@ -85,7 +85,7 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
 
         admin = self.get_contract_deployer(self.get_default_contract())
         self.action('givemoderflg', {
-                    'user': 'dan', 'flags': 32}, admin, "Give moderator flags to ted")
+                    'user': 'dan', 'flags': 32}, admin, "Give moderator flags to dan")
         self.action('chgqsttype', {
                     'user': 'dan', 'question_id': self.var['aq'], 'type': 0, 'restore_rating': True}, dan, "Change question type to expert")
         self._verify_acc()
@@ -128,7 +128,7 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
 
         admin = self.get_contract_deployer(self.get_default_contract())
         self.action('givemoderflg', {
-                    'user': 'dan', 'flags': 32}, admin, "Give moderator flags to ted")
+                    'user': 'dan', 'flags': 32}, admin, "Give moderator flags to dan")
         self.action('chgqsttype', {
                     'user': 'dan', 'question_id': self.var['aq'], 'type': 1, 'restore_rating': False}, dan, "Change question type to general")
         self._verify_acc()
@@ -402,11 +402,11 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
         t = self.table('question', 'allquestions')
         self.var = {}
         self.assertTrue(compare(self.forum_e, t, self.var, True))
-        self.action('postanswer', {'user': 'bob', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->BA'},
+        self.action('postanswer', {'user': 'bob', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->BA', 'official_answer': False},
                     bob, 'Bob answering Alice')
-        self.action('postanswer', {'user': 'carol', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->CA'},
+        self.action('postanswer', {'user': 'carol', 'question_id': self.var['aq'], 'ipfs_link': 'AQ->CA', 'official_answer': False},
                     carol, 'Carol answering Alice')
-        self.action('postanswer', {'user': 'carol', 'question_id': self.var['bq'], 'ipfs_link': 'BQ->CA'},
+        self.action('postanswer', {'user': 'carol', 'question_id': self.var['bq'], 'ipfs_link': 'BQ->CA', 'official_answer': False},
                     carol, 'Carol answering Bob')
         self.forum_e[1]['answers'].append({
             'id': '#var aq_ba',

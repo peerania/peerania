@@ -64,8 +64,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
   // If this flag == true the question will erased
   bool delete_question = false;
   bool delete_answer = false;
-
-  bool ratingAnswer = false;
+  bool change_rating = false;
 
   auto vote_question_res = VoteItem::question;
   auto vote_answer_res = VoteItem::answer;
@@ -81,7 +80,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
       iter_question, _self,
       [community_id ,&iter_account, answer_id, comment_id, &delete_question,
        &user_rating_change, &item_user, &delete_answer,
-       &snitch_reduce_energy_value, &ratingAnswer, vote_question_res,
+       &snitch_reduce_energy_value, &change_rating, vote_question_res,
        vote_answer_res](auto &question) {
         if (apply_to_question(answer_id)) {
           if (apply_to_answer(comment_id)) {
@@ -119,20 +118,13 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
             // Get for mark as correct
             item_user = iter_answer->user;
             if (question.correct_answer_id == iter_answer->id) {
-
-              int upvote_mul = ANSWER_ACCEPTED_AS_CORRECT_REWARD;
-              switch (get_property_d(question.properties, PROPERTY_QUESTION_TYPE,
-                               QUESTION_TYPE_EXPERT)) {
-                case QUESTION_TYPE_GENERAL:
-                upvote_mul = COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD;
-                break;
+              int rating_correct_answer = vote_answer_res.correct_answer;
+              
+              if (iter_answer->user == question.user) {
+                rating_correct_answer = 0;
+                change_rating = true;
               }
-              ratingAnswer = false;
-              if(iter_answer->user == question.user){
-                upvote_mul = 0;
-                ratingAnswer = true;
-              }
-              user_rating_change -= upvote_mul;     // снятие за ответ который отметили (чей был ответ)
+              user_rating_change -= rating_correct_answer;
               question.correct_answer_id = EMPTY_ANSWER_ID;
             }
             user_rating_change -= upvote_count(iter_answer->history) *
@@ -161,16 +153,10 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
     is_correct_answer_deleted =
         iter_question->correct_answer_id != old_correct_answer_id;
     if (is_correct_answer_deleted) {
-      int upvote_mul = ACCEPT_ANSWER_AS_CORRECT_REWARD;
-        switch (get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
-                               QUESTION_TYPE_EXPERT)) {
-          case QUESTION_TYPE_GENERAL:
-            upvote_mul = ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD;
-            break;
-        }
-      if(ratingAnswer)
-          upvote_mul = 0;
-      update_rating(iter_question->user, -upvote_mul);
+      int rating_correct_answer = vote_question_res.correct_answer;
+      if (change_rating)
+          rating_correct_answer = 0;
+      update_rating(iter_question->user, -rating_correct_answer);
     }
     update_community_statistics(iter_question->community_id, 0, -1,
                                 is_correct_answer_deleted ? -1 : 0, 0);
@@ -185,20 +171,13 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
 #ifdef SUPERFLUOUS_INDEX
     remove_user_question(iter_question->user, iter_question->id);
 #endif
-    if (iter_question->correct_answer_id != EMPTY_ANSWER_ID) {    //ACCEPT_ANSWER_AS_CORRECT_REWARD 2  ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD  1
+    if (iter_question->correct_answer_id != EMPTY_ANSWER_ID) {
 
-      int upvote_mul2 = ACCEPT_ANSWER_AS_CORRECT_REWARD;
-      switch (get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
-                              QUESTION_TYPE_EXPERT)) {
-        case QUESTION_TYPE_GENERAL:
-          upvote_mul2 = ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD;
-          break;
-      }
-      // auto iter_answer = find_answer(iter_question, iter_question->correct_answer_id)
+      int rating_correct_answer = vote_question_res.correct_answer;
       auto iter_answer = binary_find(iter_question->answers.begin(), iter_question->answers.end(), iter_question->correct_answer_id);
-      if(iter_answer->user == iter_question->user )
-        upvote_mul2 = 0;
-      user_rating_change -= upvote_mul2;
+      if (iter_answer->user == iter_question->user )
+        rating_correct_answer = 0;
+      user_rating_change -= rating_correct_answer;
     }
     for (auto answer = iter_question->answers.begin();
          answer != iter_question->answers.end(); answer++) {
@@ -207,16 +186,10 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
           upvote_count(answer->history) * vote_answer_res.upvoted_reward;
       bool is_correct_answer = false;
       if (answer->id == iter_question->correct_answer_id) {
-        int upvote_mul = ANSWER_ACCEPTED_AS_CORRECT_REWARD;
-        switch (get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
-                               QUESTION_TYPE_EXPERT)) {
-          case QUESTION_TYPE_GENERAL:
-            upvote_mul = COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD;
-            break;
-        }
-        if(answer->user == iter_question->user )
-          upvote_mul = 0;
-        rating_change -= upvote_mul;   
+        int rating_correct_answer = vote_answer_res.correct_answer;
+        if (answer->user == iter_question->user )
+          rating_correct_answer = 0;
+        rating_change -= rating_correct_answer;   
         is_correct_answer = true;
       }
       

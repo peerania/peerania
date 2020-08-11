@@ -14,6 +14,7 @@
 #include "property_community.hpp"
 #include "top_question.hpp"
 #include "achievements.hpp"
+#include "account_achievements.hpp"
 
 #include "token_common.hpp"
 

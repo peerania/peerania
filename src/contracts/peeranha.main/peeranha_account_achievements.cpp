@@ -52,7 +52,7 @@ void peeranha::update_account_achievements(eosio::name user) {
   account_achievements_index account_achievements_index_table(_self, scope_all_account_achievements);
   auto iter_account_achievements = account_achievements_index_table.find(user.value);
   if(iter_account_achievements == account_achievements_index_table.end()) { return; }
-  
+
   for(auto i : iter_account_achievements->user_achievements) {
     update_account_achievement(user, i.achievements_id);
   }
@@ -117,13 +117,13 @@ void peeranha::update_achievement_rating(eosio::name user) {
 // Superhero	10000
 
   if(rating_account < 0 ) { return; }
-  else if (rating_account >= 35 && rating_account <= 99) { update_achievement(user, stranger, 1); }  
-  else if (rating_account >= 100 && rating_account <= 499) { update_achievement(user, newbie, 1); }
-  else if (rating_account >= 500 && rating_account <= 999) { update_achievement(user, junior, 1); }  
-  else if (rating_account >= 1000 && rating_account <= 2499) { update_achievement(user, resident, 1); }  
-  else if (rating_account >= 2500 && rating_account <= 4999) { update_achievement(user, senior, 1); }  
-  else if (rating_account >= 5000 && rating_account <= 9999) { update_achievement(user, hero, 1); }  
-  else if (rating_account >= 10000) { update_achievement(user, superhero, 1); }  
+  else if (rating_account >= LOW_STRANGER && rating_account <= HIGH_STRANGER) { update_achievement(user, stranger, 1); }  
+  else if (rating_account >= LOW_NEWBIE && rating_account <= HIGH_NEWBIE)     { update_achievement(user, newbie, 1); }
+  else if (rating_account >= LOW_JUNIOR && rating_account <= HIGH_JUNIOR)     { update_achievement(user, junior, 1); }  
+  else if (rating_account >= LOW_RESIDENT && rating_account <= HIGH_RESIDENT) { update_achievement(user, resident, 1); }  
+  else if (rating_account >= LOW_SENIOR && rating_account <= HIGH_SENIOR)     { update_achievement(user, senior, 1); }  
+  else if (rating_account >= LOW_HERO && rating_account <= HIGH_HERO)         { update_achievement(user, hero, 1); }  
+  else if (rating_account >= LOW_SUPERHERO) { update_achievement(user, superhero, 1); }  
 }
 
 void peeranha::init_achievements_rating() {
@@ -133,12 +133,12 @@ void peeranha::init_achievements_rating() {
   for (auto iter_account = account_table.begin(); iter_account != account_table.end(); ++iter_account) {
     int rating_account = iter_account->rating;
     if (rating_account < 0) { continue; }
-    if (rating_account >= 35) { update_achievement(iter_account->user, stranger, 1); }    else { continue; }
-    if (rating_account >= 100) { update_achievement(iter_account->user, newbie, 1); }     else { continue; }
-    if (rating_account >= 500) { update_achievement(iter_account->user, junior, 1); }     else { continue; } 
-    if (rating_account >= 1000) { update_achievement(iter_account->user, resident, 1); }  else { continue; }  
-    if (rating_account >= 2500) { update_achievement(iter_account->user, senior, 1); }    else { continue; } 
-    if (rating_account >= 5000) { update_achievement(iter_account->user, hero, 1); }      else { continue; }
-    if (rating_account >= 10000) { update_achievement(iter_account->user, superhero, 1); }else { continue; }
+    if (rating_account >= LOW_STRANGER) { update_achievement(iter_account->user, stranger, 1); }  else { continue; }
+    if (rating_account >= LOW_NEWBIE) { update_achievement(iter_account->user, newbie, 1); }      else { continue; }
+    if (rating_account >= LOW_JUNIOR) { update_achievement(iter_account->user, junior, 1); }      else { continue; } 
+    if (rating_account >= LOW_RESIDENT) { update_achievement(iter_account->user, resident, 1); }  else { continue; }  
+    if (rating_account >= LOW_SENIOR) { update_achievement(iter_account->user, senior, 1); }      else { continue; } 
+    if (rating_account >= LOW_HERO) { update_achievement(iter_account->user, hero, 1); }          else { continue; }
+    if (rating_account >= LOW_SUPERHERO) { update_achievement(iter_account->user, superhero, 1); }else { continue; }
   }
 }

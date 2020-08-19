@@ -4,6 +4,20 @@
 #include <vector>
 #include "property.hpp"
 
+#define LOW_STRANGER 35
+#define HIGH_STRANGER 99
+#define LOW_NEWBIE 100
+#define HIGH_NEWBIE 499
+#define LOW_JUNIOR 500
+#define HIGH_JUNIOR 999
+#define LOW_RESIDENT 1000
+#define HIGH_RESIDENT 2499
+#define LOW_SENIOR 2500
+#define HIGH_SENIOR 4999
+#define LOW_HERO 5000
+#define HIGH_HERO 9999
+#define LOW_SUPERHERO 10000
+
 enum Achievements { questions_asked = 1, 
                     answers_given, 
                     correct_answers, 
@@ -53,10 +67,3 @@ std::vector<achievement> achievements = {
     achievement(hero,                   0, 50, false),
     achievement(superhero,              0, 10, false),
 };
-//   Stranger	0 ... 99
-// Newbie	100 ... 499
-// Junior	500-999
-// Resident	1000 ... 2499
-// Senior	2500 ... 4999
-// Hero	5000 ... 9999
-// Superhero	10000

@@ -15,6 +15,7 @@
 #include "top_question.hpp"
 #include "achievements.hpp"
 #include "account_achievements.hpp"
+#include "squeezed_achievement.hpp"
 
 #include "token_common.hpp"
 
@@ -158,6 +159,20 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     ACTION downquestion(eosio::name user, uint16_t community_id, uint64_t question_id);
     
     ACTION movequestion(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t new_position);
+
+    //init all accounts achievements
+    ACTION intallaccach();
+
+    //update account achievement
+    ACTION upaccach(eosio::name user, uint32_t achievement_id);
+
+    //update account achievements
+    ACTION upaccachs(eosio::name user);
+
+    //init_achievements_first_10k_registered_users
+    ACTION intachregist();
+
+    ACTION intachrating();
 
 #ifdef SUPERFLUOUS_INDEX
     // Delete @count@ items from superfluous index tebles
@@ -328,4 +343,30 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     void down_top_question(eosio::name user, uint16_t community_id, uint64_t question_id);
 
     void move_top_question(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t newposition);
+
+    void init_all_accounts_achievements();
+
+    void update_account_achievement(eosio::name user, uint32_t achievement_id);
+
+    void update_account_achievements(eosio::name user);
+
+    void update_question_achievement(eosio::name user);
+
+    void update_answer_achievement(eosio::name user);
+
+    void update_correct_achievement(eosio::name user);
+
+    bool up_achievement(uint32_t id_achievement);
+
+    void set_property_achieve(std::vector<key_account_achievements> &properties, uint8_t key, const uint64_t value);
+
+    void init_achievements_first_10k_registered_users();
+
+    void update_achievement(eosio::name user, Achievements id_achievement, uint64_t value);
+
+    void update_achievement_rating(eosio::name user);
+
+    void achievements_first_10k_registered_users(eosio::name user);
+
+    void init_achievements_rating();
   };

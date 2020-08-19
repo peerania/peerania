@@ -1,15 +1,13 @@
 #pragma once
 #include <eosio/eosio.hpp>
-#include <string>
 #include <vector>
-#include "property.hpp"
 
 struct key_account_achievements{
-  int achievements_id;
-  int value;
+  uint32_t achievements_id;
+  uint64_t value;
   time date;
 
-  uint8_t lkey() const { return achievements_id; }
+  uint32_t lkey() { return achievements_id; }
 };
 
 struct [[eosio::table("accachieve"), eosio::contract("peeranha.main")]] account_achievements {

@@ -13,8 +13,7 @@ bool peeranha::up_achievement(uint32_t id_achievement) {
   if(achieve ==  achievements.end()) return false;  //"Achievement not found");
 
   if (iter_squeezed_achievement == squeezed_achievement_table.end()) {
-    if(achieve->limit <= 0)
-      return false;
+    if(achieve->limit <= 0) { return false };
     squeezed_achievement_table.emplace(
       _self, [id_achievement, &achieve](auto &achievement) {
         achievement.id = id_achievement;

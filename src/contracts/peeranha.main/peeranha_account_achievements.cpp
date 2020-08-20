@@ -108,14 +108,6 @@ void peeranha::update_achievement_rating(eosio::name user) {
   if(iter_account == account_table.end()) { return; }
   int rating_account = iter_account->rating;
 
-//   Stranger	0 ... 99
-// Newbie	100 ... 499
-// Junior	500-999
-// Resident	1000 ... 2499
-// Senior	2500 ... 4999
-// Hero	5000 ... 9999
-// Superhero	10000
-
   if(rating_account < 0 ) { return; }
   else if (rating_account >= LOW_STRANGER && rating_account <= HIGH_STRANGER) { update_achievement(user, stranger, 1); }  
   else if (rating_account >= LOW_NEWBIE && rating_account <= HIGH_NEWBIE)     { update_achievement(user, newbie, 1); }

@@ -3,16 +3,6 @@
 #include <stdint.h>
 #include "property.hpp"
 
-void peeranha::init_all_accounts_achievements() {
-  account_index account_table(_self, scope_all_accounts);
-
-  for (auto iter_account = account_table.begin(); iter_account != account_table.end(); ++iter_account) {
-    update_account_achievement(iter_account->user, questions_asked);
-    update_account_achievement(iter_account->user, answers_given);
-    update_account_achievement(iter_account->user, correct_answers);
-  }
-}
-
 void peeranha::update_achievement(eosio::name user, Achievements id_achievement, uint64_t value) {
   account_achievements_index account_achievements_table(_self, scope_all_account_achievements);
   auto iter_account_achievements = account_achievements_table.find(user.value);
@@ -48,16 +38,6 @@ void peeranha::set_property_achieve(std::vector<key_account_achievements> &prope
   }
 }
 
-void peeranha::update_account_achievements(eosio::name user) {
-  account_achievements_index account_achievements_index_table(_self, scope_all_account_achievements);
-  auto iter_account_achievements = account_achievements_index_table.find(user.value);
-  if(iter_account_achievements == account_achievements_index_table.end()) { return; }
-
-  for(auto i : iter_account_achievements->user_achievements) {
-    update_account_achievement(user, i.achievements_id);
-  }
-}
-
 void peeranha::update_account_achievement(eosio::name user, uint32_t achievement_id) {
   account_achievements_index account_achievements_table(_self, scope_all_account_achievements);
 
@@ -72,6 +52,12 @@ void peeranha::update_account_achievement(eosio::name user, uint32_t achievement
       break;
     case correct_answers:
       update_correct_achievement(user);
+      break;
+    case first_10k_registered:
+      achievements_first_10k_registered_users(user);
+      break;
+    case stranger:
+      update_achievement_rating(user);
       break;
   }
 }
@@ -91,17 +77,6 @@ void peeranha::update_correct_achievement(eosio::name user) {
   update_achievement(user, correct_answers, iter_account->correct_answers);
 }
 
-void peeranha::init_achievements_first_10k_registered_users() {
-  account_index account_table(_self, scope_all_accounts);
-  for (auto iter_account = account_table.begin(); iter_account != account_table.end(); ++iter_account) {
-    update_achievement(iter_account->user, first_10k_registered, 1);       
-  }
-}
-
-void peeranha::achievements_first_10k_registered_users(eosio::name user) {
-  update_achievement(user, first_10k_registered, 1);       
-}
-
 void peeranha::update_achievement_rating(eosio::name user) {
   account_index account_table(_self, scope_all_accounts);
   auto iter_account = account_table.find(user.value);
@@ -118,8 +93,28 @@ void peeranha::update_achievement_rating(eosio::name user) {
   else if (rating_account >= LOW_SUPERHERO) { update_achievement(user, superhero, 1); }  
 }
 
-void peeranha::init_achievements_rating() {
+void peeranha::achievements_first_10k_registered_users(eosio::name user) {
+  update_achievement(user, first_10k_registered, 1);       
+}
 
+void peeranha::init_all_accounts_achievements() {
+  account_index account_table(_self, scope_all_accounts);
+
+  for (auto iter_account = account_table.begin(); iter_account != account_table.end(); ++iter_account) {
+    update_account_achievement(iter_account->user, questions_asked);
+    update_account_achievement(iter_account->user, answers_given);
+    update_account_achievement(iter_account->user, correct_answers);
+  }
+}
+
+void peeranha::init_achievements_first_10k_registered_users() {
+  account_index account_table(_self, scope_all_accounts);
+  for (auto iter_account = account_table.begin(); iter_account != account_table.end(); ++iter_account) {
+    update_achievement(iter_account->user, first_10k_registered, 1);       
+  }
+}
+
+void peeranha::init_achievements_rating() {
   account_index account_table(_self, scope_all_accounts);
   auto iter_account = account_table.begin();
   for (auto iter_account = account_table.begin(); iter_account != account_table.end(); ++iter_account) {

@@ -216,11 +216,6 @@ void peeranha::upaccach(eosio::name user, uint32_t achievement_id) {
   update_account_achievement(user, achievement_id);
 }
 
-void peeranha::upaccachs(eosio::name user) {
-  require_auth(_self);
-  update_account_achievements(user);
-}
-
 void peeranha::intachregist() {
   require_auth(_self);
   init_achievements_first_10k_registered_users();
@@ -404,7 +399,7 @@ EOSIO_DISPATCH(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
         reportprof)(updateacc)(givemoderflg)(setcommipfs)(chgqsttype)(setcommname)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
-        (intallaccach)(upaccach)(upaccachs)(intachregist)(intachrating)
+        (intallaccach)(upaccach)(intachregist)(intachrating)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

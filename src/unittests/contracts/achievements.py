@@ -2,7 +2,6 @@ import peeranhatest
 from peeranhatest import *
 from jsonutils import *
 from unittest import main
-from time import time
 from enum import Enum
 
 MODERATOR_FLG_ALL = 31
@@ -26,7 +25,7 @@ class TestAchievents(peeranhatest.peeranhaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()      
 
-        self.register_question_action(alice, 'Alice question ' + str(68719476735));
+        self.register_question_action(alice, 'Alice question ' + str(68719476735))
 
         self.action('postanswer', {'user': str(bob), 'question_id': 68719476735, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
                     '{} answer to question with id={}: "{}"'.format(str(bob), 68719476735, 'Register Alice answer'))
@@ -54,7 +53,7 @@ class TestAchievents(peeranhatest.peeranhaTest):
         bob = self.register_bob_account()
         self._give_moderator_flag(ted, MODERATOR_FLG_ALL)       
 
-        self.register_question_action(alice, 'Alice question ' + str(68719476735));
+        self.register_question_action(alice, 'Alice question ' + str(68719476735))
 
         self.action('postanswer', {'user': str(bob), 'question_id': 68719476735, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
                     '{} answer to question with id={}: "{}"'.format(str(bob), 68719476735, 'Register Bob answer'))
@@ -202,7 +201,23 @@ class TestAchievents(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example, table_achieve, ignore_excess=True))
         end()
 
+    def test_limit_achievement(self):
+        begin('test limit question ask (limit 2)')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        carol = self.register_carol_account()
+        ted = self.register_ted_account()
 
+        self.register_question_action(alice, 'Alice question ' + str(68719476735))
+        self.register_question_action(bob, 'bob question ' + str(68719476734))
+        self.register_question_action(carol, 'carol question ' + str(68719476733))
+        self.register_question_action(ted, 'ted question ' + str(68719476732))
+        
+        
+        example = [{'id': Achievents.questions_asked.value, 'count': 2}, {'id': Achievents.first_10k_registered.value, 'count': 5}]
+        table_achieve = self.table('achieve', 'allachieve')
+        self.assertTrue(compare(example, table_achieve, ignore_excess=True))
+        end()
 
     def _give_moderator_flag(self, acc, flg):
         admin = self.get_contract_deployer(self.get_default_contract())

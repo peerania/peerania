@@ -166,9 +166,6 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     //update account achievement
     ACTION upaccach(eosio::name user, uint32_t achievement_id);
 
-    //update account achievements
-    ACTION upaccachs(eosio::name user);
-
     //init_achievements_first_10k_registered_users
     ACTION intachregist();
 
@@ -347,8 +344,6 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     void init_all_accounts_achievements();
 
     void update_account_achievement(eosio::name user, uint32_t achievement_id);
-
-    void update_account_achievements(eosio::name user);
 
     void update_question_achievement(eosio::name user);
 

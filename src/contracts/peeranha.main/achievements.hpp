@@ -52,7 +52,22 @@ struct achievement {
     return this->id != other;
   }
 };
+#if STAGE == 1 || STAGE == 2
+std::vector<achievement> achievements = {
+    achievement(questions_asked,        0, 2, true), 
+    achievement(answers_given,          0, 10, true),   
+    achievement(correct_answers,        0, 5, true),
+    achievement(first_10k_registered,   0, 10000, false),
 
+    achievement(stranger,               0, 1000, false),
+    achievement(newbie,                 0, 5, false),
+    achievement(junior,                 0, 5, false),
+    achievement(resident,               0, 5, false),
+    achievement(senior,                 0, 5, false),
+    achievement(hero,                   0, 5, false),
+    achievement(superhero,              0, 10, false),
+};
+#else
 std::vector<achievement> achievements = {
     achievement(questions_asked,        0, 500000, true), 
     achievement(answers_given,          0, 500000, true),   
@@ -67,3 +82,4 @@ std::vector<achievement> achievements = {
     achievement(hero,                   0, 50, false),
     achievement(superhero,              0, 10, false),
 };
+#endif

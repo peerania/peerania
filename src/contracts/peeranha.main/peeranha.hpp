@@ -13,6 +13,7 @@
 #include "utils.hpp"
 #include "property_community.hpp"
 #include "top_question.hpp"
+#include "telegram_account.hpp"
 
 #include "token_common.hpp"
 
@@ -52,6 +53,11 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     // Post question
     ACTION postquestion(eosio::name user, uint16_t community_id,
+                        std::vector<uint32_t> tags, std::string title,
+                        IpfsHash ipfs_link, uint8_t type);
+
+    // Post question
+    ACTION telpostqston(eosio::name bot, eosio::name user, uint16_t community_id,
                         std::vector<uint32_t> tags, std::string title,
                         IpfsHash ipfs_link, uint8_t type);
 

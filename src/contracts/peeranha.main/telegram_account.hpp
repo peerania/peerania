@@ -16,7 +16,6 @@ struct [[ eosio::table("telegramacc"), eosio::contract("peeranha.main") ]] teleg
   
   uint64_t primary_key() const { return user.value; }
   int telegram_rkey() const { return telegram_id; }
-  
 
   EOSLIB_SERIALIZE(
       telegram_account,
@@ -24,12 +23,10 @@ struct [[ eosio::table("telegramacc"), eosio::contract("peeranha.main") ]] teleg
 };
 
 const uint64_t scope_all_telegram_accounts = eosio::name("alltelegramacc").value;
-typedef eosio::multi_index<
-    "telegramacc"_n, account
-    ,
-    eosio::indexed_by<"telegram"_n, eosio::const_mem_fun<telegram_account, int,
-                                                      &telegram_account::telegram_rkey>>
-    > telegram_account_index;
-
-// Stub solution:( no ability to compile correctly
-// #include "account.cpp"
+typedef eosio::multi_index<"telegramacc"_n, telegram_account> telegram_account_index;
+// typedef eosio::multi_index<
+//     "telegramacc"_n, telegram_account
+//     ,
+//     eosio::indexed_by<"tel"_n, eosio::const_mem_fun<telegram_account, uint64_t,
+//                                                       &telegram_account::telegram_rkey>>
+//     > telegram_account_index;

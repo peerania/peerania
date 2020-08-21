@@ -163,6 +163,12 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     
     ACTION movequestion(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t new_position);
 
+    ACTION apprvacc(eosio::name user);
+
+    ACTION dsapprvacc(eosio::name user);
+
+    ACTION addtelacc(eosio::name bot_name, eosio::name user, int telegram_id);
+
 #ifdef SUPERFLUOUS_INDEX
     // Delete @count@ items from superfluous index tebles
     ACTION freeindex(int count);
@@ -332,4 +338,10 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     void down_top_question(eosio::name user, uint16_t community_id, uint64_t question_id);
 
     void move_top_question(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t newposition);
+
+    void approve_account(eosio::name user);
+
+    void disapprove_account(eosio::name user);
+
+    void add_telegram_account(eosio::name user, int telegram_id);
   };

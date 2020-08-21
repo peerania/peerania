@@ -4,6 +4,7 @@
 #include "peeranha_forum.cpp"
 #include "peeranha_vote.cpp"
 #include "peeranha_top_question.cpp"
+#include "telegram_account.cpp"
 
 void peeranha::registeracc(eosio::name user, std::string display_name,
                            IpfsHash ipfs_profile, IpfsHash ipfs_avatar) {
@@ -211,6 +212,21 @@ void peeranha::movequestion(eosio::name user, uint16_t community_id, uint64_t qu
   move_top_question(user,  community_id, question_id, new_position);
 }
 
+void peeranha:: apprvacc(eosio::name user) {
+  require_auth(user);
+  approve_account(user);
+}
+
+void peeranha:: dsapprvacc(eosio::name user) {
+  require_auth(user);
+  disapprove_account(user);
+}
+
+void peeranha:: addtelacc(eosio::name bot_name, eosio::name user, int telegram_id) {
+  require_auth(bot_name);
+  add_telegram_account(user, telegram_id);
+}
+
 #ifdef SUPERFLUOUS_INDEX
 void peeranha::freeindex(int size) {
   require_auth(_self);
@@ -372,6 +388,7 @@ EOSIO_DISPATCH(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
         reportprof)(updateacc)(givemoderflg)(setcommipfs)(chgqsttype)(setcommname)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
+        (apprvacc)(dsapprvacc)(addtelacc)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

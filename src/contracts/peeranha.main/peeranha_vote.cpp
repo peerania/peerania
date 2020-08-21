@@ -178,8 +178,8 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
                       account.answers_given -= 1;
                       if (is_correct_answer) account.correct_answers -= 1;
                     });
-      update_account_achievement(answer->user, answers_given);
-      update_account_achievement(answer->user, correct_answers);
+      update_account_achievement(answer->user, ANSWER_GIVEN);
+      update_account_achievement(answer->user, CORRECT_ANSWER);
 #ifdef SUPERFLUOUS_INDEX
       remove_user_answer(answer->user, iter_question->id);
 #endif
@@ -204,7 +204,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
   update_rating(iter_account, [snitch_reduce_energy_value](auto &account) {
     account.reduce_energy(snitch_reduce_energy_value);
   });
-  update_account_achievement(item_user, questions_asked);
-  update_account_achievement(item_user, answers_given);
-  update_account_achievement(item_user, correct_answers);
+  update_account_achievement(item_user, QUESTION_ASKED);
+  update_account_achievement(item_user, ANSWER_GIVEN);
+  update_account_achievement(item_user, CORRECT_ANSWER);
 }

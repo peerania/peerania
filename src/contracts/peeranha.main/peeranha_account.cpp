@@ -34,7 +34,7 @@ void peeranha::register_account(eosio::name user, std::string display_name,
       --global_stat_table.end(), _self,
       [](auto &global_stat) { global_stat.user_count += 1; });
   
-  update_account_achievement(user, first_10k_registered);
+  update_account_achievement(user, FIRST_10K_REGISTERED);
 }
 
 // ACTION BODY
@@ -265,7 +265,7 @@ void peeranha::update_rating_base(
                          eosio::check(account.rating == rating_before,
                                       "Change rating in lambda is forbidden");
                        });
-  update_account_achievement(iter_account->user, stranger);
+  update_achievement_rating(iter_account->user);
 }
 
 void peeranha::update_rating(eosio::name user, int rating_change) {

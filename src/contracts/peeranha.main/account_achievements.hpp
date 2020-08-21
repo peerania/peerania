@@ -2,7 +2,7 @@
 #include <eosio/eosio.hpp>
 #include <vector>
 
-struct key_account_achievements{
+struct user_achievement{
   uint32_t achievements_id;
   uint64_t value;
   time date;
@@ -12,7 +12,7 @@ struct key_account_achievements{
 
 struct [[eosio::table("accachieve"), eosio::contract("peeranha.main")]] account_achievements {
   eosio::name user;
-  std::vector<key_account_achievements> user_achievements;
+  std::vector<user_achievement> user_achievements;
 
   uint64_t primary_key() const { return user.value; }
 };

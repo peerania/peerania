@@ -353,8 +353,6 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     bool up_achievement(uint32_t id_achievement);
 
-    void set_property_achieve(std::vector<user_achievement> &properties, uint8_t key, const uint64_t value);
-
     void init_achievements_first_10k_registered_users();
 
     void update_achievement(eosio::name user, Achievements id_achievement, uint64_t value);

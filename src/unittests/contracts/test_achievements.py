@@ -29,18 +29,17 @@ class TestAchievents(peeranhatest.peeranhaTest):
 
         self.action('postanswer', {'user': str(bob), 'question_id': 68719476735, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
                     '{} answer to question with id={}: "{}"'.format(str(bob), 68719476735, 'Register Alice answer'))
-        
         self.action('mrkascorrect', {'user': alice, 'question_id': 68719476735,
                                      'answer_id': 1}, str(alice), 'Alice mark bob answer as correct')
 
-        table_account_achive = self.table('accachieve', 'allaccachieve')       
-        example = [ {'user': 'alice', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'achievements_id': Achievents.questions_asked.value, 'value': 1}, {'achievements_id': Achievents.newbie.value, 'value': 1}]}, 
-                    {'user': 'bob', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'achievements_id': 2, 'value': 1}, {'achievements_id': Achievents.newbie.value, 'value': 1}, {'achievements_id': Achievents.correct_answers.value, 'value': 1}]}, 
-                    {'user': 'peeranhamain', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]}]
-        self.assertTrue(compare(example, table_account_achive, ignore_excess=True))
+        example_alice = [{'user': 'alice', 'achievements_id': Achievents.questions_asked.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.newbie.value, 'value': 1}]
+        example_bob = [{'user': 'bob', 'achievements_id': Achievents.answers_given.value, 'value': 1}, {'user': 'bob', 'achievements_id': Achievents.correct_answers.value, 'value': 1}, {'user': 'bob', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'user': 'bob', 'achievements_id': Achievents.newbie.value, 'value': 1}]
+
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
 
         table_achieve = self.table('achieve', 'allachieve')
-        example = [{'id': Achievents.questions_asked.value, 'count': 1}, {'id': Achievents.answers_given.value, 'count': 1}, {'id': Achievents.correct_answers.value, 'count': 1}, {'id': Achievents.first_10k_registered.value, 'count': 3}, {'id': Achievents.newbie.value, 'count': 2}]
+        example = [{'id': Achievents.questions_asked.value, 'count': 1}, {'id': Achievents.answers_given.value, 'count': 1}, {'id': Achievents.correct_answers.value, 'count': 1}, {'id': Achievents.first_10k_registered.value, 'count': 2}, {'id': Achievents.newbie.value, 'count': 2}]
         self.assertTrue(compare(example, table_achieve, ignore_excess=True))
         end()
     
@@ -62,15 +61,16 @@ class TestAchievents(peeranhatest.peeranhaTest):
         self.action('reportforum', {'user': 'ted', 'question_id': 68719476735, 'answer_id': 0, 'comment_id': 0},
                     ted, 'Bob vote for Alice question deletion')
         
-        table_account_achive = self.table('accachieve', 'allaccachieve')       
-        example = [{'user': 'alice', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'achievements_id': Achievents.questions_asked.value, 'value': 0}, {'achievements_id': Achievents.newbie.value, 'value': 1}, {'achievements_id': Achievents.answers_given.value, 'value': 0}, {'achievements_id': Achievents.correct_answers.value, 'value': 0}]}, 
-                    {'user': 'bob', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'achievements_id': Achievents.answers_given.value, 'value': 0}, {'achievements_id': Achievents.newbie.value, 'value': 1}, {'achievements_id': Achievents.correct_answers.value, 'value': 0}]},
-                    {'user': 'peeranhamain', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]}, 
-                    {'user': 'ted', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]}]
-        self.assertTrue(compare(example, table_account_achive, ignore_excess=True))
+        example_alice = [{'user': 'alice', 'achievements_id': Achievents.questions_asked.value, 'value': 0}, {'user': 'alice', 'achievements_id': Achievents.answers_given.value, 'value': 0}, {'user': 'alice', 'achievements_id': Achievents.correct_answers.value, 'value': 0}, {'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.newbie.value, 'value': 1}]
+        example_bob = [{'user': 'bob', 'achievements_id': Achievents.answers_given.value, 'value': 0}, {'user': 'bob', 'achievements_id': Achievents.correct_answers.value, 'value': 0}, {'user': 'bob', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'user': 'bob', 'achievements_id': Achievents.newbie.value, 'value': 1}]
+        example_ted = [{'user': 'ted', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]
+
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
+        self.assertTrue(compare(example_ted, self.table('accachieve', 'ted'), ignore_excess=True))
 
         table_achive = self.table('achieve', 'allachieve')
-        example = [{'id': Achievents.questions_asked.value, 'count': 1}, {'id': Achievents.answers_given.value, 'count': 2}, {'id': Achievents.correct_answers.value, 'count': 2}, {'id': Achievents.first_10k_registered.value, 'count': 4}, {'id': Achievents.newbie.value, 'count': 2}]
+        example = [{'id': Achievents.questions_asked.value, 'count': 1}, {'id': Achievents.answers_given.value, 'count': 2}, {'id': Achievents.correct_answers.value, 'count': 2}, {'id': Achievents.first_10k_registered.value, 'count': 3}, {'id': Achievents.newbie.value, 'count': 2}]
         self.assertTrue(compare(example, table_achive, ignore_excess=True))
         end()
 
@@ -82,14 +82,12 @@ class TestAchievents(peeranhatest.peeranhaTest):
         self.register_question_action(alice, 'Alice question ' + str(68719476735))
         self.action('delquestion', {
                     'user': 'alice', 'question_id': 68719476735}, alice, "Delete alice question")
-        
-        table_account_achive = self.table('accachieve', 'allaccachieve')       
-        example = [ {'user': 'alice', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'achievements_id': Achievents.questions_asked.value, 'value': 0}, {'achievements_id': Achievents.newbie.value, 'value': 1}]}, 
-                    {'user': 'peeranhamain', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]}]
-        self.assertTrue(compare(example, table_account_achive, ignore_excess=True))
+
+        example_alice = [{'user': 'alice', 'achievements_id': Achievents.questions_asked.value, 'value': 0}, {'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.newbie.value, 'value': 1}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
 
         table_achive = self.table('achieve', 'allachieve')
-        example = [{'id': Achievents.questions_asked.value, 'count': 1}, {'id': Achievents.first_10k_registered.value, 'count': 2}, {'id': Achievents.newbie.value, 'count': 1}]
+        example = [{'id': Achievents.questions_asked.value, 'count': 1}, {'id': Achievents.first_10k_registered.value, 'count': 1}, {'id': Achievents.newbie.value, 'count': 1}]
         self.assertTrue(compare(example, table_achive, ignore_excess=True))
         end()
 
@@ -106,21 +104,20 @@ class TestAchievents(peeranhatest.peeranhaTest):
                     '{} answer to question with id={}: "{}"'.format(str(bob), 68719476735, 'Register Bob answer')) 
         self.action('mrkascorrect', {'user': alice, 'question_id': 68719476735,
                                      'answer_id': 1}, str(alice), 'Alice mark bob answer as correct')
-
         self.action('reportforum', {'user': 'ted', 'question_id': 68719476735, 'answer_id': 1, 'comment_id': 0},
                     ted, 'Ted deleted Bob answer')
         
-        table_account_achive = self.table('accachieve', 'allaccachieve')       
-        example = [{'user': 'alice', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'achievements_id': Achievents.questions_asked.value, 'value': 1}, {'achievements_id': Achievents.newbie.value, 'value': 1}]}, 
-                    {'user': 'bob', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'achievements_id': Achievents.answers_given.value, 'value': 0}, {'achievements_id': Achievents.newbie.value, 'value': 1}, {'achievements_id': Achievents.correct_answers.value, 'value': 0}, {'achievements_id': Achievents.questions_asked.value, 'value': 0}]},
-                    {'user': 'peeranhamain', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]}, 
-                    {'user': 'ted', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]}]
-        self.assertTrue(compare(example, table_account_achive, ignore_excess=True))
+        example_alice = [{'user': 'alice', 'achievements_id': Achievents.questions_asked.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.newbie.value, 'value': 1}]
+        example_bob = [{'user': 'bob', 'achievements_id': Achievents.questions_asked.value, 'value': 0}, {'user': 'bob', 'achievements_id': Achievents.answers_given.value, 'value': 0}, {'user': 'bob', 'achievements_id': Achievents.correct_answers.value, 'value': 0}, {'user': 'bob', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'user': 'bob', 'achievements_id': Achievents.newbie.value, 'value': 1}]
+        example_ted = [{'user': 'ted', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]
+
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
+        self.assertTrue(compare(example_ted, self.table('accachieve', 'ted'), ignore_excess=True))
 
         table_achive = self.table('achieve', 'allachieve')
-        example = [{'id': Achievents.questions_asked.value, 'count': 2}, {'id': Achievents.answers_given.value, 'count': 1}, {'id': Achievents.correct_answers.value, 'count': 1}, {'id': Achievents.first_10k_registered.value, 'count': 4}, {'id': Achievents.newbie.value, 'count': 2}]
+        example = [{'id': Achievents.questions_asked.value, 'count': 2}, {'id': Achievents.answers_given.value, 'count': 1}, {'id': Achievents.correct_answers.value, 'count': 1}, {'id': Achievents.first_10k_registered.value, 'count': 3}, {'id': Achievents.newbie.value, 'count': 2}]
         self.assertTrue(compare(example, table_achive, ignore_excess=True))
-      
         end()
 
     def test_delete_answer(self):
@@ -131,14 +128,12 @@ class TestAchievents(peeranhatest.peeranhaTest):
         self.action('postanswer', {'user': str(alice), 'question_id': 68719476735, 'ipfs_link': 'undefined', 'official_answer': False}, alice,
                     '{} answer to question with id={}: "{}"'.format(str(alice), 68719476735, 'Register Alice answer'))
         self.action('delanswer', {'user': 'alice', 'question_id': 68719476735, 'answer_id': 1}, alice, 'Delete Alice answer to Alice question')
-        
-        table_account_achive = self.table('accachieve', 'allaccachieve')       
-        example = [ {'user': 'alice', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'achievements_id': Achievents.questions_asked.value, 'value': 1}, {'achievements_id': Achievents.answers_given.value, 'value': 0}, {'achievements_id': Achievents.newbie.value, 'value': 1}]}, 
-                    {'user': 'peeranhamain', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]}]
-        self.assertTrue(compare(example, table_account_achive, ignore_excess=True))
+
+        example_alice = [{'user': 'alice', 'achievements_id': Achievents.questions_asked.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.answers_given.value, 'value': 0}, {'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.newbie.value, 'value': 1}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
 
         table_achive = self.table('achieve', 'allachieve')
-        example = [{'id': Achievents.questions_asked.value, 'count': 1}, {'id': Achievents.answers_given.value, 'count': 1}, {'id': Achievents.first_10k_registered.value, 'count': 2}, {'id': Achievents.newbie.value, 'count': 1}]
+        example = [{'id': Achievents.questions_asked.value, 'count': 1}, {'id': Achievents.answers_given.value, 'count': 1}, {'id': Achievents.first_10k_registered.value, 'count': 1}, {'id': Achievents.newbie.value, 'count': 1}]
         self.assertTrue(compare(example, table_achive, ignore_excess=True))
         end()
 
@@ -148,13 +143,13 @@ class TestAchievents(peeranhatest.peeranhaTest):
         alice = self.register_alice_account()
         ted = self.register_ted_account()
 
-        example = [ {'user': 'alice', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]}, 
-                    {'user': 'peeranhamain', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]}, 
-                    {'user': 'ted', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]}] 
-        table_account_achive = self.table('accachieve', 'allaccachieve')
-        self.assertTrue(compare(example, table_account_achive, ignore_excess=True))
+        example_alice = [{'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]
+        example_ted = [{'user': 'ted', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]
 
-        example = [{'id': Achievents.first_10k_registered.value, 'count': 3}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.assertTrue(compare(example_ted, self.table('accachieve', 'ted'), ignore_excess=True))
+
+        example = [{'id': Achievents.first_10k_registered.value, 'count': 2}]
         table_achive = self.table('achieve', 'allachieve')
         self.assertTrue(compare(example, table_achive, ignore_excess=True))
         end()
@@ -170,12 +165,13 @@ class TestAchievents(peeranhatest.peeranhaTest):
 
         self.action('intachrating', {}, admin, 'init achievements rating in all accounts')   
 
-        example = [ {'user': 'alice', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'achievements_id': Achievents.stranger.value, 'value': 1}, {'achievements_id': Achievents.newbie.value, 'value': 1}, {'achievements_id': Achievents.junior.value, 'value': 1}, {'achievements_id': Achievents.resident.value, 'value': 1}, {'achievements_id': Achievents.senior.value, 'value': 1}]}, 
-                    {'user': 'bob', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]}, 
-                    {'user': 'peeranhamain', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]}, 
-                    {'user': 'ted', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'achievements_id': Achievents.stranger.value, 'value': 1}, {'achievements_id': Achievents.newbie.value, 'value': 1}, {'achievements_id': Achievents.junior.value, 'value': 1}, {'achievements_id': Achievents.resident.value, 'value': 1}, {'achievements_id': Achievents.senior.value, 'value': 1}, {'achievements_id': Achievents.hero.value, 'value': 1}, {'achievements_id': Achievents.superhero.value, 'value': 1}]}]
-        table_account_achive = self.table('accachieve', 'allaccachieve')
-        self.assertTrue(compare(example, table_account_achive, ignore_excess=True))
+        example_alice = [{'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.stranger.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.newbie.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.junior.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.resident.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.senior.value, 'value': 1}]
+        example_bob = [{'user': 'bob', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]
+        example_ted = [{'user': 'ted', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'user': 'ted', 'achievements_id': Achievents.stranger.value, 'value': 1}, {'user': 'ted', 'achievements_id': Achievents.newbie.value, 'value': 1}, {'user': 'ted', 'achievements_id': Achievents.junior.value, 'value': 1}, {'user': 'ted', 'achievements_id': Achievents.resident.value, 'value': 1}, {'user': 'ted', 'achievements_id': Achievents.senior.value, 'value': 1}, {'user': 'ted', 'achievements_id': Achievents.hero.value, 'value': 1}, {'user': 'ted', 'achievements_id': Achievents.superhero.value, 'value': 1}]
+
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
+        self.assertTrue(compare(example_ted, self.table('accachieve', 'ted'), ignore_excess=True))
 
         example = [{'id': Achievents.first_10k_registered.value, 'count': 4}, {'id': Achievents.stranger.value, 'count': 2}, {'id': Achievents.newbie.value, 'count': 2}, {'id': Achievents.junior.value, 'count': 2}, {'id': Achievents.resident.value, 'count': 2}, {'id': Achievents.senior.value, 'count': 2}, {'id': Achievents.hero.value, 'count': 1}, {'id': Achievents.superhero.value, 'count': 1}]
         table_achievement = self.table('achieve', 'allachieve')
@@ -190,13 +186,10 @@ class TestAchievents(peeranhatest.peeranhaTest):
 
         self.action('intallaccach', {}, admin, 'init achievements: questions_asked, answers_given, correct_answers in all accounts')
         
-        example = [ {'user': 'alice', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'achievements_id': Achievents.questions_asked.value, 'value': 0}, {'achievements_id': Achievents.answers_given.value, 'value': 0}, {'achievements_id': Achievents.correct_answers.value, 'value': 0}]}, 
-                    {'user': 'peeranhamain', 'user_achievements': [{'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]}]
-        table_account_achive = self.table('accachieve', 'allaccachieve')
-        self.assertTrue(compare(example, table_account_achive, ignore_excess=True))
+        example_alice = [{'user': 'alice', 'achievements_id': Achievents.questions_asked.value, 'value': 0}, {'user': 'alice', 'achievements_id': Achievents.answers_given.value, 'value': 0}, {'user': 'alice', 'achievements_id': Achievents.correct_answers.value, 'value': 0}, {'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
 
-
-        example = [{'id': Achievents.questions_asked.value, 'count': 1}, {'id': Achievents.answers_given.value, 'count': 1}, {'id': Achievents.correct_answers.value, 'count': 1}, {'id': Achievents.first_10k_registered.value, 'count': 2}]
+        example = [{'id': Achievents.questions_asked.value, 'count': 1}, {'id': Achievents.answers_given.value, 'count': 1}, {'id': Achievents.correct_answers.value, 'count': 1}, {'id': Achievents.first_10k_registered.value, 'count': 1}]
         table_achieve = self.table('achieve', 'allachieve')
         self.assertTrue(compare(example, table_achieve, ignore_excess=True))
         end()
@@ -211,10 +204,9 @@ class TestAchievents(peeranhatest.peeranhaTest):
         self.register_question_action(alice, 'Alice question ' + str(68719476735))
         self.register_question_action(bob, 'bob question ' + str(68719476734))
         self.register_question_action(carol, 'carol question ' + str(68719476733))
-        self.register_question_action(ted, 'ted question ' + str(68719476732))
+        self.register_question_action(ted, 'ted question ' + str(68719476732)) 
         
-        
-        example = [{'id': Achievents.questions_asked.value, 'count': 2}, {'id': Achievents.first_10k_registered.value, 'count': 5}]
+        example = [{'id': Achievents.questions_asked.value, 'count': 2}, {'id': Achievents.first_10k_registered.value, 'count': 4}]
         table_achieve = self.table('achieve', 'allachieve')
         self.assertTrue(compare(example, table_achieve, ignore_excess=True))
         end()

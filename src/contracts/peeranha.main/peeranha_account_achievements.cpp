@@ -4,45 +4,30 @@
 #include "property.hpp"
 
 void peeranha::update_achievement(eosio::name user, Achievements id_achievement, uint64_t value) {
-  account_achievements_index account_achievements_table(_self, scope_all_account_achievements);
-  auto iter_account_achievements = account_achievements_table.find(user.value);
+  account_achievements_index account_achievements_table(_self, user.value );
+  
+  auto iter_account_achievements = account_achievements_table.find(id_achievement);
 
   if (iter_account_achievements == account_achievements_table.end()) {
+    if(up_achievement(id_achievement)) {
       account_achievements_table.emplace(_self, 
           [&](auto &account) {
             account.user = user;
-            set_property_achieve(account.user_achievements, id_achievement, value);
+            account.achievements_id = id_achievement;
+            account.value = value;
+            account.date = now();
           });
+    }
   } else {
     account_achievements_table.modify(iter_account_achievements, _self,
           [&](auto &account) {
-            set_property_achieve(account.user_achievements, id_achievement, value);
+            account.value = value;
           });
   } 
 }
 
-void peeranha::set_property_achieve(std::vector<user_achievement> &properties, uint8_t key,
-                  const uint64_t value) {
-  auto itr_property = linear_find(properties.begin(), properties.end(), key);
-
-  if (itr_property == properties.end()) {
-    user_achievement key_value;
-    key_value.achievements_id = key;
-    key_value.value = value;
-    key_value.date = now();
-
-    if(up_achievement(key))
-      properties.push_back(key_value);
-  } else {
-    itr_property->value = value;
-  }
-}
 
 void peeranha::update_account_achievement(eosio::name user, uint32_t achievement_id) {
-  account_achievements_index account_achievements_table(_self, scope_all_account_achievements);
-
-  auto iter_account = find_account(user);
-
   switch (achievement_id) {
     case QUESTION_ASKED:
       update_question_achievement(user);

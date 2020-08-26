@@ -273,19 +273,7 @@ void peeranha::resettables() {
       iter_period_rating = period_rating_table.erase(iter_period_rating);
     }
 
-    top_question_index top_question_table(_self, scope_all_top_questions);
-    auto iter_top_question = top_question_table.begin();
-    while (iter_top_question != top_question_table.end()) {
-      iter_top_question = top_question_table.erase(iter_top_question);
-    }
-
-    squeezed_achievement_index squeezed_achievement_table(_self, scope_all_squeezed_achievements);
-    auto iter_squeezed_achievement = squeezed_achievement_table.begin();
-    while (iter_squeezed_achievement != squeezed_achievement_table.end()) {
-      iter_squeezed_achievement = squeezed_achievement_table.erase(iter_squeezed_achievement);
-    }
-
-    account_achievements_index account_achievements_table(_self, scope_all_account_achievements);
+    account_achievements_index account_achievements_table(_self, iter_account->user.value);
     auto iter_account_achievements = account_achievements_table.begin();
     while (iter_account_achievements != account_achievements_table.end()) {
       iter_account_achievements = account_achievements_table.erase(iter_account_achievements);
@@ -307,6 +295,18 @@ void peeranha::resettables() {
 #endif
     // remove user
     iter_account = account_table.erase(iter_account);
+  }
+
+  squeezed_achievement_index squeezed_achievement_table(_self, scope_all_squeezed_achievements);
+  auto iter_squeezed_achievement = squeezed_achievement_table.begin();
+  while (iter_squeezed_achievement != squeezed_achievement_table.end()) {
+    iter_squeezed_achievement = squeezed_achievement_table.erase(iter_squeezed_achievement);
+  }
+
+  top_question_index top_question_table(_self, scope_all_top_questions);
+  auto iter_top_question = top_question_table.begin();
+  while (iter_top_question != top_question_table.end()) {
+    iter_top_question = top_question_table.erase(iter_top_question);
   }
 
   // clean create community table

@@ -1,13 +1,7 @@
 #pragma once
-#include <eosio/eosio.hpp>
-#include <eosio/system.hpp>
-#include <string>
-#include "peeranha_types.h"
-#include "property.hpp"
-#include "token_common.hpp"
-#include "IpfsHash.hpp"
-#include "account_economy.h"
-#include "property_community.hpp"
+#pragma once
+#include "peeranha.hpp"
+#include <stdint.h>
 
 struct [[ eosio::table("telegramacc"), eosio::contract("peeranha.main") ]] telegram_account {
   eosio::name user;
@@ -22,7 +16,7 @@ struct [[ eosio::table("telegramacc"), eosio::contract("peeranha.main") ]] teleg
       (user)(telegram_id)(confirmed))
 };
 
-const uint64_t scope_all_telegram_accounts = eosio::name("alltelegramacc").value;
+const uint64_t scope_all_telegram_accounts = eosio::name("alltelacc").value;
 typedef eosio::multi_index<"telegramacc"_n, telegram_account> telegram_account_index;
 // typedef eosio::multi_index<
 //     "telegramacc"_n, telegram_account

@@ -25,11 +25,15 @@ void peeranha::postquestion(eosio::name user, uint16_t community_id,
   post_question(user, community_id, tags, title, ipfs_link, type);
 }
 
-void peeranha::telpostqston(eosio::name bot, eosio::name user, uint16_t community_id,
+void peeranha::telpostqstn(eosio::name bot, int id_chat, uint16_t community_id,
                             std::vector<uint32_t> tags, std::string title,
                             IpfsHash ipfs_link, const uint8_t type) {
   require_auth(bot);
-  post_question(user, community_id, tags, title, ipfs_link, type);
+
+  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
+  auto iter_telegram_account = telegram_account_table.find(id_chat);
+  eosio::check(iter_telegram_account != telegram_account_table.end(), "telegram account not found");
+  post_question(iter_telegram_account->user, community_id, tags, title, ipfs_link, type);
 }
 
 void peeranha::postanswer(eosio::name user, uint64_t question_id,
@@ -382,7 +386,7 @@ void peeranha::init() {
 
 EOSIO_DISPATCH(
     peeranha,
-    (registeracc)(setaccprof)(postquestion)(telpostqston)(postanswer)(postcomment)(
+    (registeracc)(setaccprof)(postquestion)(telpostqstn)(postanswer)(postcomment)(
         delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(modcomment)(
         upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(

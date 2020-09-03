@@ -18,9 +18,3 @@ struct [[ eosio::table("telegramacc"), eosio::contract("peeranha.main") ]] teleg
 
 const uint64_t scope_all_telegram_accounts = eosio::name("alltelacc").value;
 typedef eosio::multi_index<"telegramacc"_n, telegram_account> telegram_account_index;
-// typedef eosio::multi_index<
-//     "telegramacc"_n, telegram_account
-//     ,
-//     eosio::indexed_by<"tel"_n, eosio::const_mem_fun<telegram_account, uint64_t,
-//                                                       &telegram_account::telegram_rkey>>
-//     > telegram_account_index;

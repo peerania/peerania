@@ -4,7 +4,7 @@
 
 #if STAGE == 1
 int PERIOD_LENGTH = 7200;               // 2 hours
-time START_PERIOD_TIME = 1583020800UL;  // Wed, 15 Jan 2020 00:00:00
+time START_PERIOD_TIME = 1598953801UL;  // Wed, September 1, 2020 12:50:01 PM GMT+03:00 DST
 #elif STAGE == 2
 int PERIOD_LENGTH = 3;          // 3 sec
 

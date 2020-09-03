@@ -206,14 +206,14 @@ void peeranha::movequestion(eosio::name user, uint16_t community_id, uint64_t qu
   move_top_question(user,  community_id, question_id, new_position);
 }
 
-void peeranha::intallaccach() {
-  require_auth(_self);
-  init_all_accounts_achievements();
-}
-
 void peeranha::upaccach(eosio::name user, uint32_t achievement_id) {
   require_auth(_self);
   update_account_achievement(user, achievement_id);
+}
+
+void peeranha::intallaccach() {
+  require_auth(_self);
+  init_all_accounts_achievements();
 }
 
 void peeranha::intachregist() {

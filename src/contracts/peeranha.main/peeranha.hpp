@@ -140,6 +140,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     // Action give moderator flags
     ACTION givemoderflg(eosio::name user, int flags);
     
+    // Action give community moderator flags
     ACTION givecommuflg(eosio::name user, int flags, uint16_t community_id);
 
     ACTION setcommipfs(uint16_t community_id,
@@ -160,11 +161,11 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     
     ACTION movequestion(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t new_position);
 
-    //init all accounts achievements
-    ACTION intallaccach();
-
     //update account achievement
     ACTION upaccach(eosio::name user, uint32_t achievement_id);
+    
+    //init all accounts achievements
+    ACTION intallaccach();
 
     //init_achievements_first_10k_registered_users
     ACTION intachregist();

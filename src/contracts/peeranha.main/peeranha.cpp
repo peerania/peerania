@@ -166,14 +166,9 @@ void peeranha::givecommuflg(eosio::name user, int flags, uint16_t community_id) 
   give_moderator_flag(user, flags, community_id);
 }
 
-void peeranha::setcommipfs(uint16_t community_id, IpfsHash new_ipfs_link) {
+void peeranha::editcomm(uint16_t community_id, std::string new_name, IpfsHash new_ipfs_link) {
   require_auth(_self);
-  set_community_ipfs_hash(community_id, new_ipfs_link);
-}
-
-void peeranha::setcommname(uint16_t community_id, std::string new_name) {
-  require_auth(_self);
-  set_community_name(community_id, new_name);
+  edit_community(community_id, new_name, new_ipfs_link);
 }
 
 void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating){
@@ -397,7 +392,7 @@ EOSIO_DISPATCH(
         delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(modcomment)(
         upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
-        reportprof)(updateacc)(givemoderflg)(setcommipfs)(chgqsttype)(setcommname)
+        reportprof)(updateacc)(givemoderflg)(editcomm)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
         (intallaccach)(upaccach)(intachregist)(intachrating)
 

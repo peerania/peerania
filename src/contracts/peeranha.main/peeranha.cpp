@@ -4,6 +4,8 @@
 #include "peeranha_forum.cpp"
 #include "peeranha_vote.cpp"
 #include "peeranha_top_question.cpp"
+#include "peeranha_account_achievements.cpp"
+#include "squeezed_achievement.cpp"
 
 void peeranha::registeracc(eosio::name user, std::string display_name,
                            IpfsHash ipfs_profile, IpfsHash ipfs_avatar) {
@@ -199,6 +201,26 @@ void peeranha::movequestion(eosio::name user, uint16_t community_id, uint64_t qu
   move_top_question(user,  community_id, question_id, new_position);
 }
 
+void peeranha::upaccach(eosio::name user, uint32_t achievement_id) {
+  require_auth(_self);
+  update_account_achievement(user, achievement_id);
+}
+
+void peeranha::intallaccach() {
+  require_auth(_self);
+  init_all_accounts_achievements();
+}
+
+void peeranha::intachregist() {
+  require_auth(_self);
+  init_achievements_first_10k_registered_users();
+}
+
+void peeranha::intachrating() {
+  require_auth(_self);
+  init_achievements_rating();
+}
+
 #ifdef SUPERFLUOUS_INDEX
 void peeranha::freeindex(int size) {
   require_auth(_self);
@@ -246,10 +268,10 @@ void peeranha::resettables() {
       iter_period_rating = period_rating_table.erase(iter_period_rating);
     }
 
-    top_question_index top_question_table(_self, scope_all_top_questions);
-    auto iter_top_question = top_question_table.begin();
-    while (iter_top_question != top_question_table.end()) {
-      iter_top_question = top_question_table.erase(iter_top_question);
+    account_achievements_index account_achievements_table(_self, iter_account->user.value);
+    auto iter_account_achievements = account_achievements_table.begin();
+    while (iter_account_achievements != account_achievements_table.end()) {
+      iter_account_achievements = account_achievements_table.erase(iter_account_achievements);
     }
 #ifdef SUPERFLUOUS_INDEX
     // clean user_questions table
@@ -268,6 +290,18 @@ void peeranha::resettables() {
 #endif
     // remove user
     iter_account = account_table.erase(iter_account);
+  }
+
+  squeezed_achievement_index squeezed_achievement_table(_self, scope_all_squeezed_achievements);
+  auto iter_squeezed_achievement = squeezed_achievement_table.begin();
+  while (iter_squeezed_achievement != squeezed_achievement_table.end()) {
+    iter_squeezed_achievement = squeezed_achievement_table.erase(iter_squeezed_achievement);
+  }
+
+  top_question_index top_question_table(_self, scope_all_top_questions);
+  auto iter_top_question = top_question_table.begin();
+  while (iter_top_question != top_question_table.end()) {
+    iter_top_question = top_question_table.erase(iter_top_question);
   }
 
   // clean create community table
@@ -360,6 +394,7 @@ EOSIO_DISPATCH(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
         reportprof)(updateacc)(givemoderflg)(editcomm)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
+        (intallaccach)(upaccach)(intachregist)(intachrating)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

@@ -5,6 +5,8 @@
 #include "peeranha_vote.cpp"
 #include "peeranha_top_question.cpp"
 #include "telegram_account.cpp"
+#include "peeranha_account_achievements.cpp"
+#include "squeezed_achievement.cpp"
 
 void peeranha::registeracc(eosio::name user, std::string display_name,
                            IpfsHash ipfs_profile, IpfsHash ipfs_avatar) {
@@ -176,14 +178,9 @@ void peeranha::givecommuflg(eosio::name user, int flags, uint16_t community_id) 
   give_moderator_flag(user, flags, community_id);
 }
 
-void peeranha::setcommipfs(uint16_t community_id, IpfsHash new_ipfs_link) {
+void peeranha::editcomm(uint16_t community_id, std::string new_name, IpfsHash new_ipfs_link) {
   require_auth(_self);
-  set_community_ipfs_hash(community_id, new_ipfs_link);
-}
-
-void peeranha::setcommname(uint16_t community_id, std::string new_name) {
-  require_auth(_self);
-  set_community_name(community_id, new_name);
+  edit_community(community_id, new_name, new_ipfs_link);
 }
 
 void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating){
@@ -216,6 +213,7 @@ void peeranha::movequestion(eosio::name user, uint16_t community_id, uint64_t qu
   move_top_question(user,  community_id, question_id, new_position);
 }
 
+
 void peeranha:: apprvacc(eosio::name user) {
   require_auth(user);
   approve_account(user);
@@ -229,6 +227,25 @@ void peeranha:: dsapprvacc(eosio::name user) {
 void peeranha:: addtelacc(eosio::name bot_name, eosio::name user, int telegram_id) {
   require_auth(bot_name);
   add_telegram_account(user, telegram_id);
+
+void peeranha::upaccach(eosio::name user, uint32_t achievement_id) {
+  require_auth(_self);
+  update_account_achievement(user, achievement_id);
+}
+
+void peeranha::intallaccach() {
+  require_auth(_self);
+  init_all_accounts_achievements();
+}
+
+void peeranha::intachregist() {
+  require_auth(_self);
+  init_achievements_first_10k_registered_users();
+}
+
+void peeranha::intachrating() {
+  require_auth(_self);
+  init_achievements_rating();
 }
 
 #ifdef SUPERFLUOUS_INDEX
@@ -278,10 +295,10 @@ void peeranha::resettables() {
       iter_period_rating = period_rating_table.erase(iter_period_rating);
     }
 
-    top_question_index top_question_table(_self, scope_all_top_questions);
-    auto iter_top_question = top_question_table.begin();
-    while (iter_top_question != top_question_table.end()) {
-      iter_top_question = top_question_table.erase(iter_top_question);
+    account_achievements_index account_achievements_table(_self, iter_account->user.value);
+    auto iter_account_achievements = account_achievements_table.begin();
+    while (iter_account_achievements != account_achievements_table.end()) {
+      iter_account_achievements = account_achievements_table.erase(iter_account_achievements);
     }
 #ifdef SUPERFLUOUS_INDEX
     // clean user_questions table
@@ -300,6 +317,18 @@ void peeranha::resettables() {
 #endif
     // remove user
     iter_account = account_table.erase(iter_account);
+  }
+
+  squeezed_achievement_index squeezed_achievement_table(_self, scope_all_squeezed_achievements);
+  auto iter_squeezed_achievement = squeezed_achievement_table.begin();
+  while (iter_squeezed_achievement != squeezed_achievement_table.end()) {
+    iter_squeezed_achievement = squeezed_achievement_table.erase(iter_squeezed_achievement);
+  }
+
+  top_question_index top_question_table(_self, scope_all_top_questions);
+  auto iter_top_question = top_question_table.begin();
+  while (iter_top_question != top_question_table.end()) {
+    iter_top_question = top_question_table.erase(iter_top_question);
   }
 
   // clean create community table
@@ -390,9 +419,10 @@ EOSIO_DISPATCH(
         delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(modcomment)(
         upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
-        reportprof)(updateacc)(givemoderflg)(setcommipfs)(chgqsttype)(setcommname)
+        reportprof)(updateacc)(givemoderflg)(editcomm)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
         (apprvacc)(dsapprvacc)(addtelacc)
+        (intallaccach)(upaccach)(intachregist)(intachrating)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

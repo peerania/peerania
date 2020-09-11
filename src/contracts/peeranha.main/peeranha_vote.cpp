@@ -64,6 +64,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
   // If this flag == true the question will erased
   bool delete_question = false;
   bool delete_answer = false;
+  bool change_rating = false;
 
   auto vote_question_res = VoteItem::question;
   auto vote_answer_res = VoteItem::answer;
@@ -79,7 +80,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
       iter_question, _self,
       [community_id ,&iter_account, answer_id, comment_id, &delete_question,
        &user_rating_change, &item_user, &delete_answer,
-       &snitch_reduce_energy_value, vote_question_res,
+       &snitch_reduce_energy_value, &change_rating, vote_question_res,
        vote_answer_res](auto &question) {
         if (apply_to_question(answer_id)) {
           if (apply_to_answer(comment_id)) {
@@ -117,7 +118,13 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
             // Get for mark as correct
             item_user = iter_answer->user;
             if (question.correct_answer_id == iter_answer->id) {
-              user_rating_change -= ANSWER_ACCEPTED_AS_CORRECT_REWARD;
+              int rating_correct_answer = vote_answer_res.correct_answer;
+              
+              if (iter_answer->user == question.user) {
+                rating_correct_answer = 0;
+                change_rating = true;
+              }
+              user_rating_change -= rating_correct_answer;
               question.correct_answer_id = EMPTY_ANSWER_ID;
             }
             user_rating_change -= upvote_count(iter_answer->history) *
@@ -146,7 +153,10 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
     is_correct_answer_deleted =
         iter_question->correct_answer_id != old_correct_answer_id;
     if (is_correct_answer_deleted) {
-      update_rating(iter_question->user, -ACCEPT_ANSWER_AS_CORRECT_REWARD);
+      int rating_correct_answer = vote_question_res.correct_answer;
+      if (change_rating)
+          rating_correct_answer = 0;
+      update_rating(iter_question->user, -rating_correct_answer);
     }
     update_community_statistics(iter_question->community_id, 0, -1,
                                 is_correct_answer_deleted ? -1 : 0, 0);
@@ -161,8 +171,14 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
 #ifdef SUPERFLUOUS_INDEX
     remove_user_question(iter_question->user, iter_question->id);
 #endif
-    if (iter_question->correct_answer_id != EMPTY_ANSWER_ID)
-      user_rating_change -= ACCEPT_ANSWER_AS_CORRECT_REWARD;
+    if (iter_question->correct_answer_id != EMPTY_ANSWER_ID) {
+
+      int rating_correct_answer = vote_question_res.correct_answer;
+      auto iter_answer = binary_find(iter_question->answers.begin(), iter_question->answers.end(), iter_question->correct_answer_id);
+      if (iter_answer->user == iter_question->user )
+        rating_correct_answer = 0;
+      user_rating_change -= rating_correct_answer;
+    }
     for (auto answer = iter_question->answers.begin();
          answer != iter_question->answers.end(); answer++) {
       int rating_change = 0;
@@ -170,14 +186,20 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
           upvote_count(answer->history) * vote_answer_res.upvoted_reward;
       bool is_correct_answer = false;
       if (answer->id == iter_question->correct_answer_id) {
-        rating_change -= ANSWER_ACCEPTED_AS_CORRECT_REWARD;
+        int rating_correct_answer = vote_answer_res.correct_answer;
+        if (answer->user == iter_question->user )
+          rating_correct_answer = 0;
+        rating_change -= rating_correct_answer;   
         is_correct_answer = true;
       }
+      
       update_rating(answer->user, rating_change,
                     [is_correct_answer](auto &account) {
                       account.answers_given -= 1;
                       if (is_correct_answer) account.correct_answers -= 1;
                     });
+      update_account_achievement(answer->user, ANSWER_GIVEN);
+      update_account_achievement(answer->user, CORRECT_ANSWER);
 #ifdef SUPERFLUOUS_INDEX
       remove_user_answer(answer->user, iter_question->id);
 #endif
@@ -202,4 +224,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
   update_rating(iter_account, [snitch_reduce_energy_value](auto &account) {
     account.reduce_energy(snitch_reduce_energy_value);
   });
+  update_account_achievement(item_user, QUESTION_ASKED);
+  update_account_achievement(item_user, ANSWER_GIVEN);
+  update_account_achievement(item_user, CORRECT_ANSWER);
 }

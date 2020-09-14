@@ -60,7 +60,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                         IpfsHash ipfs_link, uint8_t type);
 
     // Telegram post question
-    ACTION telpostqstn(eosio::name bot, int id_chat, uint16_t community_id,
+    ACTION telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t community_id,
                         std::vector<uint32_t> tags, std::string title,
                         IpfsHash ipfs_link, uint8_t type);
 
@@ -167,7 +167,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     ACTION dsapprvacc(eosio::name user);
 
-    ACTION addtelacc(eosio::name bot_name, eosio::name user, int telegram_id);
+    ACTION addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id);
 
     //update account achievement
     ACTION upaccach(eosio::name user, uint32_t achievement_id);
@@ -353,7 +353,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void disapprove_account(eosio::name user);
 
-    void add_telegram_account(eosio::name user, int telegram_id);
+    void add_telegram_account(eosio::name user, uint64_t telegram_id);
 
     void init_all_accounts_achievements();
 

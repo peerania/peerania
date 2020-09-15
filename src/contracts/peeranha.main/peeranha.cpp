@@ -389,7 +389,7 @@ void peeranha::resettables() {
     iter_global_stat = global_stat_table.erase(iter_global_stat);
   }
 
-  clean create tellos account table
+  //clean create tellos account table
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
   auto iter_user = telegram_account_table.begin();
   while (iter_user != telegram_account_table.end()) {

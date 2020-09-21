@@ -29,6 +29,8 @@
 #define PROPERTY_LAST_MODIFIED 3
 #define PROPERTY_QUESTION_TYPE 4
 #define PROPERTY_OFFICIAL_ANSWER 10
+#define PROPERTY_ANSWER_15_MINUTES 12   //(12 - achive id)
+#define PROPERTY_FIRST_ANSWER 13        //(13 - achive id)
 
 #define MAX_QUESTION_ID 0xfffffffffULL
 

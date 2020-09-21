@@ -9,11 +9,13 @@ void peeranha::vote_forum_item(eosio::name user, uint64_t question_id,
   int8_t target_user_rating_change;
   int8_t caller_rating_change;
   int8_t energy;
+  int8_t within_15_minutes = 0;
+  int8_t first_answer = 0;
   question_table.modify(
       iter_question, _self,
       [answer_id, is_upvote, iter_account, &target_user,
        &target_user_rating_change, &caller_rating_change,
-       &energy](auto &question) {
+       &energy, &within_15_minutes, &first_answer](auto &question) {
         auto vote_question_res = VoteItem::question;
         auto vote_answer_res = VoteItem::answer;
         switch (get_property_d(question.properties, PROPERTY_QUESTION_TYPE,
@@ -44,11 +46,38 @@ void peeranha::vote_forum_item(eosio::name user, uint64_t question_id,
             downvote_item(*iter_answer, iter_account, energy,
                           caller_rating_change, target_user_rating_change,
                           vote_answer_res);
+        
+          auto within_15_minutes_property = get_property_d(iter_answer->properties, PROPERTY_ANSWER_15_MINUTES, -2);
+          if (iter_answer->rating >= 0 && within_15_minutes_property == 0) {
+            target_user_rating_change += vote_answer_res.upvoted_reward;
+            set_property(iter_answer->properties, PROPERTY_ANSWER_15_MINUTES, 1);
+            within_15_minutes = 1;
+          } else if (iter_answer->rating <= -1 && within_15_minutes_property == 1) {
+            target_user_rating_change -= vote_answer_res.upvoted_reward;
+            set_property(iter_answer->properties, PROPERTY_ANSWER_15_MINUTES, 0);
+            within_15_minutes = -1;
+          }
+
+          auto firs_answer_property = get_property_d(iter_answer->properties, PROPERTY_FIRST_ANSWER, -2);
+          if (iter_answer->rating >= 0 && firs_answer_property == 0) {
+            target_user_rating_change += vote_answer_res.upvoted_reward;
+            set_property(iter_answer->properties, PROPERTY_FIRST_ANSWER, 1);
+            first_answer = 1;
+          } else if (iter_answer->rating <= -1 && firs_answer_property == 1) {
+            target_user_rating_change -= vote_answer_res.upvoted_reward;
+            set_property(iter_answer->properties, PROPERTY_FIRST_ANSWER, 0);
+            first_answer = -1;
+          }
         }
       });
+
   update_rating(iter_account, caller_rating_change,
                 [energy](auto &account) { account.reduce_energy(energy); });
   update_rating(target_user, target_user_rating_change);
+  if(within_15_minutes)
+    update_achievement(target_user, ANSWER_15_MINUTES, within_15_minutes, false);
+  if(first_answer)
+    update_achievement(target_user, FIRST_ANSWER, first_answer, false);
 }
 
 void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
@@ -65,6 +94,8 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
   bool delete_question = false;
   bool delete_answer = false;
   bool change_rating = false;
+  bool within_15_minutes = false;
+  bool first_answer = false;
 
   auto vote_question_res = VoteItem::question;
   auto vote_answer_res = VoteItem::answer;
@@ -81,7 +112,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
       [community_id ,&iter_account, answer_id, comment_id, &delete_question,
        &user_rating_change, &item_user, &delete_answer,
        &snitch_reduce_energy_value, &change_rating, vote_question_res,
-       vote_answer_res](auto &question) {
+       vote_answer_res, &within_15_minutes, &first_answer](auto &question) {
         if (apply_to_question(answer_id)) {
           if (apply_to_answer(comment_id)) {
             // Delete question
@@ -130,6 +161,18 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
             user_rating_change -= upvote_count(iter_answer->history) *
                                   vote_answer_res.upvoted_reward;
             user_rating_change += ANSWER_DELETED_REWARD;
+
+            auto within_15_minutes_property = get_property_d(iter_answer->properties, PROPERTY_ANSWER_15_MINUTES, -1);
+            if (within_15_minutes_property == 1) {
+              user_rating_change -= vote_answer_res.upvoted_reward;
+              within_15_minutes = true;
+            }
+            auto first_answer_property = get_property_d(iter_answer->properties, PROPERTY_FIRST_ANSWER, -1);
+            if (first_answer_property == 1) {
+              user_rating_change -= vote_answer_res.upvoted_reward;
+              first_answer = true;
+            }
+
             question.answers.erase(iter_answer);
             delete_answer = true;
           }
@@ -192,6 +235,17 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
         rating_change -= rating_correct_answer;   
         is_correct_answer = true;
       }
+
+      auto within_15_minutes_user = get_property_d(answer->properties, PROPERTY_ANSWER_15_MINUTES, -1);
+      if (within_15_minutes_user == 1) {
+        rating_change -= vote_answer_res.upvoted_reward;
+        update_achievement(answer->user, ANSWER_15_MINUTES, -1, false);
+      }
+      auto first_answer_property = get_property_d(answer->properties, PROPERTY_FIRST_ANSWER, -1);
+      if (first_answer_property == 1) {
+        rating_change -= vote_answer_res.upvoted_reward;
+        update_achievement(answer->user, FIRST_ANSWER, -1, false);
+      }
       
       update_rating(answer->user, rating_change,
                     [is_correct_answer](auto &account) {
@@ -209,7 +263,7 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
                  "Address not erased properly");
   }
   // user_rating_change = 0 also means that item_user was not found
-  if (item_user.value != 0)
+  if (item_user.value != 0) {
     update_rating(item_user, user_rating_change,
                   [delete_question, delete_answer,
                    is_correct_answer_deleted](auto &account) {
@@ -221,6 +275,13 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
                         account.correct_answers -= 1;
                     }
                   });
+    if (within_15_minutes) {
+      update_achievement(item_user, ANSWER_15_MINUTES, -1, false);
+    }
+    if (first_answer) {
+      update_achievement(item_user, FIRST_ANSWER, -1, false);
+    }
+  }
   update_rating(iter_account, [snitch_reduce_energy_value](auto &account) {
     account.reduce_energy(snitch_reduce_energy_value);
   });

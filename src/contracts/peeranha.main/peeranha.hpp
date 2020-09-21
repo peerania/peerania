@@ -67,6 +67,10 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     // Post answer(answer question)
     ACTION postanswer(eosio::name user, uint64_t question_id,
                       IpfsHash ipfs_link, uint8_t official_answer);
+    
+    // Telegram post answer(answer question)
+    ACTION telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t question_id,
+                          IpfsHash ipfs_link, uint8_t official_answer);
 
     // Post comment
     // If the answer_id set to 0 comment question, otherwise comment question

@@ -263,7 +263,7 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
         self.var['alice_energy'] -= self.defs['ENERGY_DELETE_COMMENT']
         self.action('delanswer', {
                     'user': 'carol', 'question_id': self.var['bq'], 'answer_id': self.var['bq_ca']}, carol, "Delete Bob question->Carol answer")
-        self.var['carol_rating'] += self.defs['DELETE_OWN_ANSWER_REWARD']
+        self.var['carol_rating'] += self.defs['DELETE_OWN_ANSWER_REWARD'] - 2 * self.defs['COMMON_ANSWER_UPVOTED_REWARD']
         self.var['carol_energy'] -= self.defs['ENERGY_DELETE_ANSWER']
         self.action('delquestion', {
                     'user': 'bob', 'question_id': self.var['bq']}, bob, "Delete Bob question")
@@ -366,7 +366,7 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
         self.action('reportforum', {
                     'user': 'ted', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba'], 'comment_id': 0}, ted, "Ted report alice question->bob answer")
         self.var['ted_energy'] -= self.defs['ENERGY_REPORT_ANSWER']
-        self.var['bob_rating'] = bob_old_rt + \
+        self.var['bob_rating'] = bob_old_rt - 2 * self.defs['COMMON_ANSWER_UPVOTED_REWARD'] +\
             self.defs['ANSWER_DELETED_REWARD']
         self._verify_acc()
         end()

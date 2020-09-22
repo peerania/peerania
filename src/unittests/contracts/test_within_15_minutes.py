@@ -9,42 +9,6 @@ MODERATOR_FLG_ALL = 31
 economy = load_defines('./src/contracts/peeranha.main/economy.h')
 
 class TestWithin15Minutes(peeranhatest.peeranhaTest):  
-    def test_post_question_and_answers(self):
-        begin('test post question and answers (first answer + answer within_15_minutes)')
-        alice = self.register_alice_account()
-        bob = self.register_bob_account()
-        carol = self.register_carol_account()
-        var = self._create_basic_hierarchy(alice, bob, carol)
-
-        # self.action('upvote', {
-        #             'user': 'carol', 'question_id': var['aq'], 'answer_id': 1}, carol, 'Alice upvote for Alice question->Bob answer rating')
-        # self.action('upvote', {
-        #             'user': 'carol', 'question_id': var['aq'], 'answer_id': 2}, carol, 'Carol upvote for Alice question->Bob answer rating')
-        
-
-        # t = self.table('question', 'allquestions')
-        # print(t)
-        # print('-----------------------------------------------------')
-
-        # self.action('delanswer', {'user': 'alice', 'question_id': var['aq'], 'answer_id': 1}, alice, 'Delete Alice answer to Alice question')
-        # self.action('delanswer', {'user': 'bob', 'question_id': var['aq'], 'answer_id': 2}, bob, 'Delete Alice answer to Alice question')
-        
-        # self.action('reportforum', {'user': 'ted', 'question_id': var['aq'], 'answer_id': 1, 'comment_id': 0},
-        #             ted, 'Bob vote for Alice question deletion')
-        # self.action('reportforum', {'user': 'ted', 'question_id': var['aq'], 'answer_id': 2, 'comment_id': 0},
-        #             ted, 'Bob vote for Alice question deletion')
-
-        # self.action('reportforum', {'user': 'ted', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0},
-        #             ted, 'Bob vote for Alice question deletion')
-
-
-        # t = self.table('question', 'allquestions')[
-        #     0]['answers'][0]['id']
-        # print(t)    
-        # print("-------------------------------")
-        # print(self.table('account', 'allaccounts')) 
-        end()
-
     def test_delete_answers(self):
         begin('test delete answers (first answer + answer within_15_minutes)')
         alice = self.register_alice_account()
@@ -107,7 +71,6 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
         self.action('downvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': 2}, carol, 'Carol downvote for Bob question->Bob answer rating')
         
-        print(self.table('account', 'allaccounts'))
         example_rating = [{'user': 'alice', 'rating': 198}, {'user': 'bob', 'rating': 198}, {'user': 'carol', 'rating': 198}]
         self.assertTrue(compare(example_rating, self.table('account', 'allaccounts'), ignore_excess=True))
 
@@ -128,7 +91,6 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
         self.action('downvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': 2}, carol, 'Carol downvote for Bob question->Bob answer rating')
         
-        print(self.table('account', 'allaccounts'))
         example_rating = [{'user': 'alice', 'rating': 198}, {'user': 'bob', 'rating': 198}, {'user': 'carol', 'rating': 198}]
         self.assertTrue(compare(example_rating, self.table('account', 'allaccounts'), ignore_excess=True))
         example_question = [{'id': '68719476735', 'user': 'carol', 'answers': [{'id': 1, 'user': 'alice', 'properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]}, {'id': 2, 'user': 'bob', 'properties': []}]}]
@@ -139,7 +101,6 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
         self.action('upvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': 2}, carol, 'Carol upvote for Bob question->Bob answer rating')
         
-        print(self.table('account', 'allaccounts'))
         example_rating = [{'user': 'alice', 'rating': 230}, {'user': 'bob', 'rating': 210}, {'user': 'carol', 'rating': 200}]
         self.assertTrue(compare(example_rating, self.table('account', 'allaccounts'), ignore_excess=True))
 
@@ -159,17 +120,14 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
         self.action('upvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': 2}, carol, 'Carol upvote for Bob question->Bob answer rating')
         
-        print(self.table('account', 'allaccounts'))
         example_rating = [{'user': 'alice', 'rating': 230}, {'user': 'bob', 'rating': 210}, {'user': 'carol', 'rating': 200}]
         self.assertTrue(compare(example_rating, self.table('account', 'allaccounts'), ignore_excess=True))
-        
         
         self.action('downvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': 1}, carol, 'Carol downvote for Alice question->Bob answer rating')
         self.action('downvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': 2}, carol, 'Carol downvote for Bob question->Bob answer rating')
         
-        print(self.table('account', 'allaccounts'))
         example_rating = [{'user': 'alice', 'rating': 198}, {'user': 'bob', 'rating': 198}, {'user': 'carol', 'rating': 198}]
 
         end()
@@ -199,11 +157,8 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
                     bob, '  `->Answer to alice from bob: "Bob answer to alice"')
         
         table_question = self.table('question', 'allquestions')
-        print(table_question)
         example_question = [{'id': '68719476735', 'user': 'carol', 'answers': [{'id': 1, 'user': 'alice', 'properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]}, {'id': 2, 'user': 'bob', 'properties': []}]}]
         self.assertTrue(compare(example_question, self.table('question', 'allquestions'), ignore_excess=True))
-        print("-----------------------------------------------")
-        print(self.table('account', 'allaccounts'))
         example_rating = [{'user': 'alice', 'rating': 220}, {'user': 'bob', 'rating': 200}, {'user': 'carol', 'rating': 200}]
         self.assertTrue(compare(example_rating, self.table('account', 'allaccounts'), ignore_excess=True))
         return var

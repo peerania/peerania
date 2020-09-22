@@ -59,7 +59,7 @@ class ForumAnswerTests(peeranhatest.peeranhaTest):
         setvar(q, var)
         t = self.table('question', 'allquestions')
         q[0]['answers'][0]['ipfs_link'] = 'updated IPFS'
-        q[0]['answers'][0]['properties'] = [{'key': 3, 'value': '#ignore'}]
+        q[0]['answers'][0]['properties'] = [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}, {'key': 3, 'value': '#ignore'}]
         self.assertTrue(compare(q, t, ignore_excess=True))
         end()
 

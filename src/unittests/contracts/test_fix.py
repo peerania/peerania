@@ -17,6 +17,8 @@ ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD = 1
 QUESTION_DELETED_REWARD = 2
 ANSWER_DELETED_REWARD = 2
 
+economy = load_defines('src/contracts/peeranha.main/economy.h')
+
 class TestFix(peeranhatest.peeranhaTest):  
     def test_delete_question(self):
         begin('test delete expert question with correct answer')
@@ -31,7 +33,8 @@ class TestFix(peeranhatest.peeranhaTest):
         alice_rating = self.table('account', 'allaccounts')[0]['rating']
         bob_rating = self.table('account', 'allaccounts')[1]['rating']
         self.assertTrue(compare(alice_rating, DEFAULT_RATING + ACCEPT_ANSWER_AS_CORRECT_REWARD, ignore_excess=True))
-        self.assertTrue(compare(bob_rating, DEFAULT_RATING + ANSWER_ACCEPTED_AS_CORRECT_REWARD, ignore_excess=True))
+        example_bob_rating = DEFAULT_RATING + ANSWER_ACCEPTED_AS_CORRECT_REWARD + economy['ANSWER_UPVOTED_REWARD'] + economy['ANSWER_UPVOTED_REWARD']
+        self.assertTrue(compare(bob_rating, example_bob_rating, ignore_excess=True))
 
         self.action('reportforum', {'user': 'ted', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0},
                     ted, 'Bob vote for Alice question deletion')
@@ -39,7 +42,8 @@ class TestFix(peeranhatest.peeranhaTest):
         newAliceRating = self.table('account', 'allaccounts')[0]['rating']
         newBobRating = self.table('account', 'allaccounts')[1]['rating']
         self.assertTrue(compare(newAliceRating, alice_rating - ACCEPT_ANSWER_AS_CORRECT_REWARD - QUESTION_DELETED_REWARD, ignore_excess=True))
-        self.assertTrue(compare(newBobRating, bob_rating - ANSWER_ACCEPTED_AS_CORRECT_REWARD, ignore_excess=True))
+        bob_rating -= (ANSWER_ACCEPTED_AS_CORRECT_REWARD +  economy['ANSWER_UPVOTED_REWARD'] + economy['ANSWER_UPVOTED_REWARD'])
+        self.assertTrue(compare(newBobRating, bob_rating, ignore_excess=True))
 
         end()
     
@@ -55,16 +59,18 @@ class TestFix(peeranhatest.peeranhaTest):
 
         alice_rating = self.table('account', 'allaccounts')[0]['rating']
         bob_rating = self.table('account', 'allaccounts')[1]['rating']
+        example_bob_rating = DEFAULT_RATING + COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD + economy['COMMON_ANSWER_UPVOTED_REWARD'] + economy['COMMON_ANSWER_UPVOTED_REWARD']
         self.assertTrue(compare(alice_rating, DEFAULT_RATING + ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD, ignore_excess=True))
-        self.assertTrue(compare(bob_rating, DEFAULT_RATING + COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD, ignore_excess=True))
+        self.assertTrue(compare(bob_rating, example_bob_rating, ignore_excess=True))
 
         self.action('reportforum', {'user': 'ted', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0},
                     ted, 'Bob vote for Alice question deletion')
         
         newAliceRating = self.table('account', 'allaccounts')[0]['rating']
         newBobRating = self.table('account', 'allaccounts')[1]['rating']
+        bob_rating -= (COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD +  economy['COMMON_ANSWER_UPVOTED_REWARD'] + economy['COMMON_ANSWER_UPVOTED_REWARD'])
         self.assertTrue(compare(newAliceRating, alice_rating - ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD - QUESTION_DELETED_REWARD, ignore_excess=True))
-        self.assertTrue(compare(newBobRating, bob_rating - COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD, ignore_excess=True))
+        self.assertTrue(compare(newBobRating, bob_rating, ignore_excess=True))
 
         end()
 
@@ -82,7 +88,8 @@ class TestFix(peeranhatest.peeranhaTest):
         alice_rating = self.table('account', 'allaccounts')[0]['rating']
         bob_rating = self.table('account', 'allaccounts')[1]['rating']
         self.assertTrue(compare(alice_rating, DEFAULT_RATING + ACCEPT_ANSWER_AS_CORRECT_REWARD, ignore_excess=True))
-        self.assertTrue(compare(bob_rating, DEFAULT_RATING + ANSWER_ACCEPTED_AS_CORRECT_REWARD, ignore_excess=True))
+        example_bob_rating = DEFAULT_RATING + ANSWER_ACCEPTED_AS_CORRECT_REWARD + economy['ANSWER_UPVOTED_REWARD'] + economy['ANSWER_UPVOTED_REWARD']
+        self.assertTrue(compare(bob_rating, example_bob_rating, ignore_excess=True))
 
         self.action('reportforum', {'user': 'ted', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0},
                     ted, 'Bob vote for Alice question deletion')
@@ -90,7 +97,8 @@ class TestFix(peeranhatest.peeranhaTest):
         newAliceRating = self.table('account', 'allaccounts')[0]['rating']
         newBobRating = self.table('account', 'allaccounts')[1]['rating']
         self.assertTrue(compare(newAliceRating, alice_rating - ACCEPT_ANSWER_AS_CORRECT_REWARD, ignore_excess=True))
-        self.assertTrue(compare(newBobRating, bob_rating - ANSWER_ACCEPTED_AS_CORRECT_REWARD - ANSWER_DELETED_REWARD, ignore_excess=True))
+        bob_rating -= (ANSWER_ACCEPTED_AS_CORRECT_REWARD + ANSWER_DELETED_REWARD +  economy['ANSWER_UPVOTED_REWARD'] + economy['ANSWER_UPVOTED_REWARD'])
+        self.assertTrue(compare(newBobRating, bob_rating, ignore_excess=True))
 
         end()
     
@@ -108,7 +116,8 @@ class TestFix(peeranhatest.peeranhaTest):
         alice_rating = self.table('account', 'allaccounts')[0]['rating']
         bob_rating = self.table('account', 'allaccounts')[1]['rating']
         self.assertTrue(compare(alice_rating, DEFAULT_RATING + ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD, ignore_excess=True))
-        self.assertTrue(compare(bob_rating, DEFAULT_RATING + COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD, ignore_excess=True))
+        example_bob_rating = DEFAULT_RATING + COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD + economy['COMMON_ANSWER_UPVOTED_REWARD'] + economy['COMMON_ANSWER_UPVOTED_REWARD']
+        self.assertTrue(compare(bob_rating, example_bob_rating, ignore_excess=True))
 
         self.action('reportforum', {'user': 'ted', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0},
                     ted, 'Bob vote for Alice question deletion')
@@ -116,7 +125,8 @@ class TestFix(peeranhatest.peeranhaTest):
         newAliceRating = self.table('account', 'allaccounts')[0]['rating']
         newBobRating = self.table('account', 'allaccounts')[1]['rating']
         self.assertTrue(compare(newAliceRating, alice_rating - ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD, ignore_excess=True))
-        self.assertTrue(compare(newBobRating, bob_rating - COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD - ANSWER_DELETED_REWARD, ignore_excess=True))
+        bob_rating -= (COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD + ANSWER_DELETED_REWARD +  economy['COMMON_ANSWER_UPVOTED_REWARD'] + economy['COMMON_ANSWER_UPVOTED_REWARD'])
+        self.assertTrue(compare(newBobRating, bob_rating, ignore_excess=True))
 
         end()
 
@@ -130,13 +140,15 @@ class TestFix(peeranhatest.peeranhaTest):
         self._give_moderator_flag(ted, MODERATOR_FLG_ALL)
 
         alice_rating = self.table('account', 'allaccounts')[0]['rating']
-        self.assertTrue(compare(alice_rating, DEFAULT_RATING, ignore_excess=True))
+        example_alice_rating = DEFAULT_RATING + economy['COMMON_ANSWER_UPVOTED_REWARD'] + economy['COMMON_ANSWER_UPVOTED_REWARD']
+        self.assertTrue(compare(alice_rating, example_alice_rating, ignore_excess=True))
        
         self.action('reportforum', {'user': 'ted', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0},
                     ted, 'Bob vote for Alice question deletion')
-
+        
         new_alice_rating = self.table('account', 'allaccounts')[0]['rating']
-        self.assertTrue(compare(new_alice_rating, alice_rating - ANSWER_DELETED_REWARD, ignore_excess=True))
+        alice_rating -= (ANSWER_DELETED_REWARD + economy['COMMON_ANSWER_UPVOTED_REWARD'] + economy['COMMON_ANSWER_UPVOTED_REWARD'])
+        self.assertTrue(compare(new_alice_rating, alice_rating, ignore_excess=True))
 
         end()
     
@@ -150,13 +162,15 @@ class TestFix(peeranhatest.peeranhaTest):
         self._give_moderator_flag(ted, MODERATOR_FLG_ALL)
 
         alice_rating = self.table('account', 'allaccounts')[0]['rating']
-        self.assertTrue(compare(alice_rating, DEFAULT_RATING, ignore_excess=True))
+        example_alice_rating = DEFAULT_RATING + economy['ANSWER_UPVOTED_REWARD'] + economy['ANSWER_UPVOTED_REWARD']
+        self.assertTrue(compare(alice_rating, example_alice_rating, ignore_excess=True))
        
         self.action('reportforum', {'user': 'ted', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0},
                     ted, 'Bob vote for Alice question deletion')
 
         new_alice_rating = self.table('account', 'allaccounts')[0]['rating']
-        self.assertTrue(compare(new_alice_rating, alice_rating - ANSWER_DELETED_REWARD, ignore_excess=True))
+        alice_rating -= (ANSWER_DELETED_REWARD + economy['ANSWER_UPVOTED_REWARD'] + economy['ANSWER_UPVOTED_REWARD'])
+        self.assertTrue(compare(new_alice_rating, alice_rating, ignore_excess=True))
 
         end()
 
@@ -170,13 +184,15 @@ class TestFix(peeranhatest.peeranhaTest):
         self._give_moderator_flag(ted, MODERATOR_FLG_ALL)
 
         alice_rating = self.table('account', 'allaccounts')[0]['rating']
-        self.assertTrue(compare(alice_rating, DEFAULT_RATING, ignore_excess=True))
+        example_alice_rating = DEFAULT_RATING + economy['COMMON_ANSWER_UPVOTED_REWARD'] + economy['COMMON_ANSWER_UPVOTED_REWARD']
+        self.assertTrue(compare(alice_rating, example_alice_rating, ignore_excess=True))
        
         self.action('reportforum', {'user': 'ted', 'question_id': var['aq'], 'answer_id': 0, 'comment_id': 0},
                     ted, 'Bob vote for Alice question deletion')
 
         new_alice_rating = self.table('account', 'allaccounts')[0]['rating']
-        self.assertTrue(compare(new_alice_rating, alice_rating - QUESTION_DELETED_REWARD, ignore_excess=True))
+        alice_rating -= (QUESTION_DELETED_REWARD + economy['COMMON_ANSWER_UPVOTED_REWARD'] + economy['COMMON_ANSWER_UPVOTED_REWARD'])
+        self.assertTrue(compare(new_alice_rating, alice_rating, ignore_excess=True))
 
         end()
     
@@ -190,13 +206,15 @@ class TestFix(peeranhatest.peeranhaTest):
         self._give_moderator_flag(ted, MODERATOR_FLG_ALL)
 
         alice_rating = self.table('account', 'allaccounts')[0]['rating']
-        self.assertTrue(compare(alice_rating, DEFAULT_RATING, ignore_excess=True))
+        example_alice_rating = DEFAULT_RATING + economy['ANSWER_UPVOTED_REWARD'] + economy['ANSWER_UPVOTED_REWARD']
+        self.assertTrue(compare(alice_rating, example_alice_rating, ignore_excess=True))
        
         self.action('reportforum', {'user': 'ted', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0},
                     ted, 'Bob vote for Alice question deletion')
 
         new_alice_rating = self.table('account', 'allaccounts')[0]['rating']
-        self.assertTrue(compare(new_alice_rating, alice_rating - QUESTION_DELETED_REWARD, ignore_excess=True))
+        alice_rating -= (QUESTION_DELETED_REWARD + economy['ANSWER_UPVOTED_REWARD'] + economy['ANSWER_UPVOTED_REWARD'])
+        self.assertTrue(compare(new_alice_rating, alice_rating, ignore_excess=True))
 
         end()
     

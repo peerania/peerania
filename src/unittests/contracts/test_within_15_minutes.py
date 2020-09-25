@@ -152,7 +152,7 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
         self.assertTrue(compare(e, t, var, True))
         self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'Alice answer to herself', 'official_answer': False},
                     alice, ' |-->Answer to alice from alice: "Alice answer to herself"')
-        self.wait(5)
+        self.wait(16)
         self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'Bob answer to alice', 'official_answer': False},
                     bob, '  `->Answer to alice from bob: "Bob answer to alice"')
         

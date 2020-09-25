@@ -217,7 +217,7 @@ class TestAchievents(peeranhatest.peeranhaTest):
         self.register_question_action(alice, 'Alice question ' + str(68719476735))
         self.action('postanswer', {'user': str(alice), 'question_id': 68719476735, 'ipfs_link': 'undefined', 'official_answer': False}, alice,
                     '{} answer to question with id={}: "{}"'.format(str(alice), 68719476735, 'Register Alice answer'))
-        self.wait(5)
+        self.wait(16)
         self.action('postanswer', {'user': str(bob), 'question_id': 68719476735, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
                     '{} answer to question with id={}: "{}"'.format(str(bob), 68719476735, 'Register Alice answer'))
 

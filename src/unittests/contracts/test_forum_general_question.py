@@ -212,7 +212,7 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
         self.var['ted_energy'] -= self.defs['ENERGY_UPVOTE_ANSWER']
         self.var['alice_rating'] += self.defs['DOWNVOTE_ANSWER_REWARD']
         self.var['alice_energy'] -= self.defs['ENERGY_DOWNVOTE_ANSWER']
-        self.var['carol_rating'] += self.defs['COMMON_ANSWER_DOWNVOTED_REWARD']
+        self.var['carol_rating'] += self.defs['COMMON_ANSWER_DOWNVOTED_REWARD'] - 2 * self.defs['COMMON_ANSWER_UPVOTED_REWARD']
         self.var['carol_energy'] -= self.defs['ENERGY_UPVOTE_ANSWER']
         self._verify_acc()
         self.wait()
@@ -225,14 +225,14 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
                     'user': 'carol', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba']}, carol, 'Carol change her upvote to downvote Alice question->Bob answer')
         self.var['carol_rating'] += self.defs['DOWNVOTE_ANSWER_REWARD']
         self.var['carol_energy'] -= self.defs['ENERGY_DOWNVOTE_ANSWER']
-        self.var['bob_rating'] += self.defs['COMMON_ANSWER_DOWNVOTED_REWARD'] - \
+        self.var['bob_rating'] += self.defs['COMMON_ANSWER_DOWNVOTED_REWARD'] - 2 * self.defs['COMMON_ANSWER_UPVOTED_REWARD'] -  \
             self.defs['COMMON_ANSWER_UPVOTED_REWARD']
         self._verify_acc()
         self.action('upvote', {
             'user': 'alice', 'question_id': self.var['bq'], 'answer_id': self.var['bq_ca']}, alice, 'Alice change her downvote to upvote Bob question->Carol answer')
         self.var['alice_rating'] -= self.defs['DOWNVOTE_ANSWER_REWARD']
         self.var['alice_energy'] -= self.defs['ENERGY_UPVOTE_ANSWER']
-        self.var['carol_rating'] += self.defs['COMMON_ANSWER_UPVOTED_REWARD'] - \
+        self.var['carol_rating'] += self.defs['COMMON_ANSWER_UPVOTED_REWARD'] + 2 * self.defs['COMMON_ANSWER_UPVOTED_REWARD'] - \
             self.defs['COMMON_ANSWER_DOWNVOTED_REWARD']
         self._verify_acc()
         self.wait()
@@ -240,7 +240,7 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
                     'user': 'carol', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba']}, carol, 'Carol remove downvote Alice question->Bob answer')
         self.var['carol_rating'] -= self.defs['DOWNVOTE_ANSWER_REWARD']
         self.var['carol_energy'] -= self.defs['ENERGY_FORUM_VOTE_CHANGE']
-        self.var['bob_rating'] -= self.defs['COMMON_ANSWER_DOWNVOTED_REWARD']
+        self.var['bob_rating'] -= self.defs['COMMON_ANSWER_DOWNVOTED_REWARD'] - 2 * self.defs['COMMON_ANSWER_UPVOTED_REWARD']
         self._verify_acc()
         info('Test history not empty')
         self.action('reportforum', {'user': 'bob', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ca'], 'comment_id': 0},
@@ -477,7 +477,7 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
         self.assertTrue(compare(self.account_e, self.table(
             'account', 'allaccounts'), buf_var, ignore_excess=True))
         for key, value in buf_var.items():
-            #print(key, self.var[key], value)
+            # print(key, self.var[key], value)
             self.assertTrue(self.var[key] == value)
 
     def get_stub_suggested_tags(self):

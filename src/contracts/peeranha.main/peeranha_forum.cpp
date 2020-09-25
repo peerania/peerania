@@ -57,7 +57,7 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
   eosio::check(
       none_of(iter_question->answers.begin(), iter_question->answers.end(),
               [user](const answer &a) { return a.user == user; }),
-      "Answer with this username alredy posted");
+      "Answer with this username already posted");
   answer new_answer;
   new_answer.user = user;
   new_answer.ipfs_link = ipfs_link;

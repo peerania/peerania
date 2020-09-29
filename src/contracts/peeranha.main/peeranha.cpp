@@ -32,13 +32,7 @@ void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t commu
                             IpfsHash ipfs_link, const uint8_t type) {
   require_auth(bot);
 
-  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
-  auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
-  auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);
-  eosio::check(iter_telegram_account_user_id != telegram_account_table_user_id.end(), "Telegram account not found"); // add text error
-  //validation confirmed
-  
-  post_question(iter_telegram_account_user_id->user, community_id, tags, title, ipfs_link, type);
+  telegram_post_question(telegram_id, community_id, tags, title, ipfs_link, type);
 }
 
 void peeranha::postanswer(eosio::name user, uint64_t question_id,
@@ -229,7 +223,7 @@ void peeranha:: dsapprvacc(eosio::name user) {
 
 void peeranha:: addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id) {
   require_auth(bot_name);
-  add_telegram_account(user, telegram_id);
+  add_telegram_account(user, telegram_id, false);
 }
 
 void peeranha::upaccach(eosio::name user, uint32_t achievement_id) {
@@ -389,11 +383,11 @@ void peeranha::resettables() {
     iter_global_stat = global_stat_table.erase(iter_global_stat);
   }
 
-  //clean create tellos account table
+  // clean create tellos account table
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
-  auto iter_user = telegram_account_table.begin();
-  while (iter_user != telegram_account_table.end()) {
-    iter_user = telegram_account_table.erase(iter_user);
+  auto iter_telegram_account = telegram_account_table.begin();
+  while (iter_telegram_account != telegram_account_table.end()) {
+    iter_telegram_account = telegram_account_table.erase(iter_telegram_account);
   }
 #if STAGE == 2
   // clean constants

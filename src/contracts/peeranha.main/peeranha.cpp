@@ -48,6 +48,20 @@ void peeranha::postanswer(eosio::name user, uint64_t question_id,
   post_answer(user, question_id, ipfs_link, buf_official_answer);
 }
 
+void peeranha::telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t question_id,
+                          IpfsHash ipfs_link, uint8_t official_answer) {
+  require_auth(bot);
+
+  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
+  auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
+  auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);
+  eosio::check(iter_telegram_account_user_id != telegram_account_table_user_id.end(), "Telegram account not found"); // add text error
+  //validation confirmed
+
+  bool buf_official_answer = official_answer;
+  post_answer(iter_telegram_account_user_id->user, question_id, ipfs_link, buf_official_answer);
+}
+
 void peeranha::postcomment(eosio::name user, uint64_t question_id,
                            uint16_t answer_id, IpfsHash ipfs_link) {
   require_auth(user);
@@ -389,11 +403,11 @@ void peeranha::resettables() {
     iter_global_stat = global_stat_table.erase(iter_global_stat);
   }
 
-  //clean create tellos account table
+  // clean create tellos account table
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
-  auto iter_user = telegram_account_table.begin();
-  while (iter_user != telegram_account_table.end()) {
-    iter_user = telegram_account_table.erase(iter_user);
+  auto iter_telegram_account = telegram_account_table.begin();
+  while (iter_telegram_account != telegram_account_table.end()) {
+    iter_telegram_account = telegram_account_table.erase(iter_telegram_account);
   }
 #if STAGE == 2
   // clean constants
@@ -426,7 +440,7 @@ void peeranha::init() {
 
 EOSIO_DISPATCH(
     peeranha,
-    (registeracc)(setaccprof)(postquestion)(telpostqstn)(postanswer)(postcomment)(
+    (registeracc)(setaccprof)(postquestion)(telpostqstn)(postanswer)(telpostansw)(postcomment)(
         delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(modcomment)(
         upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(

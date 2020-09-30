@@ -8,12 +8,12 @@ void peeranha::approve_account(eosio::name user) {
       iter_telegram_account, _self, [](auto &telegram_account) {
         telegram_account.confirmed = 1;
       });
-  // auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
-  // for(auto iter_telegram_account_user_id = telegram_account_table_user_id.begin(); iter_telegram_account_user_id != telegram_account_table_user_id.end(); ++iter_telegram_account_user_id) {
-  //   if (iter_telegram_account_user_id->confirmed == 2) {
-  //     swap_account(iter_telegram_account_user_id->telegram_id);
-  //   }
-  // }
+  auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
+  for(auto iter_telegram_account_user_id = telegram_account_table_user_id.begin(); iter_telegram_account_user_id != telegram_account_table_user_id.end(); ++iter_telegram_account_user_id) {
+    if (iter_telegram_account_user_id->confirmed == 2) {
+      swap_account(iter_telegram_account_user_id->telegram_id, iter_telegram_account_user_id->user,  user);
+    }
+  }
 }
 
 void peeranha::disapprove_account(eosio::name user) { 
@@ -57,11 +57,11 @@ void peeranha::telegram_post_question(uint64_t telegram_id, uint16_t community_i
     eosio::check(check, "Account not confirmed"); // add text error
     user = iter_telegram_account_user_id->user;
   } else {
-    std::string new_account = "TelegramAccount" + std::to_string(telegram_id);
+    std::string new_account = "testtelacc12";
     user = eosio::name(new_account);
-
     const IpfsHash ipfs_profile = {18, 146, 53, 121, 7, 101, 88, 171, 43, 255, 166, 154, 112, 155, 254, 238, 241, 197, 250, 5, 183, 51, 57, 127, 15, 44, 227, 202, 75, 179, 99, 224, 50};
     const IpfsHash ipfs_avatar = {18, 254, 86, 251, 60, 165, 231, 126, 138, 64, 117, 29, 190, 91, 185, 94, 90, 25, 235, 76, 6, 26, 74, 178, 119, 211, 158, 57, 68, 171, 203, 116, 79};
+    
     register_account(user, new_account, ipfs_avatar, ipfs_avatar);
     add_telegram_account(user, telegram_id, true);
   }
@@ -69,6 +69,39 @@ void peeranha::telegram_post_question(uint64_t telegram_id, uint16_t community_i
   post_question(user, community_id, tags, title, ipfs_link, type);
 }
 
-// void peeranha::swap_account(int telegram_id) {
+void peeranha::swap_account(int telegram_id, eosio::name old_user, eosio::name new_user) {
+  auto iter_new_account = find_account(new_user);
+  auto iter_old_account = find_account(old_user);
 
-// }
+  account_table.modify(iter_new_account, _self,
+                       [&iter_old_account](auto &account) {
+                          account.rating += iter_old_account->rating - RATING_ON_CREATE;
+                          account.pay_out_rating += iter_old_account->pay_out_rating - RATING_ON_CREATE;
+                          account.report_power += iter_old_account->report_power;
+                          account.questions_asked += iter_old_account->questions_asked;
+                          account.answers_given += iter_old_account->answers_given;
+                          account.correct_answers += iter_old_account->correct_answers;
+                       });
+  update_achievement_rating(iter_new_account->user);
+
+  user_questions_index new_user_questions_table(_self, new_user.value);   //move table usranswers
+  user_questions_index old_user_questions_table(_self, old_user.value);
+  auto iter_old_user_questions = old_user_questions_table.begin();
+  while (iter_old_user_questions != old_user_questions_table.end()) {
+    new_user_questions_table.emplace(_self, [&iter_old_user_questions](auto &usr_question) {
+      usr_question.question_id = iter_old_user_questions->question_id;
+    });
+    iter_old_user_questions = old_user_questions_table.erase(iter_old_user_questions);
+  }
+
+  user_answers_index new_user_answer_table(_self, new_user.value);        //move table usrquestions
+  user_answers_index old_user_answer_table(_self, old_user.value);
+  auto iter_old_user_answer = old_user_answer_table.begin();
+  while (iter_old_user_answer != old_user_answer_table.end()) {
+    new_user_answer_table.emplace(_self, [&iter_old_user_answer](auto &usr_question) {
+      usr_question.question_id = iter_old_user_answer->question_id;
+      usr_question.answer_id = iter_old_user_answer->answer_id;
+    });
+    iter_old_user_answer = old_user_answer_table.erase(iter_old_user_answer);
+  }
+}

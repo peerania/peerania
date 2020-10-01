@@ -44,9 +44,7 @@ void peeranha::add_telegram_account(eosio::name user, uint64_t telegram_id, bool
     });
 }
 
-void peeranha::telegram_post_question(uint64_t telegram_id, uint16_t community_id,
-                            std::vector<uint32_t> tags, std::string title,
-                            IpfsHash ipfs_link, const uint8_t type) {
+eosio::name peeranha::telegram_post_action(uint64_t telegram_id) {
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
   auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
   auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);
@@ -76,14 +74,14 @@ void peeranha::telegram_post_question(uint64_t telegram_id, uint16_t community_i
       user = eosio::name(new_account); 
     }
     while (account_table.find(user.value) != account_table.end());
-    const IpfsHash ipfs_profile = {18, 146, 53, 121, 7, 101, 88, 171, 43, 255, 166, 154, 112, 155, 254, 238, 241, 197, 250, 5, 183, 51, 57, 127, 15, 44, 227, 202, 75, 179, 99, 224, 50};
+
+    const IpfsHash ipfs_profile = {18, 21, 41, 48, 206, 7, 112, 26, 240, 22, 223, 152, 83, 96, 40, 147, 2, 199, 145, 178, 251, 113, 97, 75, 177, 53, 51, 161, 9, 80, 42, 108, 151};
     const IpfsHash ipfs_avatar = {18, 254, 86, 251, 60, 165, 231, 126, 138, 64, 117, 29, 190, 91, 185, 94, 90, 25, 235, 76, 6, 26, 74, 178, 119, 211, 158, 57, 68, 171, 203, 116, 79};
     
     register_account(user, new_account, ipfs_avatar, ipfs_avatar);
     add_telegram_account(user, telegram_id, true);
   }
-  
-  post_question(user, community_id, tags, title, ipfs_link, type);
+  return user;
 }
 
 void peeranha::swap_account(int telegram_id, eosio::name old_user, eosio::name new_user) {

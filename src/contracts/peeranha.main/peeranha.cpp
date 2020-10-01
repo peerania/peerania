@@ -31,7 +31,8 @@ void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t commu
                             std::vector<uint32_t> tags, std::string title,
                             IpfsHash ipfs_link, const uint8_t type) {
   require_auth(bot);
-  telegram_post_question(telegram_id, community_id, tags, title, ipfs_link, type);
+  eosio::name user = telegram_post_action(telegram_id);
+  post_question(user, community_id, tags, title, ipfs_link, type);
 }
 
 void peeranha::postanswer(eosio::name user, uint64_t question_id,
@@ -45,14 +46,11 @@ void peeranha::telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t quest
                           IpfsHash ipfs_link, uint8_t official_answer) {
   require_auth(bot);
 
-  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
-  auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
-  auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);
-  eosio::check(iter_telegram_account_user_id != telegram_account_table_user_id.end(), "Telegram account not found"); // add text error
-  //validation confirmed
+
 
   bool buf_official_answer = official_answer;
-  post_answer(iter_telegram_account_user_id->user, question_id, ipfs_link, buf_official_answer);
+  eosio::name user = telegram_post_action(telegram_id);
+  post_answer(user, question_id, ipfs_link, buf_official_answer);
 }
 
 void peeranha::postcomment(eosio::name user, uint64_t question_id,

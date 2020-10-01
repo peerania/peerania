@@ -31,7 +31,6 @@ void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t commu
                             std::vector<uint32_t> tags, std::string title,
                             IpfsHash ipfs_link, const uint8_t type) {
   require_auth(bot);
-
   telegram_post_question(telegram_id, community_id, tags, title, ipfs_link, type);
 }
 

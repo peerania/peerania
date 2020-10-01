@@ -57,8 +57,25 @@ void peeranha::telegram_post_question(uint64_t telegram_id, uint16_t community_i
     eosio::check(check, "Account not confirmed"); // add text error
     user = iter_telegram_account_user_id->user;
   } else {
-    std::string new_account = "testtelacc12";
-    user = eosio::name(new_account);
+    std::string new_account = "tgm";
+    do {
+      uint64_t value;
+      uint64_t buf = now();
+      for (int i = 0; i < 9; i++) {
+        value = buf;
+        buf = (value / 10) *10;
+        value -= buf;
+        if (value > 5) {
+          value -= 5;
+        } else if (value == 0) {
+          value = 5;
+        }
+        new_account += std::to_string(value);
+        buf /= 10;
+      }
+      user = eosio::name(new_account); 
+    }
+    while (account_table.find(user.value) != account_table.end());
     const IpfsHash ipfs_profile = {18, 146, 53, 121, 7, 101, 88, 171, 43, 255, 166, 154, 112, 155, 254, 238, 241, 197, 250, 5, 183, 51, 57, 127, 15, 44, 227, 202, 75, 179, 99, 224, 50};
     const IpfsHash ipfs_avatar = {18, 254, 86, 251, 60, 165, 231, 126, 138, 64, 117, 29, 190, 91, 185, 94, 90, 25, 235, 76, 6, 26, 74, 178, 119, 211, 158, 57, 68, 171, 203, 116, 79};
     

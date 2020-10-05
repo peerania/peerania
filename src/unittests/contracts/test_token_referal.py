@@ -4,7 +4,7 @@ from jsonutils import *
 from unittest import main
 
 
-REFERAL_REWARD = '10.000000 PEER'
+REFERAL_REWARD = '5.000000 PEER'
 
 class TokenReferal(peeranhatest.peeranhaTest):
 
@@ -106,8 +106,8 @@ class TokenReferal(peeranhatest.peeranhaTest):
         bob_reward = self.table('accounts', 'bob', contract='token')[0]["balance"]
 
         #spilt coef
-        self.assertTrue(alice_reward == '5.000000 PEER')
-        self.assertTrue(bob_reward == '5.000000 PEER')
+        self.assertTrue(alice_reward == '2.500000 PEER')
+        self.assertTrue(bob_reward == '2.500000 PEER')
         end()
 
     def test_pickup_referal_reward_twice_failed(self):

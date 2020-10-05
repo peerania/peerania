@@ -153,7 +153,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     // Action give community moderator flags
     ACTION givecommuflg(eosio::name user, int flags, uint16_t community_id);
     
-    ACTION editcomm(uint16_t community_id, std::string new_name, IpfsHash new_ipfs_link);
+    ACTION editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_link);
 
     ACTION chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating);
 
@@ -339,7 +339,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void give_moderator_flag(eosio::name user, int flags, uint16_t community_id);
 
-    void edit_community(uint16_t community_id, const std::string &new_name, const IpfsHash &new_ipfs_link);
+    void edit_community(eosio::name user, uint16_t community_id, const std::string &name, const IpfsHash &ipfs_link);
 
     void change_question_type(eosio::name user, uint64_t question_id, int type, bool restore_rating);
 
@@ -377,7 +377,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void init_achievements_first_10k_registered_users();
 
-    void update_achievement(eosio::name user, Achievements id_achievement, uint64_t value);
+    void update_achievement(eosio::name user, Achievements id_achievement, uint64_t value, bool new_value);
 
     void update_achievement_rating(eosio::name user);
 

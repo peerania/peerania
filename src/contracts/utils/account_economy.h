@@ -24,6 +24,12 @@
 #define MODERATION_AVAILABLE_PERIOD 31536000  // One year
 #endif
 
+#if STAGE == 1
+#define TIME_15_MINUTES 15 // 15 seconds
+#else
+#define TIME_15_MINUTES 900  // 15 minutes
+#endif
+
 
 #define STATUS0(X) \
   case 0 ... 99:   \

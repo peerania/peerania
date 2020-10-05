@@ -46,8 +46,6 @@ void peeranha::telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t quest
                           IpfsHash ipfs_link, uint8_t official_answer) {
   require_auth(bot);
 
-
-
   bool buf_official_answer = official_answer;
   eosio::name user = telegram_post_action(telegram_id);
   post_answer(user, question_id, ipfs_link, buf_official_answer);
@@ -222,17 +220,17 @@ void peeranha::movequestion(eosio::name user, uint16_t community_id, uint64_t qu
 }
 
 
-void peeranha:: apprvacc(eosio::name user) {
+void peeranha::apprvacc(eosio::name user) {
   require_auth(user);
   approve_account(user);
 }
 
-void peeranha:: dsapprvacc(eosio::name user) {
+void peeranha::dsapprvacc(eosio::name user) {
   require_auth(user);
   disapprove_account(user);
 }
 
-void peeranha:: addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id) {
+void peeranha::addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id) {
   require_auth(bot_name);
   add_telegram_account(user, telegram_id, false);
 }

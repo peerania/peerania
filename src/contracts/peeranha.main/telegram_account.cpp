@@ -3,6 +3,8 @@
 void peeranha::approve_account(eosio::name user) { 
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
   auto iter_telegram_account = telegram_account_table.find(user.value);
+  eosio::check(iter_telegram_account->confirmed != 1, "This telos account already has a Telegram account");
+  eosio::check(iter_telegram_account != telegram_account_table.end(), "Account not found");
 
   telegram_account_table.modify(
       iter_telegram_account, _self, [](auto &telegram_account) {
@@ -19,6 +21,7 @@ void peeranha::approve_account(eosio::name user) {
 void peeranha::disapprove_account(eosio::name user) { 
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
   auto iter_telegram_account = telegram_account_table.find(user.value);
+  eosio::check(iter_telegram_account != telegram_account_table.end(), "Account not found");
 
   telegram_account_table.erase(iter_telegram_account);
 }
@@ -51,7 +54,7 @@ eosio::name peeranha::telegram_post_action(uint64_t telegram_id) {
   
   eosio::name user;
   if (iter_telegram_account_user_id != telegram_account_table_user_id.end()) {
-    bool check = iter_telegram_account_user_id->confirmed == 1 ||iter_telegram_account_user_id->confirmed == 2;
+    bool check = iter_telegram_account_user_id->confirmed == 1 || iter_telegram_account_user_id->confirmed == 2;
     eosio::check(check, "Account not confirmed"); // add text error
     user = iter_telegram_account_user_id->user;
   } else {
@@ -75,9 +78,11 @@ eosio::name peeranha::telegram_post_action(uint64_t telegram_id) {
     }
     while (account_table.find(user.value) != account_table.end());
 
-    const IpfsHash ipfs_profile = {18, 21, 41, 48, 206, 7, 112, 26, 240, 22, 223, 152, 83, 96, 40, 147, 2, 199, 145, 178, 251, 113, 97, 75, 177, 53, 51, 161, 9, 80, 42, 108, 151};
-    const IpfsHash ipfs_avatar = {18, 254, 86, 251, 60, 165, 231, 126, 138, 64, 117, 29, 190, 91, 185, 94, 90, 25, 235, 76, 6, 26, 74, 178, 119, 211, 158, 57, 68, 171, 203, 116, 79};
+    // const IpfsHash ipfs_profile = {18, 177, 253, 234, 86, 53, 221, 27, 4, 142, 68, 133, 172, 104, 26, 17, 244, 156, 224, 197, 231, 159, 178, 167, 245, 112, 1, 139, 232, 198, 124, 225, 162};
+    // const IpfsHash ipfs_avatar = {18, 254, 86, 251, 60, 165, 231, 126, 138, 64, 117, 29, 190, 91, 185, 94, 90, 25, 235, 76, 6, 26, 74, 178, 119, 211, 158, 57, 68, 171, 203, 116, 79};
     
+    const IpfsHash ipfs_profile = {'q', 'w', 's'};
+    const IpfsHash ipfs_avatar = {'w', 'd', 'r'};
     register_account(user, new_account, ipfs_avatar, ipfs_avatar);
     add_telegram_account(user, telegram_id, true);
   }
@@ -106,6 +111,11 @@ void peeranha::swap_account(int telegram_id, eosio::name old_user, eosio::name n
     new_user_questions_table.emplace(_self, [&iter_old_user_questions](auto &usr_question) {
       usr_question.question_id = iter_old_user_questions->question_id;
     });
+    auto iter_question = find_question(iter_old_user_questions->question_id); //change author question
+    question_table.modify(iter_question, _self,
+                        [new_user](auto &question) {
+                          question.user = new_user;
+                        });
     iter_old_user_questions = old_user_questions_table.erase(iter_old_user_questions);
   }
 
@@ -117,6 +127,13 @@ void peeranha::swap_account(int telegram_id, eosio::name old_user, eosio::name n
       usr_question.question_id = iter_old_user_answer->question_id;
       usr_question.answer_id = iter_old_user_answer->answer_id;
     });
+    auto iter_question = find_question(iter_old_user_answer->question_id);  //change author answer
+    question_table.modify(iter_question, _self,
+                        [new_user, &iter_old_user_answer, &iter_question](auto &question) {
+                          auto iter_answer = find_answer(question, iter_old_user_answer->answer_id);
+                          iter_answer->user = new_user;
+                        });
+
     iter_old_user_answer = old_user_answer_table.erase(iter_old_user_answer);
   }
 }

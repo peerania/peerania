@@ -196,7 +196,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
                     '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
         answers = self.table('question', 'allquestions')[0]['answers'][0]['properties']
-        example = []
+        example = [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]
         self.assertTrue(compare(example, answers, ignore_excess=True))
 
         self.action('givecommuflg', {
@@ -208,11 +208,8 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         self.action('postanswer', {'user': str(alice), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, alice,
                     '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'answer with flag "official_answer"'))
         answers = self.table('question', 'allquestions')[0]['answers'][1]['properties']
-        example = {
-            'key': 10,
-            'value': 1,
-        }
-        self.assertTrue(compare(example, answers[0], ignore_excess=True))
+        example = [{'key': 10, 'value': 1}, {'key': 12, 'value': 1}]
+        self.assertTrue(compare(example, answers, ignore_excess=True))
         end()
 
     def test_modify_official_answer(self):
@@ -247,7 +244,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
                                   'ipfs_link': 'undefined123', 'official_answer': True}, alice, 'modify answer with flag "official_answer", variable official_answer = True')
         properties = self.table('question', 'allquestions')[0]['answers'][1]['properties']
         example = {'key': 10, 'value': 1}
-        self.assertTrue(compare(example, properties[1], ignore_excess=True))
+        self.assertTrue(compare(example, properties[2], ignore_excess=True))
 
         self.action('modanswer', {'user': str(alice), 'question_id': question_id, 'answer_id': answers_id,
                                   'ipfs_link': 'undefined123', 'official_answer': False}, alice, 'modify answer with flag "official_answer", variable official_answer = false')

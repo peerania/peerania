@@ -21,7 +21,9 @@ enum Achievements { QUESTION_ASKED = 1,
                     RESIDENT, 
                     SENIOR, 
                     HERO, 
-                    SUPERHERO};
+                    SUPERHERO,
+                    ANSWER_15_MINUTES,
+                    FIRST_ANSWER,};
 
 enum Type_achievement { UNIQE = 0, LEVEL};
 
@@ -30,7 +32,7 @@ struct achievement {
     community_id(community_id), 
     limit(limit), 
     type(type) 
-  {} 
+  {}
 
   const std::string name;
   const uint32_t community_id;                        //0 - for all
@@ -40,8 +42,8 @@ struct achievement {
 
 #if STAGE == 1 || STAGE == 2
  std::map<uint32_t, achievement> achievements = {
-    { QUESTION_ASKED,       achievement(0, 2, LEVEL) }, 
-    { ANSWER_GIVEN,         achievement(0, 10, LEVEL) },   
+    { QUESTION_ASKED,       achievement(0, 2, LEVEL) },
+    { ANSWER_GIVEN,         achievement(0, 10, LEVEL) }, 
     { CORRECT_ANSWER,       achievement(0, 5, LEVEL) },
     { FIRST_10K_REGISTERED, achievement(0, 10000, UNIQE) },
     { STRANGER,             achievement(0, 1000, UNIQE) },
@@ -51,12 +53,14 @@ struct achievement {
     { SENIOR,               achievement(0, 5, UNIQE) },
     { HERO,                 achievement(0, 5, UNIQE) },
     { SUPERHERO,            achievement(0, 10, UNIQE) },
+    { ANSWER_15_MINUTES,    achievement(0, 500000, LEVEL) },
+    { FIRST_ANSWER,         achievement(0, 500000, LEVEL) },
 };
 
 #else
 std::map<uint32_t, achievement> achievements = {
-    { QUESTION_ASKED,       achievement(0, 500000, LEVEL) }, 
-    { ANSWER_GIVEN,         achievement(0, 500000, LEVEL) },   
+    { QUESTION_ASKED,       achievement(0, 500000, LEVEL) },
+    { ANSWER_GIVEN,         achievement(0, 500000, LEVEL) },  
     { CORRECT_ANSWER,       achievement(0, 500000, LEVEL) },
     { FIRST_10K_REGISTERED, achievement(0, 10000, UNIQE) },
     { STRANGER,             achievement(0, 1000, UNIQE) },
@@ -66,5 +70,7 @@ std::map<uint32_t, achievement> achievements = {
     { SENIOR,               achievement(0, 150, UNIQE) },
     { HERO,                 achievement(0, 50, UNIQE) },
     { SUPERHERO,            achievement(0, 10, UNIQE) },
+    { ANSWER_15_MINUTES,    achievement(0, 500000, LEVEL) },
+    { FIRST_ANSWER,         achievement(0, 500000, LEVEL) }, 
 };
 #endif

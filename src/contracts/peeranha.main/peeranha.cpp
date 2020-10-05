@@ -195,9 +195,9 @@ void peeranha::givecommuflg(eosio::name user, int flags, uint16_t community_id) 
   give_moderator_flag(user, flags, community_id);
 }
 
-void peeranha::editcomm(uint16_t community_id, std::string new_name, IpfsHash new_ipfs_link) {
-  require_auth(_self);
-  edit_community(community_id, new_name, new_ipfs_link);
+void peeranha::editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_link) {
+  require_auth(user);
+  edit_community(user, community_id, name, ipfs_link);
 }
 
 void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating){

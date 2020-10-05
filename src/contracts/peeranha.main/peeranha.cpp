@@ -4,6 +4,7 @@
 #include "peeranha_forum.cpp"
 #include "peeranha_vote.cpp"
 #include "peeranha_top_question.cpp"
+#include "telegram_account.cpp"
 #include "peeranha_account_achievements.cpp"
 #include "squeezed_achievement.cpp"
 
@@ -26,11 +27,39 @@ void peeranha::postquestion(eosio::name user, uint16_t community_id,
   post_question(user, community_id, tags, title, ipfs_link, type);
 }
 
+void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t community_id,
+                            std::vector<uint32_t> tags, std::string title,
+                            IpfsHash ipfs_link, const uint8_t type) {
+  require_auth(bot);
+
+  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
+  auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
+  auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);
+  eosio::check(iter_telegram_account_user_id != telegram_account_table_user_id.end(), "Telegram account not found"); // add text error
+  //validation confirmed
+  
+  post_question(iter_telegram_account_user_id->user, community_id, tags, title, ipfs_link, type);
+}
+
 void peeranha::postanswer(eosio::name user, uint64_t question_id,
                           IpfsHash ipfs_link, uint8_t official_answer) {
   require_auth(user);
   bool buf_official_answer = official_answer;
   post_answer(user, question_id, ipfs_link, buf_official_answer);
+}
+
+void peeranha::telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t question_id,
+                          IpfsHash ipfs_link, uint8_t official_answer) {
+  require_auth(bot);
+
+  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
+  auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
+  auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);
+  eosio::check(iter_telegram_account_user_id != telegram_account_table_user_id.end(), "Telegram account not found"); // add text error
+  //validation confirmed
+
+  bool buf_official_answer = official_answer;
+  post_answer(iter_telegram_account_user_id->user, question_id, ipfs_link, buf_official_answer);
 }
 
 void peeranha::postcomment(eosio::name user, uint64_t question_id,
@@ -166,9 +195,9 @@ void peeranha::givecommuflg(eosio::name user, int flags, uint16_t community_id) 
   give_moderator_flag(user, flags, community_id);
 }
 
-void peeranha::editcomm(uint16_t community_id, std::string new_name, IpfsHash new_ipfs_link) {
-  require_auth(_self);
-  edit_community(community_id, new_name, new_ipfs_link);
+void peeranha::editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_link) {
+  require_auth(user);
+  edit_community(user, community_id, name, ipfs_link);
 }
 
 void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating){
@@ -199,6 +228,22 @@ void peeranha::downquestion(eosio::name user, uint16_t community_id, uint64_t qu
 void peeranha::movequestion(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t new_position){
   require_auth(user);
   move_top_question(user,  community_id, question_id, new_position);
+}
+
+
+void peeranha:: apprvacc(eosio::name user) {
+  require_auth(user);
+  approve_account(user);
+}
+
+void peeranha:: dsapprvacc(eosio::name user) {
+  require_auth(user);
+  disapprove_account(user);
+}
+
+void peeranha:: addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id) {
+  require_auth(bot_name);
+  add_telegram_account(user, telegram_id);
 }
 
 void peeranha::upaccach(eosio::name user, uint32_t achievement_id) {
@@ -357,6 +402,13 @@ void peeranha::resettables() {
   while (iter_global_stat != global_stat_table.end()) {
     iter_global_stat = global_stat_table.erase(iter_global_stat);
   }
+
+  // clean create tellos account table
+  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
+  auto iter_telegram_account = telegram_account_table.begin();
+  while (iter_telegram_account != telegram_account_table.end()) {
+    iter_telegram_account = telegram_account_table.erase(iter_telegram_account);
+  }
 #if STAGE == 2
   // clean constants
   constants_index all_constants_table(_self, scope_all_constants);
@@ -388,12 +440,13 @@ void peeranha::init() {
 
 EOSIO_DISPATCH(
     peeranha,
-    (registeracc)(setaccprof)(postquestion)(postanswer)(postcomment)(
+    (registeracc)(setaccprof)(postquestion)(telpostqstn)(postanswer)(telpostansw)(postcomment)(
         delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(modcomment)(
         upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
         reportprof)(updateacc)(givemoderflg)(editcomm)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
+        (apprvacc)(dsapprvacc)(addtelacc)
         (intallaccach)(upaccach)(intachregist)(intachrating)
 
 #ifdef SUPERFLUOUS_INDEX

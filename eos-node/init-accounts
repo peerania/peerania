@@ -18,6 +18,10 @@ cleos create account eosio peeranhamain EOS5hhovSUZFZQPdvVvtCU9JjjZuuoyyQLG8EoY8
 cleos wallet import --private-key 5KP8Xo8Y7LKeGaQuCYzWbmmizEGNChpyE1XtWjQkVBRe8Jqi85T
 cleos create account eosio peeranhatken EOS6csGrgrBFxWeC1mJQ1ZGBN1sA4sQRMVieaCGSLxSaZn4DgkuuG EOS6csGrgrBFxWeC1mJQ1ZGBN1sA4sQRMVieaCGSLxSaZn4DgkuuG
 
+# import private key for sqrltest1234 account and create account
+cleos wallet import --private-key 5JJEB8DQQkEKPitiSctW51cgCxKMGectgPF9TgjcofqVrh8b3ZK
+cleos create account eosio sqrltest1234 EOS8ZKGBJZLcVHw52yfc14moPBVE6e4Kg44Ez19UaS5XKNrn5Kv5c EOS8ZKGBJZLcVHw52yfc14moPBVE6e4Kg44Ez19UaS5XKNrn5Kv5c
+
 #import private key for user1 account and create account
 cleos wallet import --private-key 5JV2aCujE9j5dUkFKJGtyzeTsgMAHCovQ8QhxKHd9eZpJDfMDmZ
 cleos create account eosio user1 EOS7EMRithgYmfEcBDZFrLP2Uoyr3engsHbxatRXffqbq7FiwvVGz EOS7EMRithgYmfEcBDZFrLP2Uoyr3engsHbxatRXffqbq7FiwvVGz

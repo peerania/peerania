@@ -102,16 +102,16 @@ void peeranha::swap_account(int telegram_id, eosio::name old_user, eosio::name n
                           account.answers_given += iter_old_account->answers_given;
                           account.correct_answers += iter_old_account->correct_answers;
                        });
-  update_achievement_rating(iter_new_account->user);
+  // update_achievement_rating(iter_new_account->user);
 
-  user_questions_index new_user_questions_table(_self, new_user.value);   //move table usranswers
+  user_questions_index new_user_questions_table(_self, new_user.value);                                 //move table usranswers
   user_questions_index old_user_questions_table(_self, old_user.value);
   auto iter_old_user_questions = old_user_questions_table.begin();
   while (iter_old_user_questions != old_user_questions_table.end()) {
     new_user_questions_table.emplace(_self, [&iter_old_user_questions](auto &usr_question) {
       usr_question.question_id = iter_old_user_questions->question_id;
     });
-    auto iter_question = find_question(iter_old_user_questions->question_id); //change author question
+    auto iter_question = find_question(iter_old_user_questions->question_id);                       //change author question
     question_table.modify(iter_question, _self,
                         [new_user](auto &question) {
                           question.user = new_user;
@@ -119,7 +119,7 @@ void peeranha::swap_account(int telegram_id, eosio::name old_user, eosio::name n
     iter_old_user_questions = old_user_questions_table.erase(iter_old_user_questions);
   }
 
-  user_answers_index new_user_answer_table(_self, new_user.value);        //move table usrquestions
+  user_answers_index new_user_answer_table(_self, new_user.value);                                  //move table usrquestions
   user_answers_index old_user_answer_table(_self, old_user.value);
   auto iter_old_user_answer = old_user_answer_table.begin();
   while (iter_old_user_answer != old_user_answer_table.end()) {
@@ -127,7 +127,7 @@ void peeranha::swap_account(int telegram_id, eosio::name old_user, eosio::name n
       usr_question.question_id = iter_old_user_answer->question_id;
       usr_question.answer_id = iter_old_user_answer->answer_id;
     });
-    auto iter_question = find_question(iter_old_user_answer->question_id);  //change author answer
+    auto iter_question = find_question(iter_old_user_answer->question_id);                       //change author answer
     question_table.modify(iter_question, _self,
                         [new_user, &iter_old_user_answer, &iter_question](auto &question) {
                           auto iter_answer = find_answer(question, iter_old_user_answer->answer_id);
@@ -136,4 +136,35 @@ void peeranha::swap_account(int telegram_id, eosio::name old_user, eosio::name n
 
     iter_old_user_answer = old_user_answer_table.erase(iter_old_user_answer);
   }
+
+  account_achievements_index old_account_achievements_table(_self, old_user.value);               //achive
+  auto iter_account_achievements = old_account_achievements_table.begin();
+  while (iter_account_achievements != old_account_achievements_table.end()) {
+    auto achieve = achievements.find(iter_account_achievements->achievements_id);
+    if (achieve->second.type == UNIQE && iter_account_achievements->value == 1) {
+      update_achievement(new_user, iter_account_achievements->achievements_id, iter_account_achievements->value, true);
+    }
+    else if (achieve->second.type == LEVEL) {
+      update_achievement(new_user, iter_account_achievements->achievements_id, iter_account_achievements->value, true);
+    }
+    
+    iter_account_achievements = old_account_achievements_table.erase(iter_account_achievements);
+  }
+
+  property_community_index property_community_table(_self, scope_all_property_community);             //property_community
+  auto iter_property_community = property_community_table.find(old_user.value);
+  property_community_table.erase(iter_property_community);
+
+  period_rating_index period_rating_table(_self, old_user.value);                                     //period_rating
+  auto iter_period_rating = period_rating_table.begin();
+  while (iter_period_rating != period_rating_table.end()) {
+    iter_period_rating = period_rating_table.erase(iter_period_rating);
+  }
+
+  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);                  //telegram_account
+  auto iter_telegram_account = telegram_account_table.find(old_user.value);
+  telegram_account_table.erase(iter_telegram_account);
+
+  account_index account_table(_self, scope_all_accounts);
+  account_table.erase(iter_old_account);
 }

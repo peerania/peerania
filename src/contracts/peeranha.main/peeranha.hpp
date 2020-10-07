@@ -373,7 +373,9 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void update_correct_achievement(eosio::name user);
 
-    bool up_achievement(uint32_t id_achievement);
+    bool add_achievement_amount(uint32_t id_achievement);
+
+    void del_achievement_amount(uint32_t id_achievement);
 
     void init_achievements_first_10k_registered_users();
 

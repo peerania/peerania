@@ -9,7 +9,7 @@ void peeranha::update_achievement(eosio::name user, uint32_t id_achievement, uin
   auto iter_account_achievements = account_achievements_table.find(id_achievement);
 
   if (iter_account_achievements == account_achievements_table.end()) {
-    if(up_achievement(id_achievement)) {
+    if(add_achievement_amount(id_achievement)) {
       account_achievements_table.emplace(_self, 
           [&](auto &account) {
             account.user = user;

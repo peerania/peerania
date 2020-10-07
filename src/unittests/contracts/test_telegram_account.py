@@ -20,6 +20,7 @@ class Achievents(int, Enum):
     first_answer = 13
 
 COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION = 1 << 6
+MODERATOR_FLG_ALL = 31
 
 class TestTopQuestion(peeranhatest.peeranhaTest):  
     def test_add_telegram_account(self):
@@ -240,14 +241,6 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
                         'Register telegram question from alice')
 
-        # table_telegram_account = self.table('telegramacc', 'alltelacc')
-        # print(table_telegram_account)
-        # table_question = self.table('question', 'allquestions')
-        # print(table_question)
-        # t = self.table('account', 'allaccounts')
-        # print(t)
-        # print("+=====================----------------------------------------===========")
-
         example = [{'telegram_id': 503975561, 'confirmed': 2}]
         table_telegram_account = self.table('telegramacc', 'alltelacc')
         self.assertTrue(compare(example, table_telegram_account, ignore_excess=True))
@@ -258,28 +251,18 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example, table_question, ignore_excess=True))
 
         self.action('addtelacc', {
-        'bot_name': ted,
-        'user': alice,
-        'telegram_id': 503975561
+            'bot_name': ted,
+            'user': alice,
+            'telegram_id': 503975561
         }, ted, 'Alice add top question. Alice don t have permission')
 
-        # table_telegram_account = self.table('telegramacc', 'alltelacc')
-        # print(table_telegram_account)
-
         self.action('apprvacc', {
-        'user': alice
+            'user': alice
         }, alice, 'Alice add top question. Alice don t have permission')
 
         example = [{'id': '68719476735', 'user': 'alice', 'title': 'telegram'}]
         table_question = self.table('question', 'allquestions')
         self.assertTrue(compare(example, table_question, ignore_excess=True))
-
-        # table_telegram_account = self.table('telegramacc', 'alltelacc')
-        # print(table_telegram_account)
-        # table_question = self.table('question', 'allquestions')
-        # print(table_question)
-        # t = self.table('account', 'allaccounts')
-        # print(t)
         end()
 
 
@@ -296,9 +279,6 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.action('telpostansw', {'bot': 'bob', 'telegram_id': 503975561, 'question_id': id_question, 'ipfs_link': 'undefined', 'official_answer': 0}, bob,
                         'Register telegram question from alice')
 
-        # table_telegram_account = self.table('telegramacc', 'alltelacc')
-        # print(table_telegram_account)
-
         example = [{'telegram_id': 503975561, 'confirmed': 2}]
         table_telegram_account = self.table('telegramacc', 'alltelacc')
         self.assertTrue(compare(example, table_telegram_account, ignore_excess=True))
@@ -308,33 +288,19 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         table_question = self.table('question', 'allquestions')
         self.assertTrue(compare(example, table_question[0]["answers"], ignore_excess=True))
 
-        table_question = self.table('question', 'allquestions')
-        # print(table_question)
-        # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         self.action('addtelacc', {
-        'bot_name': ted,
-        'user': alice,
-        'telegram_id': 503975561
+            'bot_name': ted,
+            'user': alice,
+            'telegram_id': 503975561
         }, ted, 'Alice add top question. Alice don t have permission')
-        
-        # table_telegram_account = self.table('telegramacc', 'alltelacc')
-        # print(table_telegram_account)
 
         self.action('apprvacc', {
-        'user': alice
+            'user': alice
         }, alice, 'Alice add top question. Alice don t have permission')
 
         example = [{'id': 1, 'user': 'alice'}]
         table_question = self.table('question', 'allquestions')
         self.assertTrue(compare(example, table_question[0]["answers"], ignore_excess=True))
-
-        # table_telegram_account = self.table('telegramacc', 'alltelacc')
-        # print(table_telegram_account)
-        # table_question = self.table('question', 'allquestions')
-        # print(table_question)
-        # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        # t = self.table('account', 'allaccounts')
-        # print(t)
         end()
 
 
@@ -366,6 +332,8 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example_usranswers, self.table('usranswers', name_empty_account), ignore_excess=True))
         example_alice = [{'user': name_empty_account, 'achievements_id': Achievents.questions_asked.value, 'value': 1}, {'user': name_empty_account, 'achievements_id': Achievents.answers_given.value, 'value': 1}, {'user': name_empty_account, 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'user': name_empty_account, 'achievements_id': Achievents.answer_15_minutes.value, 'value': 1}, {'user': name_empty_account, 'achievements_id': Achievents.first_answer.value, 'value': 1}]
         self.assertTrue(compare(example_alice, self.table('accachieve', name_empty_account), ignore_excess=True))
+        example_achive_amount = [{'id': Achievents.questions_asked.value, 'count': 1}, {'id': Achievents.answers_given.value, 'count': 1}, {'id': Achievents.first_10k_registered.value, 'count': 3}, {'id': Achievents.answer_15_minutes.value, 'count': 1}, {'id': Achievents.first_answer.value, 'count': 1}]
+        self.assertTrue(compare(example_achive_amount, self.table('achieve', 'allachieve'), ignore_excess=True))
         # ____________________________________________________________before_______________________________________________________
 
         self.action('addtelacc', {
@@ -392,6 +360,8 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         example_alice = [{'user': 'alice', 'achievements_id': Achievents.questions_asked.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.answers_given.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.answer_15_minutes.value, 'value': 1}, {'user': 'alice', 'achievements_id': Achievents.first_answer.value, 'value': 1}]
         self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
         self.assertTrue(compare([], self.table('accachieve', name_empty_account), ignore_excess=True))
+        example_achive_amount = [{'id': Achievents.questions_asked.value, 'count': 1}, {'id': Achievents.answers_given.value, 'count': 1}, {'id': Achievents.first_10k_registered.value, 'count': 2}, {'id': Achievents.answer_15_minutes.value, 'count': 1}, {'id': Achievents.first_answer.value, 'count': 1}]
+        self.assertTrue(compare(example_achive_amount, self.table('achieve', 'allachieve'), ignore_excess=True))
         end()
 
 
@@ -403,37 +373,63 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
 
 
 
-    def test_clear_table_telegram_account(self):
-        begin('test clear_table_telegram_account')
-        alice = self.register_alice_account()
-        ted = self.register_ted_account()
+    # def test_clear_table_telegram_account(self):
+    #     begin('test clear_table_telegram_account')
+    #     alice = self.register_alice_account()
+    #     ted = self.register_ted_account()
 
-        self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
-                        'Register telegram question from alice')
+    #     self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
+    #                     'Register telegram question from alice')
 
         
-        # table_telegram_account = self.table('account', 'allaccounts')
-        # print(table_telegram_account)
-        print(self.table('telegramacc', 'alltelacc'))
+    #     # table_telegram_account = self.table('account', 'allaccounts')
+    #     # print(table_telegram_account)
+    #     print(self.table('telegramacc', 'alltelacc'))
         
-        self.action('addtelacc', {
-            'bot_name': ted,
-            'user': alice,
-            'telegram_id': 503975561
-        }, ted, 'Alice add top question. Alice don t have permission')
+    #     self.action('addtelacc', {
+    #         'bot_name': ted,
+    #         'user': alice,
+    #         'telegram_id': 503975561
+    #     }, ted, 'Alice add top question. Alice don t have permission')
         
-        # table_telegram_account = self.table('account', 'allaccounts')
-        # print(table_telegram_account)
-        print(self.table('telegramacc', 'alltelacc'))
+    #     # table_telegram_account = self.table('account', 'allaccounts')
+    #     # print(table_telegram_account)
+    #     print(self.table('telegramacc', 'alltelacc'))
 
-        self.action('apprvacc', {
-            'user': alice
-        }, alice, 'Alice add top question. Alice don t have permission')
+    #     self.action('apprvacc', {
+    #         'user': alice
+    #     }, alice, 'Alice add top question. Alice don t have permission')
 
-        # table_telegram_account = self.table('account', 'allaccounts')
-        # print(table_telegram_account)
-        print(self.table('telegramacc', 'alltelacc'))
-        end()
+    #     # table_telegram_account = self.table('account', 'allaccounts')
+    #     # print(table_telegram_account)
+    #     print(self.table('telegramacc', 'alltelacc'))
+    #     end()
+
+
+    # def test_communities(self):
+    #     begin('test communities')
+    #     alice = self.register_alice_account()
+    #     ted = self.register_ted_account()
+    #     # admin = self.get_contract_deployer(self.get_default_contract())
+    #     self._give_moderator_flag(alice, MODERATOR_FLG_ALL)
+    #     # editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_link)
+
+    #     print(self.table('communities', 'allcomm'))
+        
+    #     self.action('editcomm', {
+    #         'user': alice,
+    #         'community_id': 1,
+    #         'name': 'testtesttest',
+    #         'ipfs_link': 'alice_IPFS'
+    #     }, alice, 'Alice add top question. Alice don t have permission')
+    #     print(self.table('communities', 'allcomm'))
+        
+    #     end()
+    
+    # def _give_moderator_flag(self, acc, flg):
+    #     admin = self.get_contract_deployer(self.get_default_contract())
+    #     self.action('givemoderflg', {
+    #             'user': acc, 'flags': flg}, admin, f'Give moderator flags to {acc}')
 
     
 

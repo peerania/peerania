@@ -150,7 +150,7 @@ void peeranha::swap_account(eosio::name old_user, eosio::name new_user) {    //t
     else if (achieve->second.type == LEVEL) {
       update_achievement(new_user, iter_account_achievements->achievements_id, iter_account_achievements->value, true);
     }
-    
+    del_achievement_amount(iter_account_achievements->achievements_id);
     iter_account_achievements = old_account_achievements_table.erase(iter_account_achievements);
   }
 

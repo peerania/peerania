@@ -361,7 +361,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void add_telegram_account(eosio::name user, uint64_t telegram_id, bool new_account);
 
-    void swap_account(int telegram_id, eosio::name old_user, eosio::name new_user);
+    void swap_account(eosio::name old_user, eosio::name new_user);
 
     void init_all_accounts_achievements();
 

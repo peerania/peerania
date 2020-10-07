@@ -12,8 +12,11 @@ void peeranha::approve_account(eosio::name user) {
       });
   auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
   for(auto iter_telegram_account_user_id = telegram_account_table_user_id.begin(); iter_telegram_account_user_id != telegram_account_table_user_id.end(); ++iter_telegram_account_user_id) {
-    if (iter_telegram_account_user_id->confirmed == 2) {
-      swap_account(iter_telegram_account_user_id->telegram_id, iter_telegram_account_user_id->user,  user);
+    if (iter_telegram_account_user_id->confirmed == 2 && iter_telegram_account_user_id->telegram_id == iter_telegram_account->telegram_id) {
+      eosio::name old_user = iter_telegram_account_user_id->user;
+      telegram_account_table_user_id.erase(iter_telegram_account_user_id);    //delete empty account
+      swap_account(old_user, user);
+      break;
     }
   }
 }
@@ -74,7 +77,7 @@ eosio::name peeranha::telegram_post_action(uint64_t telegram_id) {
         new_account += std::to_string(value);
         buf /= 10;
       }
-      user = eosio::name(new_account); 
+      user = eosio::name(new_account);
     }
     while (account_table.find(user.value) != account_table.end());
 
@@ -89,7 +92,7 @@ eosio::name peeranha::telegram_post_action(uint64_t telegram_id) {
   return user;
 }
 
-void peeranha::swap_account(int telegram_id, eosio::name old_user, eosio::name new_user) {
+void peeranha::swap_account(eosio::name old_user, eosio::name new_user) {    //telegram id????
   auto iter_new_account = find_account(new_user);
   auto iter_old_account = find_account(old_user);
 
@@ -153,7 +156,8 @@ void peeranha::swap_account(int telegram_id, eosio::name old_user, eosio::name n
 
   property_community_index property_community_table(_self, scope_all_property_community);             //property_community
   auto iter_property_community = property_community_table.find(old_user.value);
-  property_community_table.erase(iter_property_community);
+  if (iter_property_community != property_community_table.end())
+    property_community_table.erase(iter_property_community);
 
   period_rating_index period_rating_table(_self, old_user.value);                                     //period_rating
   auto iter_period_rating = period_rating_table.begin();
@@ -161,10 +165,5 @@ void peeranha::swap_account(int telegram_id, eosio::name old_user, eosio::name n
     iter_period_rating = period_rating_table.erase(iter_period_rating);
   }
 
-  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);                  //telegram_account
-  auto iter_telegram_account = telegram_account_table.find(old_user.value);
-  telegram_account_table.erase(iter_telegram_account);
-
-  account_index account_table(_self, scope_all_accounts);
   account_table.erase(iter_old_account);
 }

@@ -93,6 +93,15 @@ eosio::name peeranha::telegram_post_action(uint64_t telegram_id) {
 }
 
 void peeranha::swap_account(eosio::name old_user, eosio::name new_user) {    //telegram id????
+  move_table_usranswers(old_user, new_user);
+  move_table_usrquestions(old_user, new_user);
+  move_table_achive(old_user, new_user);
+  delete_table_property_community(old_user, new_user);
+  delete_table_period_rating(old_user, new_user);
+  move_table_statistik(old_user, new_user);
+}
+
+void peeranha::move_table_statistik(eosio::name old_user, eosio::name new_user) {
   auto iter_new_account = find_account(new_user);
   auto iter_old_account = find_account(old_user);
 
@@ -105,8 +114,10 @@ void peeranha::swap_account(eosio::name old_user, eosio::name new_user) {    //t
                           account.answers_given += iter_old_account->answers_given;
                           account.correct_answers += iter_old_account->correct_answers;
                        });
-  // update_achievement_rating(iter_new_account->user);
+  account_table.erase(iter_old_account);
+}
 
+void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user) {
   user_questions_index new_user_questions_table(_self, new_user.value);                                 //move table usranswers
   user_questions_index old_user_questions_table(_self, old_user.value);
   auto iter_old_user_questions = old_user_questions_table.begin();
@@ -121,7 +132,9 @@ void peeranha::swap_account(eosio::name old_user, eosio::name new_user) {    //t
                         });
     iter_old_user_questions = old_user_questions_table.erase(iter_old_user_questions);
   }
+}
 
+void peeranha::move_table_usrquestions(eosio::name old_user, eosio::name new_user) {
   user_answers_index new_user_answer_table(_self, new_user.value);                                  //move table usrquestions
   user_answers_index old_user_answer_table(_self, old_user.value);
   auto iter_old_user_answer = old_user_answer_table.begin();
@@ -139,7 +152,9 @@ void peeranha::swap_account(eosio::name old_user, eosio::name new_user) {    //t
 
     iter_old_user_answer = old_user_answer_table.erase(iter_old_user_answer);
   }
+}
 
+void peeranha::move_table_achive(eosio::name old_user, eosio::name new_user) {
   account_achievements_index old_account_achievements_table(_self, old_user.value);               //achive
   auto iter_account_achievements = old_account_achievements_table.begin();
   while (iter_account_achievements != old_account_achievements_table.end()) {
@@ -153,17 +168,19 @@ void peeranha::swap_account(eosio::name old_user, eosio::name new_user) {    //t
     del_achievement_amount(iter_account_achievements->achievements_id);
     iter_account_achievements = old_account_achievements_table.erase(iter_account_achievements);
   }
+}
 
+void peeranha::delete_table_property_community(eosio::name old_user, eosio::name new_user) {
   property_community_index property_community_table(_self, scope_all_property_community);             //property_community
   auto iter_property_community = property_community_table.find(old_user.value);
   if (iter_property_community != property_community_table.end())
     property_community_table.erase(iter_property_community);
+}
 
+void peeranha::delete_table_period_rating(eosio::name old_user, eosio::name new_user) {
   period_rating_index period_rating_table(_self, old_user.value);                                     //period_rating
   auto iter_period_rating = period_rating_table.begin();
   while (iter_period_rating != period_rating_table.end()) {
     iter_period_rating = period_rating_table.erase(iter_period_rating);
   }
-
-  account_table.erase(iter_old_account);
 }

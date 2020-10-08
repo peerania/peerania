@@ -363,6 +363,18 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void swap_account(eosio::name old_user, eosio::name new_user);
 
+    void move_table_statistik(eosio::name old_user, eosio::name new_user);
+
+    void move_table_usranswers(eosio::name old_user, eosio::name new_user);
+
+    void move_table_usrquestions(eosio::name old_user, eosio::name new_user);
+
+    void move_table_achive(eosio::name old_user, eosio::name new_user);
+
+    void delete_table_property_community(eosio::name old_user, eosio::name new_user);
+
+    void delete_table_period_rating(eosio::name old_user, eosio::name new_user);
+
     void init_all_accounts_achievements();
 
     void update_account_achievement(eosio::name user, uint32_t achievement_id);

@@ -198,6 +198,8 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         begin('test post question empty telegram account')
         bob = self.register_bob_account()
 
+        self.action('addemptelacc', {'bot_name': 'bob', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, bob,
+                        'Register telegram answer from alice')
         self.action('telpostqstn', {'bot': 'bob', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, bob,
                         'Register telegram question from alice')
 
@@ -219,8 +221,14 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                     'Bob asking question')
         id_question = self.table('question', 'allquestions')[0]['id']
 
+        self.action('addemptelacc', {'bot_name': 'bob', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, bob,
+                        'Register telegram answer from alice')
+        
         self.action('telpostansw', {'bot': 'bob', 'telegram_id': 503975561, 'question_id': id_question, 'ipfs_link': 'undefined', 'official_answer': 0}, bob,
                         'Register telegram answer from alice')
+        
+        print(self.table('telegramacc', 'alltelacc'))
+        print(self.table('account', 'allaccounts'))
 
         example = [{'telegram_id': 503975561, 'confirmed': 2}]
         table_telegram_account = self.table('telegramacc', 'alltelacc')
@@ -237,6 +245,8 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         ted = self.register_ted_account()
         alice = self.register_alice_account()
 
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Register telegram answer from alice')
         self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
                         'Register telegram question from alice')
 
@@ -275,6 +285,8 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                     'Bob asking question')
         id_question = self.table('question', 'allquestions')[0]['id']
 
+        self.action('addemptelacc', {'bot_name': 'bob', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, bob,
+                        'Register telegram answer from alice')
         self.action('telpostansw', {'bot': 'bob', 'telegram_id': 503975561, 'question_id': id_question, 'ipfs_link': 'undefined', 'official_answer': 0}, bob,
                         'Register telegram answer from alice')
 
@@ -308,6 +320,8 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         ted = self.register_ted_account()
         alice = self.register_alice_account()
 
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Register telegram answer from alice')
         self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
                         'Register telegram question from alice')
         id_question = self.table('question', 'allquestions')[0]['id']
@@ -368,6 +382,8 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
     #     alice = self.register_alice_account()
     #     ted = self.register_ted_account()
 
+        # self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, bob,
+        #                 'Register telegram answer from alice')
     #     self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
     #                     'Register telegram question from alice')
     #     name_empty_account = self.table('telegramacc', 'alltelacc')[0]['user']
@@ -397,6 +413,8 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
     #     alice = self.register_alice_account()
     #     ted = self.register_ted_account()
 
+        # self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, bob,
+        #                 'Register telegram answer from alice')
     #     self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
     #                     'Register telegram question from alice')
     #     name_empty_account = self.table('telegramacc', 'alltelacc')[0]['user']
@@ -439,6 +457,8 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
     #     alice = self.register_alice_account()
     #     ted = self.register_ted_account()
 
+        # self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, bob,
+        #                 'Register telegram answer from alice')
     #     self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
     #                     'Register telegram question from alice')
     #     name_empty_account = self.table('telegramacc', 'alltelacc')[0]['user']

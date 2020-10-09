@@ -50,46 +50,44 @@ void peeranha::add_telegram_account(eosio::name user, uint64_t telegram_id, bool
     });
 }
 
+void peeranha::add_empty_telegram_account(uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar) {
+  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
+  auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
+  auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);
+  eosio::check(iter_telegram_account_user_id == telegram_account_table_user_id.end(), "This Telegram account already has a telos account");
+  
+  eosio::name user;
+  std::string new_account = "tgm";
+  do {
+    uint64_t value;
+    uint64_t buf = now();
+    for (int i = 0; i < 9; i++) {
+      value = buf;
+      buf = (value / 10) *10;
+      value -= buf;
+      if (value > 5) {
+        value -= 5;
+      } else if (value == 0) {
+        value = 5;
+      }
+      new_account += std::to_string(value);
+      buf /= 10;
+    }
+    user = eosio::name(new_account);
+  }
+  while (account_table.find(user.value) != account_table.end());
+  register_account(user, display_name, ipfs_avatar, ipfs_avatar);
+  add_telegram_account(user, telegram_id, true);
+}
+
 eosio::name peeranha::telegram_post_action(uint64_t telegram_id) {
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
   auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
   auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);
+  eosio::check(iter_telegram_account_user_id != telegram_account_table_user_id.end(), "Account not found"); // add text error
+  eosio::check(iter_telegram_account_user_id->confirmed == 1 || iter_telegram_account_user_id->confirmed == 2, "Account not confirmed"); // add text error
   
-  eosio::name user;
-  if (iter_telegram_account_user_id != telegram_account_table_user_id.end()) {
-    bool check = iter_telegram_account_user_id->confirmed == 1 || iter_telegram_account_user_id->confirmed == 2;
-    eosio::check(check, "Account not confirmed"); // add text error
-    user = iter_telegram_account_user_id->user;
-  } else {
-    std::string new_account = "tgm";
-    do {
-      uint64_t value;
-      uint64_t buf = now();
-      for (int i = 0; i < 9; i++) {
-        value = buf;
-        buf = (value / 10) *10;
-        value -= buf;
-        if (value > 5) {
-          value -= 5;
-        } else if (value == 0) {
-          value = 5;
-        }
-        new_account += std::to_string(value);
-        buf /= 10;
-      }
-      user = eosio::name(new_account);
-    }
-    while (account_table.find(user.value) != account_table.end());
-
-    // const IpfsHash ipfs_profile = {18, 177, 253, 234, 86, 53, 221, 27, 4, 142, 68, 133, 172, 104, 26, 17, 244, 156, 224, 197, 231, 159, 178, 167, 245, 112, 1, 139, 232, 198, 124, 225, 162};
-    // const IpfsHash ipfs_avatar = {18, 254, 86, 251, 60, 165, 231, 126, 138, 64, 117, 29, 190, 91, 185, 94, 90, 25, 235, 76, 6, 26, 74, 178, 119, 211, 158, 57, 68, 171, 203, 116, 79};
-    
-    const IpfsHash ipfs_profile = {'q', 'w', 's'};
-    const IpfsHash ipfs_avatar = {'w', 'd', 'r'};
-    register_account(user, new_account, ipfs_avatar, ipfs_avatar);
-    add_telegram_account(user, telegram_id, true);
-  }
-  return user;
+  return iter_telegram_account_user_id->user;
 }
 
 void peeranha::swap_account(eosio::name old_user, eosio::name new_user) {    //telegram id????

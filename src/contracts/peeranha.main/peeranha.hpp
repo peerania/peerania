@@ -173,6 +173,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     ACTION addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id);
 
+    ACTION addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar);
+
     //update account achievement
     ACTION upaccach(eosio::name user, uint32_t achievement_id);
     
@@ -324,6 +326,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                                 int8_t questions_asked);
 
     void assert_community_exist(uint16_t community_id);
+
+    void add_empty_telegram_account(uint64_t telegram_id, std::string display_name, IpfsHash ipfs_profile, IpfsHash ipfs_avatar);
 #ifdef SUPERFLUOUS_INDEX
     void remove_user_question(eosio::name user, uint64_t question_id);
 

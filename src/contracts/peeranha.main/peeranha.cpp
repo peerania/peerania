@@ -33,6 +33,19 @@ void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t commu
   require_auth(bot);
   eosio::name user = telegram_post_action(telegram_id);
   post_question(user, community_id, tags, title, ipfs_link, type);
+
+  auto iter_account = account_table.find(user.value);
+  if (get_property_d(iter_account->integer_properties, PROPERTY_EMPTY_ACCOUNT, 0)) {
+    user_questions_index user_questions_table(_self, user.value); 
+    auto iter_user_question = user_questions_table.begin();
+    eosio::check(iter_user_question != user_questions_table.end(), "Error set property question");
+
+    auto iter_question = find_question(iter_user_question->question_id);
+    question_table.modify(iter_question, _self,
+                        [](auto &question) {
+                          set_property(question.properties, PROPERTY_EMPTY_QUESTION, 1);
+                        });
+  }
 }
 
 void peeranha::postanswer(eosio::name user, uint64_t question_id,
@@ -49,6 +62,20 @@ void peeranha::telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t quest
   bool buf_official_answer = official_answer;
   eosio::name user = telegram_post_action(telegram_id);
   post_answer(user, question_id, ipfs_link, buf_official_answer);
+
+  auto iter_account = account_table.find(user.value);
+  if (get_property_d(iter_account->integer_properties, PROPERTY_EMPTY_ACCOUNT, 0)) {
+    user_answers_index user_answer_table(_self, user.value);
+    auto iter_user_answer = user_answer_table.begin();
+    eosio::check(iter_user_answer != user_answer_table.end(), "Error set property answer");
+
+    auto iter_question = find_question(iter_user_answer->question_id);
+    question_table.modify(iter_question, _self,
+                        [&iter_user_answer](auto &question) {
+                          auto iter_answer = find_answer(question, iter_user_answer->answer_id);
+                          set_property(iter_answer->properties, PROPERTY_EMPTY_ANSWER, 1);
+                        });
+  }
 }
 
 void peeranha::postcomment(eosio::name user, uint64_t question_id,

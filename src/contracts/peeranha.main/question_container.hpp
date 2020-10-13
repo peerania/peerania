@@ -31,6 +31,8 @@
 #define PROPERTY_OFFICIAL_ANSWER 10
 #define PROPERTY_ANSWER_15_MINUTES 12   //(12 - achive id)
 #define PROPERTY_FIRST_ANSWER 13        //(13 - achive id)
+#define PROPERTY_EMPTY_ANSWER 15
+#define PROPERTY_EMPTY_QUESTION 15
 
 #define MAX_QUESTION_ID 0xfffffffffULL
 

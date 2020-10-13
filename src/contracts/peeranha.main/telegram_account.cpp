@@ -78,6 +78,14 @@ void peeranha::add_empty_telegram_account(uint64_t telegram_id, std::string disp
   while (account_table.find(user.value) != account_table.end());
   register_account(user, display_name, ipfs_avatar, ipfs_avatar);
   add_telegram_account(user, telegram_id, true);
+
+  auto iter_account = account_table.find(user.value);
+  eosio::check(iter_account != account_table.end(), "Error register empty account");
+  account_table.modify(
+      iter_account, _self,
+      [](auto &account) {
+        set_property(account.integer_properties, PROPERTY_EMPTY_ACCOUNT, 1);
+  });
 }
 
 eosio::name peeranha::telegram_post_action(uint64_t telegram_id) {
@@ -115,7 +123,7 @@ void peeranha::move_table_statistik(eosio::name old_user, eosio::name new_user) 
   account_table.erase(iter_old_account);
 }
 
-void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user) {
+void peeranha::move_table_usrquestions(eosio::name old_user, eosio::name new_user) {
   user_questions_index new_user_questions_table(_self, new_user.value);                                 //move table usranswers
   user_questions_index old_user_questions_table(_self, old_user.value);
   auto iter_old_user_questions = old_user_questions_table.begin();
@@ -132,7 +140,7 @@ void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user)
   }
 }
 
-void peeranha::move_table_usrquestions(eosio::name old_user, eosio::name new_user) {
+void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user) {
   user_answers_index new_user_answer_table(_self, new_user.value);                                  //move table usrquestions
   user_answers_index old_user_answer_table(_self, old_user.value);
   auto iter_old_user_answer = old_user_answer_table.begin();

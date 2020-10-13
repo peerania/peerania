@@ -592,6 +592,44 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                             {'id': id_question_empty_acc, 'answers': [{'id': 1, 'properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]}], 'properties': [{'key': 15, 'value': 1}]}]
         self.assertTrue(compare(example_question, self.table('question', 'allquestions'), ignore_excess=True))
         end()
+
+    def test_change_mark_value_empty_question_answer(self):
+        begin('change the flag value of an empty question/answer (property: key = 15 value = 1 -> value = 0)')
+        ted = self.register_ted_account()
+        bob = self.register_bob_account()
+        
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Add empty account through telegram')
+        name_empty_account = self.table('account', 'allaccounts')[2]['user']
+        
+        example_account = [{'user': 'bob', 'integer_properties': [],}, 
+                            {'user': 'ted', 'integer_properties': [],}, 
+                            {'user': name_empty_account, 'integer_properties': [{'key': 15, 'value': 1}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+        self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
+                        'Register telegram question from alice')
+        id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
+        self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+                        'Register telegram answer from bob, telegram account don`t approve')
+
+        example_question = [{'id': id_question_empty_acc, 'answers': [{'id': 1, 'properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}, {'key': 15, 'value': 1}]}], 'properties': [{'key': 15, 'value': 1}]}]
+        self.assertTrue(compare(example_question, self.table('question', 'allquestions'), ignore_excess=True))
+
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': bob,
+            'telegram_id': 503975561
+        }, ted, 'Alice add telegram account 503975561')
+
+
+        self.action('apprvacc', {
+            'user': bob
+        }, bob, 'Alice approve telegram account')
+
+        example_question = [{'id': id_question_empty_acc, 'answers': [{'id': 1, 'properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}, {'key': 15, 'value': 0}]}], 'properties': [{'key': 15, 'value': 0}]}]
+        self.assertTrue(compare(example_question, self.table('question', 'allquestions'), ignore_excess=True))
+        end()
         
 if __name__ == '__main__':
     main()

@@ -4,7 +4,7 @@ void peeranha::approve_account(eosio::name user) {
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
   auto iter_telegram_account = telegram_account_table.find(user.value);
   eosio::check(iter_telegram_account->confirmed != 1, "This telos account already has a Telegram account");
-  eosio::check(iter_telegram_account != telegram_account_table.end(), "Account not found");
+  eosio::check(iter_telegram_account != telegram_account_table.end(), "Telegram account not found");
 
   telegram_account_table.modify(
       iter_telegram_account, _self, [](auto &telegram_account) {
@@ -24,7 +24,7 @@ void peeranha::approve_account(eosio::name user) {
 void peeranha::disapprove_account(eosio::name user) { 
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
   auto iter_telegram_account = telegram_account_table.find(user.value);
-  eosio::check(iter_telegram_account != telegram_account_table.end(), "Account not found");
+  eosio::check(iter_telegram_account != telegram_account_table.end(), "Telegram account not found");
 
   telegram_account_table.erase(iter_telegram_account);
 }
@@ -92,7 +92,7 @@ eosio::name peeranha::telegram_post_action(uint64_t telegram_id) {
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
   auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
   auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);
-  eosio::check(iter_telegram_account_user_id != telegram_account_table_user_id.end(), "Account not found"); // add text error
+  eosio::check(iter_telegram_account_user_id != telegram_account_table_user_id.end(), "Telegram account not found"); // add text error
   eosio::check(iter_telegram_account_user_id->confirmed == 1 || iter_telegram_account_user_id->confirmed == 2, "Account not confirmed"); // add text error
   
   return iter_telegram_account_user_id->user;
@@ -135,6 +135,7 @@ void peeranha::move_table_usrquestions(eosio::name old_user, eosio::name new_use
     question_table.modify(iter_question, _self,
                         [new_user](auto &question) {
                           question.user = new_user;
+                          set_property(question.properties, PROPERTY_EMPTY_QUESTION, 0);
                         });
     iter_old_user_questions = old_user_questions_table.erase(iter_old_user_questions);
   }
@@ -154,6 +155,7 @@ void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user)
                         [new_user, &iter_old_user_answer, &iter_question](auto &question) {
                           auto iter_answer = find_answer(question, iter_old_user_answer->answer_id);
                           iter_answer->user = new_user;
+                          set_property(iter_answer->properties, PROPERTY_EMPTY_ANSWER, 0);
                         });
 
     iter_old_user_answer = old_user_answer_table.erase(iter_old_user_answer);

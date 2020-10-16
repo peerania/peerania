@@ -67,7 +67,6 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'user': alice,
             'telegram_id': 503975561
         }, ted, 'Alice add telegram account 503975561')
-
         self.action('apprvacc', {
             'user': alice
         }, alice, 'Alice approve telegram account')
@@ -382,7 +381,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example_alice, self.table('accachieve', name_empty_account), ignore_excess=True))
         example_achive_amount = [{'id': Achievents.questions_asked.value, 'count': 1}, 
                                 {'id': Achievents.answers_given.value, 'count': 1}, 
-                                {'id': Achievents.first_10k_registered.value, 'count': 3}, # first_10k_registered = 3 || 4
+                                {'id': Achievents.first_10k_registered.value, 'count': 4}, # first_10k_registered = 3 || 4
                                 {'id': Achievents.answer_15_minutes.value, 'count': 1}, 
                                 {'id': Achievents.first_answer.value, 'count': 1}]
         self.assertTrue(compare(example_achive_amount, self.table('achieve', 'allachieve'), ignore_excess=True))
@@ -390,6 +389,9 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                             {'user': 'ted'}, 
                             {'user': name_empty_account, 'questions_asked': 1, 'answers_given': 1, 'correct_answers': 0}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        print(self.table('globalstat', 'allstat'))
+        example_count_user = [{'version': 1, 'user_count': 4, 'communities_count': 3}]
+        self.assertTrue(compare(example_count_user, self.table('globalstat', 'allstat'), ignore_excess=True))
         
         # ____________________________________________________________before_______________________________________________________
 
@@ -423,12 +425,15 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.assertTrue(compare([], self.table('accachieve', name_empty_account), ignore_excess=True))
         example_achive_amount = [{'id': Achievents.questions_asked.value, 'count': 1}, 
                                 {'id': Achievents.answers_given.value, 'count': 1}, 
-                                {'id': Achievents.first_10k_registered.value, 'count': 2}, #first_10k_registered = 2 || 3
+                                {'id': Achievents.first_10k_registered.value, 'count': 3}, #first_10k_registered = 2 || 3
                                 {'id': Achievents.answer_15_minutes.value, 'count': 1}, 
                                 {'id': Achievents.first_answer.value, 'count': 1}]
         self.assertTrue(compare(example_achive_amount, self.table('achieve', 'allachieve'), ignore_excess=True))
         example_account = [{'user': 'alice', 'questions_asked': 1, 'answers_given': 1, 'correct_answers': 0}, {'user': 'ted'}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        print(self.table('globalstat', 'allstat'))
+        example_count_user = [{'version': 1, 'user_count': 3, 'communities_count': 3}]
+        self.assertTrue(compare(example_count_user, self.table('globalstat', 'allstat'), ignore_excess=True))
         end()
 
     def test_clear_table_telegram_account(self):
@@ -734,7 +739,6 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
 
-
     def test_move_account_user_vote_mark_correct_answer(self):
         begin('user mark correct/vote answer -> move account. Check user rating ')
         ted = self.register_ted_account()
@@ -772,7 +776,6 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
 
-    
     def test_move_account_vote_question_for_yourself(self):
         begin('user upvote question empty account and move his. Take away rating')
         ted = self.register_ted_account()

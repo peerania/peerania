@@ -367,7 +367,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void swap_account(eosio::name old_user, eosio::name new_user);
 
-    void move_table_statistik(eosio::name old_user, eosio::name new_user);
+    void move_account_statistik(eosio::name old_user, eosio::name new_user);
 
     void move_table_usranswers(eosio::name old_user, eosio::name new_user);
 

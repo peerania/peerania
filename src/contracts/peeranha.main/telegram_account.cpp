@@ -104,10 +104,10 @@ void peeranha::swap_account(eosio::name old_user, eosio::name new_user) {    //t
   move_table_achive(old_user, new_user);
   delete_table_property_community(old_user, new_user);
   delete_table_period_rating(old_user, new_user);
-  move_table_statistik(old_user, new_user);
+  move_account_statistik(old_user, new_user);
 }
 
-void peeranha::move_table_statistik(eosio::name old_user, eosio::name new_user) {
+void peeranha::move_account_statistik(eosio::name old_user, eosio::name new_user) {
   auto iter_new_account = find_account(new_user);
   auto iter_old_account = find_account(old_user);
 
@@ -120,6 +120,10 @@ void peeranha::move_table_statistik(eosio::name old_user, eosio::name new_user) 
                           account.answers_given += iter_old_account->answers_given;
                           account.correct_answers += iter_old_account->correct_answers;
                        });
+  global_stat_index global_stat_table(_self, scope_all_stat);
+  global_stat_table.modify(
+      --global_stat_table.end(), _self,
+      [](auto &global_stat) { global_stat.user_count -= 1; });
   account_table.erase(iter_old_account);
 }
 

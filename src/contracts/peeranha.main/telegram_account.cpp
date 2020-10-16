@@ -137,6 +137,22 @@ void peeranha::move_table_usrquestions(eosio::name old_user, eosio::name new_use
                           question.user = new_user;
                           set_property(question.properties, PROPERTY_EMPTY_QUESTION, 0);
                         });
+
+    int upvote_mul = QUESTION_UPVOTED_REWARD;
+    switch (get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
+                         QUESTION_TYPE_EXPERT)) {
+      case QUESTION_TYPE_GENERAL:
+        upvote_mul = COMMON_QUESTION_UPVOTED_REWARD;
+        break;
+    }
+
+    int8_t rating_change = 0;
+    std::for_each(iter_question->history.begin(), iter_question->history.end(), [&new_user, &rating_change, upvote_mul](auto hst) {
+      if (hst.is_flag_set(HISTORY_UPVOTED_FLG) && hst.user == new_user) {
+        rating_change -= upvote_mul;
+      }
+    });
+    update_rating(find_account(old_user)->user, rating_change);
     iter_old_user_questions = old_user_questions_table.erase(iter_old_user_questions);
   }
 }
@@ -151,13 +167,44 @@ void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user)
       usr_question.answer_id = iter_old_user_answer->answer_id;
     });
     auto iter_question = find_question(iter_old_user_answer->question_id);                       //change author answer
+
+    auto vote_question_res = VoteItem::question;
+    auto vote_answer_res = VoteItem::answer;
+    switch (get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
+                         QUESTION_TYPE_EXPERT)) {
+      case QUESTION_TYPE_GENERAL:
+        vote_question_res = VoteItem::common_question;
+        vote_answer_res = VoteItem::common_answer;
+        break;
+    }
+
+    int8_t rating_change_old_user = 0;
+    int8_t rating_change_new_user = 0;
     question_table.modify(iter_question, _self,
-                        [new_user, &iter_old_user_answer, &iter_question](auto &question) {
+                        [new_user, &iter_old_user_answer, &rating_change_old_user, &rating_change_new_user, vote_answer_res, vote_question_res](auto &question) {
                           auto iter_answer = find_answer(question, iter_old_user_answer->answer_id);
                           iter_answer->user = new_user;
                           set_property(iter_answer->properties, PROPERTY_EMPTY_ANSWER, 0);
-                        });
 
+                          if (question.correct_answer_id == iter_answer->id && question.user == new_user) {
+                            rating_change_old_user -= vote_answer_res.correct_answer;
+                            rating_change_new_user -= vote_question_res.correct_answer;
+                          }
+                          if (get_property_d(iter_answer->properties, PROPERTY_ANSWER_15_MINUTES, -2) == 1 && question.user == new_user) {
+                            rating_change_old_user -= vote_answer_res.upvoted_reward;
+                          }
+                          if (get_property_d(iter_answer->properties, PROPERTY_FIRST_ANSWER, -2) == 1 && question.user == new_user) {
+                            rating_change_old_user -= vote_answer_res.upvoted_reward;
+                          }
+
+                          std::for_each(iter_answer->history.begin(), iter_answer->history.end(), [&new_user, &rating_change_old_user, vote_answer_res](auto hst) {
+                            if (hst.is_flag_set(HISTORY_UPVOTED_FLG) && hst.user == new_user) {
+                              rating_change_old_user -= vote_answer_res.upvoted_reward;
+                            }
+                          });
+                        });
+    update_rating(find_account(new_user)->user, rating_change_new_user);
+    update_rating(find_account(old_user)->user, rating_change_old_user);
     iter_old_user_answer = old_user_answer_table.erase(iter_old_user_answer);
   }
 }

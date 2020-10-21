@@ -184,8 +184,10 @@ void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user)
 
     int8_t rating_change_old_user = 0;
     int8_t rating_change_new_user = 0;
+    int32_t delete_achievement_first_answer = 0;
+    int32_t delete_achievement_answer_15_minutes = 0;
     question_table.modify(iter_question, _self,
-                        [new_user, &iter_old_user_answer, &rating_change_old_user, &rating_change_new_user, vote_answer_res, vote_question_res](auto &question) {
+                        [new_user, &iter_old_user_answer, &rating_change_old_user, &rating_change_new_user, vote_answer_res, vote_question_res, &delete_achievement_answer_15_minutes, &delete_achievement_first_answer](auto &question) {
                           auto iter_answer = find_answer(question, iter_old_user_answer->answer_id);
                           iter_answer->user = new_user;
                           set_property(iter_answer->properties, PROPERTY_EMPTY_ANSWER, 0);
@@ -196,9 +198,11 @@ void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user)
                           }
                           if (get_property_d(iter_answer->properties, PROPERTY_ANSWER_15_MINUTES, -2) == 1 && question.user == new_user) {
                             rating_change_old_user -= vote_answer_res.upvoted_reward;
+                            delete_achievement_answer_15_minutes --;
                           }
                           if (get_property_d(iter_answer->properties, PROPERTY_FIRST_ANSWER, -2) == 1 && question.user == new_user) {
                             rating_change_old_user -= vote_answer_res.upvoted_reward;
+                            delete_achievement_first_answer --;
                           }
 
                           std::for_each(iter_answer->history.begin(), iter_answer->history.end(), [&new_user, &rating_change_old_user, vote_answer_res](auto hst) {
@@ -207,8 +211,11 @@ void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user)
                             }
                           });
                         });
-    update_rating(find_account(new_user)->user, rating_change_new_user);
-    update_rating(find_account(old_user)->user, rating_change_old_user);
+    update_achievement(old_user, ANSWER_15_MINUTES, delete_achievement_answer_15_minutes, false);
+    update_achievement(old_user, FIRST_ANSWER, delete_achievement_first_answer, false);
+
+    update_rating(new_user, rating_change_new_user);
+    update_rating(old_user, rating_change_old_user);
     iter_old_user_answer = old_user_answer_table.erase(iter_old_user_answer);
   }
 }

@@ -76,7 +76,7 @@ void peeranha::add_empty_telegram_account(uint64_t telegram_id, std::string disp
     user = eosio::name(new_account);
   }
   while (account_table.find(user.value) != account_table.end());
-  register_account(user, display_name, ipfs_avatar, ipfs_avatar);
+  register_account(user, display_name, ipfs_profile, ipfs_avatar);
   add_telegram_account(user, telegram_id, true);
 
   auto iter_account = account_table.find(user.value);

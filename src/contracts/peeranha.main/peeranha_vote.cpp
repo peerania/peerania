@@ -164,12 +164,12 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
 
             auto within_15_minutes_property = get_property_d(iter_answer->properties, PROPERTY_ANSWER_15_MINUTES, -1);
             if (within_15_minutes_property == 1) {
-              user_rating_change -= vote_answer_res.upvoted_reward;
+              user_rating_change -= vote_answer_res.answer_15_minutes;
               within_15_minutes = true;
             }
             auto first_answer_property = get_property_d(iter_answer->properties, PROPERTY_FIRST_ANSWER, -1);
             if (first_answer_property == 1) {
-              user_rating_change -= vote_answer_res.upvoted_reward;
+              user_rating_change -= vote_answer_res.first_answer;
               first_answer = true;
             }
 
@@ -238,12 +238,12 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
 
       auto within_15_minutes_user = get_property_d(answer->properties, PROPERTY_ANSWER_15_MINUTES, -1);
       if (within_15_minutes_user == 1) {
-        rating_change -= vote_answer_res.upvoted_reward;
+        rating_change -= vote_answer_res.answer_15_minutes;
         update_achievement(answer->user, ANSWER_15_MINUTES, -1, false);
       }
       auto first_answer_property = get_property_d(answer->properties, PROPERTY_FIRST_ANSWER, -1);
       if (first_answer_property == 1) {
-        rating_change -= vote_answer_res.upvoted_reward;
+        rating_change -= vote_answer_res.first_answer;
         update_achievement(answer->user, FIRST_ANSWER, -1, false);
       }
       

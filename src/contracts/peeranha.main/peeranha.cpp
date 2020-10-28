@@ -246,24 +246,9 @@ void peeranha:: addtelacc(eosio::name bot_name, eosio::name user, uint64_t teleg
   add_telegram_account(user, telegram_id);
 }
 
-void peeranha::upaccach(eosio::name user, uint32_t achievement_id) {
-  require_auth(_self);
-  update_account_achievement(user, achievement_id);
-}
-
-void peeranha::intallaccach() {
-  require_auth(_self);
-  init_all_accounts_achievements();
-}
-
 void peeranha::intachregist() {
   require_auth(_self);
   init_achievements_first_10k_registered_users();
-}
-
-void peeranha::intachrating() {
-  require_auth(_self);
-  init_achievements_rating();
 }
 
 #ifdef SUPERFLUOUS_INDEX
@@ -446,8 +431,7 @@ EOSIO_DISPATCH(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
         reportprof)(updateacc)(givemoderflg)(editcomm)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
-        (apprvacc)(dsapprvacc)(addtelacc)
-        (intallaccach)(upaccach)(intachregist)(intachrating)
+        (apprvacc)(dsapprvacc)(addtelacc)(intachregist)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

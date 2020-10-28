@@ -43,7 +43,7 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
 #endif
   update_community_statistics(community_id, 1, 0, 0, 0);
   update_tags_statistics(community_id, tags, 1);
-  testAchievement(iter_account->user, QUESTION, iter_account->questions_asked);
+  update_achievement(iter_account->user, QUESTION, iter_account->questions_asked);
 }
 
 void peeranha::post_answer(eosio::name user, uint64_t question_id,
@@ -88,7 +88,7 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
     update_rating(iter_account, [sum_answer_15_minutes](auto &account) {
       set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes);
     });
-    testAchievement(iter_account->user, ANSWER_15_MINUTES, sum_answer_15_minutes);
+    update_achievement(iter_account->user, ANSWER_15_MINUTES, sum_answer_15_minutes);
   }
   if (iter_question->answers.size() == 0 && user != iter_question->user) {
     int_key_value key_value;
@@ -101,7 +101,7 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
     update_rating(iter_account, [&sum_first_answer](auto &account) {
       set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer);
     });
-    testAchievement(iter_account->user, FIRST_ANSWER, sum_first_answer);
+    update_achievement(iter_account->user, FIRST_ANSWER, sum_first_answer);
   }
 
   uint16_t answer_id;
@@ -124,7 +124,7 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
     account.reduce_energy(ENERGY_POST_ANSWER, community_id);
     account.answers_given += 1;
   });
-  testAchievement(iter_account->user, ANSWER, iter_account->answers_given);
+  update_achievement(iter_account->user, ANSWER, iter_account->answers_given);
 }
 #ifdef SUPERFLUOUS_INDEX
 void peeranha::remove_user_question(eosio::name user, uint64_t question_id) {
@@ -203,7 +203,7 @@ void peeranha::delete_question(eosio::name user, uint64_t question_id) {
                   account.reduce_energy(ENERGY_DELETE_QUESTION);
                   account.questions_asked -= 1;
                 });
-  testAchievement(iter_account->user, QUESTION, iter_account->questions_asked);
+  update_achievement(iter_account->user, QUESTION, iter_account->questions_asked);
   question_table.erase(iter_question);
   eosio::check(iter_question != question_table.end(),
                "Address not erased properly");
@@ -261,9 +261,9 @@ void peeranha::delete_answer(eosio::name user, uint64_t question_id,
                   set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer);
                 });
 
-  testAchievement(iter_account->user, ANSWER_15_MINUTES, sum_answer_15_minutes);
-  testAchievement(iter_account->user, FIRST_ANSWER, sum_first_answer);
-  testAchievement(iter_account->user, ANSWER, iter_account->answers_given);
+  update_achievement(iter_account->user, ANSWER_15_MINUTES, sum_answer_15_minutes);
+  update_achievement(iter_account->user, FIRST_ANSWER, sum_first_answer);
+  update_achievement(iter_account->user, ANSWER, iter_account->answers_given);
 }
 
 void peeranha::delete_comment(eosio::name user, uint64_t question_id,
@@ -429,7 +429,7 @@ void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
           account.correct_answers += 1;
         });
       }
-      testAchievement(iter_answer->user, CORRECT_ANSWER, find_account(iter_answer->user)->correct_answers);
+      update_achievement(iter_answer->user, CORRECT_ANSWER, find_account(iter_answer->user)->correct_answers);
     } else {
       // One of answers is marked as correct. Find this one,
       // pick up the reward of past user and give it to new
@@ -442,7 +442,7 @@ void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
         update_rating(iter_old_answer->user, -answer_accepted_as_correct_reward,
                       [](auto &account) { account.correct_answers -= 1; });
         auto iter_account = find_account(iter_old_answer->user);
-        testAchievement (iter_old_answer->user, CORRECT_ANSWER, iter_account->correct_answers);
+        update_achievement (iter_old_answer->user, CORRECT_ANSWER, iter_account->correct_answers);
       }
       else 
         update_rating(iter_account, accept_answer_as_correct_reward,
@@ -466,9 +466,9 @@ void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
           account.reduce_energy(ENERGY_MARK_ANSWER_AS_CORRECT);
         });
       }
-      testAchievement(iter_old_answer->user, CORRECT_ANSWER, find_account(iter_old_answer->user)->correct_answers);
-      testAchievement(iter_answer->user, CORRECT_ANSWER, find_account(iter_answer->user)->correct_answers);
-      testAchievement(iter_account->user, CORRECT_ANSWER, iter_account->correct_answers);
+      update_achievement(iter_old_answer->user, CORRECT_ANSWER, find_account(iter_old_answer->user)->correct_answers);
+      update_achievement(iter_answer->user, CORRECT_ANSWER, find_account(iter_answer->user)->correct_answers);
+      update_achievement(iter_account->user, CORRECT_ANSWER, iter_account->correct_answers);
     }
   } else {
     // Set question to "without answer"
@@ -493,7 +493,7 @@ void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
       });
     }
     auto iter_account = find_account(iter_old_answer->user);
-    testAchievement(iter_account->user, CORRECT_ANSWER, iter_account->correct_answers);
+    update_achievement(iter_account->user, CORRECT_ANSWER, iter_account->correct_answers);
   }
   if (iter_question->correct_answer_id == EMPTY_ANSWER_ID &&
       answer_id != EMPTY_ANSWER_ID)

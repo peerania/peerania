@@ -350,11 +350,9 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void add_telegram_account(eosio::name user, uint64_t telegram_id);
 
-    void testAchievement (eosio::name user, Group_achievement group, int value);
+    void update_achievement (eosio::name user, Group_achievement group, int value);
 
     bool give_achievement(uint32_t id_achievement);
 
     void init_achievements_first_10k_registered_users();
-
-    void update_achievement(eosio::name user, std::pair<uint32_t, achievement> achievementt, int value);
 };

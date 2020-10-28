@@ -3,23 +3,6 @@
 #include <stdint.h>
 #include "property.hpp"
 
-// void peeranha::update_achievement(eosio::name user, std::pair<uint32_t, achievement> achievement, int value) {
-//   account_achievements_index account_achievements_table(_self, user.value );
-  
-//   auto iter_account_achievements = account_achievements_table.find(achievement.first);
-  
-//   auto find_achievement = iter_account_achievements == account_achievements_table.end();
-//   auto lower_bound = value >= achievement.second.lower_bound;
-//   if (find_achievement && lower_bound && give_achievement(achievement.first)) {
-//     account_achievements_table.emplace(_self, 
-//         [&](auto &account) {
-//           account.user = user;
-//           account.achievements_id = achievement.first;
-//           account.date = now();
-//     });
-//   }
-// }
-
 void peeranha::update_achievement(eosio::name user, Group_achievement group, int value) {
   account_achievements_index account_achievements_table(_self, user.value );
 

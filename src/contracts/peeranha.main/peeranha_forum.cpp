@@ -203,7 +203,6 @@ void peeranha::delete_question(eosio::name user, uint64_t question_id) {
                   account.reduce_energy(ENERGY_DELETE_QUESTION);
                   account.questions_asked -= 1;
                 });
-  update_achievement(iter_account->user, QUESTION, iter_account->questions_asked);
   question_table.erase(iter_question);
   eosio::check(iter_question != question_table.end(),
                "Address not erased properly");
@@ -248,22 +247,22 @@ void peeranha::delete_answer(eosio::name user, uint64_t question_id,
 #ifdef SUPERFLUOUS_INDEX
   remove_user_answer(user, question_id);
 #endif
-  int32_t sum_answer_15_minutes = get_property_d(iter_account->integer_properties, PROPERTY_ANSWER_15_MINUTES, 1) - 1;
-  int32_t sum_first_answer = get_property_d(iter_account->integer_properties, PROPERTY_FIRST_ANSWER, 1) - 1;
 
   update_community_statistics(iter_question->community_id, 0, -1, 0, 0);
   update_rating(iter_account,
                 rating_change,
-                [sum_answer_15_minutes, sum_first_answer](auto &account) {
+                [within_15_minutes, first_answer](auto &account) {
                   account.reduce_energy(ENERGY_DELETE_ANSWER);
                   account.answers_given -= 1;
-                  set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes);
-                  set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer);
+                  if (within_15_minutes) {
+                    int32_t sum_answer_15_minutes = get_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, 1) - 1;
+                    set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes);
+                  }
+                  if (first_answer) {
+                    int32_t sum_first_answer = get_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, 1) - 1;
+                    set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer);
+                  }
                 });
-
-  update_achievement(iter_account->user, ANSWER_15_MINUTES, sum_answer_15_minutes);
-  update_achievement(iter_account->user, FIRST_ANSWER, sum_first_answer);
-  update_achievement(iter_account->user, ANSWER, iter_account->answers_given);
 }
 
 void peeranha::delete_comment(eosio::name user, uint64_t question_id,
@@ -441,8 +440,6 @@ void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
       if (iter_old_answer->user != user) {
         update_rating(iter_old_answer->user, -answer_accepted_as_correct_reward,
                       [](auto &account) { account.correct_answers -= 1; });
-        auto iter_account = find_account(iter_old_answer->user);
-        update_achievement (iter_old_answer->user, CORRECT_ANSWER, iter_account->correct_answers);
       }
       else 
         update_rating(iter_account, accept_answer_as_correct_reward,
@@ -466,7 +463,6 @@ void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
           account.reduce_energy(ENERGY_MARK_ANSWER_AS_CORRECT);
         });
       }
-      update_achievement(iter_old_answer->user, CORRECT_ANSWER, find_account(iter_old_answer->user)->correct_answers);
       update_achievement(iter_answer->user, CORRECT_ANSWER, find_account(iter_answer->user)->correct_answers);
       update_achievement(iter_account->user, CORRECT_ANSWER, iter_account->correct_answers);
     }
@@ -492,8 +488,6 @@ void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
         account.reduce_energy(ENERGY_MARK_ANSWER_AS_CORRECT);
       });
     }
-    auto iter_account = find_account(iter_old_answer->user);
-    update_achievement(iter_account->user, CORRECT_ANSWER, iter_account->correct_answers);
   }
   if (iter_question->correct_answer_id == EMPTY_ANSWER_ID &&
       answer_id != EMPTY_ANSWER_ID)

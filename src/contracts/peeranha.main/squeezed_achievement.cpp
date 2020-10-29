@@ -3,7 +3,7 @@
 #include <string>
 #include "peeranha.hpp"
 
-bool peeranha::add_achievement_amount(uint32_t id_achievement) {
+bool peeranha::increment_achievement_count(uint32_t id_achievement) {
   squeezed_achievement_index squeezed_achievement_table(_self, scope_all_squeezed_achievements);
 
   auto achieve = achievements.find(id_achievement);
@@ -29,7 +29,7 @@ bool peeranha::add_achievement_amount(uint32_t id_achievement) {
   return true;
 }
 
-void  peeranha::del_achievement_amount(uint32_t id_achievement) {
+void peeranha::decrement_achievement_count(uint32_t id_achievement) {
   squeezed_achievement_index squeezed_achievement_table(_self, scope_all_squeezed_achievements);
   auto iter_squeezed_achievement = squeezed_achievement_table.find(id_achievement);
   if (iter_squeezed_achievement != squeezed_achievement_table.end()) {

@@ -3,17 +3,17 @@
 #include <stdint.h>
 #include "property.hpp"
 
-void peeranha::update_achievement(eosio::name user, uint32_t id_achievement, uint64_t value, bool new_value) {
+void peeranha::update_achievement(eosio::name user, uint32_t achievement_id, uint64_t value, bool new_value) {
   account_achievements_index account_achievements_table(_self, user.value );
   
-  auto iter_account_achievements = account_achievements_table.find(id_achievement);
+  auto iter_account_achievements = account_achievements_table.find(achievement_id);
 
   if (iter_account_achievements == account_achievements_table.end()) {
-    if(add_achievement_amount(id_achievement)) {
+    if(increment_achievement_count(achievement_id)) {
       account_achievements_table.emplace(_self, 
           [&](auto &account) {
             account.user = user;
-            account.achievements_id = id_achievement;
+            account.achievements_id = achievement_id;
             account.value = value;
             account.date = now();
           });

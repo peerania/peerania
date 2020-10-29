@@ -2,6 +2,10 @@
 #include "peeranha.hpp"
 #include <stdint.h>
 
+#define NOT_CONFIRMED_TELEGRAM_ACCOUNT 0
+#define CONFIRMED_TELEGRAM_ACCOUNT 1
+#define EMPTY_TELEGRAM_ACCOUNT 2
+
 struct [[ eosio::table("telegramacc"), eosio::contract("peeranha.main") ]] telegram_account {
   eosio::name user;
   int telegram_id; 

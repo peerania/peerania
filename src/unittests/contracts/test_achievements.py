@@ -22,494 +22,414 @@ class Achievents(int, Enum):
     first_answer = 13
 
 class TestAchievents(peeranhatest.peeranhaTest):  
-    # def test_post_question(self):
-    #     begin('test post question (bronze, silver, gold) ahievements')
-    #     alice = self.register_alice_account()     
+    def test_post_question(self):
+        begin('test post question (bronze, silver, gold) ahievements')
+        alice = self.register_alice_account()     
 
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476735))
-    #     example_alice = [{'user': 'alice', 'achievements_id': 30}, 
-    #                     {'user': 'alice', 'achievements_id': 40}]
-    #     self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.register_question_action(alice, 'Alice question ' + str(68719476735))
+        example_alice = [{'user': 'alice', 'achievements_id': 30}, 
+                        {'user': 'alice', 'achievements_id': 40}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
 
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476734))
-    #     example_alice = [{'user': 'alice', 'achievements_id': 1}, 
-    #                     {'user': 'alice', 'achievements_id': 30}, 
-    #                     {'user': 'alice', 'achievements_id': 40}]
-    #     self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.register_question_action(alice, 'Alice question ' + str(68719476734))
+        example_alice = [{'user': 'alice', 'achievements_id': 1}, 
+                        {'user': 'alice', 'achievements_id': 30}, 
+                        {'user': 'alice', 'achievements_id': 40}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
 
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476733))
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476732))
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476731))
-    #     example_alice = [{'user': 'alice', 'achievements_id': 1},
-    #                     {'user': 'alice', 'achievements_id': 2}, 
-    #                     {'user': 'alice', 'achievements_id': 30}, 
-    #                     {'user': 'alice', 'achievements_id': 40}]
-    #     self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.register_question_action(alice, 'Alice question ' + str(68719476733))
+        self.register_question_action(alice, 'Alice question ' + str(68719476732))
+        self.register_question_action(alice, 'Alice question ' + str(68719476731))
+        example_alice = [{'user': 'alice', 'achievements_id': 1},
+                        {'user': 'alice', 'achievements_id': 2}, 
+                        {'user': 'alice', 'achievements_id': 30}, 
+                        {'user': 'alice', 'achievements_id': 40}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
 
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476730))
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476729))
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476728))
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476727))
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476726))
-    #     example_alice = [{'user': 'alice', 'achievements_id': 1},
-    #                     {'user': 'alice', 'achievements_id': 2},
-    #                     {'user': 'alice', 'achievements_id': 3}, 
-    #                     {'user': 'alice', 'achievements_id': 30}, 
-    #                     {'user': 'alice', 'achievements_id': 40}]
-    #     self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.register_question_action(alice, 'Alice question ' + str(68719476730))
+        self.register_question_action(alice, 'Alice question ' + str(68719476729))
+        self.register_question_action(alice, 'Alice question ' + str(68719476728))
+        self.register_question_action(alice, 'Alice question ' + str(68719476727))
+        self.register_question_action(alice, 'Alice question ' + str(68719476726))
+        example_alice = [{'user': 'alice', 'achievements_id': 1},
+                        {'user': 'alice', 'achievements_id': 2},
+                        {'user': 'alice', 'achievements_id': 3}, 
+                        {'user': 'alice', 'achievements_id': 30}, 
+                        {'user': 'alice', 'achievements_id': 40}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
 
-    #     example_achievement = [{'id': 1, 'count': 1},
-    #                             {'id': 2, 'count': 1},
-    #                             {'id': 3, 'count': 1},
-    #                             {'id': 30, 'count': 1},
-    #                             {'id': 40, 'count': 1}]
-    #     self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
-    #     end()
+        example_achievement = [{'id': 1, 'count': 1},
+                                {'id': 2, 'count': 1},
+                                {'id': 3, 'count': 1},
+                                {'id': 30, 'count': 1},
+                                {'id': 40, 'count': 1}]
+        self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
+        end()
 
     
-    # def test_post_answer(self):
-    #     begin('test post answer (bronze, silver, gold) ahievements')
-    #     alice = self.register_alice_account()
-    #     bob = self.register_bob_account()
-
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476735))
-
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-
-    #     example_alice = [{'user': 'alice', 'achievements_id': 30}, 
-    #                     {'user': 'alice', 'achievements_id': 40}]
-    #     example_bob = [ {'user': 'bob', 'achievements_id': 30}, 
-    #                     {'user': 'bob', 'achievements_id': 31}, 
-    #                     {'user': 'bob', 'achievements_id': 40}, 
-    #                     {'user': 'bob', 'achievements_id': 41}, 
-    #                     {'user': 'bob', 'achievements_id': 50}, 
-    #                     {'user': 'bob', 'achievements_id': 60}]
-    #     self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
-    #     self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
-
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476734))
-
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     example_alice = [{'user': 'alice', 'achievements_id': 1}, 
-    #                     {'user': 'alice', 'achievements_id': 30}, 
-    #                     {'user': 'alice', 'achievements_id': 40}]
-    #     example_bob = [ {'user': 'bob', 'achievements_id': 10},
-    #                     {'user': 'bob', 'achievements_id': 30}, 
-    #                     {'user': 'bob', 'achievements_id': 31}, 
-    #                     {'user': 'bob', 'achievements_id': 40}, 
-    #                     {'user': 'bob', 'achievements_id': 41}, 
-    #                     {'user': 'bob', 'achievements_id': 50}, 
-    #                     {'user': 'bob', 'achievements_id': 60}]
-    #     self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
-    #     self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
-
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476733))
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476732))
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476731))
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     example_alice = [{'user': 'alice', 'achievements_id': 1},
-    #                     {'user': 'alice', 'achievements_id': 2}, 
-    #                     {'user': 'alice', 'achievements_id': 30}, 
-    #                     {'user': 'alice', 'achievements_id': 40}]
-    #     example_bob = [ {'user': 'bob', 'achievements_id': 10},
-    #                     {'user': 'bob', 'achievements_id': 11},
-    #                     {'user': 'bob', 'achievements_id': 30}, 
-    #                     {'user': 'bob', 'achievements_id': 31}, 
-    #                     {'user': 'bob', 'achievements_id': 40}, 
-    #                     {'user': 'bob', 'achievements_id': 41}, 
-    #                     {'user': 'bob', 'achievements_id': 50},
-    #                     {'user': 'bob', 'achievements_id': 51},
-    #                     {'user': 'bob', 'achievements_id': 52}, 
-    #                     {'user': 'bob', 'achievements_id': 60},
-    #                     {'user': 'bob', 'achievements_id': 61},
-    #                     {'user': 'bob', 'achievements_id': 62}]
-    #     self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
-    #     self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
-
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476730))
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476729))
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476728))
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476727))
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476726))
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     example_alice = [{'user': 'alice', 'achievements_id': 1},
-    #                     {'user': 'alice', 'achievements_id': 2},
-    #                     {'user': 'alice', 'achievements_id': 3}, 
-    #                     {'user': 'alice', 'achievements_id': 30}, 
-    #                     {'user': 'alice', 'achievements_id': 40}]
-    #     example_bob = [ {'user': 'bob', 'achievements_id': 10},
-    #                     {'user': 'bob', 'achievements_id': 11},
-    #                     {'user': 'bob', 'achievements_id': 12},
-    #                     {'user': 'bob', 'achievements_id': 30}, 
-    #                     {'user': 'bob', 'achievements_id': 31}, 
-    #                     {'user': 'bob', 'achievements_id': 40}, 
-    #                     {'user': 'bob', 'achievements_id': 41}, 
-    #                     {'user': 'bob', 'achievements_id': 50},
-    #                     {'user': 'bob', 'achievements_id': 51},
-    #                     {'user': 'bob', 'achievements_id': 52}, 
-    #                     {'user': 'bob', 'achievements_id': 60},
-    #                     {'user': 'bob', 'achievements_id': 61},
-    #                     {'user': 'bob', 'achievements_id': 62}]
-    #     self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
-    #     self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
-
-    #     example_achievement = [{'id': 1, 'count': 1},
-    #                             {'id': 2, 'count': 1},
-    #                             {'id': 3, 'count': 1},
-    #                             {'id': 10, 'count': 1},
-    #                             {'id': 11, 'count': 1},
-    #                             {'id': 12, 'count': 1},
-    #                             {'id': 30, 'count': 3},
-    #                             {'id': 31, 'count': 1},
-    #                             {'id': 40, 'count': 3},
-    #                             {'id': 41, 'count': 1},
-    #                             {'id': 50, 'count': 1},
-    #                             {'id': 51, 'count': 1},
-    #                             {'id': 52, 'count': 1},
-    #                             {'id': 60, 'count': 1},
-    #                             {'id': 61, 'count': 1},
-    #                             {'id': 62, 'count': 1}]
-    #     self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
-    #     end()
-
-    # def test_mark_correct_answer(self):
-    #     begin('test mark correct answer (bronze, silver, gold) ahievements')
-    #     alice = self.register_alice_account()
-    #     bob = self.register_bob_account()
-
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476735))
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     self.action('mrkascorrect', {
-    #                 'user': 'alice', 'question_id': question_id, 'answer_id': 1}, alice, "Alice mark Carol answer as correct")
-
-    #     example_alice = [{'user': 'alice', 'achievements_id': 30},
-    #                     {'user': 'alice', 'achievements_id': 31}, 
-    #                     {'user': 'alice', 'achievements_id': 40},
-    #                     {'user': 'alice', 'achievements_id': 41}]
-    #     example_bob = [ {'user': 'bob', 'achievements_id': 20},
-    #                     {'user': 'bob', 'achievements_id': 30}, 
-    #                     {'user': 'bob', 'achievements_id': 31}, 
-    #                     {'user': 'bob', 'achievements_id': 40}, 
-    #                     {'user': 'bob', 'achievements_id': 41}, 
-    #                     {'user': 'bob', 'achievements_id': 50}, 
-    #                     {'user': 'bob', 'achievements_id': 60}]
-    #     self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
-    #     self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
-
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476734))
-
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     self.action('mrkascorrect', {
-    #                 'user': 'alice', 'question_id': question_id, 'answer_id': 1}, alice, "Alice mark Carol answer as correct")
-        
-
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476733))
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     self.action('mrkascorrect', {
-    #                 'user': 'alice', 'question_id': question_id, 'answer_id': 1}, alice, "Alice mark Carol answer as correct")
-    #     example_alice = [{'user': 'alice', 'achievements_id': 1},
-    #                     {'user': 'alice', 'achievements_id': 30},
-    #                     {'user': 'alice', 'achievements_id': 31}, 
-    #                     {'user': 'alice', 'achievements_id': 40},
-    #                     {'user': 'alice', 'achievements_id': 41}]
-    #     example_bob = [ {'user': 'bob', 'achievements_id': 10},
-    #                     {'user': 'bob', 'achievements_id': 20},
-    #                     {'user': 'bob', 'achievements_id': 21},
-    #                     {'user': 'bob', 'achievements_id': 30}, 
-    #                     {'user': 'bob', 'achievements_id': 31}, 
-    #                     {'user': 'bob', 'achievements_id': 40}, 
-    #                     {'user': 'bob', 'achievements_id': 41}, 
-    #                     {'user': 'bob', 'achievements_id': 50},
-    #                     {'user': 'bob', 'achievements_id': 51}, 
-    #                     {'user': 'bob', 'achievements_id': 60},
-    #                     {'user': 'bob', 'achievements_id': 61}]
-    #     self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
-    #     self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
-        
-        
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476732))
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     self.action('mrkascorrect', {
-    #                 'user': 'alice', 'question_id': question_id, 'answer_id': 1}, alice, "Alice mark Carol answer as correct")
-
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476731))
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-    #     self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
-    #     self.action('mrkascorrect', {
-    #                 'user': 'alice', 'question_id': question_id, 'answer_id': 1}, alice, "Alice mark Carol answer as correct")
-    #     example_alice = [{'user': 'alice', 'achievements_id': 1},
-    #                     {'user': 'alice', 'achievements_id': 2}, 
-    #                     {'user': 'alice', 'achievements_id': 30},
-    #                     {'user': 'alice', 'achievements_id': 31}, 
-    #                     {'user': 'alice', 'achievements_id': 40},
-    #                     {'user': 'alice', 'achievements_id': 41},]
-    #     example_bob = [ {'user': 'bob', 'achievements_id': 10},
-    #                     {'user': 'bob', 'achievements_id': 11},
-    #                     {'user': 'bob', 'achievements_id': 20},
-    #                     {'user': 'bob', 'achievements_id': 21},
-    #                     {'user': 'bob', 'achievements_id': 22},
-    #                     {'user': 'bob', 'achievements_id': 30}, 
-    #                     {'user': 'bob', 'achievements_id': 31}, 
-    #                     {'user': 'bob', 'achievements_id': 40}, 
-    #                     {'user': 'bob', 'achievements_id': 41}, 
-    #                     {'user': 'bob', 'achievements_id': 50},
-    #                     {'user': 'bob', 'achievements_id': 51},
-    #                     {'user': 'bob', 'achievements_id': 52}, 
-    #                     {'user': 'bob', 'achievements_id': 60},
-    #                     {'user': 'bob', 'achievements_id': 61},
-    #                     {'user': 'bob', 'achievements_id': 62}]
-    #     self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
-    #     self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
-
-    #     example_achievement = [{'id': 1, 'count': 1},
-    #                             {'id': 2, 'count': 1},
-    #                             {'id': 10, 'count': 1},
-    #                             {'id': 11, 'count': 1},
-    #                             {'id': 20, 'count': 1},
-    #                             {'id': 21, 'count': 1},
-    #                             {'id': 22, 'count': 1},
-    #                             {'id': 30, 'count': 3},
-    #                             {'id': 31, 'count': 2},
-    #                             {'id': 40, 'count': 3},
-    #                             {'id': 41, 'count': 2},
-    #                             {'id': 50, 'count': 1},
-    #                             {'id': 51, 'count': 1},
-    #                             {'id': 52, 'count': 1},
-    #                             {'id': 60, 'count': 1},
-    #                             {'id': 61, 'count': 1},
-    #                             {'id': 62, 'count': 1}]
-    #     self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
-    #     end()
-
-    def test_moderator_delete_question(self):
-        begin('moderator delete question with correct answer')
+    def test_post_answer(self):
+        begin('test post answer (bronze, silver, gold) ahievements')
         alice = self.register_alice_account()
-        ted = self.register_ted_account()
         bob = self.register_bob_account()
-        self._give_moderator_flag(ted, MODERATOR_FLG_ALL)       
 
         self.register_question_action(alice, 'Alice question ' + str(68719476735))
 
-        self.action('postanswer', {'user': str(bob), 'question_id': 68719476735, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
-                    '{} answer to question with id={}: "{}"'.format(str(bob), 68719476735, 'Register Bob answer'))
-        self.action('mrkascorrect', {'user': alice, 'question_id': 68719476735,
-                                     'answer_id': 1}, str(alice), 'Alice mark bob answer as correct')
-        self.action('reportforum', {'user': 'ted', 'question_id': 68719476735, 'answer_id': 0, 'comment_id': 0},
-                    ted, 'Bob vote for Alice question deletion')
-        
-        example_alice = [{'user': 'alice', 'achievements_id': Achievents.questions_asked.value, 'value': 0},
-                        {'user': 'alice', 'achievements_id': Achievents.answers_given.value, 'value': 0},
-                        {'user': 'alice', 'achievements_id': Achievents.correct_answers.value, 'value': 0},
-                        {'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1},
-                        {'user': 'alice', 'achievements_id': Achievents.newbie.value, 'value': 1}]
-        example_bob = [{'user': 'bob', 'achievements_id': Achievents.answers_given.value, 'value': 0},
-                        {'user': 'bob', 'achievements_id': Achievents.correct_answers.value, 'value': 0},
-                        {'user': 'bob', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1},
-                        {'user': 'bob', 'achievements_id': Achievents.newbie.value, 'value': 1},
-                        {'user': 'bob', 'achievements_id': Achievents.answer_15_minutes.value, 'value': 0},
-                        {'user': 'bob', 'achievements_id': Achievents.first_answer.value, 'value': 0}]
-        example_ted = [{'user': 'ted', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
 
+        example_alice = [{'user': 'alice', 'achievements_id': 30}, 
+                        {'user': 'alice', 'achievements_id': 40}]
+        example_bob = [ {'user': 'bob', 'achievements_id': 30}, 
+                        {'user': 'bob', 'achievements_id': 31}, 
+                        {'user': 'bob', 'achievements_id': 40}, 
+                        {'user': 'bob', 'achievements_id': 41}, 
+                        {'user': 'bob', 'achievements_id': 50}, 
+                        {'user': 'bob', 'achievements_id': 60}]
         self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
         self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
-        self.assertTrue(compare(example_ted, self.table('accachieve', 'ted'), ignore_excess=True))
 
-        table_achive = self.table('achieve', 'allachieve')
-        example = [{'id': Achievents.questions_asked.value, 'count': 1},
-                    {'id': Achievents.answers_given.value, 'count': 2},
-                    {'id': Achievents.correct_answers.value, 'count': 2},
-                    {'id': Achievents.first_10k_registered.value, 'count': 4},
-                    {'id': Achievents.newbie.value, 'count': 2},
-                    {'id': Achievents.answer_15_minutes.value, 'count': 1},
-                    {'id': Achievents.first_answer.value, 'count': 1}]
-        self.assertTrue(compare(example, table_achive, ignore_excess=True))
+        self.register_question_action(alice, 'Alice question ' + str(68719476734))
+
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        example_alice = [{'user': 'alice', 'achievements_id': 1}, 
+                        {'user': 'alice', 'achievements_id': 30}, 
+                        {'user': 'alice', 'achievements_id': 40}]
+        example_bob = [ {'user': 'bob', 'achievements_id': 10},
+                        {'user': 'bob', 'achievements_id': 30}, 
+                        {'user': 'bob', 'achievements_id': 31}, 
+                        {'user': 'bob', 'achievements_id': 40}, 
+                        {'user': 'bob', 'achievements_id': 41}, 
+                        {'user': 'bob', 'achievements_id': 50}, 
+                        {'user': 'bob', 'achievements_id': 60}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
+
+        self.register_question_action(alice, 'Alice question ' + str(68719476733))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        self.register_question_action(alice, 'Alice question ' + str(68719476732))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        self.register_question_action(alice, 'Alice question ' + str(68719476731))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        example_alice = [{'user': 'alice', 'achievements_id': 1},
+                        {'user': 'alice', 'achievements_id': 2}, 
+                        {'user': 'alice', 'achievements_id': 30}, 
+                        {'user': 'alice', 'achievements_id': 40}]
+        example_bob = [ {'user': 'bob', 'achievements_id': 10},
+                        {'user': 'bob', 'achievements_id': 11},
+                        {'user': 'bob', 'achievements_id': 30}, 
+                        {'user': 'bob', 'achievements_id': 31}, 
+                        {'user': 'bob', 'achievements_id': 40}, 
+                        {'user': 'bob', 'achievements_id': 41}, 
+                        {'user': 'bob', 'achievements_id': 50},
+                        {'user': 'bob', 'achievements_id': 51},
+                        {'user': 'bob', 'achievements_id': 52}, 
+                        {'user': 'bob', 'achievements_id': 60},
+                        {'user': 'bob', 'achievements_id': 61},
+                        {'user': 'bob', 'achievements_id': 62}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
+
+        self.register_question_action(alice, 'Alice question ' + str(68719476730))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        self.register_question_action(alice, 'Alice question ' + str(68719476729))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        self.register_question_action(alice, 'Alice question ' + str(68719476728))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        self.register_question_action(alice, 'Alice question ' + str(68719476727))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        self.register_question_action(alice, 'Alice question ' + str(68719476726))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        example_alice = [{'user': 'alice', 'achievements_id': 1},
+                        {'user': 'alice', 'achievements_id': 2},
+                        {'user': 'alice', 'achievements_id': 3}, 
+                        {'user': 'alice', 'achievements_id': 30}, 
+                        {'user': 'alice', 'achievements_id': 40}]
+        example_bob = [ {'user': 'bob', 'achievements_id': 10},
+                        {'user': 'bob', 'achievements_id': 11},
+                        {'user': 'bob', 'achievements_id': 12},
+                        {'user': 'bob', 'achievements_id': 30}, 
+                        {'user': 'bob', 'achievements_id': 31}, 
+                        {'user': 'bob', 'achievements_id': 40}, 
+                        {'user': 'bob', 'achievements_id': 41}, 
+                        {'user': 'bob', 'achievements_id': 50},
+                        {'user': 'bob', 'achievements_id': 51},
+                        {'user': 'bob', 'achievements_id': 52}, 
+                        {'user': 'bob', 'achievements_id': 60},
+                        {'user': 'bob', 'achievements_id': 61},
+                        {'user': 'bob', 'achievements_id': 62}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
+
+        example_achievement = [{'id': 1, 'count': 1},
+                                {'id': 2, 'count': 1},
+                                {'id': 3, 'count': 1},
+                                {'id': 10, 'count': 1},
+                                {'id': 11, 'count': 1},
+                                {'id': 12, 'count': 1},
+                                {'id': 30, 'count': 2},
+                                {'id': 31, 'count': 1},
+                                {'id': 40, 'count': 2},
+                                {'id': 41, 'count': 1},
+                                {'id': 50, 'count': 1},
+                                {'id': 51, 'count': 1},
+                                {'id': 52, 'count': 1},
+                                {'id': 60, 'count': 1},
+                                {'id': 61, 'count': 1},
+                                {'id': 62, 'count': 1}]
+        self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
         end()
 
-    # def test_delete_question(self):
-    #     begin('delete question')
-    #     alice = self.register_alice_account()    
+    def test_mark_correct_answer(self):
+        begin('test mark correct answer (bronze, silver, gold) ahievements')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
 
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476735))
-    #     self.action('delquestion', {
-    #                 'user': 'alice', 'question_id': 68719476735}, alice, "Delete alice question")
+        self.register_question_action(alice, 'Alice question ' + str(68719476735))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        self.action('mrkascorrect', {
+                    'user': 'alice', 'question_id': question_id, 'answer_id': 1}, alice, "Alice mark Carol answer as correct")
 
-    #     example_alice = [{'user': 'alice', 'achievements_id': Achievents.questions_asked.value, 'value': 0},
-    #                     {'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1},
-    #                     {'user': 'alice', 'achievements_id': Achievents.newbie.value, 'value': 1}]
-    #     self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        example_alice = [{'user': 'alice', 'achievements_id': 30},
+                        {'user': 'alice', 'achievements_id': 31}, 
+                        {'user': 'alice', 'achievements_id': 40},
+                        {'user': 'alice', 'achievements_id': 41}]
+        example_bob = [ {'user': 'bob', 'achievements_id': 20},
+                        {'user': 'bob', 'achievements_id': 30}, 
+                        {'user': 'bob', 'achievements_id': 31}, 
+                        {'user': 'bob', 'achievements_id': 40}, 
+                        {'user': 'bob', 'achievements_id': 41}, 
+                        {'user': 'bob', 'achievements_id': 50}, 
+                        {'user': 'bob', 'achievements_id': 60}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
 
-    #     table_achive = self.table('achieve', 'allachieve')
-    #     example = [{'id': Achievents.questions_asked.value, 'count': 1},
-    #                 {'id': Achievents.first_10k_registered.value, 'count': 2},
-    #                 {'id': Achievents.newbie.value, 'count': 1}]
-    #     self.assertTrue(compare(example, table_achive, ignore_excess=True))
-    #     end()
+        self.register_question_action(alice, 'Alice question ' + str(68719476734))
 
-    # def test_moderator_delete_answer(self):
-    #     begin('moderator delete answer with correct answer')
-    #     alice = self.register_alice_account()
-    #     ted = self.register_ted_account()
-    #     bob = self.register_bob_account()
-    #     self._give_moderator_flag(ted, MODERATOR_FLG_ALL)       
-
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476735));
-    #     self.action('postanswer', {'user': str(bob), 'question_id': 68719476735, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(bob), 68719476735, 'Register Bob answer')) 
-    #     self.action('mrkascorrect', {'user': alice, 'question_id': 68719476735,
-    #                                  'answer_id': 1}, str(alice), 'Alice mark bob answer as correct')
-    #     self.action('reportforum', {'user': 'ted', 'question_id': 68719476735, 'answer_id': 1, 'comment_id': 0},
-    #                 ted, 'Ted deleted Bob answer')
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        self.action('mrkascorrect', {
+                    'user': 'alice', 'question_id': question_id, 'answer_id': 1}, alice, "Alice mark Carol answer as correct")
         
-    #     example_alice = [{'user': 'alice', 'achievements_id': Achievents.questions_asked.value, 'value': 1},
-    #                     {'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1},
-    #                     {'user': 'alice', 'achievements_id': Achievents.newbie.value, 'value': 1}]
-    #     example_bob = [{'user': 'bob', 'achievements_id': Achievents.questions_asked.value, 'value': 0},
-    #                     {'user': 'bob', 'achievements_id': Achievents.answers_given.value, 'value': 0},
-    #                     {'user': 'bob', 'achievements_id': Achievents.correct_answers.value, 'value': 0},
-    #                     {'user': 'bob', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1},
-    #                     {'user': 'bob', 'achievements_id': Achievents.newbie.value, 'value': 1},
-    #                     {'user': 'bob', 'achievements_id': Achievents.answer_15_minutes.value, 'value': 0},
-    #                     {'user': 'bob', 'achievements_id': Achievents.first_answer.value, 'value': 0}]
-    #     example_ted = [{'user': 'ted', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}]
 
-    #     self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
-    #     self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
-    #     self.assertTrue(compare(example_ted, self.table('accachieve', 'ted'), ignore_excess=True))
+        self.register_question_action(alice, 'Alice question ' + str(68719476733))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        self.action('mrkascorrect', {
+                    'user': 'alice', 'question_id': question_id, 'answer_id': 1}, alice, "Alice mark Carol answer as correct")
+        example_alice = [{'user': 'alice', 'achievements_id': 1},
+                        {'user': 'alice', 'achievements_id': 30},
+                        {'user': 'alice', 'achievements_id': 31}, 
+                        {'user': 'alice', 'achievements_id': 40},
+                        {'user': 'alice', 'achievements_id': 41}]
+        example_bob = [ {'user': 'bob', 'achievements_id': 10},
+                        {'user': 'bob', 'achievements_id': 20},
+                        {'user': 'bob', 'achievements_id': 21},
+                        {'user': 'bob', 'achievements_id': 30}, 
+                        {'user': 'bob', 'achievements_id': 31}, 
+                        {'user': 'bob', 'achievements_id': 40}, 
+                        {'user': 'bob', 'achievements_id': 41}, 
+                        {'user': 'bob', 'achievements_id': 50},
+                        {'user': 'bob', 'achievements_id': 51}, 
+                        {'user': 'bob', 'achievements_id': 60},
+                        {'user': 'bob', 'achievements_id': 61}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
+        
+        
+        self.register_question_action(alice, 'Alice question ' + str(68719476732))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        self.action('mrkascorrect', {
+                    'user': 'alice', 'question_id': question_id, 'answer_id': 1}, alice, "Alice mark Carol answer as correct")
 
-    #     table_achive = self.table('achieve', 'allachieve')
-    #     example = [{'id': Achievents.questions_asked.value, 'count': 2},
-    #                 {'id': Achievents.answers_given.value, 'count': 1},
-    #                 {'id': Achievents.correct_answers.value, 'count': 1},
-    #                 {'id': Achievents.first_10k_registered.value, 'count': 4},
-    #                 {'id': Achievents.newbie.value, 'count': 2},
-    #                 {'id': Achievents.answer_15_minutes.value, 'count': 1},
-    #                 {'id': Achievents.first_answer.value, 'count': 1}]
-    #     self.assertTrue(compare(example, table_achive, ignore_excess=True))
-    #     end()
+        self.register_question_action(alice, 'Alice question ' + str(68719476731))
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+        self.action('mrkascorrect', {
+                    'user': 'alice', 'question_id': question_id, 'answer_id': 1}, alice, "Alice mark Carol answer as correct")
+        example_alice = [{'user': 'alice', 'achievements_id': 1},
+                        {'user': 'alice', 'achievements_id': 2}, 
+                        {'user': 'alice', 'achievements_id': 30},
+                        {'user': 'alice', 'achievements_id': 31}, 
+                        {'user': 'alice', 'achievements_id': 40},
+                        {'user': 'alice', 'achievements_id': 41},]
+        example_bob = [ {'user': 'bob', 'achievements_id': 10},
+                        {'user': 'bob', 'achievements_id': 11},
+                        {'user': 'bob', 'achievements_id': 20},
+                        {'user': 'bob', 'achievements_id': 21},
+                        {'user': 'bob', 'achievements_id': 22},
+                        {'user': 'bob', 'achievements_id': 30}, 
+                        {'user': 'bob', 'achievements_id': 31}, 
+                        {'user': 'bob', 'achievements_id': 40}, 
+                        {'user': 'bob', 'achievements_id': 41}, 
+                        {'user': 'bob', 'achievements_id': 50},
+                        {'user': 'bob', 'achievements_id': 51},
+                        {'user': 'bob', 'achievements_id': 52}, 
+                        {'user': 'bob', 'achievements_id': 60},
+                        {'user': 'bob', 'achievements_id': 61},
+                        {'user': 'bob', 'achievements_id': 62}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
 
-    # def test_delete_answer(self):
-    #     begin('delete answer')
-    #     alice = self.register_alice_account()
-    #     bob = self.register_bob_account() 
+        example_achievement = [{'id': 1, 'count': 1},
+                                {'id': 2, 'count': 1},
+                                {'id': 10, 'count': 1},
+                                {'id': 11, 'count': 1},
+                                {'id': 20, 'count': 1},
+                                {'id': 21, 'count': 1},
+                                {'id': 22, 'count': 1},
+                                {'id': 30, 'count': 2},
+                                {'id': 31, 'count': 2},
+                                {'id': 40, 'count': 2},
+                                {'id': 41, 'count': 2},
+                                {'id': 50, 'count': 1},
+                                {'id': 51, 'count': 1},
+                                {'id': 52, 'count': 1},
+                                {'id': 60, 'count': 1},
+                                {'id': 61, 'count': 1},
+                                {'id': 62, 'count': 1}]
+        self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
+        end()
 
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476735));
-    #     self.action('postanswer', {'user': str(bob), 'question_id': 68719476735, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(alice), 68719476735, 'Register Alice answer'))
 
-    #     self.action('delanswer', {'user': 'bob', 'question_id': 68719476735, 'answer_id': 1}, bob, 'Delete bob answer to bob question')
-    #     example_bob = [{'user': 'bob', 'achievements_id': Achievents.answers_given.value, 'value': 0}, 
-    #                     {'user': 'bob', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, 
-    #                     {'user': 'bob', 'achievements_id': Achievents.newbie.value, 'value': 1},
-    #                     {'user': 'bob', 'achievements_id': Achievents.answer_15_minutes.value, 'value': 0},
-    #                     {'user': 'bob', 'achievements_id': Achievents.first_answer.value, 'value': 0}]
-    #     self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
-
-    #     example = [{'id': Achievents.questions_asked.value, 'count': 1}, 
-    #                 {'id': Achievents.answers_given.value, 'count': 1}, 
-    #                 {'id': Achievents.first_10k_registered.value, 'count': 3}, 
-    #                 {'id': Achievents.newbie.value, 'count': 1},
-    #                 {'id': Achievents.answer_15_minutes.value, 'count': 1},
-    #                 {'id': Achievents.first_answer.value, 'count': 1}]
-    #     self.assertTrue(compare(example, self.table('achieve', 'allachieve'), ignore_excess=True))
-    #     end()
     
-    # def test_downvote_answer(self):
-    #     begin('downvote answer (first answer + answer within_15_minutes)')
-    #     alice = self.register_alice_account()
-    #     bob = self.register_bob_account()
-    #     ted = self.register_ted_account()
+    def test_downvote_answer(self):
+        begin('downvote answer (first answer + answer within_15_minutes) post answer and right away downvote x3. Max 1 first answer and answer within_15_minutes in moment')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        ted = self.register_ted_account()
 
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476735));
-    #     self.action('postanswer', {'user': str(bob), 'question_id': 68719476735, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(alice), 68719476735, 'Register Alice answer'))
+        self.register_question_action(alice, 'Alice question ' + str(68719476735));
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'Register Alice answer'))
+        self.action('downvote', {'user': 'ted', 'question_id': question_id, 'answer_id': 1}, ted, 'ted downvote for Alice question->Bob answer rating')
+        
+        self.register_question_action(alice, 'Alice question ' + str(68719476734));
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'Register Alice answer'))
+        self.action('downvote', {'user': 'ted', 'question_id': question_id, 'answer_id': 1}, ted, 'ted downvote for Alice question->Bob answer rating')
+        
+        self.register_question_action(alice, 'Alice question ' + str(68719476733));
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'Register Alice answer'))
+        self.action('downvote', {'user': 'ted', 'question_id': question_id, 'answer_id': 1}, ted, 'ted downvote for Alice question->Bob answer rating')
 
-    #     self.action('downvote', {'user': 'ted', 'question_id': 68719476735, 'answer_id': 1}, ted, 'ted downvote for Alice question->Bob answer rating')
-    #     example_bob = [{'user': 'bob', 'achievements_id': Achievents.answers_given.value, 'value': 1},
-    #                     {'user': 'bob', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1},
-    #                     {'user': 'bob', 'achievements_id': Achievents.newbie.value, 'value': 1},
-    #                     {'user': 'bob', 'achievements_id': Achievents.answer_15_minutes.value, 'value': 0},
-    #                     {'user': 'bob', 'achievements_id': Achievents.first_answer.value, 'value': 0}]
-    #     self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
+        example_bob = [ {'user': 'bob', 'achievements_id': 10},
+                        {'user': 'bob', 'achievements_id': 30}, 
+                        {'user': 'bob', 'achievements_id': 31}, 
+                        {'user': 'bob', 'achievements_id': 40}, 
+                        {'user': 'bob', 'achievements_id': 41}, 
+                        {'user': 'bob', 'achievements_id': 50},
+                        {'user': 'bob', 'achievements_id': 60}]
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
 
-    #     table_achive = self.table('achieve', 'allachieve')
-    #     example = [{'id': Achievents.questions_asked.value, 'count': 1},
-    #                 {'id': Achievents.answers_given.value, 'count': 1},
-    #                 {'id': Achievents.first_10k_registered.value, 'count': 4},
-    #                 {'id': Achievents.newbie.value, 'count': 2},
-    #                 {'id': Achievents.answer_15_minutes.value, 'count': 1},
-    #                 {'id': Achievents.first_answer.value, 'count': 1}]
-    #     self.assertTrue(compare(example, table_achive, ignore_excess=True))
-    #     end()
+        example_achievement = [{'id': 1, 'count': 1},
+                                {'id': 10, 'count': 1},
+                                {'id': 30, 'count': 4},
+                                {'id': 31, 'count': 2},
+                                {'id': 40, 'count': 4},
+                                {'id': 41, 'count': 2},
+                                {'id': 50, 'count': 1},
+                                {'id': 60, 'count': 1}]
+        print(self.table('achieve', 'allachieve'))
+        self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
+        end()
 
-    # def test_downvote_upvote_answer(self):
-    #     begin('downvote and upvote answer (first answer + answer within_15_minutes)')
-    #     alice = self.register_alice_account()
-    #     bob = self.register_bob_account()
-    #     ted = self.register_ted_account()   
+    def test_downvote_upvote_answer(self):
+        begin('downvote and upvote answer (first answer + answer within_15_minutes)')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        ted = self.register_ted_account()   
 
-    #     self.register_question_action(alice, 'Alice question ' + str(68719476735));
-    #     self.action('postanswer', {'user': str(bob), 'question_id': 68719476735, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(alice), 68719476735, 'Register bob answer'))
+        self.register_question_action(alice, 'Alice question ' + str(68719476735));
+        question_id_1 = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id_1, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(alice), question_id_1, 'Register Alice answer'))
+        self.action('downvote', {'user': 'ted', 'question_id': question_id_1, 'answer_id': 1}, ted, 'ted downvote for Alice question->Bob answer rating')
+        
+        self.register_question_action(alice, 'Alice question ' + str(68719476734));
+        question_id_2 = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id_2, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(alice), question_id_2, 'Register Alice answer'))
+        self.action('downvote', {'user': 'ted', 'question_id': question_id_2, 'answer_id': 1}, ted, 'ted downvote for Alice question->Bob answer rating')
+        self.action('upvote', {'user': 'ted', 'question_id': question_id_1, 'answer_id': 1}, ted, 'ted downvote for Alice question->Bob answer rating')
+        self.action('upvote', {'user': 'ted', 'question_id': question_id_2, 'answer_id': 1}, ted, 'ted downvote for Alice question->Bob answer rating')
+        
+        example_bob = [ {'user': 'bob', 'achievements_id': 10},
+                        {'user': 'bob', 'achievements_id': 30}, 
+                        {'user': 'bob', 'achievements_id': 31}, 
+                        {'user': 'bob', 'achievements_id': 40}, 
+                        {'user': 'bob', 'achievements_id': 41}, 
+                        {'user': 'bob', 'achievements_id': 50},
+                        {'user': 'bob', 'achievements_id': 60}]
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
 
-    #     self.action('downvote', {'user': 'ted', 'question_id': 68719476735, 'answer_id': 1}, ted, 'ted downvote for Alice question->Bob answer rating')
-    #     example_bob = [{'user': 'bob', 'achievements_id': Achievents.answers_given.value, 'value': 1}, 
-    #                     {'user': 'bob', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, 
-    #                     {'user': 'bob', 'achievements_id': Achievents.newbie.value, 'value': 1},
-    #                     {'user': 'bob', 'achievements_id': Achievents.answer_15_minutes.value, 'value': 0},
-    #                     {'user': 'bob', 'achievements_id': Achievents.first_answer.value, 'value': 0}]
-    #     self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
+        example_achievement = [{'id': 1, 'count': 1},
+                                {'id': 10, 'count': 1},
+                                {'id': 30, 'count': 3},
+                                {'id': 31, 'count': 2},
+                                {'id': 40, 'count': 3},
+                                {'id': 41, 'count': 2},
+                                {'id': 50, 'count': 1},
+                                {'id': 60, 'count': 1}]
+        self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
 
-    #     self.action('upvote', {'user': 'ted', 'question_id': 68719476735, 'answer_id': 1}, ted, 'ted downvote for Alice question->Bob answer rating')
-    #     example_bob = [{'user': 'bob', 'achievements_id': Achievents.answers_given.value, 'value': 1}, 
-    #                     {'user': 'bob', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, 
-    #                     {'user': 'bob', 'achievements_id': Achievents.newbie.value, 'value': 1},
-    #                     {'user': 'bob', 'achievements_id': Achievents.answer_15_minutes.value, 'value': 1},
-    #                     {'user': 'bob', 'achievements_id': Achievents.first_answer.value, 'value': 1}]
-    #     self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
+        self.register_question_action(alice, 'Alice question ' + str(68719476733));
+        question_id_3 = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id_3, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(alice), question_id_3, 'Register Alice answer'))
+        
+        example_bob = [ {'user': 'bob', 'achievements_id': 10},
+                        {'user': 'bob', 'achievements_id': 30}, 
+                        {'user': 'bob', 'achievements_id': 31}, 
+                        {'user': 'bob', 'achievements_id': 40}, 
+                        {'user': 'bob', 'achievements_id': 41}, 
+                        {'user': 'bob', 'achievements_id': 50},
+                        {'user': 'bob', 'achievements_id': 51},
+                        {'user': 'bob', 'achievements_id': 60},
+                        {'user': 'bob', 'achievements_id': 61},]
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
 
-    #     example = [{'id': Achievents.questions_asked.value, 'count': 1}, 
-    #                 {'id': Achievents.answers_given.value, 'count': 1}, 
-    #                 {'id': Achievents.first_10k_registered.value, 'count': 4}, 
-    #                 {'id': Achievents.newbie.value, 'count': 2}, 
-    #                 {'id': Achievents.answer_15_minutes.value, 'count': 1}, 
-    #                 {'id': Achievents.first_answer.value, 'count': 1}]
-    #     self.assertTrue(compare(example, self.table('achieve', 'allachieve'), ignore_excess=True))
-    #     end()
+        example_achievement = [{'id': 1, 'count': 1},
+                                {'id': 10, 'count': 1},
+                                {'id': 30, 'count': 3},
+                                {'id': 31, 'count': 2},
+                                {'id': 40, 'count': 3},
+                                {'id': 41, 'count': 2},
+                                {'id': 50, 'count': 1},
+                                {'id': 51, 'count': 1},
+                                {'id': 60, 'count': 1},
+                                {'id': 61, 'count': 1},]
+        self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
+        end()
 
     # def test_post_2questions_and_2answers(self):
     #     begin('post 2 questions and alice post 2 answers  (first answer + answer within_15_minutes)')

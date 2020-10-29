@@ -86,7 +86,7 @@ struct achievement {
   const std::string name;
   const uint32_t community_id;                        //0 - for all
   const uint64_t limit;
-  const uint64_t lower_bound;
+  const int64_t lower_bound;
   const Type_achievement type;                        //uniqe -false | level = true
   const Group_achievement group;
 };

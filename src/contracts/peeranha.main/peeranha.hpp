@@ -153,7 +153,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     // Action give community moderator flags
     ACTION givecommuflg(eosio::name user, int flags, uint16_t community_id);
     
-    ACTION editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_link);
+    ACTION editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_description);
 
     ACTION chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating);
 
@@ -175,17 +175,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     ACTION addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar);
 
-    //update account achievement
-    ACTION upaccach(eosio::name user, uint32_t achievement_id);
-    
-    //init all accounts achievements(question, answer, corrent answer)
-    ACTION intallaccach();
-
-    //init_achievements_first_10k_registered_users
+    //init achievements first 10k registered users
     ACTION intachregist();
-
-    //init_achievements__users rating
-    ACTION intachrating();
 
 #ifdef SUPERFLUOUS_INDEX
     // Delete @count@ items from superfluous index tebles
@@ -251,7 +242,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                        const std::string &title, const IpfsHash &ipfs_link,
                        const uint8_t type);
     
-    eosio::name telegram_post_action(uint64_t telegram_id);
+    eosio::name get_telegram_action_account(uint64_t telegram_id);
 
     void post_answer(eosio::name user, uint64_t question_id,
                      const IpfsHash &ipfs_link, bool official_answer);
@@ -328,6 +319,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     void assert_community_exist(uint16_t community_id);
 
     void add_empty_telegram_account(uint64_t telegram_id, std::string display_name, IpfsHash ipfs_profile, IpfsHash ipfs_avatar);
+
+    eosio::name generate_temp_telegram_account();
 #ifdef SUPERFLUOUS_INDEX
     void remove_user_question(eosio::name user, uint64_t question_id);
 
@@ -343,7 +336,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void give_moderator_flag(eosio::name user, int flags, uint16_t community_id);
 
-    void edit_community(eosio::name user, uint16_t community_id, const std::string &name, const IpfsHash &ipfs_link);
+    void edit_community(eosio::name user, uint16_t community_id, const std::string &name, const IpfsHash &ipfs_description);
 
     void change_question_type(eosio::name user, uint64_t question_id, int type, bool restore_rating);
 
@@ -365,41 +358,27 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void add_telegram_account(eosio::name user, uint64_t telegram_id, bool new_account);
 
-    void swap_account(eosio::name old_user, eosio::name new_user);
-
     void move_account_statistik(eosio::name old_user, eosio::name new_user);
-
-    void move_table_usranswers(eosio::name old_user, eosio::name new_user);
-
-    void move_table_usrquestions(eosio::name old_user, eosio::name new_user);
-
-    void move_table_achive(eosio::name old_user, eosio::name new_user);
 
     void delete_table_property_community(eosio::name old_user, eosio::name new_user);
 
     void delete_table_period_rating(eosio::name old_user, eosio::name new_user);
 
-    void init_all_accounts_achievements();
+    void swap_account(eosio::name old_user, eosio::name new_user);
 
-    void update_account_achievement(eosio::name user, uint32_t achievement_id);
+    void move_table_statistic(eosio::name old_user, eosio::name new_user);
 
-    void update_question_achievement(eosio::name user);
+    void move_table_usranswers(eosio::name old_user, eosio::name new_user);
 
-    void update_answer_achievement(eosio::name user);
+    void move_table_usrquestions(eosio::name old_user, eosio::name new_user);
 
-    void update_correct_achievement(eosio::name user);
+    void move_table_achieve(eosio::name old_user, eosio::name new_user);
 
-    bool add_achievement_amount(uint32_t id_achievement);
+    void update_achievement (eosio::name user, Group_achievement group, int value);
 
-    void del_achievement_amount(uint32_t id_achievement);
+    bool increment_achievement_count(uint32_t id_achievement);
+
+    void decrement_achievement_count(uint32_t id_achievement);
 
     void init_achievements_first_10k_registered_users();
-
-    void update_achievement(eosio::name user, uint32_t id_achievement, uint64_t value, bool new_value);
-
-    void update_achievement_rating(eosio::name user);
-
-    void achievements_first_10k_registered_users(eosio::name user);
-
-    void init_achievements_rating();
-  };
+};

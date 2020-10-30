@@ -31,7 +31,7 @@ void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t commu
                             std::vector<uint32_t> tags, std::string title,
                             IpfsHash ipfs_link, const uint8_t type) {
   require_auth(bot);
-  eosio::name user = telegram_post_action(telegram_id);
+  eosio::name user = get_telegram_action_account(telegram_id);
   post_question(user, community_id, tags, title, ipfs_link, type);
 
   user_questions_index user_questions_table(_self, user.value); 
@@ -62,7 +62,7 @@ void peeranha::telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t quest
   require_auth(bot);
 
   bool buf_official_answer = official_answer;
-  eosio::name user = telegram_post_action(telegram_id);
+  eosio::name user = get_telegram_action_account(telegram_id);
   post_answer(user, question_id, ipfs_link, buf_official_answer);
 
   user_answers_index user_answer_table(_self, user.value);
@@ -215,9 +215,9 @@ void peeranha::givecommuflg(eosio::name user, int flags, uint16_t community_id) 
   give_moderator_flag(user, flags, community_id);
 }
 
-void peeranha::editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_link) {
+void peeranha::editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_description) {
   require_auth(user);
-  edit_community(user, community_id, name, ipfs_link);
+  edit_community(user, community_id, name, ipfs_description);
 }
 
 void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating){
@@ -271,24 +271,9 @@ void peeranha::addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::str
   add_empty_telegram_account(telegram_id, display_name, ipfs_profile, ipfs_avatar);
 }
 
-void peeranha::upaccach(eosio::name user, uint32_t achievement_id) {
-  require_auth(_self);
-  update_account_achievement(user, achievement_id);
-}
-
-void peeranha::intallaccach() {
-  require_auth(_self);
-  init_all_accounts_achievements();
-}
-
 void peeranha::intachregist() {
   require_auth(_self);
   init_achievements_first_10k_registered_users();
-}
-
-void peeranha::intachrating() {
-  require_auth(_self);
-  init_achievements_rating();
 }
 
 #ifdef SUPERFLUOUS_INDEX
@@ -471,8 +456,7 @@ EOSIO_DISPATCH(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
         reportprof)(updateacc)(givemoderflg)(editcomm)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
-        (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)
-        (intallaccach)(upaccach)(intachregist)(intachrating)
+        (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(intachregist)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

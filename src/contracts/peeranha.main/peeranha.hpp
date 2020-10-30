@@ -173,17 +173,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     ACTION addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id);
 
-    //update account achievement
-    ACTION upaccach(eosio::name user, uint32_t achievement_id);
-    
-    //init all accounts achievements(question, answer, corrent answer)
-    ACTION intallaccach();
-
-    //init_achievements_first_10k_registered_users
+    //init achievements first 10k registered users
     ACTION intachregist();
-
-    //init_achievements__users rating
-    ACTION intachrating();
 
 #ifdef SUPERFLUOUS_INDEX
     // Delete @count@ items from superfluous index tebles
@@ -359,25 +350,9 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void add_telegram_account(eosio::name user, uint64_t telegram_id);
 
-    void init_all_accounts_achievements();
+    void update_achievement (eosio::name user, Group_achievement group, int value);
 
-    void update_account_achievement(eosio::name user, uint32_t achievement_id);
-
-    void update_question_achievement(eosio::name user);
-
-    void update_answer_achievement(eosio::name user);
-
-    void update_correct_achievement(eosio::name user);
-
-    bool up_achievement(uint32_t id_achievement);
+    bool give_achievement(uint32_t id_achievement);
 
     void init_achievements_first_10k_registered_users();
-
-    void update_achievement(eosio::name user, Achievements id_achievement, uint64_t value, bool new_value);
-
-    void update_achievement_rating(eosio::name user);
-
-    void achievements_first_10k_registered_users(eosio::name user);
-
-    void init_achievements_rating();
-  };
+};

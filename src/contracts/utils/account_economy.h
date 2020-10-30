@@ -25,9 +25,9 @@
 #endif
 
 #if STAGE == 1
-#define TIME_15_MINUTES 900 // 15 seconds
+#define TIME_15_MINUTES 4 // 15 seconds
 #else
-#define TIME_15_MINUTES 900  // 15 minutes
+#define TIME_15_MINUTES 4  // 15 minutes
 #endif
 
 

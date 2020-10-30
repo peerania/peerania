@@ -30,7 +30,7 @@ void peeranha::add_top_question(eosio::name user, uint16_t community_id, uint64_
   }
 }
 
-void peeranha::remove_top_question(eosio::name user, uint16_t community_id, uint64_t question_id){  
+void peeranha::remove_top_question(eosio::name user, uint16_t community_id, uint64_t question_id) {  
   assert_community_exist(community_id);
   eosio::check(find_account_property_community(user, COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION, community_id), "user not found or user without rights");
   top_question_index top_question_table(_self, scope_all_top_questions);
@@ -45,7 +45,7 @@ void peeranha::remove_top_question(eosio::name user, uint16_t community_id, uint
   }
 }
 
-void peeranha::delete_top_question(uint16_t community_id, uint64_t question_id){  
+void peeranha::delete_top_question(uint16_t community_id, uint64_t question_id) {  
   assert_community_exist(community_id);
   top_question_index top_question_table(_self, scope_all_top_questions);
   auto iter_community = top_question_table.find(community_id);
@@ -59,7 +59,7 @@ void peeranha::delete_top_question(uint16_t community_id, uint64_t question_id){
   }
 }
 
-void peeranha::up_top_question(eosio::name user, uint16_t community_id, uint64_t question_id){
+void peeranha::up_top_question(eosio::name user, uint16_t community_id, uint64_t question_id) {
   assert_community_exist(community_id);
   eosio::check(find_account_property_community(user, COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION, community_id), "user not found or user without rights");
   top_question_index top_question_table(_self, scope_all_top_questions);
@@ -75,7 +75,7 @@ void peeranha::up_top_question(eosio::name user, uint16_t community_id, uint64_t
   }
 }
 
-void peeranha::down_top_question(eosio::name user, uint16_t community_id, uint64_t question_id){
+void peeranha::down_top_question(eosio::name user, uint16_t community_id, uint64_t question_id) {
   assert_community_exist(community_id);
   eosio::check(find_account_property_community(user, COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION, community_id), "user not found or user without rights");
   top_question_index top_question_table(_self, scope_all_top_questions);
@@ -91,7 +91,7 @@ void peeranha::down_top_question(eosio::name user, uint16_t community_id, uint64
   }
 }
 
-void peeranha::move_top_question(eosio::name user, uint16_t community_id, uint64_t question_id,  uint16_t new_position){
+void peeranha::move_top_question(eosio::name user, uint16_t community_id, uint64_t question_id,  uint16_t new_position) {
   assert_community_exist(community_id);
   eosio::check(find_account_property_community(user, COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION, community_id), "user not found or user without rights");
   top_question_index top_question_table(_self, scope_all_top_questions);

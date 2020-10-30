@@ -173,6 +173,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     ACTION addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id);
 
+    ACTION addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar);
+
     //init achievements first 10k registered users
     ACTION intachregist();
 
@@ -239,6 +241,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                        const std::vector<uint32_t> tags,
                        const std::string &title, const IpfsHash &ipfs_link,
                        const uint8_t type);
+    
+    eosio::name get_telegram_action_account(uint64_t telegram_id);
 
     void post_answer(eosio::name user, uint64_t question_id,
                      const IpfsHash &ipfs_link, bool official_answer);
@@ -313,6 +317,10 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                                 int8_t questions_asked);
 
     void assert_community_exist(uint16_t community_id);
+
+    void add_empty_telegram_account(uint64_t telegram_id, std::string display_name, IpfsHash ipfs_profile, IpfsHash ipfs_avatar);
+
+    eosio::name generate_temp_telegram_account();
 #ifdef SUPERFLUOUS_INDEX
     void remove_user_question(eosio::name user, uint64_t question_id);
 
@@ -348,11 +356,37 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void disapprove_account(eosio::name user);
 
-    void add_telegram_account(eosio::name user, uint64_t telegram_id);
+    void add_telegram_account(eosio::name user, uint64_t telegram_id, bool new_account);
+
+    void swap_account(eosio::name old_user, eosio::name new_user);
+
+    void move_table_statistic(eosio::name old_user, eosio::name new_user);
+
+    void move_table_usranswers(eosio::name old_user, eosio::name new_user);
+
+    void move_table_usrquestions(eosio::name old_user, eosio::name new_user);
+
+    void move_table_achieve(eosio::name old_user, eosio::name new_user);
+
+    void delete_table_property_community(eosio::name old_user, eosio::name new_user);
+
+    void delete_table_period_rating(eosio::name old_user, eosio::name new_user);
 
     void update_achievement (eosio::name user, Group_achievement group, int value);
 
-    bool give_achievement(uint32_t id_achievement);
+    void update_correct_achievement(eosio::name user);
+
+    bool increment_achievement_count(uint32_t id_achievement);
+
+    void decrement_achievement_count(uint32_t id_achievement);
 
     void init_achievements_first_10k_registered_users();
+
+    void update_achievement(eosio::name user, uint32_t achievement_id, uint64_t value, bool new_value);
+
+    void update_achievement_rating(eosio::name user);
+
+    void achievements_first_10k_registered_users(eosio::name user);
+
+    void init_achievements_rating();
 };

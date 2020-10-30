@@ -31,14 +31,8 @@ void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t commu
                             std::vector<uint32_t> tags, std::string title,
                             IpfsHash ipfs_link, const uint8_t type) {
   require_auth(bot);
-
-  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
-  auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
-  auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);
-  eosio::check(iter_telegram_account_user_id != telegram_account_table_user_id.end(), "Telegram account not found"); // add text error
-  //validation confirmed
-  
-  post_question(iter_telegram_account_user_id->user, community_id, tags, title, ipfs_link, type);
+  eosio::name user = get_telegram_action_account(telegram_id);
+  post_question(user, community_id, tags, title, ipfs_link, type);
 }
 
 void peeranha::postanswer(eosio::name user, uint64_t question_id,
@@ -52,14 +46,9 @@ void peeranha::telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t quest
                           IpfsHash ipfs_link, uint8_t official_answer) {
   require_auth(bot);
 
-  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
-  auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
-  auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);
-  eosio::check(iter_telegram_account_user_id != telegram_account_table_user_id.end(), "Telegram account not found"); // add text error
-  //validation confirmed
-
   bool buf_official_answer = official_answer;
-  post_answer(iter_telegram_account_user_id->user, question_id, ipfs_link, buf_official_answer);
+  eosio::name user = get_telegram_action_account(telegram_id);
+  post_answer(user, question_id, ipfs_link, buf_official_answer);
 }
 
 void peeranha::postcomment(eosio::name user, uint64_t question_id,
@@ -231,19 +220,24 @@ void peeranha::movequestion(eosio::name user, uint16_t community_id, uint64_t qu
 }
 
 
-void peeranha:: apprvacc(eosio::name user) {
+void peeranha::apprvacc(eosio::name user) {
   require_auth(user);
   approve_account(user);
 }
 
-void peeranha:: dsapprvacc(eosio::name user) {
+void peeranha::dsapprvacc(eosio::name user) {
   require_auth(user);
   disapprove_account(user);
 }
 
-void peeranha:: addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id) {
+void peeranha::addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id) {
   require_auth(bot_name);
-  add_telegram_account(user, telegram_id);
+  add_telegram_account(user, telegram_id, false);
+}
+
+void peeranha::addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar) {
+  require_auth(bot_name);
+  add_empty_telegram_account(telegram_id, display_name, ipfs_profile, ipfs_avatar);
 }
 
 void peeranha::intachregist() {
@@ -431,7 +425,7 @@ EOSIO_DISPATCH(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
         reportprof)(updateacc)(givemoderflg)(editcomm)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
-        (apprvacc)(dsapprvacc)(addtelacc)(intachregist)
+        (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(intachregist)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

@@ -1,12 +1,15 @@
 #pragma once
-#pragma once
 #include "peeranha.hpp"
 #include <stdint.h>
+
+#define NOT_CONFIRMED_TELEGRAM_ACCOUNT 0
+#define CONFIRMED_TELEGRAM_ACCOUNT 1
+#define EMPTY_TELEGRAM_ACCOUNT 2
 
 struct [[ eosio::table("telegramacc"), eosio::contract("peeranha.main") ]] telegram_account {
   eosio::name user;
   int telegram_id; 
-  bool confirmed;
+  uint8_t confirmed;
   
   uint64_t primary_key() const { return user.value; }
   uint64_t telegram_rkey() const { return telegram_id; }

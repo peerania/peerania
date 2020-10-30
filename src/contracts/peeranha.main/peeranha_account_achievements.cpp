@@ -10,7 +10,7 @@ void peeranha::update_achievement(eosio::name user, Group_achievement group, int
     auto iter_account_achievements = account_achievements_table.find(buf_achievement.first);
     if (buf_achievement.second.group == group && iter_account_achievements == account_achievements_table.end()) {
       auto lower_bound = value >= buf_achievement.second.lower_bound;
-      if (lower_bound && give_achievement(buf_achievement.first)) {
+      if (lower_bound && increment_achievement_count(buf_achievement.first)) {
         account_achievements_table.emplace(_self, [&](auto &account) {
           account.user = user;
           account.achievements_id = buf_achievement.first;

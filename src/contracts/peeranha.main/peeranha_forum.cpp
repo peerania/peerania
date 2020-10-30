@@ -77,7 +77,6 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
     break;
   }
   int8_t rating_change = 0;
-
   if (now() - iter_question->post_time <= TIME_15_MINUTES && user != iter_question->user) {
     int_key_value key_value;
     key_value.key = PROPERTY_ANSWER_15_MINUTES;

@@ -228,7 +228,6 @@ void peeranha::move_table_achieve(eosio::name old_user, eosio::name new_user) {
   auto iter_account_achievements = old_account_achievements_table.begin();
   while (iter_account_achievements != old_account_achievements_table.end()) {
     auto achieve = achievements.find(iter_account_achievements->achievements_id);
-
     update_achievement(new_user, achieve->second.group, achieve->second.lower_bound);
     decrement_achievement_count(iter_account_achievements->achievements_id);
     iter_account_achievements = old_account_achievements_table.erase(iter_account_achievements);

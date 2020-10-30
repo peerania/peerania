@@ -86,7 +86,7 @@ eosio::name peeranha::generate_temp_telegram_account() {
   return user;
 }
 
-eosio::name peeranha::telegram_post_action(uint64_t telegram_id) {
+eosio::name peeranha::get_telegram_action_account(uint64_t telegram_id) {
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
   auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
   auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);

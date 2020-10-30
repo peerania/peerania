@@ -251,7 +251,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                        const std::string &title, const IpfsHash &ipfs_link,
                        const uint8_t type);
     
-    eosio::name telegram_post_action(uint64_t telegram_id);
+    eosio::name get_telegram_action_account(uint64_t telegram_id);
 
     void post_answer(eosio::name user, uint64_t question_id,
                      const IpfsHash &ipfs_link, bool official_answer);

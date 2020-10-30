@@ -31,7 +31,7 @@ void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t commu
                             std::vector<uint32_t> tags, std::string title,
                             IpfsHash ipfs_link, const uint8_t type) {
   require_auth(bot);
-  eosio::name user = telegram_post_action(telegram_id);
+  eosio::name user = get_telegram_action_account(telegram_id);
   post_question(user, community_id, tags, title, ipfs_link, type);
 }
 
@@ -47,7 +47,7 @@ void peeranha::telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t quest
   require_auth(bot);
 
   bool buf_official_answer = official_answer;
-  eosio::name user = telegram_post_action(telegram_id);
+  eosio::name user = get_telegram_action_account(telegram_id);
   post_answer(user, question_id, ipfs_link, buf_official_answer);
 }
 

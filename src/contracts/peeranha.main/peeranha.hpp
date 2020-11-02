@@ -358,8 +358,6 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void add_telegram_account(eosio::name user, uint64_t telegram_id, bool new_account);
 
-    void move_account_statistik(eosio::name old_user, eosio::name new_user);
-
     void delete_table_property_community(eosio::name old_user, eosio::name new_user);
 
     void delete_table_period_rating(eosio::name old_user, eosio::name new_user);

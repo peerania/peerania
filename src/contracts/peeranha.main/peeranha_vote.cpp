@@ -30,7 +30,7 @@ void peeranha::vote_forum_item(eosio::name user, uint64_t question_id,
         uint16_t community_id = question.community_id;
         if (apply_to_question(answer_id)) {
           target_user = question.user;
-                    if (is_upvote)
+          if (is_upvote)
             upvote_item(question, iter_account, energy, caller_rating_change,
                         target_user_rating_change, vote_question_res, community_id);
           else

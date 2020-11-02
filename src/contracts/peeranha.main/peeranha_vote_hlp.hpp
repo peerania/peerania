@@ -7,8 +7,8 @@
 template <typename T, typename T_iter_acc>
 void upvote_item(T &item, T_iter_acc iter_account, int8_t &energy,
                  int8_t &caller_rating, int8_t &target_user_rating,
-                 VoteItem::vote_resources_t item_type) {
-  assert_allowed(*iter_account, item.user, Action::UPVOTE);
+                 VoteItem::vote_resources_t item_type, uint16_t community_id = 0) {
+  assert_allowed(*iter_account, item.user, Action::UPVOTE, community_id);
   bool is_new;
   auto itr_history =
       get_history_item_iter(item.history, iter_account->user, is_new);
@@ -62,8 +62,8 @@ void upvote_item(T &item, T_iter_acc iter_account, int8_t &energy,
 template <typename T, typename T_iter_acc>
 void downvote_item(T &item, T_iter_acc iter_account, int8_t &energy,
                    int8_t &caller_rating, int8_t &target_user_rating,
-                   VoteItem::vote_resources_t item_type) {
-  assert_allowed(*iter_account, item.user, Action::DOWNVOTE);
+                   VoteItem::vote_resources_t item_type, uint16_t community_id = 0) {
+  assert_allowed(*iter_account, item.user, Action::DOWNVOTE, community_id);
   bool is_new;
   auto itr_history =
       get_history_item_iter(item.history, iter_account->user, is_new);

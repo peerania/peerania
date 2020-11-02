@@ -64,7 +64,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example, table, ignore_excess=True))
         end()
 
-    def test_add_flag_ignore_rating(self):
+    def test_add_flag_ignore_rating_create_tag(self):
         begin('Test add flag ignore rating')
         alice = self.register_alice_account(0, 100)
         admin = self.get_contract_deployer(self.get_default_contract())
@@ -97,7 +97,45 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
                                 'tag_id': t[0]['id']}, bob, 'Bob vote create tag, with flag ignore rating')
         self.action('vtdeltag', {'user': bob, 'community_id': 1,
                                  'tag_id': t[0]['id']}, bob, 'Bob vote delete tag, with flag ignore rating')
+        end()
 
+    
+    def test_add_flag_ignore_rating_upvote_downvote(self):
+        begin('Test add flag ignore rating for upvote/downvote answer/question')
+        alice = self.register_alice_account(0, 200)
+        bob = self.register_bob_account(0, 200)
+        admin = self.get_contract_deployer(self.get_default_contract())
+
+        self._register_question_action(alice, 'Alice question 1', 'q1')
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(alice), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': False}, alice,
+                    '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'answer without flag "official_answer", variable official_answer = False'))
+
+
+        self.failed_action('upvote', {
+                    'user': 'bob', 'question_id': question_id, 'answer_id': 0}, bob, 'bob upvote Alice question without rating')
+        self.failed_action('upvote', {
+                    'user': 'bob', 'question_id': question_id, 'answer_id': 1}, bob, 'bob upvote Alice answer without rating')
+        self.failed_action('downvote', {
+                    'user': 'bob', 'question_id': question_id, 'answer_id': 1}, bob, 'bob downvote Alice question without rating')
+        self.failed_action('downvote', {
+                    'user': 'bob', 'question_id': question_id, 'answer_id': 0}, bob, 'bob downvote Alice answer without rating')
+
+        self.action('givecommuflg', {
+        'user': bob,
+        'flags': COMMUNITY_ADMIN_FLG_IGNORE_RATING,
+        'community_id': 1
+        }, admin, 'add a flag COMMUNITY_ADMIN_FLG_IGNORE_RATING')
+
+        self.wait(2)
+        self.action('upvote', {
+                    'user': 'bob', 'question_id': question_id, 'answer_id': 0}, bob, 'bob upvote Alice question without rating')
+        self.action('upvote', {
+                    'user': 'bob', 'question_id': question_id, 'answer_id': 1}, bob, 'bob upvote Alice answer without rating')
+        self.action('downvote', {
+                    'user': 'bob', 'question_id': question_id, 'answer_id': 1}, bob, 'bob downvote Alice question without rating')
+        self.action('downvote', {
+                    'user': 'bob', 'question_id': question_id, 'answer_id': 0}, bob, 'bob downvote Alice answer without rating')
         end()
 
 
@@ -186,7 +224,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         end()
 
     def test_official_answer(self):
-        begin('Test post answeradd with "official_answer"')
+        begin('Test post answeradd with "official_answer" (flag 10)')
         alice = self.register_alice_account()
         admin = self.get_contract_deployer(self.get_default_contract())
         bob = self.register_bob_account()
@@ -194,7 +232,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         question_id = self.table('question', 'allquestions')[0]['id']
 
         self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, bob,
-                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer"'))
+                    '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'answer without flag "official_answer" (properties official answer don`t give)'))
         answers = self.table('question', 'allquestions')[0]['answers'][0]['properties']
         example = [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]
         self.assertTrue(compare(example, answers, ignore_excess=True))
@@ -208,7 +246,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         self.action('postanswer', {'user': str(alice), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, alice,
                     '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'answer with flag "official_answer"'))
         answers = self.table('question', 'allquestions')[0]['answers'][1]['properties']
-        example = [{'key': 10, 'value': 1}, {'key': 12, 'value': 1}]
+        example = [{'key': 10, 'value': 1}]
         self.assertTrue(compare(example, answers, ignore_excess=True))
         end()
 
@@ -243,8 +281,8 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         self.action('modanswer', {'user': str(alice), 'question_id': question_id, 'answer_id': answers_id,
                                   'ipfs_link': 'undefined123', 'official_answer': True}, alice, 'modify answer with flag "official_answer", variable official_answer = True')
         properties = self.table('question', 'allquestions')[0]['answers'][1]['properties']
-        example = {'key': 10, 'value': 1}
-        self.assertTrue(compare(example, properties[2], ignore_excess=True))
+        example = [{'key': 3}, {'key': 10, 'value': 1}]
+        self.assertTrue(compare(example, properties, ignore_excess=True))
 
         self.action('modanswer', {'user': str(alice), 'question_id': question_id, 'answer_id': answers_id,
                                   'ipfs_link': 'undefined123', 'official_answer': False}, alice, 'modify answer with flag "official_answer", variable official_answer = false')

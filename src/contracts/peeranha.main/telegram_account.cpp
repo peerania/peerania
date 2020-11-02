@@ -24,7 +24,7 @@ void peeranha::approve_account(eosio::name user) {
 void peeranha::disapprove_account(eosio::name user) { 
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
   auto iter_telegram_account = telegram_account_table.find(user.value);
-  eosio::check(iter_telegram_account != telegram_account_table.end(), "Account not found");
+  eosio::check(iter_telegram_account != telegram_account_table.end(), "Telegram account not found");
 
   telegram_account_table.erase(iter_telegram_account);
 }
@@ -35,7 +35,6 @@ void peeranha::add_telegram_account(eosio::name user, uint64_t telegram_id, bool
   auto iter_telegram_account = telegram_account_table.find(user.value);
   auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
   auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);
-
   eosio::check(iter_telegram_account == telegram_account_table.end(), "This telos account already has a Telegram account");
   eosio::check(iter_telegram_account_user_id == telegram_account_table_user_id.end() || iter_telegram_account_user_id->confirmed == EMPTY_TELEGRAM_ACCOUNT, "This Telegram account already has a telos account");
 
@@ -60,6 +59,14 @@ void peeranha::add_empty_telegram_account(uint64_t telegram_id, std::string disp
 
   register_account(user, display_name, ipfs_avatar, ipfs_avatar);
   add_telegram_account(user, telegram_id, true);
+
+  auto iter_account = account_table.find(user.value);
+  eosio::check(iter_account != account_table.end(), "Error register empty account");
+  account_table.modify(
+      iter_account, _self,
+      [](auto &account) {
+        set_property(account.integer_properties, PROPERTY_EMPTY_ACCOUNT, 1);
+  });
 }
 
 eosio::name peeranha::generate_temp_telegram_account() {
@@ -90,7 +97,7 @@ eosio::name peeranha::get_telegram_action_account(uint64_t telegram_id) {
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
   auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
   auto iter_telegram_account_user_id = telegram_account_table_user_id.find(telegram_id);
-  eosio::check(iter_telegram_account_user_id != telegram_account_table_user_id.end(), "Account not found"); // add text error
+  eosio::check(iter_telegram_account_user_id != telegram_account_table_user_id.end(), "Telegram account not found"); // add text error
   eosio::check(iter_telegram_account_user_id->confirmed == CONFIRMED_TELEGRAM_ACCOUNT || iter_telegram_account_user_id->confirmed == EMPTY_TELEGRAM_ACCOUNT, "Account not confirmed"); // add text error
   
   return iter_telegram_account_user_id->user;
@@ -118,10 +125,14 @@ void peeranha::move_table_statistic(eosio::name old_user, eosio::name new_user) 
                           account.answers_given += iter_old_account->answers_given;
                           account.correct_answers += iter_old_account->correct_answers;
                        });
+  global_stat_index global_stat_table(_self, scope_all_stat);
+  global_stat_table.modify(
+      --global_stat_table.end(), _self,
+      [](auto &global_stat) { global_stat.user_count -= 1; });
   account_table.erase(iter_old_account);
 }
 
-void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user) {
+void peeranha::move_table_usrquestions(eosio::name old_user, eosio::name new_user) {
   user_questions_index new_user_questions_table(_self, new_user.value);                                 //move table usranswers
   user_questions_index old_user_questions_table(_self, old_user.value);
   auto iter_old_user_questions = old_user_questions_table.begin();
@@ -133,12 +144,29 @@ void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user)
     question_table.modify(iter_question, _self,
                         [new_user](auto &question) {
                           question.user = new_user;
+                          set_property(question.properties, PROPERTY_EMPTY_QUESTION, 0);
                         });
+
+    int upvote_mul = QUESTION_UPVOTED_REWARD;
+    switch (get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
+                         QUESTION_TYPE_EXPERT)) {
+      case QUESTION_TYPE_GENERAL:
+        upvote_mul = COMMON_QUESTION_UPVOTED_REWARD;
+        break;
+    }
+
+    int8_t rating_change = 0;
+    std::for_each(iter_question->history.begin(), iter_question->history.end(), [&new_user, &rating_change, upvote_mul](auto hst) {
+      if (hst.is_flag_set(HISTORY_UPVOTED_FLG) && hst.user == new_user) {
+        rating_change -= upvote_mul;
+      }
+    });
+    update_rating(find_account(old_user)->user, rating_change);
     iter_old_user_questions = old_user_questions_table.erase(iter_old_user_questions);
   }
 }
 
-void peeranha::move_table_usrquestions(eosio::name old_user, eosio::name new_user) {
+void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user) {
   user_answers_index new_user_answer_table(_self, new_user.value);                                  //move table usrquestions
   user_answers_index old_user_answer_table(_self, old_user.value);
   auto iter_old_user_answer = old_user_answer_table.begin();
@@ -148,12 +176,49 @@ void peeranha::move_table_usrquestions(eosio::name old_user, eosio::name new_use
       usr_question.answer_id = iter_old_user_answer->answer_id;
     });
     auto iter_question = find_question(iter_old_user_answer->question_id);                       //change author answer
+
+    auto vote_question_res = VoteItem::question;
+    auto vote_answer_res = VoteItem::answer;
+    switch (get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
+                         QUESTION_TYPE_EXPERT)) {
+      case QUESTION_TYPE_GENERAL:
+        vote_question_res = VoteItem::common_question;
+        vote_answer_res = VoteItem::common_answer;
+        break;
+    }
+
+    int8_t rating_change_old_user = 0;
+    int8_t rating_change_new_user = 0;
+    int32_t delete_achievement_first_answer = 0;
+    int32_t delete_achievement_answer_15_minutes = 0;
     question_table.modify(iter_question, _self,
-                        [new_user, &iter_old_user_answer, &iter_question](auto &question) {
+                        [new_user, &iter_old_user_answer, &rating_change_old_user, &rating_change_new_user, vote_answer_res, vote_question_res, &delete_achievement_answer_15_minutes, &delete_achievement_first_answer](auto &question) {
                           auto iter_answer = find_answer(question, iter_old_user_answer->answer_id);
                           iter_answer->user = new_user;
+                          set_property(iter_answer->properties, PROPERTY_EMPTY_ANSWER, 0);
+
+                          if (question.correct_answer_id == iter_answer->id && question.user == new_user) {
+                            rating_change_old_user -= vote_answer_res.correct_answer;
+                            rating_change_new_user -= vote_question_res.correct_answer;
+                          }
+                          if (get_property_d(iter_answer->properties, PROPERTY_ANSWER_15_MINUTES, -2) == 1 && question.user == new_user) {
+                            rating_change_old_user -= vote_answer_res.upvoted_reward;
+                            delete_achievement_answer_15_minutes --;
+                          }
+                          if (get_property_d(iter_answer->properties, PROPERTY_FIRST_ANSWER, -2) == 1 && question.user == new_user) {
+                            rating_change_old_user -= vote_answer_res.upvoted_reward;
+                            delete_achievement_first_answer --;
+                          }
+
+                          std::for_each(iter_answer->history.begin(), iter_answer->history.end(), [&new_user, &rating_change_old_user, vote_answer_res](auto hst) {
+                            if (hst.is_flag_set(HISTORY_UPVOTED_FLG) && hst.user == new_user) {
+                              rating_change_old_user -= vote_answer_res.upvoted_reward;
+                            }
+                          });
                         });
 
+    update_rating(new_user, rating_change_new_user);
+    update_rating(old_user, rating_change_old_user);
     iter_old_user_answer = old_user_answer_table.erase(iter_old_user_answer);
   }
 }

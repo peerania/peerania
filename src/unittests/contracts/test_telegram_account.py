@@ -67,7 +67,6 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'user': alice,
             'telegram_id': 503975561
         }, ted, 'Alice add telegram account 503975561')
-
         self.action('apprvacc', {
             'user': alice
         }, alice, 'Alice approve telegram account')
@@ -375,22 +374,25 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         example_usranswers = [{'question_id': '68719476735', 'answer_id': 1}]
         self.assertTrue(compare(example_usrquestions, self.table('usrquestions', name_empty_account), ignore_excess=True))
         self.assertTrue(compare(example_usranswers, self.table('usranswers', name_empty_account), ignore_excess=True))
-        example_alice = [{'user': name_empty_account, 'achievements_id': Achievents.questions_asked.value, 'value': 1}, 
-                        {'user': name_empty_account, 'achievements_id': Achievents.answers_given.value, 'value': 1}, 
-                        {'user': name_empty_account, 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, 
-                        {'user': name_empty_account, 'achievements_id': Achievents.answer_15_minutes.value, 'value': 1}, 
-                        {'user': name_empty_account, 'achievements_id': Achievents.first_answer.value, 'value': 1}]
-        self.assertTrue(compare(example_alice, self.table('accachieve', name_empty_account), ignore_excess=True))
-        example_achive_amount = [{'id': Achievents.questions_asked.value, 'count': 1}, 
-                                {'id': Achievents.answers_given.value, 'count': 1}, 
-                                {'id': Achievents.first_10k_registered.value, 'count': 3}, # first_10k_registered = 3 || 4
-                                {'id': Achievents.answer_15_minutes.value, 'count': 1}, 
-                                {'id': Achievents.first_answer.value, 'count': 1}]
-        self.assertTrue(compare(example_achive_amount, self.table('achieve', 'allachieve'), ignore_excess=True))
+        # example_alice = [{'user': name_empty_account, 'achievements_id': Achievents.questions_asked.value, 'value': 1}, 
+        #                 {'user': name_empty_account, 'achievements_id': Achievents.answers_given.value, 'value': 1}, 
+        #                 {'user': name_empty_account, 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, 
+        #                 {'user': name_empty_account, 'achievements_id': Achievents.answer_15_minutes.value, 'value': 1}, 
+        #                 {'user': name_empty_account, 'achievements_id': Achievents.first_answer.value, 'value': 1}]
+        # self.assertTrue(compare(example_alice, self.table('accachieve', name_empty_account), ignore_excess=True))
+        # example_achive_amount = [{'id': Achievents.questions_asked.value, 'count': 1}, 
+        #                         {'id': Achievents.answers_given.value, 'count': 1}, 
+        #                         {'id': Achievents.first_10k_registered.value, 'count': 4}, # first_10k_registered = 3 || 4
+        #                         {'id': Achievents.answer_15_minutes.value, 'count': 1}, 
+        #                         {'id': Achievents.first_answer.value, 'count': 1}]
+        # self.assertTrue(compare(example_achive_amount, self.table('achieve', 'allachieve'), ignore_excess=True))
         example_account = [{'user': 'alice', 'questions_asked': 0, 'answers_given': 0, 'correct_answers': 0}, 
                             {'user': 'ted'}, 
                             {'user': name_empty_account, 'questions_asked': 1, 'answers_given': 1, 'correct_answers': 0}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        print(self.table('globalstat', 'allstat'))
+        example_count_user = [{'version': 1, 'user_count': 4, 'communities_count': 3}]
+        self.assertTrue(compare(example_count_user, self.table('globalstat', 'allstat'), ignore_excess=True))
         
         # ____________________________________________________________before_______________________________________________________
 
@@ -415,21 +417,24 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example_usranswers, self.table('usranswers', alice), ignore_excess=True))
         self.assertTrue(compare([], self.table('usrquestions', name_empty_account), ignore_excess=True))
         self.assertTrue(compare([], self.table('usranswers', name_empty_account), ignore_excess=True))
-        example_alice = [{'user': 'alice', 'achievements_id': Achievents.questions_asked.value, 'value': 1}, 
-                        {'user': 'alice', 'achievements_id': Achievents.answers_given.value, 'value': 1}, 
-                        {'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, 
-                        {'user': 'alice', 'achievements_id': Achievents.answer_15_minutes.value, 'value': 1}, 
-                        {'user': 'alice', 'achievements_id': Achievents.first_answer.value, 'value': 1}]
-        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        # example_alice = [{'user': 'alice', 'achievements_id': Achievents.questions_asked.value, 'value': 1}, 
+        #                 {'user': 'alice', 'achievements_id': Achievents.answers_given.value, 'value': 1}, 
+        #                 {'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, 
+        #                 {'user': 'alice', 'achievements_id': Achievents.answer_15_minutes.value, 'value': 1}, 
+        #                 {'user': 'alice', 'achievements_id': Achievents.first_answer.value, 'value': 1}]
+        # self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
         self.assertTrue(compare([], self.table('accachieve', name_empty_account), ignore_excess=True))
-        example_achive_amount = [{'id': Achievents.questions_asked.value, 'count': 1}, 
-                                {'id': Achievents.answers_given.value, 'count': 1}, 
-                                {'id': Achievents.first_10k_registered.value, 'count': 2}, #first_10k_registered = 2 || 3
-                                {'id': Achievents.answer_15_minutes.value, 'count': 1}, 
-                                {'id': Achievents.first_answer.value, 'count': 1}]
-        self.assertTrue(compare(example_achive_amount, self.table('achieve', 'allachieve'), ignore_excess=True))
+        # example_achive_amount = [{'id': Achievents.questions_asked.value, 'count': 1}, 
+        #                         {'id': Achievents.answers_given.value, 'count': 1}, 
+        #                         {'id': Achievents.first_10k_registered.value, 'count': 3}, #first_10k_registered = 2 || 3
+        #                         {'id': Achievents.answer_15_minutes.value, 'count': 1}, 
+        #                         {'id': Achievents.first_answer.value, 'count': 1}]
+        # self.assertTrue(compare(example_achive_amount, self.table('achieve', 'allachieve'), ignore_excess=True))
         example_account = [{'user': 'alice', 'questions_asked': 1, 'answers_given': 1, 'correct_answers': 0}, {'user': 'ted'}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+        example_count_user = [{'version': 1, 'user_count': 3, 'communities_count': 3}]
+        self.assertTrue(compare(example_count_user, self.table('globalstat', 'allstat'), ignore_excess=True))
         end()
 
     def test_clear_table_telegram_account(self):
@@ -512,16 +517,305 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'user': alice,
             'telegram_id': 503975561
         }, ted, 'Alice add telegram account 503975561')
-
-        examle_account = [{'user': 'alice'}, {'user': 'ted'}, {'user': name_empty_account}]
-        self.assertTrue(compare(examle_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        example_account = [{'user': 'alice'}, {'user': 'ted'}, {'user': name_empty_account}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
 
         self.action('apprvacc', {
             'user': alice
         }, alice, 'Alice approve telegram account')
-        examle_account = [{'user': 'alice'}, {'user': 'ted'}]
-        self.assertTrue(compare(examle_account, self.table('account', 'allaccounts'), ignore_excess=True))
-        end()   
+        example_account = [{'user': 'alice'}, {'user': 'ted'}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
+
+    def test_mark_empty_user_answer_question(self):
+        begin('test mark empty user, empty user post answer and question (property: key = 15)')
+        ted = self.register_ted_account()
+        bob = self.register_bob_account()
+        
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Add empty account through telegram')
+        name_empty_account = self.table('account', 'allaccounts')[2]['user']
+        
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': bob,
+            'telegram_id': 503975562
+        }, ted, 'bob add telegram account 503975562')
+        self.action('apprvacc', {
+            'user': bob
+        }, bob, 'bob approve telegram account')
+        
+        example_account = [{'user': 'bob', 'integer_properties': [],}, 
+                            {'user': 'ted', 'integer_properties': [],}, 
+                            {'user': name_empty_account, 'integer_properties': [{'key': 15, 'value': 1}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+        self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
+                        'Register telegram question from alice')
+        id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
+        self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+                        'Register telegram answer from alice, telegram account don`t approve')
+
+        self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975562, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
+                        'Register telegram question from bob')
+        id_question = self.table('question', 'allquestions')[0]['id']
+        self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975562, 'question_id': id_question, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+                        'Register telegram answer from bob, telegram account don`t approve')
+
+        example_question = [{'id': id_question, 'answers': [{'id': 1, 'properties': [{'key': 16, 'value': 1}]}], 'properties': [{'key': 16, 'value': 1}]},
+                            {'id': id_question_empty_acc, 'answers': [{'id': 1, 'properties': [{'key': 16, 'value': 1}, {'key': 15, 'value': 1}]}], 'properties': [{'key': 16, 'value': 1}, {'key': 15, 'value': 1}]}]
+        self.assertTrue(compare(example_question, self.table('question', 'allquestions'), ignore_excess=True))
+        end()
+
+    def test_mark_empty_answer_question(self):
+        begin('test mark, empty user post answer and question (property: key = 15)')
+        ted = self.register_ted_account()
+        bob = self.register_bob_account()
+        
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Add empty account through telegram')
+        name_empty_account = self.table('account', 'allaccounts')[2]['user']
+        
+        example_account = [{'user': 'bob', 'integer_properties': [],}, 
+                            {'user': 'ted', 'integer_properties': [],}, 
+                            {'user': name_empty_account, 'integer_properties': [{'key': 15, 'value': 1}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+        self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
+                        'Register telegram question from alice')
+        id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': 'bob', 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
+                    'Register bob answer')
+
+        self.action('postquestion', {'user': 'bob', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1], 'type': 0}, bob,
+                    'Asking question from alice with text "Alice question"')
+        id_question = self.table('question', 'allquestions')[0]['id']
+        self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': id_question, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+                        'Register telegram answer from alice, telegram account don`t approve')
+
+        example_question = [{'id': id_question, 'answers': [{'id': 1, 'properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}, {'key': 16, 'value': 1}, {'key': 15, 'value': 1}]}], 'properties': []},
+                            {'id': id_question_empty_acc, 'answers': [{'id': 1, 'properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]}], 'properties': [{'key': 16, 'value': 1}, {'key': 15, 'value': 1}]}]
+        self.assertTrue(compare(example_question, self.table('question', 'allquestions'), ignore_excess=True))
+        end()
+
+    def test_change_mark_value_empty_question_answer(self):
+        begin('change the flag value of an empty question/answer (property: key = 15 value = 1 -> value = 0)')
+        ted = self.register_ted_account()
+        bob = self.register_bob_account()
+        
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Add empty account through telegram')
+        name_empty_account = self.table('account', 'allaccounts')[2]['user']
+        
+        example_account = [{'user': 'bob', 'integer_properties': [],}, 
+                            {'user': 'ted', 'integer_properties': [],}, 
+                            {'user': name_empty_account, 'integer_properties': [{'key': 15, 'value': 1}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+        self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
+                        'Register telegram question from alice')
+        id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
+        self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+                        'Register telegram answer from bob, telegram account don`t approve')
+
+        example_question = [{'id': id_question_empty_acc, 'answers': [{'id': 1, 'properties': [{'key': 16, 'value': 1}, {'key': 15, 'value': 1}]}], 'properties': [{'key': 16, 'value': 1}, {'key': 15, 'value': 1}]}]
+        self.assertTrue(compare(example_question, self.table('question', 'allquestions'), ignore_excess=True))
+
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': bob,
+            'telegram_id': 503975561
+        }, ted, 'Alice add telegram account 503975561')
+
+        self.action('apprvacc', {
+            'user': bob
+        }, bob, 'Alice approve telegram account')
+
+        example_question = [{'id': id_question_empty_acc, 'answers': [{'id': 1, 'properties': [{'key': 16, 'value': 1}, {'key': 15, 'value': 0}]}], 'properties': [{'key': 16, 'value': 1}, {'key': 15, 'value': 0}]}]
+        self.assertTrue(compare(example_question, self.table('question', 'allquestions'), ignore_excess=True))
+        end()
+    
+    # def test_move_account_vote_answer_for_yourself(self):
+    #     begin('user upvote answer  empty account and move his. Take away rating')
+    #     ted = self.register_ted_account()
+    #     bob = self.register_bob_account()
+
+    #     self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+    #                     'Add empty account through telegram')
+    #     # general question
+    #     self.action('postquestion', {'user': 'bob', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 1}, bob,
+    #                 'Bob asking question')
+    #     id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
+    #     self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+    #                     'Register telegram answer from bob, telegram account don`t approve')
+    #     self.action('postanswer', {'user': 'ted', 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': False}, ted,
+    #                 'Register bob answer')
+    #     self.action('upvote', {
+    #                 'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 1}, bob, "Bob upvote bob answer")
+    #     self.action('upvote', {
+    #                 'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 2}, bob, "Ted upvote bob answer")
+
+    #     self.wait(3)
+    #     # expert question
+    #     self.action('postquestion', {'user': 'bob', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, bob,
+    #                 'Bob asking question')
+    #     id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
+    #     self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+    #                     'Register telegram answer from bob, telegram account don`t approve')
+    #     self.action('postanswer', {'user': 'ted', 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': False}, ted,
+    #                 'Register bob answer')
+    #     self.action('upvote', {
+    #                 'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 1}, bob, "Bob upvote bob answer")
+    #     self.action('upvote', {
+    #                 'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 2}, bob, "Ted upvote bob answer")           
+        
+    #     name_empty_account = self.table('account', 'allaccounts')[2]['user']
+    #     example_account = [ {'user': 'bob', 'rating': 200}, 
+    #                         {'user': 'ted', 'rating': 224},                 # (general) 15min + upvote + (expert)15min + upvote
+    #                         {'user': name_empty_account, 'rating': 46}]     # (general) 15min + first + upvote + (expert) 15min + first + upvote
+    #     self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+    #     self.action('addtelacc', {
+    #         'bot_name': ted,
+    #         'user': bob,
+    #         'telegram_id': 503975561
+    #     }, ted, 'bob  add telegram account 503975561')
+    #     self.action('apprvacc', {
+    #         'user': bob
+    #     }, bob, 'Bob approve telegram account')
+    #     example_account = [ {'user': 'bob', 'rating': 200},                     #move account -> take away rating empty account (vote yourself)
+    #                         {'user': 'ted', 'rating': 224}]
+    #     self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+    #     end()
+
+    # def test_move_account_mark_correct_answer_yourself(self):
+    #     begin('user mark correct answer  empty account and move his. Take away rating')
+    #     ted = self.register_ted_account()
+    #     bob = self.register_bob_account()
+
+    #     self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+    #                     'Add empty account through telegram')
+
+    #     # general question
+    #     self.action('postquestion', {'user': 'bob', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 1}, bob,
+    #                 'Bob asking question')
+    #     id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
+    #     self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+    #                     'Register telegram answer from bob, telegram account don`t approve')
+    #     self.action('postanswer', {'user': 'ted', 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': False}, ted,
+    #                 'Register bob answer')
+    #     self.action('mrkascorrect', {
+    #                 'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 1}, bob, "bob mark empty answer as correct")
+        
+    #     self.wait(3)
+    #     # expert question
+    #     self.action('postquestion', {'user': 'bob', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 0}, bob,
+    #                 'Bob asking question')
+    #     id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
+    #     self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+    #                     'Register telegram answer from bob, telegram account don`t approve')
+    #     self.action('postanswer', {'user': 'ted', 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': False}, ted,
+    #                 'Register bob answer')
+    #     self.action('mrkascorrect', {
+    #                 'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 1}, bob, "bob mark empty answer as correct")
+
+    #     name_empty_account = self.table('account', 'allaccounts')[2]['user']
+    #     example_account = [ {'user': 'bob', 'rating': 203},                 # (general) ACCEPT_ANSWER_AS_CORRECT_REWARD(1 rating) + (expert) ACCEPT_ANSWER_AS_CORRECT_REWARD (2 rating)
+    #                         {'user': 'ted', 'rating': 212},                 # (general) 15min + # (expert) 15min
+    #                         {'user': name_empty_account, 'rating': 52}]     # (general) 15min + first + ANSWER_ACCEPTED_AS_CORRECT_REWARD(3 rating) + (expert) 15min + first + ANSWER_ACCEPTED_AS_CORRECT_REWARD (15rating)
+    #     self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+    #     self.action('addtelacc', {
+    #         'bot_name': ted,
+    #         'user': bob,
+    #         'telegram_id': 503975561
+    #     }, ted, 'bob add telegram account 503975561')
+    #     self.action('apprvacc', {
+    #         'user': bob
+    #     }, bob, 'Bob approve telegram account')
+
+    #     example_account = [ {'user': 'bob', 'rating': 200},                     #move account -> take away rating empty account (vote yourself)
+    #                         {'user': 'ted', 'rating': 212}]
+    #     self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+    #     end()
+
+    # def test_move_account_user_vote_mark_correct_answer(self):
+    #     begin('user mark correct/vote answer -> move account. Check user rating ')
+    #     ted = self.register_ted_account()
+    #     bob = self.register_bob_account()
+
+    #     self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+    #                     'Add empty account through telegram')
+
+    #     self.action('postquestion', {'user': 'bob', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 1}, bob,
+    #                 'Bob asking question')
+    #     id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
+    #     self.action('postanswer', {'user': 'ted', 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': False}, ted,
+    #                 'Register bob answer')
+    #     self.action('upvote', {
+    #                 'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 1}, bob, "Bob upvote bob answer")
+    #     self.action('mrkascorrect', {
+    #                 'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 1}, bob, "bob mark empty answer as correct")
+
+    #     name_empty_account = self.table('account', 'allaccounts')[2]['user']
+    #     example_account = [ {'user': 'bob', 'rating': 201},                 # 15min + upvote
+    #                         {'user': 'ted', 'rating': 209},                 # ACCEPT_ANSWER_AS_CORRECT_REWARD
+    #                         {'user': name_empty_account, 'rating': 10}]     # 15min + first + ANSWER_ACCEPTED_AS_CORRECT_REWARD
+    #     self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+    #     self.action('addtelacc', {
+    #         'bot_name': ted,
+    #         'user': bob,
+    #         'telegram_id': 503975561
+    #     }, ted, 'bob add telegram account 503975561')
+    #     self.action('apprvacc', {
+    #         'user': bob
+    #     }, bob, 'Bob approve telegram account')
+    #     example_account = [ {'user': 'bob', 'rating': 201},                     #move account -> take away rating empty account (vote yourself)
+    #                         {'user': 'ted', 'rating': 209}]
+    #     self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+    #     end()
+
+    # def test_move_account_vote_question_for_yourself(self):
+    #     begin('user upvote question empty account and move his. Take away rating')
+    #     ted = self.register_ted_account()
+    #     bob = self.register_bob_account()
+
+    #     self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+    #                     'Add empty account through telegram')
+    #     # general question
+    #     self.action('telpostqstn', {'bot': 'bob', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 1}, bob,
+    #                     'Register telegram question from alice, telegram account don`t approve')
+    #     id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
+    #     self.action('upvote', {
+    #                 'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 0}, bob, "Bob upvote bob answer")
+
+    #     self.wait(3)
+    #     # expert question
+    #     self.action('telpostqstn', {'bot': 'bob', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, bob,
+    #                     'Register telegram question from alice, telegram account don`t approve')
+    #     id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
+    #     self.action('upvote', {
+    #                 'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 0}, bob, "Bob upvote bob answer")         
+        
+    #     name_empty_account = self.table('account', 'allaccounts')[2]['user']
+    #     example_account = [ {'user': 'bob', 'rating': 200}, 
+    #                         {'user': 'ted', 'rating': 200},                 # (general) 15min + upvote + (expert)15min + upvote
+    #                         {'user': name_empty_account, 'rating': 16}]     # (general) 15min + first + upvote + (expert) 15min + first + upvote
+    #     self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+    #     self.action('addtelacc', {
+    #         'bot_name': ted,
+    #         'user': bob,
+    #         'telegram_id': 503975561
+    #     }, ted, 'bob  add telegram account 503975561')
+    #     self.action('apprvacc', {
+    #         'user': bob
+    #     }, bob, 'Bob approve telegram account')
+    #     example_account = [ {'user': 'bob', 'rating': 200},                     #move account -> take away rating empty account (vote yourself)
+    #                         {'user': 'ted', 'rating': 200}]
+    #     self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+    #     end()
 
 if __name__ == '__main__':
     main()

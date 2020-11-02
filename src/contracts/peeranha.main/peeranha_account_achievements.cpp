@@ -21,9 +21,13 @@ void peeranha::update_achievement(eosio::name user, Group_achievement group, int
   }
 }
 
-void peeranha::init_achievements_first_10k_registered_users() {
+void peeranha::init_users_achievements() {
   account_index account_table(_self, scope_all_accounts);
   for (auto iter_account = account_table.begin(); iter_account != account_table.end(); ++iter_account) {
-    update_achievement(iter_account->user, REGISTERED, 1);       
+    update_achievement(iter_account->user, REGISTERED, 1);
+    update_achievement(iter_account->user, QUESTION, iter_account->questions_asked);
+    update_achievement(iter_account->user, ANSWER, iter_account->answers_given);
+    update_achievement(iter_account->user, CORRECT_ANSWER, iter_account->correct_answers);
+    update_achievement(iter_account->user, RATING, iter_account->rating);       
   }
 }

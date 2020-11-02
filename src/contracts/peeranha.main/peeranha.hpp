@@ -176,7 +176,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     ACTION addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar);
 
     //init achievements first 10k registered users
-    ACTION intachregist();
+    ACTION intallaccach();
 
 #ifdef SUPERFLUOUS_INDEX
     // Delete @count@ items from superfluous index tebles
@@ -378,5 +378,5 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void decrement_achievement_count(uint32_t id_achievement);
 
-    void init_achievements_first_10k_registered_users();
+    void init_users_achievements();
 };

@@ -27,25 +27,26 @@ void peeranha::vote_forum_item(eosio::name user, uint64_t question_id,
           default:
             break;
         }
+        uint16_t community_id = question.community_id;
         if (apply_to_question(answer_id)) {
           target_user = question.user;
           if (is_upvote)
             upvote_item(question, iter_account, energy, caller_rating_change,
-                        target_user_rating_change, vote_question_res);
+                        target_user_rating_change, vote_question_res, community_id);
           else
             downvote_item(question, iter_account, energy, caller_rating_change,
-                          target_user_rating_change, vote_question_res);
+                          target_user_rating_change, vote_question_res, community_id);
         } else {
           auto iter_answer = find_answer(question, answer_id);
           target_user = iter_answer->user;
           if (is_upvote)
             upvote_item(*iter_answer, iter_account, energy,
                         caller_rating_change, target_user_rating_change,
-                        vote_answer_res);
+                        vote_answer_res, community_id);
           else
             downvote_item(*iter_answer, iter_account, energy,
                           caller_rating_change, target_user_rating_change,
-                          vote_answer_res);
+                          vote_answer_res, community_id);
         
           auto within_15_minutes_property = get_property_d(iter_answer->properties, PROPERTY_ANSWER_15_MINUTES, -2);
           if (iter_answer->rating >= 0 && within_15_minutes_property == 0) {

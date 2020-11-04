@@ -23,10 +23,15 @@ void peeranha::approve_account(eosio::name user) {
 
 void peeranha::disapprove_account(eosio::name user) { 
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
-  auto iter_telegram_account = telegram_account_table.find(user.value);
-  eosio::check(iter_telegram_account != telegram_account_table.end(), "Telegram account not found");
 
-  telegram_account_table.erase(iter_telegram_account);
+  for (auto iter_telegram_account = telegram_account_table.begin(); iter_telegram_account != telegram_account_table.end(); ++iter_telegram_account) {
+    if (iter_telegram_account->user == user && iter_telegram_account->confirmed != EMPTY_TELEGRAM_ACCOUNT) {
+      telegram_account_table.erase(iter_telegram_account);
+      return;
+    }
+  }
+  
+  eosio::check(false, "Telegram account not found");
 }
 
 void peeranha::add_telegram_account(eosio::name user, uint64_t telegram_id, bool new_account) { 

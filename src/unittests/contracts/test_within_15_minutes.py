@@ -9,6 +9,99 @@ MODERATOR_FLG_ALL = 31
 economy = load_defines('./src/contracts/peeranha.main/economy.h')
 
 class TestWithin15Minutes(peeranhatest.peeranhaTest):  
+    def test_account_properties(self):
+        begin('test account properties (first answer + answer within_15_minutes)')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        carol = self.register_carol_account()
+        self._create_basic_hierarchy(alice, bob, carol)       
+
+        example_account = [{'user': 'alice', 'integer_properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]}, 
+                            {'user': 'bob', 'integer_properties': []},
+                            {'user': 'carol', 'integer_properties': []}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
+    
+    def test_account_properties_mod_delete_answer(self):
+        begin('test account properties moderator delete answer(first answer + answer within_15_minutes)')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        ted = self.register_ted_account()
+        self._give_moderator_flag(ted, MODERATOR_FLG_ALL) 
+
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1, 2, 3], 'type': 0}, alice,
+                    'Asking question from alice with text "Alice question"')
+        id_question = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': 'bob', 'question_id': id_question, 'ipfs_link': 'Bob answer to Alice', 'official_answer': False},
+                    bob, ' |-->Answer to alice from alice: "Alice answer to herself"')
+
+        example_account = [{'user': 'alice', 'integer_properties': []}, 
+                            {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]},
+                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 31}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+       
+        self.action('reportforum', {'user': 'ted', 'question_id': id_question, 'answer_id': 1, 'comment_id': 0},
+                    ted, 'Ted vote for Alice question deletion')
+        
+        example_account = [{'user': 'alice', 'integer_properties': []}, 
+                            {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]},
+                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 31}, {'key': 12, 'value': 0}, {'key': 13, 'value': 0}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
+
+    def test_account_properties_mod_delete_question(self):
+        begin('test account properties moderator delete question(first answer + answer within_15_minutes)')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        ted = self.register_ted_account()
+        self._give_moderator_flag(ted, MODERATOR_FLG_ALL) 
+
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1, 2, 3], 'type': 0}, alice,
+                    'Asking question from alice with text "Alice question"')
+        id_question = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': 'bob', 'question_id': id_question, 'ipfs_link': 'Bob answer to Alice', 'official_answer': False},
+                    bob, ' |-->Answer to alice from alice: "Alice answer to herself"')
+
+        example_account = [{'user': 'alice', 'integer_properties': []}, 
+                            {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]},
+                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 31}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+       
+        self.action('reportforum', {'user': 'ted', 'question_id': id_question, 'answer_id': 0, 'comment_id': 0},
+                    ted, 'Ted vote for Alice question deletion')
+        
+        example_account = [{'user': 'alice', 'integer_properties': []}, 
+                            {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]},
+                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 31}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
+
+    def test_account_properties_delete_answer(self):
+        begin('test account properties moderator delete answer(first answer + answer within_15_minutes)')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        ted = self.register_ted_account()
+        self._give_moderator_flag(ted, MODERATOR_FLG_ALL) 
+
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1, 2, 3], 'type': 0}, alice,
+                    'Asking question from alice with text "Alice question"')
+        id_question = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': 'bob', 'question_id': id_question, 'ipfs_link': 'Bob answer to Alice', 'official_answer': False},
+                    bob, ' |-->Answer to alice from alice: "Alice answer to herself"')
+
+        example_account = [{'user': 'alice', 'integer_properties': []}, 
+                            {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]},
+                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 31}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        
+        self.action('delanswer', {'user': 'bob', 'question_id': id_question, 'answer_id': 1}, bob, 'Delete Alice answer to Carol question')
+        
+        example_account = [{'user': 'alice', 'integer_properties': []}, 
+                            {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]},
+                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 31}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
+    
     def test_delete_answers(self):
         begin('test delete answers (first answer + answer within_15_minutes)')
         alice = self.register_alice_account()
@@ -76,7 +169,6 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
 
         example_question = [{'id': '68719476735', 'user': 'carol', 'answers': [{'id': 1, 'user': 'alice', 'properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]}, {'id': 2, 'user': 'bob', 'properties': []}]}]
         self.assertTrue(compare(example_question, self.table('question', 'allquestions'), ignore_excess=True))
-        
         end()
 
     def test_downvote_and_upvote_answer(self):
@@ -101,7 +193,7 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
         self.action('upvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': 2}, carol, 'Carol upvote for Bob question->Bob answer rating')
         
-        example_rating = [{'user': 'alice', 'rating': 230}, {'user': 'bob', 'rating': 210}, {'user': 'carol', 'rating': 200}]
+        example_rating = [{'user': 'alice', 'rating': 220}, {'user': 'bob', 'rating': 210}, {'user': 'carol', 'rating': 200}]
         self.assertTrue(compare(example_rating, self.table('account', 'allaccounts'), ignore_excess=True))
 
         example_question = [{'id': '68719476735', 'user': 'carol', 'answers': [{'id': 1, 'user': 'alice', 'properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]}, {'id': 2, 'user': 'bob', 'properties': []}]}]
@@ -120,7 +212,7 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
         self.action('upvote', {
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': 2}, carol, 'Carol upvote for Bob question->Bob answer rating')
         
-        example_rating = [{'user': 'alice', 'rating': 230}, {'user': 'bob', 'rating': 210}, {'user': 'carol', 'rating': 200}]
+        example_rating = [{'user': 'alice', 'rating': 220}, {'user': 'bob', 'rating': 210}, {'user': 'carol', 'rating': 200}]
         self.assertTrue(compare(example_rating, self.table('account', 'allaccounts'), ignore_excess=True))
         
         self.action('downvote', {
@@ -129,7 +221,6 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
                     'user': 'carol', 'question_id': var['aq'], 'answer_id': 2}, carol, 'Carol downvote for Bob question->Bob answer rating')
         
         example_rating = [{'user': 'alice', 'rating': 198}, {'user': 'bob', 'rating': 198}, {'user': 'carol', 'rating': 198}]
-
         end()
 
    
@@ -152,19 +243,17 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
         self.assertTrue(compare(e, t, var, True))
         self.action('postanswer', {'user': 'alice', 'question_id': var['aq'], 'ipfs_link': 'Alice answer to herself', 'official_answer': False},
                     alice, ' |-->Answer to alice from alice: "Alice answer to herself"')
-        self.wait(16)
+        self.wait(7)
         self.action('postanswer', {'user': 'bob', 'question_id': var['aq'], 'ipfs_link': 'Bob answer to alice', 'official_answer': False},
                     bob, '  `->Answer to alice from bob: "Bob answer to alice"')
         
-        table_question = self.table('question', 'allquestions')
         example_question = [{'id': '68719476735', 'user': 'carol', 'answers': [{'id': 1, 'user': 'alice', 'properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]}, {'id': 2, 'user': 'bob', 'properties': []}]}]
         self.assertTrue(compare(example_question, self.table('question', 'allquestions'), ignore_excess=True))
-        example_rating = [{'user': 'alice', 'rating': 220}, {'user': 'bob', 'rating': 200}, {'user': 'carol', 'rating': 200}]
+        example_rating = [{'user': 'alice', 'rating': 210}, 
+                            {'user': 'bob', 'rating': 200}, 
+                            {'user': 'carol', 'rating': 200}]
         self.assertTrue(compare(example_rating, self.table('account', 'allaccounts'), ignore_excess=True))
         return var
-
-    
-
 
     def _give_moderator_flag(self, acc, flg):
         admin = self.get_contract_deployer(self.get_default_contract())

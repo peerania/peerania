@@ -60,6 +60,8 @@ struct [[eosio::table("communities"), eosio::contract("peeranha.main")]] communi
   std::string name;
   IpfsHash ipfs_description;
   time creation_time;
+  std::vector<str_key_value> string_properties;
+  std::vector<int_key_value> integer_properties;
   uint32_t questions_asked = 0;
   uint32_t answers_given = 0;
   uint32_t correct_answers = 0;

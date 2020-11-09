@@ -4,7 +4,7 @@ from jsonutils import *
 from unittest import main
 from enum import Enum
 
-MODERATOR_FLG_ALL = 31
+MODERATOR_FLG_ALL = 63
 
 economy = load_defines('./src/contracts/peeranha.main/economy.h')
 
@@ -37,7 +37,7 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
 
         example_account = [{'user': 'alice', 'integer_properties': []}, 
                             {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]},
-                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 31}]}]
+                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 63}]}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
        
         self.action('reportforum', {'user': 'ted', 'question_id': id_question, 'answer_id': 1, 'comment_id': 0},
@@ -45,7 +45,7 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
         
         example_account = [{'user': 'alice', 'integer_properties': []}, 
                             {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]},
-                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 31}, {'key': 12, 'value': 0}, {'key': 13, 'value': 0}]}]
+                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 63}, {'key': 12, 'value': 0}, {'key': 13, 'value': 0}]}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
 
@@ -64,7 +64,7 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
 
         example_account = [{'user': 'alice', 'integer_properties': []}, 
                             {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]},
-                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 31}]}]
+                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 63}]}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
        
         self.action('reportforum', {'user': 'ted', 'question_id': id_question, 'answer_id': 0, 'comment_id': 0},
@@ -72,7 +72,7 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
         
         example_account = [{'user': 'alice', 'integer_properties': []}, 
                             {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]},
-                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 31}]}]
+                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 63}]}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
 
@@ -91,14 +91,14 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
 
         example_account = [{'user': 'alice', 'integer_properties': []}, 
                             {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 1}, {'key': 13, 'value': 1}]},
-                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 31}]}]
+                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 63}]}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         
         self.action('delanswer', {'user': 'bob', 'question_id': id_question, 'answer_id': 1}, bob, 'Delete Alice answer to Carol question')
         
         example_account = [{'user': 'alice', 'integer_properties': []}, 
                             {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]},
-                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 31}]}]
+                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 63}]}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
     
@@ -222,7 +222,35 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
         
         example_rating = [{'user': 'alice', 'rating': 198}, {'user': 'bob', 'rating': 198}, {'user': 'carol', 'rating': 198}]
         end()
+    
+    def test_change_type_quesion(self):
+        begin('test change type question')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        self._give_moderator_flag(alice, MODERATOR_FLG_ALL)
+        
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1, 2, 3], 'type': 0}, alice,
+                    'Asking question from alice with text')
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
+                    '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'Register Alice answer'))
 
+        example_rating = [  {'user': 'alice', 'rating': 200}, 
+                            {'user': 'bob', 'rating': 210}]
+        self.assertTrue(compare(example_rating, self.table('account', 'allaccounts'), ignore_excess=True))
+
+        self.action('chgqsttype', {
+                    'user': 'alice', 'question_id': question_id, 'type': 1, 'restore_rating': True}, alice, "Change question type to general")
+        example_rating = [  {'user': 'alice', 'rating': 200}, 
+                            {'user': 'bob', 'rating': 202}]
+        self.assertTrue(compare(example_rating, self.table('account', 'allaccounts'), ignore_excess=True))
+
+        self.action('chgqsttype', {
+                    'user': 'alice', 'question_id': question_id, 'type': 0, 'restore_rating': True}, alice, "Change question type to expert")
+        example_rating = [  {'user': 'alice', 'rating': 200}, 
+                            {'user': 'bob', 'rating': 210}]
+        self.assertTrue(compare(example_rating, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
    
     def _create_basic_hierarchy(self, alice, bob, carol):
         self.action('postquestion', {'user': 'carol', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1, 2, 3], 'type': 0}, carol,

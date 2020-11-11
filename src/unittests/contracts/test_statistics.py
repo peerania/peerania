@@ -93,6 +93,25 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
                             (1 if comm['id'] == 1 else 0))
         end()
 
+    def test_mark_yourself_as_correct(self):
+        begin('test mark yourself as correct')
+        carol = self.register_carol_account()
+        self.action('postquestion', {'user': 'carol', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1, 2, 3], 'type': 0}, carol,
+                    'Asking question from alice with text "Alice question"')
+        id_question = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': 'carol', 'question_id': id_question, 'ipfs_link': 'Alice answer to herself', 'official_answer': False},
+                    carol, ' |-->Answer to alice from alice: "Alice answer to herself"')
+        self.assertTrue(compare([{'user': 'carol', 'correct_answers': 0}], self.table('account', 'allaccounts'), ignore_excess=True))
+        self.action('mrkascorrect', {
+                    'user': 'carol', 'question_id': id_question, 'answer_id': 1}, carol, "Alice mark Bob answer as correct")
+        
+        self.wait(3)
+        self.assertTrue(compare([{'user': 'carol', 'correct_answers': 1}], self.table('account', 'allaccounts'), ignore_excess=True))
+        self.action('mrkascorrect', {
+                    'user': 'carol', 'question_id': id_question, 'answer_id': 0}, carol, "Alice mark Bob answer as correct")
+        self.assertTrue(compare([{'user': 'carol', 'correct_answers': 0}], self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
+
     def test_mark_as_correct_own(self):
         begin('Test answer question')
         alice = self.register_alice_account()

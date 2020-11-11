@@ -66,10 +66,11 @@ void peeranha::telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t quest
   post_answer(user, question_id, ipfs_link, buf_official_answer);
 
   user_answers_index user_answer_table(_self, user.value);
-  auto iter_user_answer = user_answer_table.begin();
+  auto iter_user_answer = user_answer_table.find(question_id);
   eosio::check(iter_user_answer != user_answer_table.end(), "Error set property answer");
+  eosio::check(iter_user_answer->question_id == question_id, std::to_string(iter_user_answer->question_id) );
 
-  auto iter_question = find_question(iter_user_answer->question_id);
+  auto iter_question = find_question(question_id);
   auto iter_account = account_table.find(user.value);
   question_table.modify(iter_question, _self,
                       [&iter_user_answer, iter_account](auto &question) {

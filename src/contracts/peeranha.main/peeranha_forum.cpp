@@ -486,6 +486,7 @@ void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
     } else {
       update_rating(iter_account, [](auto &account) {
         account.reduce_energy(ENERGY_MARK_ANSWER_AS_CORRECT);
+        account.correct_answers -= 1;
       });
     }
   }

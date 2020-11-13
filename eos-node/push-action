@@ -46,9 +46,9 @@ for i in {1..10}
 do
     cleos push action peeranhamain chnguserrt '{"user": "alice", "rating_change": '$(( 5*$i ))'}' -p peeranhamain
     cleos push action peeranhamain chnguserrt '{"user": "bob", "rating_change": '$(( 10*$i ))'}' -p peeranhamain
-    cleos push action peeranhamain postquestion '{"user":"alice", "type": 0, "title":"Q'$i'1", "community_id": 1, "tags": [1, 2], "ipfs_link":[18, 171, 34, 183, 70, 70, 148, 39, 119, 204, 125, 190, 141, 91, 238, 193, 232, 42, 72, 162, 220, 241, 71, 100, 9, 49, 83, 218, 169, 253, 201, 131, 224]}' -p alice
-    cleos push action peeranhamain postquestion '{"user":"user1", "type": 0, "title":"Q'$i'2", "community_id": 1, "tags": [1, 2], "ipfs_link":[18, 171, 34, 183, 70, 70, 148, 39, 119, 204, 125, 190, 141, 91, 238, 193, 232, 42, 72, 162, 220, 241, 71, 100, 9, 49, 83, 218, 169, 253, 201, 131, 224]}' -p user1
-    cleos push action peeranhamain postquestion '{"user":"user1", "type": 0, "title":"Q'$i'3", "community_id": 1, "tags": [1, 2], "ipfs_link":[18, 171, 34, 183, 70, 70, 148, 39, 119, 204, 125, 190, 141, 91, 238, 193, 232, 42, 72, 162, 220, 241, 71, 100, 9, 49, 83, 218, 169, 253, 201, 131, 224]}' -p user1
+    cleos push action peeranhamain postquestion '{"user":"alice", "type": 0, "title":"Q'$i'1", "community_id": 1, "tags": [1, 2], "ipfs_link":[18, 171, 34, 183, 70, 70, 148, 39, 119, 204, 125, 190, 141, 91, 238, 193, 232, 42, 72, 162, 220, 241, 71, 100, 9, 49, 83, 218, 169, 253, 201, 131, 224], "bounty": 123}' -p alice
+    cleos push action peeranhamain postquestion '{"user":"user1", "type": 0, "title":"Q'$i'2", "community_id": 1, "tags": [1, 2], "ipfs_link":[18, 171, 34, 183, 70, 70, 148, 39, 119, 204, 125, 190, 141, 91, 238, 193, 232, 42, 72, 162, 220, 241, 71, 100, 9, 49, 83, 218, 169, 253, 201, 131, 224], "bounty": 123}' -p user1
+    cleos push action peeranhamain postquestion '{"user":"user1", "type": 0, "title":"Q'$i'3", "community_id": 1, "tags": [1, 2], "ipfs_link":[18, 171, 34, 183, 70, 70, 148, 39, 119, 204, 125, 190, 141, 91, 238, 193, 232, 42, 72, 162, 220, 241, 71, 100, 9, 49, 83, 218, 169, 253, 201, 131, 224], "bounty": 123}' -p user1
     # if [[ i -gt 2 ]]
     # then
     #     cleos push action peeranhatken pickupreward '{"user": "alice", "period": '$(( $i - 2 ))'}' -p alice

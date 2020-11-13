@@ -9,7 +9,8 @@ question_index::const_iterator peeranha::find_question(uint64_t question_id) {
 void peeranha::post_question(eosio::name user, uint16_t community_id,
                              const std::vector<uint32_t> tags,
                              const std::string &title,
-                             const IpfsHash &ipfs_link, const uint8_t type) {
+                             const IpfsHash &ipfs_link,
+                             const uint8_t type, const uint32_t bounty) {
   assert_ipfs(ipfs_link);
   assert_title(title);
   assert_question_type(type);
@@ -34,6 +35,7 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
     question.post_time = now();
     set_property_d(question.properties, PROPERTY_QUESTION_TYPE, (int)type,
                    QUESTION_TYPE_EXPERT);
+    set_property_d(question.properties, PROPERTY_BOUNTY_COUNT, (int)bounty, 0);
   });
 #ifdef SUPERFLUOUS_INDEX
   user_questions_index user_questions_table(_self, user.value);

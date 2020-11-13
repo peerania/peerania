@@ -22,9 +22,10 @@ void peeranha::setaccprof(eosio::name user, IpfsHash ipfs_profile,
 
 void peeranha::postquestion(eosio::name user, uint16_t community_id,
                             std::vector<uint32_t> tags, std::string title,
-                            IpfsHash ipfs_link, const uint8_t type) {
+                            IpfsHash ipfs_link, const uint8_t type,
+                            const uint32_t bounty) {
   require_auth(user);
-  post_question(user, community_id, tags, title, ipfs_link, type);
+  post_question(user, community_id, tags, title, ipfs_link, type, bounty);
 }
 
 void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t community_id,
@@ -34,7 +35,7 @@ void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t commu
   eosio::name user = get_telegram_action_account(telegram_id);
   post_question(user, community_id, tags, title, ipfs_link, type);
 
-  user_questions_index user_questions_table(_self, user.value); 
+  user_questions_index user_questions_table(_self, user.value);
   auto iter_user_question = user_questions_table.begin();
   eosio::check(iter_user_question != user_questions_table.end(), "Error set property question");
 

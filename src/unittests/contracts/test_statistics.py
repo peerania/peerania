@@ -106,10 +106,10 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
                     'user': 'carol', 'question_id': id_question, 'answer_id': 1}, carol, "Carol mark Carol answer as correct")
 
         self.wait(3)
-        self.assertTrue(compare([{'user': 'carol', 'correct_answers': 1}], self.table('account', 'allaccounts'), ignore_excess=True))
+        self.assertTrue(compare([{'user': 'carol', 'rating': 200, 'correct_answers': 0}], self.table('account', 'allaccounts'), ignore_excess=True))
         self.action('mrkascorrect', {
                     'user': 'carol', 'question_id': id_question, 'answer_id': 0}, carol, "Carol dismark Carol answer as correct")
-        self.assertTrue(compare([{'user': 'carol', 'correct_answers': 0}], self.table('account', 'allaccounts'), ignore_excess=True))
+        self.assertTrue(compare([{'user': 'carol', 'rating': 200, 'correct_answers': 0}], self.table('account', 'allaccounts'), ignore_excess=True))
         end()
     
     def test_mark_as_correct_own(self):
@@ -128,7 +128,7 @@ class StatisticUserCommunityTagTests(peeranhatest.peeranhaTest):
         self.action('mrkascorrect', {
                     'user': 'alice', 'question_id': question['id'], 'answer_id': question['answers'][0]['id']}, alice, "Alice mark Bob answer as correct")
         self.assertTrue(self._find_by_id(self.table(
-            'account', 'allaccounts'), 'user', 'alice')['correct_answers'] == 1)
+            'account', 'allaccounts'), 'user', 'alice')['correct_answers'] == 0)
         for comm in self.table('communities', 'allcomm'):
             self.assertTrue(comm['correct_answers'] ==
                             (1 if comm['id'] == 1 else 0))

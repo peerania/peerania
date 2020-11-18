@@ -358,5 +358,5 @@ EOSIO_DISPATCH(eosio::token,
                        (mapcrrwpool)
 #endif
 
-#endif 
+#endif
                       (payforcpu))

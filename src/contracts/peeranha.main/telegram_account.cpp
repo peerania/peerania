@@ -124,6 +124,14 @@ void peeranha::move_table_statistic(eosio::name old_user, eosio::name new_user) 
                           account.questions_asked += iter_old_account->questions_asked;
                           account.answers_given += iter_old_account->answers_given;
                           account.correct_answers += iter_old_account->correct_answers;
+
+                          int32_t sum_first_answer = get_property_d(iter_old_account->integer_properties, PROPERTY_FIRST_ANSWER, 0);
+                          sum_first_answer += get_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, 0);
+                          set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer);
+
+                          int32_t sum_answer_15_minutes = get_property_d(iter_old_account->integer_properties, PROPERTY_ANSWER_15_MINUTES, 0);
+                          sum_answer_15_minutes += get_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, 0);
+                          set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes);
                        });
   global_stat_index global_stat_table(_self, scope_all_stat);
   global_stat_table.modify(
@@ -136,47 +144,76 @@ void peeranha::move_table_usrquestions(eosio::name old_user, eosio::name new_use
   user_questions_index new_user_questions_table(_self, new_user.value);                                 //move table usranswers
   user_questions_index old_user_questions_table(_self, old_user.value);
   auto iter_old_user_questions = old_user_questions_table.begin();
+
+  int8_t rating_change = 0;
+  int32_t delete_first_answer = 0;
+  int32_t delete_answer_15_minutes = 0;
   while (iter_old_user_questions != old_user_questions_table.end()) {
     new_user_questions_table.emplace(_self, [&iter_old_user_questions](auto &usr_question) {
       usr_question.question_id = iter_old_user_questions->question_id;
     });
-    auto iter_question = find_question(iter_old_user_questions->question_id);                       //change author question
+    auto iter_question = find_question(iter_old_user_questions->question_id);                       //change author question  
+    auto vote_question = QUESTION_UPVOTED_REWARD;
+    auto vote_answer_res = VoteItem::answer;
+    switch (get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
+                         QUESTION_TYPE_EXPERT)) {
+      case QUESTION_TYPE_GENERAL:
+        vote_question = COMMON_QUESTION_UPVOTED_REWARD;
+        vote_answer_res = VoteItem::common_answer;
+        break;
+      }
+
+    std::for_each(iter_question->history.begin(), iter_question->history.end(), [&new_user, &rating_change, vote_question](auto hst) {
+      if (hst.is_flag_set(HISTORY_UPVOTED_FLG) && hst.user == new_user) {
+        rating_change -= vote_question;
+      }
+    });
+
+    std::for_each(iter_question->answers.begin(), iter_question->answers.end(), [new_user, &delete_answer_15_minutes, &delete_first_answer, vote_answer_res, &rating_change](auto answer) {
+      if (get_property_d(answer.properties, PROPERTY_ANSWER_15_MINUTES, -2) == 1 && answer.user == new_user) {
+        rating_change -= vote_answer_res.answer_15_minutes;
+        delete_answer_15_minutes++;
+      }
+      if (get_property_d(answer.properties, PROPERTY_FIRST_ANSWER, -2) == 1 && answer.user == new_user) {
+        rating_change -= vote_answer_res.first_answer;
+        delete_first_answer++;
+      }
+    });
+
     question_table.modify(iter_question, _self,
                         [new_user](auto &question) {
                           question.user = new_user;
                           set_property(question.properties, PROPERTY_EMPTY_QUESTION, 0);
                         });
-
-    int upvote_mul = QUESTION_UPVOTED_REWARD;
-    switch (get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
-                         QUESTION_TYPE_EXPERT)) {
-      case QUESTION_TYPE_GENERAL:
-        upvote_mul = COMMON_QUESTION_UPVOTED_REWARD;
-        break;
-    }
-
-    int8_t rating_change = 0;
-    std::for_each(iter_question->history.begin(), iter_question->history.end(), [&new_user, &rating_change, upvote_mul](auto hst) {
-      if (hst.is_flag_set(HISTORY_UPVOTED_FLG) && hst.user == new_user) {
-        rating_change -= upvote_mul;
-      }
-    });
-    update_rating(find_account(old_user)->user, rating_change);
     iter_old_user_questions = old_user_questions_table.erase(iter_old_user_questions);
   }
+  update_rating(new_user, rating_change, [delete_first_answer, delete_answer_15_minutes](auto &account) {
+    int32_t first_answer = get_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, 0);
+    set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, first_answer - delete_first_answer);
+
+    int32_t answer_15_minutes = get_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, 0);
+    set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, answer_15_minutes - delete_answer_15_minutes);
+  });
 }
 
 void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user) {
   user_answers_index new_user_answer_table(_self, new_user.value);                                  //move table usrquestions
   user_answers_index old_user_answer_table(_self, old_user.value);
+  int32_t delete_first_answer = 0;
+  int32_t delete_answer_15_minutes = 0;
+  int32_t rating_change_old_user = 0;
+  int32_t rating_change_new_user = 0;
+
   auto iter_old_user_answer = old_user_answer_table.begin();
   while (iter_old_user_answer != old_user_answer_table.end()) {
-    new_user_answer_table.emplace(_self, [&iter_old_user_answer](auto &usr_question) {
-      usr_question.question_id = iter_old_user_answer->question_id;
-      usr_question.answer_id = iter_old_user_answer->answer_id;
-    });
+    if (new_user_answer_table.find(iter_old_user_answer->question_id) == new_user_answer_table.end()) { //duplicate object
+      new_user_answer_table.emplace(_self, [&iter_old_user_answer](auto &usr_question) {
+        usr_question.question_id = iter_old_user_answer->question_id;
+        usr_question.answer_id = iter_old_user_answer->answer_id;
+      });
+    }
+    
     auto iter_question = find_question(iter_old_user_answer->question_id);                       //change author answer
-
     auto vote_question_res = VoteItem::question;
     auto vote_answer_res = VoteItem::answer;
     switch (get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
@@ -186,13 +223,9 @@ void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user)
         vote_answer_res = VoteItem::common_answer;
         break;
     }
-
-    int8_t rating_change_old_user = 0;
-    int8_t rating_change_new_user = 0;
-    int32_t delete_achievement_first_answer = 0;
-    int32_t delete_achievement_answer_15_minutes = 0;
+ 
     question_table.modify(iter_question, _self,
-                        [new_user, &iter_old_user_answer, &rating_change_old_user, &rating_change_new_user, vote_answer_res, vote_question_res, &delete_achievement_answer_15_minutes, &delete_achievement_first_answer](auto &question) {
+                        [new_user, &iter_old_user_answer, &rating_change_old_user, &rating_change_new_user, vote_answer_res, vote_question_res, &delete_answer_15_minutes, &delete_first_answer](auto &question) {
                           auto iter_answer = find_answer(question, iter_old_user_answer->answer_id);
                           iter_answer->user = new_user;
                           set_property(iter_answer->properties, PROPERTY_EMPTY_ANSWER, 0);
@@ -203,11 +236,11 @@ void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user)
                           }
                           if (get_property_d(iter_answer->properties, PROPERTY_ANSWER_15_MINUTES, -2) == 1 && question.user == new_user) {
                             rating_change_old_user -= vote_answer_res.answer_15_minutes;
-                            delete_achievement_answer_15_minutes --;
+                            delete_answer_15_minutes++;
                           }
                           if (get_property_d(iter_answer->properties, PROPERTY_FIRST_ANSWER, -2) == 1 && question.user == new_user) {
                             rating_change_old_user -= vote_answer_res.first_answer;
-                            delete_achievement_first_answer --;
+                            delete_first_answer++;
                           }
 
                           std::for_each(iter_answer->history.begin(), iter_answer->history.end(), [&new_user, &rating_change_old_user, vote_answer_res](auto hst) {
@@ -217,10 +250,18 @@ void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user)
                           });
                         });
 
-    update_rating(new_user, rating_change_new_user);
-    update_rating(old_user, rating_change_old_user);
     iter_old_user_answer = old_user_answer_table.erase(iter_old_user_answer);
   }
+
+  update_rating(old_user, rating_change_old_user, [delete_first_answer, delete_answer_15_minutes](auto &account) {
+    int32_t first_answer = get_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, 0);
+    set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, first_answer - delete_first_answer);
+
+    int32_t answer_15_minutes = get_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, 0);
+    set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, answer_15_minutes - delete_answer_15_minutes);
+  });
+
+  update_rating(new_user, rating_change_new_user);
 }
 
 void peeranha::move_table_achieve(eosio::name old_user, eosio::name new_user) {

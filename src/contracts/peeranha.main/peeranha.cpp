@@ -7,6 +7,7 @@
 #include "telegram_account.cpp"
 #include "peeranha_account_achievements.cpp"
 #include "squeezed_achievement.cpp"
+#include "peeranha_configuration.cpp"
 
 void peeranha::registeracc(eosio::name user, std::string display_name,
                            IpfsHash ipfs_profile, IpfsHash ipfs_avatar) {
@@ -271,6 +272,11 @@ void peeranha::addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::str
   add_empty_telegram_account(telegram_id, display_name, ipfs_profile, ipfs_avatar);
 }
 
+void peeranha::addconfig(eosio::name user, uint64_t key, uint64_t value) {
+  require_auth(_self);
+  add_configuration(key, value);
+}
+
 void peeranha::intallaccach() {
   require_auth(_self);
   init_users_achievements();
@@ -456,7 +462,7 @@ EOSIO_DISPATCH(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
         reportprof)(updateacc)(givemoderflg)(editcomm)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
-        (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(intallaccach)
+        (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(addconfig)(intallaccach)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

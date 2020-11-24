@@ -251,6 +251,25 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
                             {'user': 'bob', 'rating': 210}]
         self.assertTrue(compare(example_rating, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
+
+    def test_upvote_answer(self):
+        begin('test account properties (first answer + answer within_15_minutes)')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()  
+
+        for w in range(3):
+            self.register_question_action(bob, 'Alice question ' + str(68719476735 - w))
+            question_id = self.table('question', 'allquestions')[0]['id']
+            self.action('postanswer', {'user': 'alice', 'question_id': question_id, 'ipfs_link': 'Alice post answer', 'official_answer': False},
+                    alice, ' |-->Answer to alice from bob: "Alice post answer"')
+
+        self.action('upvote', {'user': 'bob', 'question_id': question_id, 'answer_id': 1},
+                    bob, 'Bob upvote Alice answer')
+
+        example_account = [{'user': 'alice', 'integer_properties': [{'key': 12, 'value': 3}, {'key': 13, 'value': 3}]}, 
+                            {'user': 'bob', 'integer_properties': []}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
    
     def _create_basic_hierarchy(self, alice, bob, carol):
         self.action('postquestion', {'user': 'carol', 'title': 'Title alice question', 'ipfs_link': 'Alice question', 'community_id': 1, 'tags': [1, 2, 3], 'type': 0}, carol,

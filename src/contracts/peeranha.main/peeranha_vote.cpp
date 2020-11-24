@@ -79,13 +79,17 @@ void peeranha::vote_forum_item(eosio::name user, uint64_t question_id,
 
   auto iter_answer_account = find_account(target_user);
   int32_t sum_answer_15_minutes = get_property_d(iter_answer_account->integer_properties, PROPERTY_ANSWER_15_MINUTES, 0) + within_15_minutes;
-  update_achievement(iter_answer_account->user, ANSWER_15_MINUTES, sum_answer_15_minutes);
+  if (within_15_minutes)
+    update_achievement(iter_answer_account->user, ANSWER_15_MINUTES, sum_answer_15_minutes);
   int32_t sum_first_answer = get_property_d(iter_answer_account->integer_properties, PROPERTY_FIRST_ANSWER, 0) + first_answer;
-  update_achievement(iter_answer_account->user, FIRST_ANSWER, sum_first_answer);
+  if (first_answer)
+    update_achievement(iter_answer_account->user, FIRST_ANSWER, sum_first_answer);
   update_rating(iter_answer_account, target_user_rating_change,
-                [sum_answer_15_minutes, sum_first_answer](auto &account) { 
-                  set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes);
-                  set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer);
+                [sum_answer_15_minutes, within_15_minutes, sum_first_answer, first_answer](auto &account) {
+                  if (within_15_minutes)
+                    set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes);
+                  if (first_answer)
+                    set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer);
                 });
 }
 

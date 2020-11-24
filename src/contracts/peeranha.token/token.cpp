@@ -256,6 +256,84 @@ void token::inviteuser(name inviter, name invited_user) {
       });
 }
 
+void token::addboost(name user, asset tokens) {
+  
+  require_auth(user);
+  boost_index boost_table(_self, user.value);
+  const uint16_t next_period = get_period(now()) + 1;
+  auto iter_last_boost = boost_table.rbegin();
+
+  // eosio::check(false, "----------------------------------------");
+
+  // accounts from_acnts(_self, user.value);
+  // const auto &from =
+  //     from_acnts.get(tokens.symbol.code().raw(), "no balance object found");
+  // eosio::check(from.balance.amount >= tokens.amount, "overdrawn balance");
+
+  const bool is_first_transaction_on_this_week = (boost_table.rend() == boost_table.rbegin());
+  if (is_first_transaction_on_this_week || iter_last_boost->period != next_period) {
+    const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+    asset old_tokens = is_first_transaction_on_this_week
+                                  ? asset{0, sym}
+                                  : iter_last_boost->old_streaked_tokens + iter_last_boost->new_steaked_tokens;
+    asset conclusion_tokens = asset{0, sym};
+    if (!is_first_transaction_on_this_week && iter_last_boost->new_steaked_tokens.amount < 0 && next_period -1 == iter_last_boost->period) {
+      conclusion_tokens = iter_last_boost->new_steaked_tokens;
+    }
+
+    auto iter_boost = boost_table.emplace(
+      _self, [next_period, old_tokens, tokens, conclusion_tokens](auto &boost) {
+        boost.old_streaked_tokens = old_tokens;
+        boost.new_steaked_tokens = tokens;
+        boost.period = next_period;
+        boost.conclusion_tokens = conclusion_tokens;
+      });
+    updatstboost(iter_boost->new_steaked_tokens + iter_boost->old_streaked_tokens);
+  } else {
+    auto iter_total_rating_change = boost_table.find(next_period);
+    updatstboost(-iter_total_rating_change->new_steaked_tokens);
+    boost_table.modify(
+      iter_total_rating_change, _self, [tokens](auto &boost) {
+        boost.new_steaked_tokens += tokens;
+      });
+    updatstboost(iter_total_rating_change->new_steaked_tokens);
+  }
+}
+
+void token::updatstboost(asset tokens) {
+  statistics_boost_index statistics_boost_table(_self, scope_all_boost);
+  const uint16_t next_period = get_period(now()) + 1;
+
+  if (statistics_boost_table.rbegin() == statistics_boost_table.rend() || statistics_boost_table.rbegin()->period != next_period) {
+    statistics_boost_table.emplace(
+      _self, [tokens, next_period](auto &stat_boost) {
+        stat_boost.sum_tokens = tokens;
+        stat_boost.period = next_period;
+      });
+  } else {
+    auto iter_total_rating_change = statistics_boost_table.find(next_period);
+    statistics_boost_table.modify(
+      iter_total_rating_change, _self, [tokens](auto &stat_boost) {
+        stat_boost.sum_tokens += tokens;
+      });
+  }
+}
+
+void token::newperboost() {
+  // require_auth(_self);
+  // boost_index boost_table(_self, scope_all_boost);
+
+  // eosio::check(boost_table.begin() == boost_table.end(), "Error boost");
+
+  // for (auto iter_boost = boost_table.begin(); iter_boost != boost_table.end(); ++iter_boost) {
+  //   boost_table.modify(
+  //   iter_boost, _self, [](auto &boost) {
+  //     boost.old_streaked_tokens += boost.new_steaked_tokens.tokens - boost.unsteaked_tokens.tokens;
+  //     eosio::check(boost.old_streaked_tokens.amount > 0, "old_streaked_tokens is negetive");
+  //   });
+  // }
+}
+
 void token::rewardrefer(name invited_user) {
   require_auth(invited_user);
   invited_users_index invited_users_table(_self, all_invited);
@@ -352,6 +430,7 @@ void token::resettables(std::vector<eosio::name> allaccs) {
 
 EOSIO_DISPATCH(eosio::token,
                (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)(rewardrefer)
+               (addboost)(updatstboost)(newperboost)
 #if STAGE == 1 || STAGE == 2
                    (resettables)
 #if STAGE == 2

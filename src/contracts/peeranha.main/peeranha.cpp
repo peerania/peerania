@@ -33,7 +33,7 @@ void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t commu
                             IpfsHash ipfs_link, const uint8_t type) {
   require_auth(bot);
   eosio::name user = get_telegram_action_account(telegram_id);
-  post_question(user, community_id, tags, title, ipfs_link, type);
+  post_question(user, community_id, tags, title, ipfs_link, type, 0);
 
   user_questions_index user_questions_table(_self, user.value);
   auto iter_user_question = user_questions_table.begin();

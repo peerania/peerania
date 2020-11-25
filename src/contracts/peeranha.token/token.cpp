@@ -256,6 +256,27 @@ void token::inviteuser(name inviter, name invited_user) {
       });
 }
 
+void token::getbounty(name user, asset bounty, uint64_t question_id) {
+    require_auth(user);
+    name peertken = name("peeranhatken");
+    transfer(user, peertken, bounty, "test");
+
+//    auto sym = bounty.symbol;
+      question_bounty bountytable(_self, user.value);
+//      const auto &st = bountytable.get(sym_code_raw, "symbol does not exist");
+//      eosio::check(st.supply.symbol == symbol, "symbol precision mismatch");
+
+//      accounts acnts(_self, user.value);
+//      auto it = bountytable.find(question_id);
+//      if (it == bountytable.end()) {
+        bountytable.emplace(_self, [&](auto &a) {
+            a.user = user;
+            a.bounty = bounty;
+            a.question_id = question_id;
+        });
+//      }
+}
+
 void token::rewardrefer(name invited_user) {
   require_auth(invited_user);
   invited_users_index invited_users_table(_self, all_invited);
@@ -351,7 +372,7 @@ void token::resettables(std::vector<eosio::name> allaccs) {
 }  // namespace eosio
 
 EOSIO_DISPATCH(eosio::token,
-               (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)(rewardrefer)
+               (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)(getbounty)(rewardrefer)
 #if STAGE == 1 || STAGE == 2
                    (resettables)
 #if STAGE == 2

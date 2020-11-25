@@ -49,7 +49,14 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   [[eosio::action]] void pickupreward(name user, const uint16_t period);
 
+  // Get bounty from user who asked question
+
+  // Give bounty to user who gave best answer
+//  [[eosio::action]] void givebounty();
+
   [[eosio::action]] void inviteuser(name inviter, name invited_user);
+
+  [[eosio::action]] void getbounty(name user, asset bounty, uint64_t question_id);
 
   [[eosio::action]] void rewardrefer(name invited_user);
 
@@ -95,6 +102,16 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
   };
 
   struct [[
+    eosio::table("bounty"), eosio::contract("peeranha.token")
+  ]] bounty {
+    name user;
+    asset bounty;
+    uint64_t question_id;
+
+    uint64_t primary_key() const { return question_id; }
+  };
+
+  struct [[
     eosio::table("stat"), , eosio::contract("peeranha.token")
   ]] currency_stats {
     asset supply;
@@ -123,6 +140,7 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
   typedef eosio::multi_index<"invited"_n, invited_users> invited_users_index;
 
   typedef eosio::multi_index<"accounts"_n, account> accounts;
+  typedef eosio::multi_index<"bounty"_n, bounty> question_bounty;
   typedef eosio::multi_index<"stat"_n, currency_stats> stats;
 
   void sub_balance(name user, asset value);

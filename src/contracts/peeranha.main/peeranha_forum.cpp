@@ -36,6 +36,7 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
     set_property_d(question.properties, PROPERTY_QUESTION_TYPE, (int)type,
                    QUESTION_TYPE_EXPERT);
     set_property_d(question.properties, PROPERTY_BOUNTY_COUNT, (int)bounty, 0);
+//    set_property_d(question.properties, PROPERTY_BOUNTY_STATUS, (int)bounty, 0);
   });
 #ifdef SUPERFLUOUS_INDEX
   user_questions_index user_questions_table(_self, user.value);

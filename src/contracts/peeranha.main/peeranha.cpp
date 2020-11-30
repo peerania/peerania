@@ -277,6 +277,29 @@ void peeranha::intallaccach() {
   init_users_achievements();
 }
 
+void peeranha::movecomfrst() {
+  require_auth(_self);
+
+  commbuf_table_index commbuf_table (_self, scope_all_communities);
+  community_table_index community_table (_self, scope_all_communities);
+
+  auto iter_communities = community_table.begin();
+  while (iter_communities != community_table.end()) {
+    commbuf_table.emplace(
+          _self, [&iter_communities](auto &comm) {
+            comm.id = iter_communities->id;
+            comm.name = iter_communities->name;
+            comm.ipfs_description = iter_communities->ipfs_description;
+            comm.creation_time = iter_communities->creation_time;
+            comm.questions_asked = iter_communities->questions_asked;
+            comm.answers_given = iter_communities->answers_given;
+            comm.correct_answers = iter_communities->correct_answers;
+            comm.users_subscribed = iter_communities->users_subscribed;
+          });
+    iter_communities = community_table.erase(iter_communities);
+  }
+}
+
 #ifdef SUPERFLUOUS_INDEX
 void peeranha::freeindex(int size) {
   require_auth(_self);
@@ -458,6 +481,7 @@ EOSIO_DISPATCH(
         reportprof)(updateacc)(givemoderflg)(editcomm)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
         (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(intallaccach)
+        (movecomfrst)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

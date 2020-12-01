@@ -130,6 +130,9 @@ struct vote_resources_t
   int downvoted_reward;
   int energy_upvote;
   int energy_downvote;
+  int correct_answer;
+  int first_answer;
+  int answer_15_minutes;
 };
 
 const vote_resources_t question = {
@@ -139,6 +142,9 @@ const vote_resources_t question = {
     .downvoted_reward = QUESTION_DOWNVOTED_REWARD,
     .energy_upvote = ENERGY_UPVOTE_QUESTION,
     .energy_downvote = ENERGY_DOWNVOTE_QUESTION,
+    .correct_answer = ACCEPT_ANSWER_AS_CORRECT_REWARD,
+    .first_answer = 0,
+    .answer_15_minutes = 0,
 };
 
 const vote_resources_t answer = {
@@ -148,6 +154,9 @@ const vote_resources_t answer = {
     .downvoted_reward = ANSWER_DOWNVOTED_REWARD,
     .energy_upvote = ENERGY_UPVOTE_ANSWER,
     .energy_downvote = ENERGY_DOWNVOTE_ANSWER,
+    .correct_answer = ANSWER_ACCEPTED_AS_CORRECT_REWARD,
+    .first_answer = (int)(ANSWER_UPVOTED_REWARD * 0.5),
+    .answer_15_minutes = (int)(ANSWER_UPVOTED_REWARD * 0.5),
 };
 
 const vote_resources_t common_question = {
@@ -157,6 +166,9 @@ const vote_resources_t common_question = {
     .downvoted_reward = COMMON_QUESTION_DOWNVOTED_REWARD,
     .energy_upvote = ENERGY_UPVOTE_QUESTION,
     .energy_downvote = ENERGY_DOWNVOTE_QUESTION,
+    .correct_answer = ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD,
+    .first_answer = 0,
+    .answer_15_minutes = 0,
 };
 
 const vote_resources_t common_answer = {
@@ -166,6 +178,9 @@ const vote_resources_t common_answer = {
     .downvoted_reward = COMMON_ANSWER_DOWNVOTED_REWARD,
     .energy_upvote = ENERGY_UPVOTE_ANSWER,
     .energy_downvote = ENERGY_DOWNVOTE_ANSWER,
+    .correct_answer = COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD,
+    .first_answer = (int)(COMMON_ANSWER_UPVOTED_REWARD * 0.5),
+    .answer_15_minutes = (int)(COMMON_ANSWER_UPVOTED_REWARD * 0.5),
 };
 } // namespace VoteItem
 

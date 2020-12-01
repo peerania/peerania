@@ -3,6 +3,9 @@ from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
+defs = load_defines('src/contracts/peeranha.main/economy.h')
+first_answer = defs['ANSWER_UPVOTED_REWARD'] / 2                        # 5
+answer_15_minutes = defs['ANSWER_UPVOTED_REWARD'] / 2                   # 5
 
 class RatingRewardsTests(peeranhatest.peeranhaTest):
 
@@ -95,7 +98,7 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
         self.var['ted_energy'] -= self.defs['ENERGY_UPVOTE_ANSWER']
         self.var['alice_rating'] += self.defs['DOWNVOTE_ANSWER_REWARD']
         self.var['alice_energy'] -= self.defs['ENERGY_DOWNVOTE_ANSWER']
-        self.var['carol_rating'] += self.defs['ANSWER_DOWNVOTED_REWARD']
+        self.var['carol_rating'] += self.defs['ANSWER_DOWNVOTED_REWARD'] - (first_answer + answer_15_minutes)
         self.var['carol_energy'] -= self.defs['ENERGY_UPVOTE_ANSWER']
         self._verify_acc()
         self.wait()
@@ -108,14 +111,14 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
                     'user': 'carol', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba']}, carol, 'Carol change her upvote to downvote Alice question->Bob answer')
         self.var['carol_rating'] += self.defs['DOWNVOTE_ANSWER_REWARD']
         self.var['carol_energy'] -= self.defs['ENERGY_DOWNVOTE_ANSWER']
-        self.var['bob_rating'] += self.defs['ANSWER_DOWNVOTED_REWARD'] - \
+        self.var['bob_rating'] += self.defs['ANSWER_DOWNVOTED_REWARD'] - (first_answer + answer_15_minutes) - \
             self.defs['ANSWER_UPVOTED_REWARD']
         self._verify_acc()
         self.action('upvote', {
             'user': 'alice', 'question_id': self.var['bq'], 'answer_id': self.var['bq_ca']}, alice, 'Alice change her downvote to upvote Bob question->Carol answer')
         self.var['alice_rating'] -= self.defs['DOWNVOTE_ANSWER_REWARD']
         self.var['alice_energy'] -= self.defs['ENERGY_UPVOTE_ANSWER']
-        self.var['carol_rating'] += self.defs['ANSWER_UPVOTED_REWARD'] - \
+        self.var['carol_rating'] += self.defs['ANSWER_UPVOTED_REWARD'] + (first_answer + answer_15_minutes) - \
             self.defs['ANSWER_DOWNVOTED_REWARD']
         self._verify_acc()
         self.wait()
@@ -123,14 +126,14 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
                     'user': 'carol', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba']}, carol, 'Carol remove downvote Alice question->Bob answer')
         self.var['carol_rating'] -= self.defs['DOWNVOTE_ANSWER_REWARD']
         self.var['carol_energy'] -= self.defs['ENERGY_FORUM_VOTE_CHANGE']
-        self.var['bob_rating'] -= self.defs['ANSWER_DOWNVOTED_REWARD']
+        self.var['bob_rating'] -= self.defs['ANSWER_DOWNVOTED_REWARD'] - (first_answer + answer_15_minutes)
         self._verify_acc()
         info('Test history not empty')
         self.action('reportforum', {'user': 'bob', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ca'], 'comment_id': 0},
                     bob, 'Bob vote for Alice question->Carol Answer deletion')
         self.action('downvote', {'user': 'bob', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ca']},
                     bob, 'Bob downvote Alice question->Carol Answer')
-        self.var['carol_rating'] += self.defs['ANSWER_DOWNVOTED_REWARD']
+        self.var['carol_rating'] += self.defs['ANSWER_DOWNVOTED_REWARD'] - answer_15_minutes
         self.var['bob_rating'] += self.defs['DOWNVOTE_ANSWER_REWARD']
         self.var['bob_energy'] -= self.defs['ENERGY_REPORT_ANSWER'] + \
             self.defs['ENERGY_DOWNVOTE_ANSWER']
@@ -174,7 +177,7 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
                     'user': 'ted', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba'], 'comment_id': 0}, ted, "Ted delete bob answer")
         self.var['ted_energy'] -= self.defs['ENERGY_REPORT_ANSWER']
         self.var['alice_rating'] -= self.defs['ACCEPT_ANSWER_AS_CORRECT_REWARD']
-        self.var['bob_rating'] += self.defs['ANSWER_DELETED_REWARD'] - \
+        self.var['bob_rating'] += self.defs['ANSWER_DELETED_REWARD'] - (first_answer + answer_15_minutes) - \
             self.defs['ANSWER_ACCEPTED_AS_CORRECT_REWARD']
         self._verify_acc()
         end()
@@ -269,7 +272,7 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
         self.var['alice_energy'] -= self.defs['ENERGY_DELETE_COMMENT']
         self.action('delanswer', {
                     'user': 'carol', 'question_id': self.var['bq'], 'answer_id': self.var['bq_ca']}, carol, "Delete Bob question->Carol answer")
-        self.var['carol_rating'] += self.defs['DELETE_OWN_ANSWER_REWARD']
+        self.var['carol_rating'] += self.defs['DELETE_OWN_ANSWER_REWARD'] - (first_answer + answer_15_minutes)
         self.var['carol_energy'] -= self.defs['ENERGY_DELETE_ANSWER']
         self.action('delquestion', {
                     'user': 'bob', 'question_id': self.var['bq']}, bob, "Delete Bob question")
@@ -335,6 +338,8 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
         (self.var['bob_rating'], self.var['alice_rating'], self.var['carol_rating']) = (
             bob_old_rt, alice_old_rt, carol_old_rt)
         self.var['alice_rating'] += self.defs['QUESTION_DELETED_REWARD']
+        self.var['bob_rating'] -= (first_answer + answer_15_minutes)
+        self.var['carol_rating'] -= answer_15_minutes
         self._verify_acc()
         end()
 
@@ -380,7 +385,7 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
                     'user': 'ted', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba'], 'comment_id': 0}, ted, "Ted report alice question->bob answer")
         self.var['ted_energy'] -= self.defs['ENERGY_REPORT_ANSWER']
         self.var['alice_rating'] -= self.defs['ACCEPT_ANSWER_AS_CORRECT_REWARD']
-        self.var['bob_rating'] = bob_old_rt + \
+        self.var['bob_rating'] = bob_old_rt - (first_answer + answer_15_minutes) + \
             self.defs['ANSWER_DELETED_REWARD']
         self._verify_acc()
         end()
@@ -493,7 +498,7 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
         self.var['alice_energy'] -= self.defs['ENERGY_UPVOTE_QUESTION'] * 2
         self.var['bob_rating'] += self.defs['DELETE_OWN_QUESTION_REWARD'] 
         self.var['bob_energy'] -= self.defs['ENERGY_DELETE_QUESTION'] + self.defs['ENERGY_UPVOTE_QUESTION']
-        self.var['carol_rating'] += self.defs['DELETE_OWN_ANSWER_REWARD'] 
+        self.var['carol_rating'] += self.defs['DELETE_OWN_ANSWER_REWARD'] - (first_answer + answer_15_minutes)
         self.var['carol_energy'] -= self.defs['ENERGY_DELETE_ANSWER'] + self.defs['ENERGY_UPVOTE_QUESTION']
         self._verify_acc()
         end()

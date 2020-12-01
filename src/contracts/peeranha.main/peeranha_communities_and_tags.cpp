@@ -394,21 +394,16 @@ void peeranha::unfollow_community(eosio::name user, uint16_t community_id) {
   });
 }
 
-void peeranha::set_community_ipfs_hash(uint16_t community_id, const IpfsHash &new_ipfs_link){
+void peeranha::edit_community(eosio::name user, uint16_t community_id, const std::string &name, const IpfsHash &ipfs_description){
+  auto iter_account = find_account(user);
+  eosio::check(iter_account->has_moderation_flag(MODERATOR_FLG_CREATE_COMMUNITY), "User must to be moderator");
+  assert_ipfs(ipfs_description);
+
   community_table_index community_table(_self, scope_all_communities);
   auto iter_community = community_table.find(community_id);
   community_table.modify(iter_community, _self,
-                         [new_ipfs_link](auto &community) {
-                           community.ipfs_description = new_ipfs_link;
+                         [name, ipfs_description](auto &community) {
+                           community.name = name;
+                           community.ipfs_description = ipfs_description;
                          });
 }
-
-
-void peeranha::set_community_name(uint16_t community_id, const std::string &new_name){
-  community_table_index community_table(_self, scope_all_communities);
-  auto iter_community = community_table.find(community_id);
-  community_table.modify(iter_community, _self,
-                         [new_name](auto &community) {
-                           community.name = new_name;
-                         });
-} 

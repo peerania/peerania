@@ -13,6 +13,10 @@
 #include "utils.hpp"
 #include "property_community.hpp"
 #include "top_question.hpp"
+#include "telegram_account.hpp"
+#include "achievements.hpp"
+#include "account_achievements.hpp"
+#include "squeezed_achievement.hpp"
 
 #include "token_common.hpp"
 
@@ -55,9 +59,18 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                         std::vector<uint32_t> tags, std::string title,
                         IpfsHash ipfs_link, uint8_t type);
 
+    // Telegram post question
+    ACTION telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t community_id, 
+                        std::vector<uint32_t> tags, std::string title,
+                        IpfsHash ipfs_link, uint8_t type);
+
     // Post answer(answer question)
     ACTION postanswer(eosio::name user, uint64_t question_id,
                       IpfsHash ipfs_link, uint8_t official_answer);
+    
+    // Telegram post answer(answer question)
+    ACTION telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t question_id,
+                          IpfsHash ipfs_link, uint8_t official_answer);
 
     // Post comment
     // If the answer_id set to 0 comment question, otherwise comment question
@@ -137,13 +150,10 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     // Action give moderator flags
     ACTION givemoderflg(eosio::name user, int flags);
     
+    // Action give community moderator flags
     ACTION givecommuflg(eosio::name user, int flags, uint16_t community_id);
-
-    ACTION setcommipfs(uint16_t community_id,
-                        IpfsHash new_ipfs_link);
-
-    ACTION setcommname(uint16_t community_id,
-                        std::string new_name);
+    
+    ACTION editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_description);
 
     ACTION chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating);
 
@@ -156,6 +166,17 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     ACTION downquestion(eosio::name user, uint16_t community_id, uint64_t question_id);
     
     ACTION movequestion(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t new_position);
+
+    ACTION apprvacc(eosio::name user);
+
+    ACTION dsapprvacc(eosio::name user);
+
+    ACTION addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id);
+
+    ACTION addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar);
+
+    //init achievements first 10k registered users
+    ACTION intallaccach();
 
 #ifdef SUPERFLUOUS_INDEX
     // Delete @count@ items from superfluous index tebles
@@ -220,6 +241,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                        const std::vector<uint32_t> tags,
                        const std::string &title, const IpfsHash &ipfs_link,
                        const uint8_t type);
+    
+    eosio::name get_telegram_action_account(uint64_t telegram_id);
 
     void post_answer(eosio::name user, uint64_t question_id,
                      const IpfsHash &ipfs_link, bool official_answer);
@@ -294,6 +317,10 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                                 int8_t questions_asked);
 
     void assert_community_exist(uint16_t community_id);
+
+    void add_empty_telegram_account(uint64_t telegram_id, std::string display_name, IpfsHash ipfs_profile, IpfsHash ipfs_avatar);
+
+    eosio::name generate_temp_telegram_account();
 #ifdef SUPERFLUOUS_INDEX
     void remove_user_question(eosio::name user, uint64_t question_id);
 
@@ -309,9 +336,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void give_moderator_flag(eosio::name user, int flags, uint16_t community_id);
 
-    void set_community_ipfs_hash(uint16_t community_id, const IpfsHash &new_ipfs_link);
-
-    void set_community_name(uint16_t community_id, const std::string &new_name);
+    void edit_community(eosio::name user, uint16_t community_id, const std::string &name, const IpfsHash &ipfs_description);
 
     void change_question_type(eosio::name user, uint64_t question_id, int type, bool restore_rating);
 
@@ -326,4 +351,32 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     void down_top_question(eosio::name user, uint16_t community_id, uint64_t question_id);
 
     void move_top_question(eosio::name user, uint16_t community_id, uint64_t question_id, uint16_t newposition);
-  };
+
+    void approve_account(eosio::name user);
+
+    void disapprove_account(eosio::name user);
+
+    void add_telegram_account(eosio::name user, uint64_t telegram_id, bool new_account);
+
+    void delete_table_property_community(eosio::name old_user, eosio::name new_user);
+
+    void delete_table_period_rating(eosio::name old_user, eosio::name new_user);
+
+    void swap_account(eosio::name old_user, eosio::name new_user);
+
+    void move_table_statistic(eosio::name old_user, eosio::name new_user);
+
+    void move_table_usranswers(eosio::name old_user, eosio::name new_user);
+
+    void move_table_usrquestions(eosio::name old_user, eosio::name new_user);
+
+    void move_table_achieve(eosio::name old_user, eosio::name new_user);
+
+    void update_achievement (eosio::name user, Group_achievement group, int value);
+
+    bool increment_achievement_count(uint32_t id_achievement);
+
+    void decrement_achievement_count(uint32_t id_achievement);
+
+    void init_users_achievements();
+};

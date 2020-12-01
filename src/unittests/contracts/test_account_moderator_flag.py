@@ -91,7 +91,7 @@ class AccountModerationTests(peeranhatest.peeranhaTest):
                     ted, 'Ted delete Alice question->Bob answer->Carol comment')
         new_rating = base_rating
         new_rating['alice_rating'] += economy['QUESTION_DELETED_REWARD']
-        new_rating['bob_rating'] += economy['ANSWER_DELETED_REWARD']
+        new_rating['bob_rating'] += economy['ANSWER_DELETED_REWARD'] - economy['ANSWER_UPVOTED_REWARD'] - economy['ANSWER_UPVOTED_REWARD'] #firt answer - answer withing 15 minutes
         new_rating['carol_rating'] += economy['COMMENT_DELETED_REWARD']
         setvar(account_e, new_rating)
         self.assertTrue(compare(account_e, self.table(

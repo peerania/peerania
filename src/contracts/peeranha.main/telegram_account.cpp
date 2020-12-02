@@ -57,7 +57,7 @@ void peeranha::add_empty_telegram_account(uint64_t telegram_id, std::string disp
   
   eosio::name user = generate_temp_telegram_account();
 
-  register_account(user, display_name, ipfs_avatar, ipfs_avatar);
+  register_account(user, display_name, ipfs_profile, ipfs_avatar);
   add_telegram_account(user, telegram_id, true);
 
   auto iter_account = account_table.find(user.value);
@@ -222,11 +222,11 @@ void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user)
                             rating_change_new_user -= vote_question_res.correct_answer;
                           }
                           if (get_property_d(iter_answer->properties, PROPERTY_ANSWER_15_MINUTES, -2) == 1 && question.user == new_user) {
-                            rating_change_old_user -= vote_answer_res.upvoted_reward;
+                            rating_change_old_user -= vote_answer_res.answer_15_minutes;
                             delete_achievement_answer_15_minutes --;
                           }
                           if (get_property_d(iter_answer->properties, PROPERTY_FIRST_ANSWER, -2) == 1 && question.user == new_user) {
-                            rating_change_old_user -= vote_answer_res.upvoted_reward;
+                            rating_change_old_user -= vote_answer_res.first_answer;
                             delete_achievement_first_answer --;
                           }
 

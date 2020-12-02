@@ -345,14 +345,20 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example, table_question[0]["answers"], ignore_excess=True))
         end()
 
-
     def test_post_question_answer_empty_account_move_data(self):
         begin('test post question empty telegram account move author question')
         ted = self.register_ted_account()
         alice = self.register_alice_account()
+        carol = self.register_carol_account()
 
         self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
                         'Add empty account through telegram')
+        self.action('postquestion', {'user': 'carol', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 1}, carol,
+                    'carol asking question')
+        id_question = self.table('question', 'allquestions')[0]['id']
+        self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': id_question, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+                        'Register telegram answer from alice')
+
         self.action('telpostqstn', {'bot': 'ted', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, ted,
                         'Register telegram question from alice')
         id_question = self.table('question', 'allquestions')[0]['id']
@@ -364,34 +370,38 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example, table_telegram_account, ignore_excess=True))
         name_empty_account = table_telegram_account[0]['user']
 
-        example_question = [{'id': '68719476735', 'user': name_empty_account, 'title': 'telegram'}]
+        example_question = [{'id': '68719476734', 'user': name_empty_account, 'title': 'telegram'}, {'id': '68719476735', 'user': carol}]
         table_question = self.table('question', 'allquestions')
         self.assertTrue(compare(example_question, table_question, ignore_excess=True))
         example_answer = [{'id': 1, 'user': name_empty_account}]
         self.assertTrue(compare(example_answer, table_question[0]["answers"], ignore_excess=True))
 
-        example_usrquestions = [{'question_id': '68719476735'}]
-        example_usranswers = [{'question_id': '68719476735', 'answer_id': 1}]
+        example_usrquestions = [{'question_id': '68719476734'}]
+        example_usranswers = [{'question_id': '68719476734', 'answer_id': 1}, {'question_id': '68719476735', 'answer_id': 1}]
         self.assertTrue(compare(example_usrquestions, self.table('usrquestions', name_empty_account), ignore_excess=True))
         self.assertTrue(compare(example_usranswers, self.table('usranswers', name_empty_account), ignore_excess=True))
-        # example_alice = [{'user': name_empty_account, 'achievements_id': Achievents.questions_asked.value, 'value': 1}, 
-        #                 {'user': name_empty_account, 'achievements_id': Achievents.answers_given.value, 'value': 1}, 
-        #                 {'user': name_empty_account, 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, 
-        #                 {'user': name_empty_account, 'achievements_id': Achievents.answer_15_minutes.value, 'value': 1}, 
-        #                 {'user': name_empty_account, 'achievements_id': Achievents.first_answer.value, 'value': 1}]
-        # self.assertTrue(compare(example_alice, self.table('accachieve', name_empty_account), ignore_excess=True))
-        # example_achive_amount = [{'id': Achievents.questions_asked.value, 'count': 1}, 
-        #                         {'id': Achievents.answers_given.value, 'count': 1}, 
-        #                         {'id': Achievents.first_10k_registered.value, 'count': 4}, # first_10k_registered = 3 || 4
-        #                         {'id': Achievents.answer_15_minutes.value, 'count': 1}, 
-        #                         {'id': Achievents.first_answer.value, 'count': 1}]
-        # self.assertTrue(compare(example_achive_amount, self.table('achieve', 'allachieve'), ignore_excess=True))
+
+        example_empty_account = [   {'user': name_empty_account, 'achievements_id': 10},
+                                    {'user': name_empty_account, 'achievements_id': 30},
+                                    {'user': name_empty_account, 'achievements_id': 40},
+                                    {'user': name_empty_account, 'achievements_id': 50},
+                                    {'user': name_empty_account, 'achievements_id': 60}]
+        self.assertTrue(compare(example_empty_account, self.table('accachieve', name_empty_account), ignore_excess=True))
+        example_alice = [   {'user': alice, 'achievements_id': 30},
+                            {'user': alice, 'achievements_id': 40}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', alice), ignore_excess=True))
+        example_achievement = [ {'id': 10, 'count': 1},
+                                {'id': 30, 'count': 4}, # 4 // 5
+                                {'id': 40, 'count': 4}, # 4 // 5
+                                {'id': 50, 'count': 1},
+                                {'id': 60, 'count': 1}]
+        self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
         example_account = [{'user': 'alice', 'questions_asked': 0, 'answers_given': 0, 'correct_answers': 0}, 
+                            {'user': 'carol'},
                             {'user': 'ted'}, 
-                            {'user': name_empty_account, 'questions_asked': 1, 'answers_given': 1, 'correct_answers': 0}]
+                            {'user': name_empty_account, 'questions_asked': 1, 'answers_given': 2, 'correct_answers': 0}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
-        print(self.table('globalstat', 'allstat'))
-        example_count_user = [{'version': 1, 'user_count': 4, 'communities_count': 3}]
+        example_count_user = [{'version': 1, 'user_count': 5}]
         self.assertTrue(compare(example_count_user, self.table('globalstat', 'allstat'), ignore_excess=True))
         
         # ____________________________________________________________before_______________________________________________________
@@ -405,35 +415,34 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         'user': alice
         }, alice, 'Alice approve telegram account')
         # ____________________________________________________________after_______________________________________________________
-        example_question = [{'id': '68719476735', 'user': 'alice', 'title': 'telegram'}]
+        example_question = [{'id': '68719476734', 'user': 'alice', 'title': 'telegram'}, {'id': '68719476735', 'user': carol}]
         table_question = self.table('question', 'allquestions')
         self.assertTrue(compare(example_question, table_question, ignore_excess=True))
         example_answer = [{'id': 1, 'user': 'alice'}]
         self.assertTrue(compare(example_answer, table_question[0]["answers"], ignore_excess=True))
 
-        example_usrquestions = [{'question_id': '68719476735'}]
-        example_usranswers = [{'question_id': '68719476735', 'answer_id': 1}]
+        example_usrquestions = [{'question_id': '68719476734'}]
+        example_usranswers = [{'question_id': '68719476734', 'answer_id': 1}, {'question_id': '68719476735', 'answer_id': 1}]
         self.assertTrue(compare(example_usrquestions, self.table('usrquestions', alice), ignore_excess=True))
         self.assertTrue(compare(example_usranswers, self.table('usranswers', alice), ignore_excess=True))
         self.assertTrue(compare([], self.table('usrquestions', name_empty_account), ignore_excess=True))
         self.assertTrue(compare([], self.table('usranswers', name_empty_account), ignore_excess=True))
-        # example_alice = [{'user': 'alice', 'achievements_id': Achievents.questions_asked.value, 'value': 1}, 
-        #                 {'user': 'alice', 'achievements_id': Achievents.answers_given.value, 'value': 1}, 
-        #                 {'user': 'alice', 'achievements_id': Achievents.first_10k_registered.value, 'value': 1}, 
-        #                 {'user': 'alice', 'achievements_id': Achievents.answer_15_minutes.value, 'value': 1}, 
-        #                 {'user': 'alice', 'achievements_id': Achievents.first_answer.value, 'value': 1}]
-        # self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
+        example_alice = [   {'user': alice, 'achievements_id': 10},
+                            {'user': alice, 'achievements_id': 30},
+                            {'user': alice, 'achievements_id': 40},
+                            {'user': alice, 'achievements_id': 50},
+                            {'user': alice, 'achievements_id': 60}]
+        self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
         self.assertTrue(compare([], self.table('accachieve', name_empty_account), ignore_excess=True))
-        # example_achive_amount = [{'id': Achievents.questions_asked.value, 'count': 1}, 
-        #                         {'id': Achievents.answers_given.value, 'count': 1}, 
-        #                         {'id': Achievents.first_10k_registered.value, 'count': 3}, #first_10k_registered = 2 || 3
-        #                         {'id': Achievents.answer_15_minutes.value, 'count': 1}, 
-        #                         {'id': Achievents.first_answer.value, 'count': 1}]
-        # self.assertTrue(compare(example_achive_amount, self.table('achieve', 'allachieve'), ignore_excess=True))
-        example_account = [{'user': 'alice', 'questions_asked': 1, 'answers_given': 1, 'correct_answers': 0}, {'user': 'ted'}]
+        example_achievement = [ {'id': 10, 'count': 1},
+                                {'id': 30, 'count': 3}, # 3 // 4
+                                {'id': 40, 'count': 3}, # 3 // 4
+                                {'id': 50, 'count': 1},
+                                {'id': 60, 'count': 1}]
+        self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
+        example_account = [{'user': 'alice', 'questions_asked': 1, 'answers_given': 2, 'correct_answers': 0}, {'user': 'carol'}, {'user': 'ted'}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
-
-        example_count_user = [{'version': 1, 'user_count': 3, 'communities_count': 3}]
+        example_count_user = [{'version': 1, 'user_count': 4}]
         self.assertTrue(compare(example_count_user, self.table('globalstat', 'allstat'), ignore_excess=True))
         end()
 
@@ -671,8 +680,8 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         
         name_empty_account = self.table('account', 'allaccounts')[2]['user']
         example_account = [ {'user': 'bob', 'rating': 200}, 
-                            {'user': 'ted', 'rating': 218},                 # (general) 15min(1) + upvote(2) + (expert)15min(5) + upvote(10)
-                            {'user': name_empty_account, 'rating': 34}]     # (general) 15min(1) + first(1) + upvote(2) + (expert) 15min(5) + first(5) + upvote(10)
+                            {'user': 'ted', 'rating': 218},                 # (general) 15min + upvote + (expert)15min + upvote (1 + 2 + 5 + 10)
+                            {'user': name_empty_account, 'rating': 34}]     # (general) 15min + first + upvote + (expert) 15min + first + upvote (1 + 1 + 2 + 5 + 5 + 10) = 24 + 10(start rating) 
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
 
         self.action('addtelacc', {
@@ -721,9 +730,8 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
 
         name_empty_account = self.table('account', 'allaccounts')[2]['user']
         example_account = [ {'user': 'bob', 'rating': 203},                 # (general) ACCEPT_ANSWER_AS_CORRECT_REWARD(1 rating) + (expert) ACCEPT_ANSWER_AS_CORRECT_REWARD (2 rating)
-                            {'user': 'ted', 'rating': 206},                 # (general 1) 15min + # (expert 5) 15min
-                            {'user': name_empty_account, 'rating': 40}]     # (general) 15min(1) + first(1) + ANSWER_ACCEPTED_AS_CORRECT_REWARD(3 rating) + (expert) 15min(5) + first(5) + ANSWER_ACCEPTED_AS_CORRECT_REWARD (15rating) + 10 start
-        print(self.table('account', 'allaccounts'))
+                            {'user': 'ted', 'rating': 206},                 # (general) 15min + (expert) 15min (1 + 5)
+                            {'user': name_empty_account, 'rating': 40}]     # (general) 15min + first + ANSWER_ACCEPTED_AS_CORRECT_REWARD(3 rating) + (expert) 15min + first + ANSWER_ACCEPTED_AS_CORRECT_REWARD (15rating) (1 + 1 + 3 + 5 + 5 + 15) = 29 + 10(start rating)
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
 
         self.action('addtelacc', {
@@ -750,19 +758,18 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
 
         self.action('postquestion', {'user': 'bob', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 1}, bob,
                     'Bob asking question')
-        id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
-        self.action('postanswer', {'user': 'ted', 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': False}, ted,
-                    'Register ted answer')
+        id_question = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': 'ted', 'question_id': id_question, 'ipfs_link': 'undefined', 'official_answer': False}, ted,
+                    'Register bob answer')
         self.action('upvote', {
-                    'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 1}, bob, "Bob upvote ted answer")
+                    'user': 'bob', 'question_id': id_question, 'answer_id': 1}, bob, "Bob upvote bob answer")
         self.action('mrkascorrect', {
-                    'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 1}, bob, "bob mark empty answer as correct")
+                    'user': 'bob', 'question_id': id_question, 'answer_id': 1}, bob, "bob mark empty answer as correct")
 
         name_empty_account = self.table('account', 'allaccounts')[2]['user']
-        example_account = [ {'user': 'bob', 'rating': 201},                 # ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD
-                            {'user': 'ted', 'rating': 207},                 # 15min(1) + first(1) + upvote(2) + COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD(3)
-                            {'user': name_empty_account, 'rating': 10}]
-        print(self.table('account', 'allaccounts'))
+        example_account = [ {'user': 'bob', 'rating': 201},                 # ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD(1 rating)
+                            {'user': 'ted', 'rating': 207},                 # 15min + first + upvote + COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD (1 + 1 + 2 +3)
+                            {'user': name_empty_account, 'rating': 10}]     
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
 
         self.action('addtelacc', {
@@ -773,7 +780,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.action('apprvacc', {
             'user': bob
         }, bob, 'Bob approve telegram account')
-        example_account = [ {'user': 'bob', 'rating': 201},                     #move account -> take away rating empty account (vote yourself)
+        example_account = [ {'user': 'bob', 'rating': 201},                     
                             {'user': 'ted', 'rating': 207}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
@@ -791,13 +798,18 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
         self.action('upvote', {
                     'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 0}, bob, "Bob upvote bob answer")
-
+        
+        self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': id_question_empty_acc, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+                        'Register telegram answer from bob, telegram account don`t approve')
+        self.action('upvote', {
+                    'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 1}, bob, "Bob upvote bob answer")
         self.wait(3)
         # expert question
         self.action('telpostqstn', {'bot': 'bob', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, bob,
                         'Register telegram question from alice, telegram account don`t approve')
         id_question_empty_acc = self.table('question', 'allquestions')[0]['id']
         self.action('upvote', {
+<<<<<<< HEAD
                     'user': 'bob', 'question_id': id_question_empty_acc, 'answer_id': 0}, bob, "Bob upvote bob answer")         
         
         name_empty_account = self.table('account', 'allaccounts')[2]['user']

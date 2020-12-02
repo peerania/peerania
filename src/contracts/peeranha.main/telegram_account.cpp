@@ -93,6 +93,26 @@ eosio::name peeranha::generate_temp_telegram_account() {
   return user;
 }
 
+void peeranha::update_display_name(uint64_t telegram_id, std::string display_name) { 
+  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
+  auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
+
+  eosio::name item_user = eosio::name(0);
+  for(auto iter_telegram_account_user_id = telegram_account_table_user_id.begin(); iter_telegram_account_user_id != telegram_account_table_user_id.end(); ++iter_telegram_account_user_id) {  
+    if (iter_telegram_account_user_id->telegram_id == telegram_id) {
+      eosio::check(iter_telegram_account_user_id->confirmed != NOT_CONFIRMED_TELEGRAM_ACCOUNT, "Account not confirmed");
+      item_user = iter_telegram_account_user_id->user;
+    }
+  }
+  eosio::check(item_user != eosio::name(0), "Telegram account not found");
+  
+  auto iter_account = find_account(item_user);
+  account_table.modify(iter_account, _self,
+                        [display_name](auto &account) {
+                          account.display_name = display_name;
+                        });
+}
+
 eosio::name peeranha::get_telegram_action_account(uint64_t telegram_id) {
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts); 
   auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();

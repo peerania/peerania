@@ -98,10 +98,9 @@ void peeranha::update_display_name(uint64_t telegram_id, std::string display_nam
   auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
 
   eosio::name item_user = eosio::name(0);
-  for(auto iter_telegram_account_user_id = telegram_account_table_user_id.begin(); iter_telegram_account_user_id != telegram_account_table_user_id.end(); ++iter_telegram_account_user_id) {
-    
+  for(auto iter_telegram_account_user_id = telegram_account_table_user_id.begin(); iter_telegram_account_user_id != telegram_account_table_user_id.end(); ++iter_telegram_account_user_id) {  
     if (iter_telegram_account_user_id->telegram_id == telegram_id) {
-      eosio::check(iter_telegram_account_user_id->confirmed != NOT_CONFIRMED_TELEGRAM_ACCOUNT, "Account not confirmed123");
+      eosio::check(iter_telegram_account_user_id->confirmed != NOT_CONFIRMED_TELEGRAM_ACCOUNT, "Account not confirmed");
       item_user = iter_telegram_account_user_id->user;
     }
   }

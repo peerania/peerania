@@ -107,9 +107,9 @@ void peeranha::delcomment(eosio::name user, uint64_t question_id,
 
 void peeranha::modquestion(eosio::name user, uint64_t question_id,
                            uint16_t community_id, std::vector<uint32_t> tags,
-                           std::string title, IpfsHash ipfs_link, uint8_t type) {
+                           std::string title, IpfsHash ipfs_link) {
   require_auth(user);
-  modify_question(user, question_id, community_id, tags, title, ipfs_link, type);
+  modify_question(user, question_id, community_id, tags, title, ipfs_link);
 }
 
 void peeranha::modanswer(eosio::name user, uint64_t question_id,
@@ -152,9 +152,9 @@ void peeranha::reportforum(eosio::name user, uint64_t question_id,
 // Tags and communities
 void peeranha::crcommunity(eosio::name user, std::string name,
                            IpfsHash ipfs_description,
-                           std::vector<suggest_tag> suggested_tags, uint16_t type) {
+                           std::vector<suggest_tag> suggested_tags) {
   require_auth(user);
-  create_community(user, name, type, ipfs_description, suggested_tags);
+  create_community(user, name, ipfs_description, suggested_tags);
 }
 
 void peeranha::crtag(eosio::name user, uint16_t community_id, std::string name,
@@ -215,9 +215,9 @@ void peeranha::givecommuflg(eosio::name user, int flags, uint16_t community_id) 
   give_moderator_flag(user, flags, community_id);
 }
 
-void peeranha::editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_description, uint16_t type) {
+void peeranha::editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_description) {
   require_auth(user);
-  edit_community(user, community_id, name, ipfs_description, type);
+  edit_community(user, community_id, name, ipfs_description);
 }
 
 void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating){

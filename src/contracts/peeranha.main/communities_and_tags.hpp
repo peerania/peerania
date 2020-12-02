@@ -15,9 +15,6 @@
 #define MIN_SUGGESTED_TAG 5
 #define MAX_SUGGESTED_TAG 25
 
-#define ID_QUESTIONS_TYPE 28
-#define ANY_QUESTIONS_TYPE 2
-
 struct suggest_tag {
   std::string name;
   IpfsHash ipfs_description;

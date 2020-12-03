@@ -130,6 +130,57 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         }, alice, 'Alice disapprove telegram account after approve')
         self.assertTrue(compare([], self.table('telegramacc', 'alltelacc'), ignore_excess=True))
         end()
+    
+    def test_disappruve_telegram_account_through_telegram(self):
+        begin('test disapprove telegram account through_telegram')
+        alice = self.register_alice_account()
+        ted = self.register_ted_account()
+        bob = self.register_bob_account()
+
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': alice,
+            'telegram_id': 503975561
+        }, ted, 'Alice add telegram account 503975561')
+        example = [{'user': 'alice', 'telegram_id': 503975561, 'confirmed': 0}]
+        self.assertTrue(compare(example, self.table('telegramacc', 'alltelacc'), ignore_excess=True))
+
+        self.action('dsapprvacctl', {
+            'bot_name': ted,
+            'user': alice
+        }, ted, 'Alice disapprove telegram account')
+        self.assertTrue(compare([], self.table('telegramacc', 'alltelacc'), ignore_excess=True))
+
+        self.wait(1)
+        self.failed_action('dsapprvacctl', {
+            'bot_name': ted,
+            'user': alice
+        }, ted, 'Alice disapprove telegram account again')
+
+        self.failed_action('dsapprvacctl', {
+            'bot_name': ted,
+            'user': bob
+        }, bob, 'Bob disapprove nonexistent telegram account')
+
+        self.wait(2)
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': alice,
+            'telegram_id': 503975562
+        }, ted, 'Alice add telegram account 503975562')
+
+        self.action('apprvacc', {
+            'user': alice
+        }, alice, 'Alice approve telegram account')
+        example = [{'user': 'alice', 'telegram_id': 503975562, 'confirmed': 1}]
+        self.assertTrue(compare(example, self.table('telegramacc', 'alltelacc'), ignore_excess=True))
+
+        self.action('dsapprvacctl', {
+            'bot_name': ted,
+            'user': alice
+        }, ted, 'Alice disapprove telegram account after approve')
+        self.assertTrue(compare([], self.table('telegramacc', 'alltelacc'), ignore_excess=True))
+        end()
 
     def test_post_question_telegram_account(self):
         begin('test post question telegram account')
@@ -789,7 +840,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         begin('user upvote question empty account and move his. Take away rating')
         ted = self.register_ted_account()
         bob = self.register_bob_account()
-        
+
         self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
                         'Add empty account through telegram')
         # general question

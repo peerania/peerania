@@ -443,12 +443,12 @@ class TestAchievents(peeranhatest.peeranhaTest):
         self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
                     '{} answer to question with id={}: "{}"'.format(str(bob), question_id, 'Register Alice answer'))
 
-        example_bob = [ {'user': 'bob', 'achievements_id': 30},
+        example_bob = [ {'user': 'bob', 'achievements_id': 30},     
                         {'user': 'bob', 'achievements_id': 40}]
         example_alice = [{'user': 'alice', 'achievements_id': 30},
                         {'user': 'alice', 'achievements_id': 40}]
         self.assertTrue(compare(example_alice, self.table('accachieve', 'alice'), ignore_excess=True))
-        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True))
+        self.assertTrue(compare(example_bob, self.table('accachieve', 'bob'), ignore_excess=True)) # to change TIME_15_MINUTES -> 5
 
         example_achievement = [ {'id': 30, 'count': 2},
                                 {'id': 40, 'count': 2}]

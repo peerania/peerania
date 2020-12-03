@@ -262,6 +262,11 @@ void peeranha::dsapprvacc(eosio::name user) {
   disapprove_account(user);
 }
 
+void peeranha::dsapprvacctl(eosio::name bot_name, eosio::name user) {
+  require_auth(bot_name);
+  disapprove_account(user);
+}
+
 void peeranha::addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id) {
   require_auth(bot_name);
   add_telegram_account(user, telegram_id, false);
@@ -462,7 +467,7 @@ EOSIO_DISPATCH(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
         reportprof)(updateacc)(givemoderflg)(editcomm)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
-        (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(updtdsplname)(intallaccach)
+        (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(dsapprvacctl)(updtdsplname)(intallaccach)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

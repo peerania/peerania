@@ -171,6 +171,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     ACTION dsapprvacc(eosio::name user);
 
+    ACTION dsapprvacctl(eosio::name bot_name, eosio::name user);
+
     ACTION addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id);
 
     ACTION addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar);

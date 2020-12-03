@@ -94,6 +94,9 @@ class AccountModerationTests(peeranhatest.peeranhaTest):
         new_rating['bob_rating'] += economy['ANSWER_DELETED_REWARD'] - economy['ANSWER_UPVOTED_REWARD'] - economy['ANSWER_UPVOTED_REWARD'] #firt answer - answer withing 15 minutes
         new_rating['carol_rating'] += economy['COMMENT_DELETED_REWARD']
         setvar(account_e, new_rating)
+        print(account_e)
+        print("===============")
+        print(self.table('account', 'allaccounts'))
         self.assertTrue(compare(account_e, self.table(
             'account', 'allaccounts'), ignore_excess=True))
         self.assertTrue(len(self.table('question', 'allquestions')) == 0)

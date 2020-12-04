@@ -205,7 +205,7 @@ class TestFix(peeranhatest.peeranhaTest):
         self.action('reportforum', {'user': 'ted', 'question_id': var['aq'], 'answer_id': var['aq_ba'], 'comment_id': 0},
                     ted, 'Bob vote for Alice question deletion')
 
-        new_alice_rating = self.table('account', 'allaccounts')[0]['rating'
+        new_alice_rating = self.table('account', 'allaccounts')[0]['rating']
         alice_rating -= (QUESTION_DELETED_REWARD + economy['ANSWER_UPVOTED_REWARD'] + economy['ANSWER_UPVOTED_REWARD'])
         self.assertTrue(compare(new_alice_rating, alice_rating, ignore_excess=True))
         end()

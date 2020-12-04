@@ -93,3 +93,7 @@ inline void assert_tag_name(const std::string name) {
 inline void assert_community_name(const std::string name) {
   assert_readble_string(name, 2, 50, "Invalid community name");
 }
+
+inline void assert_community_type(int question_type){
+  eosio::check(question_type <= ANY_QUESTIONS_TYPE, "Question type not exists");
+}

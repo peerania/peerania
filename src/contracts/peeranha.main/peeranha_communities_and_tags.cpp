@@ -57,6 +57,7 @@ void peeranha::create_community(
     const std::vector<suggest_tag> &suggested_tags) {
   auto iter_account = find_account(user);
   assert_community_name(name);
+  assert_community_type(type);
   assert_ipfs(ipfs_description);
   eosio::check(suggested_tags.size() >= MIN_SUGGESTED_TAG &&
                    suggested_tags.size() <= MAX_SUGGESTED_TAG,

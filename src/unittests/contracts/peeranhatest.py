@@ -23,7 +23,7 @@ class peeranhaTest(EOSTest):
             admin, 'Register admin account', suppress_output=True)
         self.action('givemoderflg', {'user': admin, 'flags': 31}, admin, "Give admin permisson", suppress_output=True)
         for i in range(3):
-            self.action('crcommunity', {'user': admin, 'name': f'Community {i+1}', 'ipfs_description': 'undefined', 'suggested_tags': 
+            self.action('crcommunity', {'user': admin, 'name': f'Community {i+1}', 'type': 2, 'ipfs_description': 'undefined', 'suggested_tags': 
                 [{'name': f'Community {i+1} tag {j+1}', 'ipfs_description': 'undefined'} for j in range(6)]}, admin, f'Create community {i+1}', suppress_output=True)
         self.action('setaccrten', {'user': admin, 'rating': -1, 'energy': -1}, admin, 'Delete admin account', suppress_output=True)
         self.admin = admin

@@ -393,7 +393,7 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
             defs['CREATE_COMMUNITY_ALLOWED'], defs['ENERGY_CREATE_COMMUNITY'])
         bob = self.register_bob_account(
             defs['CREATE_TAG_ALLOWED'], defs['ENERGY_CREATE_TAG'])
-        self.action('crcommunity', {'user': alice, 'name': 'alice community',
+        self.action('crcommunity', {'user': alice, 'name': 'alice community', 'type': 2,
                                     'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community')
         self.action('crtag', {'user': bob, 'name': 'bob tag',  'community_id': 1,
                               'ipfs_description': 'BCM'}, bob, 'Bob create ')
@@ -438,7 +438,7 @@ class RatingRewardsTests(peeranhatest.peeranhaTest):
             defs['CREATE_COMMUNITY_ALLOWED'], defs['ENERGY_CREATE_COMMUNITY'])
         bob = self.register_bob_account(
             defs['CREATE_TAG_ALLOWED'], defs['ENERGY_CREATE_TAG'])
-        self.action('crcommunity', {'user': alice, 'name': 'alice community',
+        self.action('crcommunity', {'user': alice, 'name': 'alice community', 'type': 2,
                                     'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community')
         self.action('crtag', {'user': bob, 'name': 'bob tag',  'community_id': 1,
                               'ipfs_description': 'BCM'}, bob, 'Bob create ')

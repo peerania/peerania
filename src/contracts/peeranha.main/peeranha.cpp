@@ -22,10 +22,9 @@ void peeranha::setaccprof(eosio::name user, IpfsHash ipfs_profile,
 
 void peeranha::postquestion(eosio::name user, uint16_t community_id,
                             std::vector<uint32_t> tags, std::string title,
-                            IpfsHash ipfs_link, const uint8_t type,
-                            const uint32_t bounty) {
+                            IpfsHash ipfs_link, const uint8_t type) {
   require_auth(user);
-  post_question(user, community_id, tags, title, ipfs_link, type, bounty);
+  post_question(user, community_id, tags, title, ipfs_link, type);
 }
 
 void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t community_id,
@@ -33,7 +32,7 @@ void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t commu
                             IpfsHash ipfs_link, const uint8_t type) {
   require_auth(bot);
   eosio::name user = get_telegram_action_account(telegram_id);
-  post_question(user, community_id, tags, title, ipfs_link, type, 0);
+  post_question(user, community_id, tags, title, ipfs_link, type);
 
   user_questions_index user_questions_table(_self, user.value);
   auto iter_user_question = user_questions_table.begin();

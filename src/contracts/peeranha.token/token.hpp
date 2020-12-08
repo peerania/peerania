@@ -56,7 +56,9 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   [[eosio::action]] void inviteuser(name inviter, name invited_user);
 
-  [[eosio::action]] void getbounty(name user, asset bounty, uint64_t question_id);
+  [[eosio::action]] void getbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp);
+
+  [[eosio::action]] void givebounty(name user, uint64_t question_id);
 
   [[eosio::action]] void rewardrefer(name invited_user);
 
@@ -101,12 +103,15 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
     uint64_t primary_key() const { return balance.symbol.code().raw(); }
   };
 
+  const uint64_t scope_all_bounties = eosio::name("allbounties").value;
   struct [[
     eosio::table("bounty"), eosio::contract("peeranha.token")
   ]] bounty {
     name user;
     asset bounty;
     uint64_t question_id;
+    uint64_t timestamp;
+    uint8_t status;
 
     uint64_t primary_key() const { return question_id; }
   };

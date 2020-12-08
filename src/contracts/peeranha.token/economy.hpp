@@ -35,6 +35,10 @@
 
 #define TOKEN_PRECISION 6
 
+#define BOUNTY_STATUS_ACTIVE 1
+#define BOUNTY_STATUS_PAID 2
+#define BOUNTY_STATUS_PENDING 3
+
 constexpr inline const int64_t int64_to_peer(const int64_t quantity){
     int64_t peer = quantity;
     for (int i = 0; i < TOKEN_PRECISION; ++i)

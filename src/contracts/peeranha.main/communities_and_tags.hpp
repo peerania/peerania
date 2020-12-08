@@ -97,3 +97,9 @@ inline void assert_community_name(const std::string name) {
 inline void assert_community_type(int question_type){
   eosio::check(question_type <= ANY_QUESTIONS_TYPE, "Question type not exists");
 }
+
+inline void assert_choose_type_allowed(const account &action_caller, int type) {
+  if (type != ANY_QUESTIONS_TYPE){
+    eosio::check(action_caller.has_moderation_flag(MODERATOR_FLG_CREATE_COMMUNITY), "User must to be moderator");
+  } else return;
+}

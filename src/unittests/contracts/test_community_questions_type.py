@@ -66,11 +66,11 @@ class CommunityQuestionsTyeTest(peeranhatest.peeranhaTest):
                            'Alice attempt to ask EXPERT question in GENERAL_TYPE community', 'assert')
         end()
 
-    def test_create_specific_type_community(self):
+    def test_create_specific_type_community_allowed(self):
         begin("Testing work of changing community questions type")
         alice = self.register_alice_account(100000, 400)
-        self.action('crcommunity', {'user': alice, 'name': 'alice community1', 'type': 0,
-                                    'ipfs_description': 'ACM1', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community with ANY type')
+        self.failed_action('crcommunity', {'user': alice, 'name': 'alice community1', 'type': 0,
+                                    'ipfs_description': 'ACM1', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community with ANY type', 'assert')
         end()
 
     def get_stub_suggested_tags(self):

@@ -59,6 +59,7 @@ void peeranha::create_community(
   assert_community_name(name);
   assert_community_type(type);
   assert_ipfs(ipfs_description);
+  assert_choose_type_allowed(*iter_account, type);
   eosio::check(suggested_tags.size() >= MIN_SUGGESTED_TAG &&
                    suggested_tags.size() <= MAX_SUGGESTED_TAG,
                "Invalid tag count");

@@ -53,9 +53,11 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   [[eosio::action]] void addboost(name user, asset tokens);
 
-  [[eosio::action]] void updatstboost(asset tokens);
+  [[eosio::action]] void updatstboost(asset tokens, name user);
 
-  [[eosio::action]] void newperboost();
+  [[eosio::action]] int64_t getfrezboost(name user);
+
+  [[eosio::action]] uint64_t getvalboost(name user, uint64_t period);
 
   [[eosio::action]] void rewardrefer(name invited_user);
 
@@ -99,25 +101,6 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
     uint64_t primary_key() const { return balance.symbol.code().raw(); }
   };
-
-  struct [[ eosio::table("statboost"), eosio::contract("peeranha.token") ]] statistics_boost {
-    asset sum_tokens;
-    uint64_t period;
-
-    uint64_t primary_key() const { return period; }
-  };
-  typedef eosio::multi_index<"statboost"_n, statistics_boost> statistics_boost_index;
-  const uint64_t scope_all_boost = eosio::name("allboost").value;
-
-  struct [[ eosio::table("boost"), eosio::contract("peeranha.token") ]] boost_tokens {
-    asset old_streaked_tokens;
-    asset new_steaked_tokens;
-    asset conclusion_tokens;
-    uint64_t period;
-
-    uint64_t primary_key() const { return period; }
-  };
-  typedef eosio::multi_index<"boost"_n, boost_tokens> boost_index;
 
   struct [[
     eosio::table("stat"), , eosio::contract("peeranha.token")

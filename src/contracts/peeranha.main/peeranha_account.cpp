@@ -167,7 +167,7 @@ void peeranha::update_rating_base(
                                   ? 0
                                   : iter_this_week_rating->rating_to_award;
 
-  int rating_to_award_change = 0;
+  int64_t rating_to_award_change = 0;
   const int pay_out_rating = iter_account->pay_out_rating;
 
   // Very bad code.
@@ -199,19 +199,20 @@ void peeranha::update_rating_base(
       rating_to_award_change = -rating_to_award;
 
     auto iter_total_rating_change = total_rating_table.find(current_period);
+    int64_t new_rating_to_award_change = rating_to_award_change * getboost(iter_account->user ,current_period);
     if (iter_total_rating_change == total_rating_table.end()) {
       total_rating_table.emplace(
-          _self, [current_period, rating_to_award_change](auto &total_rating) {
+          _self, [current_period, new_rating_to_award_change](auto &total_rating) {
             // If there is no record about this week in the table yet, a new
             // week has begun. That means rating_to_award = 0 for any user(first
             // rating transaction on this week); Test 2 guarantees the value of
             // rating_to_award_change >= 0;
             total_rating.period = current_period;
-            total_rating.total_rating_to_reward = rating_to_award_change;
+            total_rating.total_rating_to_reward = new_rating_to_award_change;    // total_rating_to_reward / 1000
           });
     } else {
       total_rating_table.modify(iter_total_rating_change, _self,
-                                [rating_to_award_change](auto &total_rating) {
+                                [new_rating_to_award_change](auto &total_rating) {
                                   // The invariant is total_rating_change >=0
                                   // To proof this invariant we also use Test 2.
                                   // total_rating_change value is summ of all
@@ -219,7 +220,7 @@ void peeranha::update_rating_base(
                                   // Test 2 guarantee that summ of all
                                   // ratnig_to_award_change >= 0
                                   total_rating.total_rating_to_reward +=
-                                      rating_to_award_change;
+                                      new_rating_to_award_change;               // total_rating_to_reward / 1000
                                 });
     }
   }

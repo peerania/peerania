@@ -8,6 +8,7 @@
 #include "IpfsHash.hpp"
 #include "account_economy.h"
 #include "property_community.hpp"
+#include "boost.hpp"
 
 struct report {
   eosio::name user;

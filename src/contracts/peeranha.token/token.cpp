@@ -111,7 +111,7 @@ void token::sub_balance(name user, asset value) {
 
   const auto &from =
       from_acnts.get(value.symbol.code().raw(), "no balance object found");
-  eosio::check(from.balance.amount >= value.amount, "overdrawn balance");
+  eosio::check(from.balance.amount >= value.amount + getfrezboost(user), "overdrawn balance");
 
   from_acnts.modify(from, user, [&](auto &a) { a.balance -= value; });
 }
@@ -195,13 +195,13 @@ void token::pickupreward(name user, const uint16_t period) {
   // it means user isn't pickup reward yet
   eosio::check(period_reward_table.find(period) == period_reward_table.end(),
                "You already pick up this reward");
-  total_rating_index total_rating_table(peeranha_main, scope_all_periods);
+  total_rating_index total_rating_table(peeranha_main, scope_all_periods); //////// totalrating
   auto iter_total_rating = total_rating_table.find(period);
   int total_rating_to_reward = iter_total_rating == total_rating_table.end()
                                    ? 0
-                                   : iter_total_rating->total_rating_to_reward;
+                                   : iter_total_rating->total_rating_to_reward / 1000;
 
-  total_reward_index total_reward_table(_self, scope_all_periods);
+  total_reward_index total_reward_table(_self, scope_all_periods); ////////// totalreward сколько выдали 
   auto iter_total_reward = total_reward_table.find(period);
   // Create reward pool
   if (iter_total_reward == total_reward_table.end()) {
@@ -212,13 +212,14 @@ void token::pickupreward(name user, const uint16_t period) {
           total_reward_item.total_reward = quantity;
         });
   }
-  period_rating_index period_rating_table(peeranha_main, user.value);
+  period_rating_index period_rating_table(peeranha_main, user.value); /////// periodrating
   auto period_rating = period_rating_table.find(period);
   eosio::check(period_rating != period_rating_table.end(),
                "No reward for you in this period");
   asset user_reward =
       get_user_reward(iter_total_reward->total_reward,
                       period_rating->rating_to_award, total_rating_to_reward);
+  user_reward.amount *= getboost(user, period) / 1000;
   period_reward_table.emplace(user, [user_reward, period](auto &reward) {
     reward.period = period;
     reward.reward = user_reward;
@@ -257,81 +258,157 @@ void token::inviteuser(name inviter, name invited_user) {
 }
 
 void token::addboost(name user, asset tokens) {
-  
   require_auth(user);
   boost_index boost_table(_self, user.value);
   const uint16_t next_period = get_period(now()) + 1;
   auto iter_last_boost = boost_table.rbegin();
 
-  // eosio::check(false, "----------------------------------------");
+  accounts from_acnts(_self, user.value);
+  const auto &from =
+      from_acnts.get(tokens.symbol.code().raw(), "no balance object found");
+  eosio::check(from.balance.amount >= tokens.amount + getfrezboost(user), "overdrawn balance");
 
-  // accounts from_acnts(_self, user.value);
-  // const auto &from =
-  //     from_acnts.get(tokens.symbol.code().raw(), "no balance object found");
-  // eosio::check(from.balance.amount >= tokens.amount, "overdrawn balance");
-
-  const bool is_first_transaction_on_this_week = (boost_table.rend() == boost_table.rbegin());
+  const bool is_first_transaction_on_this_week = boost_table.rend() == iter_last_boost;
   if (is_first_transaction_on_this_week || iter_last_boost->period != next_period) {
     const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
-    asset old_tokens = is_first_transaction_on_this_week
-                                  ? asset{0, sym}
-                                  : iter_last_boost->old_streaked_tokens + iter_last_boost->new_steaked_tokens;
+    asset new_tokens = is_first_transaction_on_this_week
+                                  ? tokens
+                                  : iter_last_boost->streaked_tokens + tokens;
     asset conclusion_tokens = asset{0, sym};
-    if (!is_first_transaction_on_this_week && iter_last_boost->new_steaked_tokens.amount < 0 && next_period -1 == iter_last_boost->period) {
-      conclusion_tokens = iter_last_boost->new_steaked_tokens;
+    if (!is_first_transaction_on_this_week && tokens.amount < 0) {
+      eosio::check(tokens.amount * -1 <= iter_last_boost->streaked_tokens.amount,
+               "... balance");
+      conclusion_tokens = tokens;
     }
 
     auto iter_boost = boost_table.emplace(
-      _self, [next_period, old_tokens, tokens, conclusion_tokens](auto &boost) {
-        boost.old_streaked_tokens = old_tokens;
-        boost.new_steaked_tokens = tokens;
+      _self, [next_period, new_tokens, tokens, conclusion_tokens](auto &boost) {
+        boost.streaked_tokens = new_tokens;
         boost.period = next_period;
         boost.conclusion_tokens = conclusion_tokens;
       });
-    updatstboost(iter_boost->new_steaked_tokens + iter_boost->old_streaked_tokens);
+    updatstboost(tokens, user);
   } else {
     auto iter_total_rating_change = boost_table.find(next_period);
-    updatstboost(-iter_total_rating_change->new_steaked_tokens);
     boost_table.modify(
       iter_total_rating_change, _self, [tokens](auto &boost) {
-        boost.new_steaked_tokens += tokens;
+        boost.streaked_tokens += tokens;
+        if (tokens.amount < 0) {
+          eosio::check((tokens.amount + boost.conclusion_tokens.amount) * -1 <= boost.streaked_tokens.amount,
+               "... balance");
+          boost.conclusion_tokens += tokens;
+        }
       });
-    updatstboost(iter_total_rating_change->new_steaked_tokens);
+    updatstboost(tokens, user);
   }
 }
 
-void token::updatstboost(asset tokens) {
+void token::updatstboost(asset tokens, name user) {
   statistics_boost_index statistics_boost_table(_self, scope_all_boost);
   const uint16_t next_period = get_period(now()) + 1;
+  auto iter_last_statistics = statistics_boost_table.rbegin();
 
-  if (statistics_boost_table.rbegin() == statistics_boost_table.rend() || statistics_boost_table.rbegin()->period != next_period) {
+  const bool is_first_transaction_on_this_week = iter_last_statistics == statistics_boost_table.rend();
+  if (is_first_transaction_on_this_week || iter_last_statistics->period != next_period) {
+    asset new_tokens;
+    asset max_stake;
+    name user_max_stake;
+    if (is_first_transaction_on_this_week) {
+      new_tokens = tokens;
+      max_stake = tokens;
+      user_max_stake = user;
+    } else {
+      new_tokens = iter_last_statistics->sum_tokens + tokens;
+      max_stake = iter_last_statistics->max_stake;
+      user_max_stake = iter_last_statistics->user_max_stake;
+
+      if (tokens.amount > 0) {
+        boost_index boost_table(_self, user.value);
+        auto iter_last_boost = boost_table.rbegin();
+        if (iter_last_boost->streaked_tokens.amount > max_stake.amount) {
+          max_stake = iter_last_boost->streaked_tokens;
+          user_max_stake = user;
+        }
+      } else if (tokens.amount < 0 && user_max_stake == user) {
+        const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+        max_stake = asset{0, sym};
+        account_index account_table(peeranha_main, scope_all_accounts);
+        for (auto iter_account = account_table.begin(); iter_account != account_table.end(); ++iter_account) {
+          boost_index boost_table(_self, iter_account->user.value);
+          auto iter_last_boost = boost_table.rbegin();
+          if (boost_table.begin() != boost_table.end() && iter_last_boost->streaked_tokens.amount > max_stake.amount) {
+            max_stake = iter_last_boost->streaked_tokens;
+            user_max_stake = iter_account->user;
+          }
+        }
+      }
+    }
     statistics_boost_table.emplace(
-      _self, [tokens, next_period](auto &stat_boost) {
-        stat_boost.sum_tokens = tokens;
+      _self, [new_tokens, next_period, max_stake, user_max_stake](auto &stat_boost) {
+        stat_boost.sum_tokens = new_tokens;
+        stat_boost.max_stake = max_stake;
+        stat_boost.user_max_stake = user_max_stake;
         stat_boost.period = next_period;
       });
   } else {
     auto iter_total_rating_change = statistics_boost_table.find(next_period);
+    asset max_stake = iter_total_rating_change->max_stake;
+    name user_max_stake = iter_total_rating_change->user_max_stake;
+
+    if (tokens.amount > 0) {
+      boost_index boost_table(_self, user.value);
+      auto iter_last_boost = boost_table.rbegin();
+      if (iter_last_boost->streaked_tokens.amount > max_stake.amount) {
+        max_stake = iter_last_boost->streaked_tokens;
+        user_max_stake = user;
+      }
+    } else if (tokens.amount < 0 && user_max_stake == user) {
+      const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+      max_stake = asset{0, sym};
+      account_index account_table(peeranha_main, scope_all_accounts);
+      for (auto iter_account = account_table.begin(); iter_account != account_table.end(); ++iter_account) {
+        boost_index boost_table(_self, iter_account->user.value);
+        auto iter_last_boost = boost_table.rbegin();
+        if (boost_table.begin() != boost_table.end() && iter_last_boost->streaked_tokens.amount > max_stake.amount) {
+          max_stake = iter_last_boost->streaked_tokens;
+          user_max_stake = iter_account->user;
+        }
+      }
+    }
+ 
     statistics_boost_table.modify(
-      iter_total_rating_change, _self, [tokens](auto &stat_boost) {
+      iter_total_rating_change, _self, [tokens, max_stake, user_max_stake](auto &stat_boost) {
         stat_boost.sum_tokens += tokens;
+        stat_boost.max_stake = max_stake;
+        stat_boost.user_max_stake = user_max_stake;
       });
   }
 }
 
-void token::newperboost() {
-  // require_auth(_self);
-  // boost_index boost_table(_self, scope_all_boost);
+int64_t token::getfrezboost(name user) {
+  boost_index boost_table(_self, user.value);
 
-  // eosio::check(boost_table.begin() == boost_table.end(), "Error boost");
+  if (boost_table.begin() == boost_table.end()) {
+    return 0;
+  }
 
-  // for (auto iter_boost = boost_table.begin(); iter_boost != boost_table.end(); ++iter_boost) {
-  //   boost_table.modify(
-  //   iter_boost, _self, [](auto &boost) {
-  //     boost.old_streaked_tokens += boost.new_steaked_tokens.tokens - boost.unsteaked_tokens.tokens;
-  //     eosio::check(boost.old_streaked_tokens.amount > 0, "old_streaked_tokens is negetive");
-  //   });
-  // }
+  auto iter_last_boost = boost_table.rbegin();
+
+  bool period_res = get_period(now()) + 2 >= iter_last_boost->period; //??
+  return period_res
+              ? iter_last_boost->streaked_tokens.amount
+              : iter_last_boost->streaked_tokens.amount + iter_last_boost->conclusion_tokens.amount * -1;
+}
+
+uint64_t token::getvalboost(name user, uint64_t period) {
+  boost_index boost_table(_self, user.value);
+
+  if (boost_table.begin() == boost_table.end()) {
+    return 0;
+  }
+
+  auto iter_last_boost = boost_table.find(period);
+  return iter_last_boost->streaked_tokens.amount;
 }
 
 void token::rewardrefer(name invited_user) {
@@ -397,6 +474,12 @@ void token::resettables(std::vector<eosio::name> allaccs) {
     while (iter_period_reward != period_reward_table.end()) {
       iter_period_reward = period_reward_table.erase(iter_period_reward);
     }
+
+    boost_index boost_table(_self, iter_acc->value);
+    auto iter_boost = boost_table.begin();
+    while (iter_boost != boost_table.end()) {
+      iter_boost = boost_table.erase(iter_boost);
+    }
   }
 
   const symbol sym = symbol("PEER", TOKEN_PRECISION);
@@ -409,6 +492,12 @@ void token::resettables(std::vector<eosio::name> allaccs) {
   auto iter_total_reward = total_reward_table.begin();
   while (iter_total_reward != total_reward_table.end()) {
     iter_total_reward = total_reward_table.erase(iter_total_reward);
+  }
+
+  statistics_boost_index statistics_boost_table(_self, scope_all_boost);
+  auto iter_statistics_boost = statistics_boost_table.begin();
+  while (iter_statistics_boost != statistics_boost_table.end()) {
+    iter_statistics_boost = statistics_boost_table.erase(iter_statistics_boost);
   }
 
   invited_users_index invited_users_table(_self, all_invited);
@@ -430,7 +519,7 @@ void token::resettables(std::vector<eosio::name> allaccs) {
 
 EOSIO_DISPATCH(eosio::token,
                (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)(rewardrefer)
-               (addboost)(updatstboost)(newperboost)
+               (addboost)(updatstboost)
 #if STAGE == 1 || STAGE == 2
                    (resettables)
 #if STAGE == 2

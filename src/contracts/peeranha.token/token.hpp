@@ -49,16 +49,11 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   [[eosio::action]] void pickupreward(name user, const uint16_t period);
 
-  // Get bounty from user who asked question
-
-  // Give bounty to user who gave best answer
-//  [[eosio::action]] void givebounty();
-
   [[eosio::action]] void inviteuser(name inviter, name invited_user);
 
-  [[eosio::action]] void getbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp);
+  [[eosio::action]] void setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp);
 
-  [[eosio::action]] void givebounty(name user, uint64_t question_id);
+  [[eosio::action]] void paybounty(name user, uint64_t question_id);
 
   [[eosio::action]] void rewardrefer(name invited_user);
 

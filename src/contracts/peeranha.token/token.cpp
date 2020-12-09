@@ -256,7 +256,7 @@ void token::inviteuser(name inviter, name invited_user) {
       });
 }
 
-void token::getbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp) {
+void token::setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp) {
     require_auth(user);
     eosio::check(bounty.is_valid(), "invalid quantity");
     eosio::check(bounty.amount > 0, "must transfer positive quantity");
@@ -272,18 +272,12 @@ void token::getbounty(name user, asset bounty, uint64_t question_id, uint64_t ti
     });
 }
 
-// remove scope of user and make it with global scope, f.e. "all_bounty_scope"
-// remove questionUser because it's not needed and needs authorization
-
-void token::givebounty(name user, uint64_t question_id) {
+void token::paybounty(name user, uint64_t question_id) {
     require_auth(user);
-//    name peertken = name("peeranhatken");
     question_bounty bountytable(_self, scope_all_bounties);
     auto iter_bounty = bountytable.find(question_id);
     eosio::check(iter_bounty->status == BOUNTY_STATUS_ACTIVE,
                 "You have already got your bounty");
-//    auto payer = has_auth(user) ? user : peertken;
-//    sub_balance(peertken, iter_bounty->bounty);
     add_balance(user, iter_bounty->bounty, user);
     bountytable.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
 }
@@ -384,7 +378,7 @@ void token::resettables(std::vector<eosio::name> allaccs) {
 
 EOSIO_DISPATCH(eosio::token,
                (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)
-               (getbounty)(givebounty)(rewardrefer)
+               (setbounty)(paybounty)(rewardrefer)
 #if STAGE == 1 || STAGE == 2
                    (resettables)
 #if STAGE == 2

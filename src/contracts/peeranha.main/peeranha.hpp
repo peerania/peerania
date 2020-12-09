@@ -57,7 +57,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     // Post question
     ACTION postquestion(eosio::name user, uint16_t community_id,
                         std::vector<uint32_t> tags, std::string title,
-                        IpfsHash ipfs_link, const uint8_t type);
+                        IpfsHash ipfs_link, uint8_t type);
 
     // Telegram post question
     ACTION telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t community_id, 

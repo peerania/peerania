@@ -37,12 +37,12 @@ void peeranha::assert_community_exist(uint16_t community_id) {
                "Community not found");
 }
 
-void peeranha::assert_community_questions_type(const uint16_t community_id, const uint8_t type) {
+void peeranha::assert_community_questions_type(const uint16_t community_id, const uint8_t question_type) {
   community_table_index community_table(_self, scope_all_communities);
   auto iter_community = community_table.find(community_id);
-  auto property = get_property_d(iter_community->integer_properties, ID_QUESTIONS_TYPE, 2);
+  auto property = get_property_d(iter_community->integer_properties, ID_QUESTIONS_TYPE, ANY_QUESTIONS_TYPE);
   if (property != ANY_QUESTIONS_TYPE){
-    eosio::check(property == type, "Illegal question type");
+    eosio::check(property == question_type, "Illegal question type");
   }
 }
 
@@ -52,14 +52,14 @@ uint64_t peeranha::get_tag_scope(uint16_t community_id) {
 
 void peeranha::create_community(
     eosio::name user, const std::string &name,
-    const uint16_t &type,
+    const uint16_t &allowed_question_type,
     const IpfsHash &ipfs_description,
     const std::vector<suggest_tag> &suggested_tags) {
   auto iter_account = find_account(user);
   assert_community_name(name);
-  assert_community_type(type);
+  assert_community_type(allowed_question_type);
   assert_ipfs(ipfs_description);
-  assert_choose_type_allowed(*iter_account, type);
+  assert_question_type_allowed(*iter_account, allowed_question_type);
   eosio::check(suggested_tags.size() >= MIN_SUGGESTED_TAG &&
                    suggested_tags.size() <= MAX_SUGGESTED_TAG,
                "Invalid tag count");
@@ -72,7 +72,7 @@ void peeranha::create_community(
       community.name = name;
       community.ipfs_description = ipfs_description;
       community.creation_time = now();
-      set_property(community.integer_properties, ID_QUESTIONS_TYPE, type);
+      set_property(community.integer_properties, ID_QUESTIONS_TYPE, allowed_question_type);
       community.questions_asked = 0;
       community.answers_given = 0;
       community.correct_answers = 0;

@@ -14,8 +14,8 @@ struct [[ eosio::table("statboost"), eosio::contract("peeranha.token") ]] statis
   const uint64_t scope_all_boost = eosio::name("allboost").value;
 
   struct [[ eosio::table("boost"), eosio::contract("peeranha.token") ]] boost_tokens {
-    eosio::asset streaked_tokens;
-    eosio::asset conclusion_tokens;
+    eosio::asset staked_tokens;
+    eosio::asset unstaked_tokens;
     uint64_t period;
 
     uint64_t primary_key() const { return period; }

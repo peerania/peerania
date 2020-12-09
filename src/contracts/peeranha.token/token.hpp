@@ -53,7 +53,9 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   [[eosio::action]] void addboost(name user, asset tokens);
 
-  [[eosio::action]] void updatstboost(asset tokens, name user);
+  void update_statistics_boost(asset tokens, name user);
+  
+  void get_value_statistic_boost(asset &new_tokens, asset &max_stake, name &user_max_stake, name user);
 
   [[eosio::action]] int64_t getfrezboost(name user);
 

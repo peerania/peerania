@@ -273,37 +273,37 @@ void token::addboost(name user, asset tokens) {
     const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
     asset new_tokens = is_first_transaction_on_this_week
                                   ? tokens
-                                  : iter_last_boost->streaked_tokens + tokens;
-    asset conclusion_tokens = asset{0, sym};
+                                  : iter_last_boost->staked_tokens + tokens;
+    asset unstaked_tokens = asset{0, sym};
     if (!is_first_transaction_on_this_week && tokens.amount < 0) {
-      eosio::check(tokens.amount * -1 <= iter_last_boost->streaked_tokens.amount,
+      eosio::check(tokens.amount * -1 <= iter_last_boost->staked_tokens.amount,
                "... balance");
-      conclusion_tokens = tokens;
+      unstaked_tokens = tokens;
     }
 
     auto iter_boost = boost_table.emplace(
-      _self, [next_period, new_tokens, tokens, conclusion_tokens](auto &boost) {
-        boost.streaked_tokens = new_tokens;
+      _self, [next_period, new_tokens, tokens, unstaked_tokens](auto &boost) {
+        boost.staked_tokens = new_tokens;
         boost.period = next_period;
-        boost.conclusion_tokens = conclusion_tokens;
+        boost.unstaked_tokens = unstaked_tokens;
       });
-    updatstboost(tokens, user);
+    update_statistics_boost(tokens, user);
   } else {
     auto iter_total_rating_change = boost_table.find(next_period);
     boost_table.modify(
       iter_total_rating_change, _self, [tokens](auto &boost) {
-        boost.streaked_tokens += tokens;
+        boost.staked_tokens += tokens;
         if (tokens.amount < 0) {
-          eosio::check((tokens.amount + boost.conclusion_tokens.amount) * -1 <= boost.streaked_tokens.amount,
+          eosio::check((tokens.amount + boost.unstaked_tokens.amount) * -1 <= boost.staked_tokens.amount,
                "... balance");
-          boost.conclusion_tokens += tokens;
+          boost.unstaked_tokens += tokens;
         }
       });
-    updatstboost(tokens, user);
+    update_statistics_boost(tokens, user);
   }
 }
 
-void token::updatstboost(asset tokens, name user) {
+void token::update_statistics_boost(asset tokens, name user) {
   statistics_boost_index statistics_boost_table(_self, scope_all_boost);
   const uint16_t next_period = get_period(now()) + 1;
   auto iter_last_statistics = statistics_boost_table.rbegin();
@@ -322,26 +322,7 @@ void token::updatstboost(asset tokens, name user) {
       max_stake = iter_last_statistics->max_stake;
       user_max_stake = iter_last_statistics->user_max_stake;
 
-      if (tokens.amount > 0) {
-        boost_index boost_table(_self, user.value);
-        auto iter_last_boost = boost_table.rbegin();
-        if (iter_last_boost->streaked_tokens.amount > max_stake.amount) {
-          max_stake = iter_last_boost->streaked_tokens;
-          user_max_stake = user;
-        }
-      } else if (tokens.amount < 0 && user_max_stake == user) {
-        const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
-        max_stake = asset{0, sym};
-        account_index account_table(peeranha_main, scope_all_accounts);
-        for (auto iter_account = account_table.begin(); iter_account != account_table.end(); ++iter_account) {
-          boost_index boost_table(_self, iter_account->user.value);
-          auto iter_last_boost = boost_table.rbegin();
-          if (boost_table.begin() != boost_table.end() && iter_last_boost->streaked_tokens.amount > max_stake.amount) {
-            max_stake = iter_last_boost->streaked_tokens;
-            user_max_stake = iter_account->user;
-          }
-        }
-      }
+      get_value_statistic_boost(tokens, max_stake, user_max_stake, user);
     }
     statistics_boost_table.emplace(
       _self, [new_tokens, next_period, max_stake, user_max_stake](auto &stat_boost) {
@@ -355,26 +336,7 @@ void token::updatstboost(asset tokens, name user) {
     asset max_stake = iter_total_rating_change->max_stake;
     name user_max_stake = iter_total_rating_change->user_max_stake;
 
-    if (tokens.amount > 0) {
-      boost_index boost_table(_self, user.value);
-      auto iter_last_boost = boost_table.rbegin();
-      if (iter_last_boost->streaked_tokens.amount > max_stake.amount) {
-        max_stake = iter_last_boost->streaked_tokens;
-        user_max_stake = user;
-      }
-    } else if (tokens.amount < 0 && user_max_stake == user) {
-      const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
-      max_stake = asset{0, sym};
-      account_index account_table(peeranha_main, scope_all_accounts);
-      for (auto iter_account = account_table.begin(); iter_account != account_table.end(); ++iter_account) {
-        boost_index boost_table(_self, iter_account->user.value);
-        auto iter_last_boost = boost_table.rbegin();
-        if (boost_table.begin() != boost_table.end() && iter_last_boost->streaked_tokens.amount > max_stake.amount) {
-          max_stake = iter_last_boost->streaked_tokens;
-          user_max_stake = iter_account->user;
-        }
-      }
-    }
+    get_value_statistic_boost(tokens, max_stake, user_max_stake, user);
  
     statistics_boost_table.modify(
       iter_total_rating_change, _self, [tokens, max_stake, user_max_stake](auto &stat_boost) {
@@ -382,6 +344,29 @@ void token::updatstboost(asset tokens, name user) {
         stat_boost.max_stake = max_stake;
         stat_boost.user_max_stake = user_max_stake;
       });
+  }
+}
+
+void token::get_value_statistic_boost(asset &tokens, asset &max_stake, name &user_max_stake, name user) {
+  if (tokens.amount > 0) {
+    boost_index boost_table(_self, user.value);
+    auto iter_last_boost = boost_table.rbegin();
+    if (iter_last_boost->staked_tokens.amount > max_stake.amount) {
+    max_stake = iter_last_boost->staked_tokens;
+      user_max_stake = user;
+    }
+  } else if (tokens.amount < 0 && user_max_stake == user) {
+    const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+    max_stake = asset{0, sym};
+    account_index account_table(peeranha_main, scope_all_accounts);
+    for (auto iter_account = account_table.begin(); iter_account != account_table.end(); ++iter_account) {
+      boost_index boost_table(_self, iter_account->user.value);
+      auto iter_last_boost = boost_table.rbegin();
+      if (boost_table.begin() != boost_table.end() && iter_last_boost->staked_tokens.amount > max_stake.amount) {
+        max_stake = iter_last_boost->staked_tokens;
+        user_max_stake = iter_account->user;
+      }
+    }
   }
 }
 
@@ -396,8 +381,8 @@ int64_t token::getfrezboost(name user) {
 
   bool period_res = get_period(now()) + 2 >= iter_last_boost->period; //??
   return period_res
-              ? iter_last_boost->streaked_tokens.amount
-              : iter_last_boost->streaked_tokens.amount + iter_last_boost->conclusion_tokens.amount * -1;
+              ? iter_last_boost->staked_tokens.amount
+              : iter_last_boost->staked_tokens.amount + iter_last_boost->unstaked_tokens.amount * -1;
 }
 
 uint64_t token::getvalboost(name user, uint64_t period) {
@@ -408,7 +393,7 @@ uint64_t token::getvalboost(name user, uint64_t period) {
   }
 
   auto iter_last_boost = boost_table.find(period);
-  return iter_last_boost->streaked_tokens.amount;
+  return iter_last_boost->staked_tokens.amount;
 }
 
 void token::rewardrefer(name invited_user) {
@@ -519,7 +504,7 @@ void token::resettables(std::vector<eosio::name> allaccs) {
 
 EOSIO_DISPATCH(eosio::token,
                (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)(rewardrefer)
-               (addboost)(updatstboost)
+               (addboost)
 #if STAGE == 1 || STAGE == 2
                    (resettables)
 #if STAGE == 2

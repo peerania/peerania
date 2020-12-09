@@ -61,6 +61,8 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   [[eosio::action]] void rewardrefer(name invited_user);
 
+  [[eosio::action]] void payforcpu(){};
+
   static asset get_supply(name token_contract_account, symbol_code sym_code) {
 
     stats statstable(token_contract_account, sym_code.raw());

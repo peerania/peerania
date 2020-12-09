@@ -527,4 +527,4 @@ EOSIO_DISPATCH(eosio::token,
 #endif
 
 #endif
-)
+                      (payforcpu))

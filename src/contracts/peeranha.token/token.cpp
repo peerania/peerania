@@ -266,41 +266,32 @@ void token::addboost(name user, asset tokens) {
   accounts from_acnts(_self, user.value);
   const auto &from =
       from_acnts.get(tokens.symbol.code().raw(), "no balance object found");
-  eosio::check(from.balance.amount >= tokens.amount + getfrezboost(user), "overdrawn balance");
+  eosio::check(from.balance.amount >= tokens.amount, "overdrawn balance");
+  eosio::check(tokens.amount > 0, "boost must be positive ");
 
-  const bool is_first_transaction_on_this_week = boost_table.rend() == iter_last_boost;
-  if (is_first_transaction_on_this_week || iter_last_boost->period != next_period) {
-    const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
-    asset new_tokens = is_first_transaction_on_this_week
+  asset change_boost = tokens;
+  
+  const bool is_first_boost_user = boost_table.rend() == boost_table.rbegin();
+
+  auto iter_boost = boost_table.find(next_period);
+
+  if (iter_boost == boost_table.end()) {
+    change_boost = is_first_boost_user                            ////correct
                                   ? tokens
-                                  : iter_last_boost->staked_tokens + tokens;
-    asset unstaked_tokens = asset{0, sym};
-    if (!is_first_transaction_on_this_week && tokens.amount < 0) {
-      eosio::check(tokens.amount * -1 <= iter_last_boost->staked_tokens.amount,
-               "... balance");
-      unstaked_tokens = tokens;
-    }
-
+                                  : tokens - iter_last_boost->staked_tokens;
     auto iter_boost = boost_table.emplace(
-      _self, [next_period, new_tokens, tokens, unstaked_tokens](auto &boost) {
-        boost.staked_tokens = new_tokens;
+      _self, [next_period, tokens](auto &boost) {
+        boost.staked_tokens = tokens;
         boost.period = next_period;
-        boost.unstaked_tokens = unstaked_tokens;
       });
-    update_statistics_boost(tokens, user);
   } else {
-    auto iter_total_rating_change = boost_table.find(next_period);
+    change_boost -= iter_boost->staked_tokens;
     boost_table.modify(
-      iter_total_rating_change, _self, [tokens](auto &boost) {
-        boost.staked_tokens += tokens;
-        if (tokens.amount < 0) {
-          eosio::check((tokens.amount + boost.unstaked_tokens.amount) * -1 <= boost.staked_tokens.amount,
-               "... balance");
-          boost.unstaked_tokens += tokens;
-        }
+      iter_boost, _self, [tokens](auto &boost) {
+        boost.staked_tokens = tokens;
       });
-    update_statistics_boost(tokens, user);
   }
+  update_statistics_boost(change_boost, user);
 }
 
 void token::update_statistics_boost(asset tokens, name user) {
@@ -308,12 +299,12 @@ void token::update_statistics_boost(asset tokens, name user) {
   const uint16_t next_period = get_period(now()) + 1;
   auto iter_last_statistics = statistics_boost_table.rbegin();
 
-  const bool is_first_transaction_on_this_week = iter_last_statistics == statistics_boost_table.rend();
-  if (is_first_transaction_on_this_week || iter_last_statistics->period != next_period) {
+  const bool is_first_transaction = iter_last_statistics == statistics_boost_table.rend();
+  if (is_first_transaction || iter_last_statistics->period != next_period) {
     asset new_tokens;
     asset max_stake;
     name user_max_stake;
-    if (is_first_transaction_on_this_week) {
+    if (is_first_transaction) {
       new_tokens = tokens;
       max_stake = tokens;
       user_max_stake = user;
@@ -378,14 +369,31 @@ int64_t token::getfrezboost(name user) {
   }
 
   auto iter_last_boost = boost_table.rbegin();
+  uint16_t period = get_period(now());
 
-  bool period_res = get_period(now()) + 2 >= iter_last_boost->period; //??
-  return period_res
-              ? iter_last_boost->staked_tokens.amount
-              : iter_last_boost->staked_tokens.amount + iter_last_boost->unstaked_tokens.amount * -1;
+  int64_t output_value = 0;
+  if (iter_last_boost->period <= period) {
+    output_value = iter_last_boost->staked_tokens.amount;
+  } else {                                                      //в текущем периоде изменили буст
+    auto iter_buf_boost = iter_last_boost;
+    
+    ++iter_buf_boost;
+    // eosio::check(false, "1213213 ");///////// проверить iter_last_boost не должен измениться
+    if (iter_buf_boost == boost_table.rend()) {                 // только 1 запись о бусте
+      output_value =  iter_last_boost->staked_tokens.amount;
+    } else {
+      if (iter_last_boost->staked_tokens.amount > iter_buf_boost->staked_tokens.amount) {  // добавили буст
+        output_value =  iter_last_boost->staked_tokens.amount;
+      } else {                                                                            //уменьшили
+        output_value =  iter_buf_boost->staked_tokens.amount;
+      }
+    }
+  }
+  
+  return output_value;
 }
 
-uint64_t token::getvalboost(name user, uint64_t period) {
+uint64_t token::getvalboost(name user, uint64_t period) { ///???
   boost_index boost_table(_self, user.value);
 
   if (boost_table.begin() == boost_table.end()) {

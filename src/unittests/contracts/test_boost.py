@@ -349,7 +349,7 @@ class TestBoost(peeranhatest.peeranhaTest):
     #     self.assertTrue(compare(example_total_reward, self.table('totalreward', 'allperiods', contract='token'), ignore_excess=True))
         
     #     print(self.table('boost', 'bob', contract='token'))
-    #     example_boost = [{'staked_tokens': '1.00000 PEER', 'unstaked_tokens': '0.000000 PEER', 'period': 3}]
+    #     example_boost = [{'staked_tokens': '1.00000 PEER', 'period': 3}]
     #     self.assertTrue(compare(example_boost, self.table('boost', 'bob', contract='token'), ignore_excess=True))
         
     #     print(self.table('statboost', 'allboost', contract='token'))
@@ -398,7 +398,7 @@ class TestBoost(peeranhatest.peeranhaTest):
     #     self.assertTrue(compare(example_total_reward, self.table('totalreward', 'allperiods', contract='token'), ignore_excess=True))
         
     #     print(self.table('boost', 'bob', contract='token'))
-    #     example_boost = [{'staked_tokens': '1.00000 PEER', 'unstaked_tokens': '0.000000 PEER', 'period': 3}]
+    #     example_boost = [{'staked_tokens': '1.00000 PEER', 'period': 3}]
     #     self.assertTrue(compare(example_boost, self.table('boost', 'bob', contract='token'), ignore_excess=True))
         
     #     print(self.table('statboost', 'allboost', contract='token'))
@@ -414,13 +414,13 @@ class TestBoost(peeranhatest.peeranhaTest):
         begin('add boost')
         alice = self.register_alice_account()
         give_tokens(self, 'alice', '20.000000 PEER')
-
+        print(self.table('accounts', 'alice', contract='token'))
         self.action('addboost', {'user': 'alice', 'tokens': '10.000000 PEER'}, alice,
                     'Asking question from alice with text "Alice question"', contract='token')
 
         print(self.table('boost', 'alice', contract='token'))
         print(self.table('statboost', 'allboost', contract='token'))
-        example_boost = [{'staked_tokens': '10.000000 PEER', 'unstaked_tokens': '0.000000 PEER', 'period': 1}]
+        example_boost = [{'staked_tokens': '10.000000 PEER', 'period': 1}]
         self.assertTrue(compare(example_boost, self.table('boost', 'alice', contract='token'), ignore_excess=True))
         example_statistics = [{'sum_tokens': '10.000000 PEER', 'max_stake': '10.000000 PEER', 'user_max_stake': 'alice', 'period': 1}]
         self.assertTrue(compare(example_statistics, self.table('statboost', 'allboost', contract='token'), ignore_excess=True))
@@ -431,11 +431,11 @@ class TestBoost(peeranhatest.peeranhaTest):
 
         print(self.table('boost', 'alice', contract='token'))
         print(self.table('statboost', 'allboost', contract='token'))
-        example_boost = [{'staked_tokens': '10.000000 PEER', 'unstaked_tokens': '0.000000 PEER', 'period': 1}, 
-                        {'staked_tokens': '12.000000 PEER', 'unstaked_tokens': '0.000000 PEER', 'period': 2}]
+        example_boost = [{'staked_tokens': '10.000000 PEER', 'period': 1}, 
+                        {'staked_tokens': '2.000000 PEER', 'period': 2}]
         self.assertTrue(compare(example_boost, self.table('boost', 'alice', contract='token'), ignore_excess=True))
         example_statistics = [{'sum_tokens': '10.000000 PEER', 'max_stake': '10.000000 PEER', 'user_max_stake': 'alice', 'period': 1}, 
-                            {'sum_tokens': '12.000000 PEER', 'max_stake': '12.000000 PEER', 'user_max_stake': 'alice', 'period': 2}]
+                            {'sum_tokens': '2.000000 PEER', 'max_stake': '2.000000 PEER', 'user_max_stake': 'alice', 'period': 2}]
         self.assertTrue(compare(example_statistics, self.table('statboost', 'allboost', contract='token'), ignore_excess=True))
         end()
     
@@ -452,30 +452,30 @@ class TestBoost(peeranhatest.peeranhaTest):
         end()
 
     def test_pick_up_stake(self):
-        begin('add boost 2 user')
+        begin('pick up stake')
         alice = self.register_alice_account()
         give_tokens(self, 'alice', '25.000000 PEER')
 
         self.action('addboost', {'user': 'alice', 'tokens': '20.000000 PEER'}, alice,
                     'Asking question from alice with text "Alice question"', contract='token')
-        example_boost = [{'staked_tokens': '20.000000 PEER', 'unstaked_tokens': '0.000000 PEER', 'period': 1}]
+        example_boost = [{'staked_tokens': '20.000000 PEER', 'period': 1}]
         self.assertTrue(compare(example_boost, self.table('boost', 'alice', contract='token'), ignore_excess=True))
         example_statistics = [{'sum_tokens': '20.000000 PEER', 'max_stake': '20.000000 PEER', 'user_max_stake': 'alice', 'period': 1}]
         self.assertTrue(compare(example_statistics, self.table('statboost', 'allboost', contract='token'), ignore_excess=True))
         
-        self.action('addboost', {'user': 'alice', 'tokens': '-2.000000 PEER'}, alice,
+        self.action('addboost', {'user': 'alice', 'tokens': '18.000000 PEER'}, alice,
                     'Asking question from alice with text "Alice question"', contract='token')
-        example_boost = [{'staked_tokens': '18.000000 PEER', 'unstaked_tokens': '-2.000000 PEER', 'period': 1}]
+        example_boost = [{'staked_tokens': '18.000000 PEER', 'period': 1}]
         print(self.table('boost', 'alice', contract='token'))
         self.assertTrue(compare(example_boost, self.table('boost', 'alice', contract='token'), ignore_excess=True))
         example_statistics = [{'sum_tokens': '18.000000 PEER', 'max_stake': '18.000000 PEER', 'user_max_stake': 'alice', 'period': 1}]
         self.assertTrue(compare(example_statistics, self.table('statboost', 'allboost', contract='token'), ignore_excess=True))
 
         self.wait(3)
-        self.action('addboost', {'user': 'alice', 'tokens': '-5.000000 PEER'}, alice,
+        self.action('addboost', {'user': 'alice', 'tokens': '13.000000 PEER'}, alice,
                     'Asking question from alice with text "Alice question"', contract='token')
-        example_boost = [{'staked_tokens': '18.000000 PEER', 'unstaked_tokens': '-2.000000 PEER', 'period': 1},
-                        {'staked_tokens': '13.000000 PEER', 'unstaked_tokens': '-5.000000 PEER', 'period': 2}]
+        example_boost = [{'staked_tokens': '18.000000 PEER', 'period': 1},
+                        {'staked_tokens': '13.000000 PEER', 'period': 2}]
         self.assertTrue(compare(example_boost, self.table('boost', 'alice', contract='token'), ignore_excess=True))
         example_statistics = [{'sum_tokens': '18.000000 PEER', 'max_stake': '18.000000 PEER', 'user_max_stake': 'alice', 'period': 1},
                                 {'sum_tokens': '13.000000 PEER', 'max_stake': '13.000000 PEER', 'user_max_stake': 'alice', 'period': 2}]
@@ -496,9 +496,9 @@ class TestBoost(peeranhatest.peeranhaTest):
 
         print(self.table('boost', 'alice', contract='token'))
         print(self.table('statboost', 'allboost', contract='token'))
-        example_boost_alice = [{'staked_tokens': '10.000000 PEER', 'unstaked_tokens': '0.000000 PEER', 'period': 1}]
+        example_boost_alice = [{'staked_tokens': '10.000000 PEER', 'period': 1}]
         self.assertTrue(compare(example_boost_alice, self.table('boost', 'alice', contract='token'), ignore_excess=True))
-        example_boost_carol = [{'staked_tokens': '5.000000 PEER', 'unstaked_tokens': '0.000000 PEER', 'period': 1}]
+        example_boost_carol = [{'staked_tokens': '5.000000 PEER', 'period': 1}]
         self.assertTrue(compare(example_boost_carol, self.table('boost', 'carol', contract='token'), ignore_excess=True))
 
         example_statistics = [{'sum_tokens': '15.000000 PEER', 'max_stake': '10.000000 PEER', 'user_max_stake': 'alice', 'period': 1}]
@@ -513,15 +513,15 @@ class TestBoost(peeranhatest.peeranhaTest):
         print(self.table('boost', 'alice', contract='token'))
         print(self.table('boost', 'carol', contract='token'))
         print(self.table('statboost', 'allboost', contract='token'))
-        example_boost_alice = [{'staked_tokens': '10.000000 PEER', 'unstaked_tokens': '0.000000 PEER', 'period': 1}, 
-                        {'staked_tokens': '12.000000 PEER', 'unstaked_tokens': '0.000000 PEER', 'period': 2}]
+        example_boost_alice = [{'staked_tokens': '10.000000 PEER', 'period': 1}, 
+                        {'staked_tokens': '2.000000 PEER', 'period': 2}]
         self.assertTrue(compare(example_boost_alice, self.table('boost', 'alice', contract='token'), ignore_excess=True))
-        example_boost_carol = [{'staked_tokens': '5.000000 PEER', 'unstaked_tokens': '0.000000 PEER', 'period': 1}, 
-                        {'staked_tokens': '6.000000 PEER', 'unstaked_tokens': '0.000000 PEER', 'period': 2}]
+        example_boost_carol = [{'staked_tokens': '5.000000 PEER', 'period': 1}, 
+                        {'staked_tokens': '1.000000 PEER', 'period': 2}]
         self.assertTrue(compare(example_boost_carol, self.table('boost', 'carol', contract='token'), ignore_excess=True))
 
         example_statistics = [{'sum_tokens': '15.000000 PEER', 'max_stake': '10.000000 PEER', 'user_max_stake': 'alice', 'period': 1}, 
-                            {'sum_tokens': '18.000000 PEER', 'max_stake': '12.000000 PEER', 'user_max_stake': 'alice', 'period': 2}]
+                            {'sum_tokens': '3.000000 PEER', 'max_stake': '2.000000 PEER', 'user_max_stake': 'alice', 'period': 2}]
         self.assertTrue(compare(example_statistics, self.table('statboost', 'allboost', contract='token'), ignore_excess=True))
         end()
 
@@ -544,7 +544,7 @@ class TestBoost(peeranhatest.peeranhaTest):
         end()
 
     def test_max_stake_change_user_add_stake(self):
-        begin('add boost 2 user')
+        begin('max_stake_change_user_add_stake')
         alice = self.register_alice_account()
         carol = self.register_carol_account()
         give_tokens(self, 'alice', '20.000000 PEER')
@@ -560,7 +560,7 @@ class TestBoost(peeranhatest.peeranhaTest):
         example_statistics = [{'sum_tokens': '18.000000 PEER', 'max_stake': '10.000000 PEER', 'user_max_stake': 'alice', 'period': 1}]
         self.assertTrue(compare(example_statistics, self.table('statboost', 'allboost', contract='token'), ignore_excess=True))
 
-        self.action('addboost', {'user': 'carol', 'tokens': '5.000000 PEER'}, carol,
+        self.action('addboost', {'user': 'carol', 'tokens': '13.000000 PEER'}, carol,
                     'Asking question from alice with text "Alice question"', contract='token')
         example_statistics = [{'sum_tokens': '23.000000 PEER', 'max_stake': '13.000000 PEER', 'user_max_stake': 'carol', 'period': 1}]
         print(self.table('statboost', 'allboost', contract='token'))
@@ -569,7 +569,7 @@ class TestBoost(peeranhatest.peeranhaTest):
         end()
 
     def test_max_stake_change_user_pick_up_stake(self):
-        begin('add boost 2 user')
+        begin('max_stake_change_user_pick_up_stake')
         alice = self.register_alice_account()
         carol = self.register_carol_account()
         give_tokens(self, 'alice', '20.000000 PEER')
@@ -585,7 +585,7 @@ class TestBoost(peeranhatest.peeranhaTest):
         example_statistics = [{'sum_tokens': '18.000000 PEER', 'max_stake': '10.000000 PEER', 'user_max_stake': 'alice', 'period': 1}]
         self.assertTrue(compare(example_statistics, self.table('statboost', 'allboost', contract='token'), ignore_excess=True))
 
-        self.action('addboost', {'user': 'alice', 'tokens': '-5.000000 PEER'}, alice,
+        self.action('addboost', {'user': 'alice', 'tokens': '5.000000 PEER'}, alice,
                     'Asking question from alice with text "Alice question"', contract='token')
         example_statistics = [{'sum_tokens': '13.000000 PEER', 'max_stake': '8.000000 PEER', 'user_max_stake': 'carol', 'period': 1}]
         self.assertTrue(compare(example_statistics, self.table('statboost', 'allboost', contract='token'), ignore_excess=True))

@@ -67,10 +67,11 @@ void peeranha::telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t quest
   post_answer(user, question_id, ipfs_link, buf_official_answer);
 
   user_answers_index user_answer_table(_self, user.value);
-  auto iter_user_answer = user_answer_table.begin();
+  auto iter_user_answer = user_answer_table.find(question_id);
   eosio::check(iter_user_answer != user_answer_table.end(), "Error set property answer");
+  eosio::check(iter_user_answer->question_id == question_id, std::to_string(iter_user_answer->question_id) );
 
-  auto iter_question = find_question(iter_user_answer->question_id);
+  auto iter_question = find_question(question_id);
   auto iter_account = account_table.find(user.value);
   question_table.modify(iter_question, _self,
                       [&iter_user_answer, iter_account](auto &question) {
@@ -262,6 +263,11 @@ void peeranha::dsapprvacc(eosio::name user) {
   disapprove_account(user);
 }
 
+void peeranha::dsapprvacctl(eosio::name bot_name, eosio::name user) {
+  require_auth(bot_name);
+  disapprove_account(user);
+}
+
 void peeranha::addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id) {
   require_auth(bot_name);
   add_telegram_account(user, telegram_id, false);
@@ -275,6 +281,11 @@ void peeranha::addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::str
 void peeranha::addconfig(eosio::name user, uint64_t key, uint64_t value) {
   require_auth(_self);
   add_configuration(key, value);
+}
+
+void peeranha::updtdsplname(eosio::name bot_name, uint64_t telegram_id, std::string display_name) {
+  require_auth(bot_name);
+  update_display_name(telegram_id, display_name);
 }
 
 void peeranha::intallaccach() {
@@ -462,7 +473,7 @@ EOSIO_DISPATCH(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
         reportprof)(updateacc)(givemoderflg)(editcomm)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
-        (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(addconfig)(intallaccach)
+        (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(dsapprvacctl)(updtdsplname)(intallaccach)(addconfig)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

@@ -7,8 +7,10 @@
 #include <eosio/name.hpp>
 #include <string>
 #include "account.hpp"
+#include "bounty.hpp"
 #include "peeranha_types.h"
 #include "token_period.hpp"
+#include "../peeranha.main/question_container.hpp"
 
 
 namespace eosio {
@@ -53,7 +55,7 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   [[eosio::action]] void setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp);
 
-  [[eosio::action]] void paybounty(name user, uint64_t question_id);
+  [[eosio::action]] void paybounty(name user, uint64_t question_id, uint64_t best_answer_id, bool on_delete);
 
   [[eosio::action]] void rewardrefer(name invited_user);
 
@@ -98,19 +100,6 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
     uint64_t primary_key() const { return balance.symbol.code().raw(); }
   };
 
-  const uint64_t scope_all_bounties = eosio::name("allbounties").value;
-  struct [[
-    eosio::table("bounty"), eosio::contract("peeranha.token")
-  ]] bounty {
-    name user;
-    asset bounty;
-    uint64_t question_id;
-    uint64_t timestamp;
-    uint8_t status;
-
-    uint64_t primary_key() const { return question_id; }
-  };
-
   struct [[
     eosio::table("stat"), , eosio::contract("peeranha.token")
   ]] currency_stats {
@@ -140,7 +129,6 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
   typedef eosio::multi_index<"invited"_n, invited_users> invited_users_index;
 
   typedef eosio::multi_index<"accounts"_n, account> accounts;
-  typedef eosio::multi_index<"bounty"_n, bounty> question_bounty;
   typedef eosio::multi_index<"stat"_n, currency_stats> stats;
 
   void sub_balance(name user, asset value);

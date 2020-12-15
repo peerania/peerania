@@ -359,7 +359,6 @@ class TestAchievents(peeranhatest.peeranhaTest):
                                 {'id': 41, 'count': 2},
                                 {'id': 50, 'count': 1},
                                 {'id': 60, 'count': 1}]
-        print(self.table('achieve', 'allachieve'))
         self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
         end()
 
@@ -536,38 +535,6 @@ class TestAchievents(peeranhatest.peeranhaTest):
     #     table_achieve = self.table('achieve', 'allachieve')
     #     self.assertTrue(compare(example, table_achieve, ignore_excess=True))
     #     end()
-
-    # def test_change_type_quesion(self):
-    #     begin('test change type question')
-    #     alice = self.register_alice_account()
-    #     bob = self.register_bob_account()
-    #     self._give_moderator_flag(alice, MODERATOR_FLG_ALL)
-        
-        
-    #     self.register_question_action(alice, 'ted question ' + str(68719476732))
-    #     self.action('postanswer', {'user': str(bob), 'question_id': 68719476735, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
-    #                 '{} answer to question with id={}: "{}"'.format(str(alice), 68719476735, 'Register Alice answer'))
-
-    #     print(self.table('accachieve', 'bob'))
-    #     print(self.table('account', 'allaccounts'))
-
-    #     question_id = self.table('question', 'allquestions')[0]['id']
-
-    #     self.action('chgqsttype', {
-    #                 'user': 'alice', 'question_id': question_id, 'type': 1, 'restore_rating': True}, alice, "Change question type to general")
-        
-    #     print("change type")
-    #     print(self.table('account', 'allaccounts'))
-
-    #     self.action('chgqsttype', {
-    #                 'user': 'alice', 'question_id': question_id, 'type': 0, 'restore_rating': True}, alice, "Change question type to general")
-        
-    #     print("change type")
-    #     print(self.table('account', 'allaccounts'))
-        # example = [{'id': Achievents.questions_asked.value, 'count': 2}, {'id': Achievents.first_10k_registered.value, 'count': 4}]
-        # table_achieve = self.table('achieve', 'allachieve')
-        # self.assertTrue(compare(example, table_achieve, ignore_excess=True))
-        # end()
 
     def _give_moderator_flag(self, acc, flg):
         admin = self.get_contract_deployer(self.get_default_contract())

@@ -178,10 +178,16 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     ACTION addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar);
 
-    ACTION addconfig(eosio::name user, uint64_t key, uint64_t value);
-
     ACTION updtdsplname(eosio::name bot_name, uint64_t telegram_id, std::string display_name);
 
+    ACTION addconfig(uint64_t key, uint64_t value);
+
+    ACTION addusrconfig(uint64_t key, eosio::name user);
+
+    ACTION updateconfig(uint64_t key, uint64_t value);
+
+    ACTION upuserconfig(uint64_t key, eosio::name user);
+    
     //init achievements first 10k registered users
     ACTION intallaccach();
 

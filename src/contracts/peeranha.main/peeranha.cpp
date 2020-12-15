@@ -265,27 +265,46 @@ void peeranha::dsapprvacc(eosio::name user) {
 
 void peeranha::dsapprvacctl(eosio::name bot_name, eosio::name user) {
   require_auth(bot_name);
+  eosio::check(get_configuration(CONFIGURATION_KEY_TELEGRAM) == bot_name.value, "Wrong bot account");
   disapprove_account(user);
 }
 
 void peeranha::addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id) {
   require_auth(bot_name);
+  eosio::check(get_configuration(CONFIGURATION_KEY_TELEGRAM) == bot_name.value, "Wrong bot account");
   add_telegram_account(user, telegram_id, false);
 }
 
 void peeranha::addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar) {
   require_auth(bot_name);
+  eosio::check(get_configuration(CONFIGURATION_KEY_TELEGRAM) == bot_name.value, "Wrong bot account");
   add_empty_telegram_account(telegram_id, display_name, ipfs_profile, ipfs_avatar);
-}
-
-void peeranha::addconfig(eosio::name user, uint64_t key, uint64_t value) {
-  require_auth(_self);
-  add_configuration(key, value);
 }
 
 void peeranha::updtdsplname(eosio::name bot_name, uint64_t telegram_id, std::string display_name) {
   require_auth(bot_name);
+  eosio::check(get_configuration(CONFIGURATION_KEY_TELEGRAM) == bot_name.value, "Wrong bot account");
   update_display_name(telegram_id, display_name);
+}
+
+void peeranha::addconfig(uint64_t key, uint64_t value) {
+  require_auth(_self);
+  add_configuration(key, value);
+}
+
+void peeranha::addusrconfig(uint64_t key, eosio::name user) {
+  require_auth(_self);
+  add_configuration(key, user.value);
+}
+
+void peeranha::updateconfig(uint64_t key, uint64_t value) {
+  require_auth(_self);
+  update_configuration(key, value);
+}
+
+void peeranha::upuserconfig(uint64_t key, eosio::name user) {
+  require_auth(_self);
+  update_configuration(key, user.value);
 }
 
 void peeranha::intallaccach() {
@@ -436,6 +455,13 @@ void peeranha::resettables() {
   while (iter_telegram_account != telegram_account_table.end()) {
     iter_telegram_account = telegram_account_table.erase(iter_telegram_account);
   }
+
+  // clean table configuration
+  configuration_index configuration_table(_self, scope_all_config);
+  auto iter_config = configuration_table.begin();
+  while (iter_config != configuration_table.end()) {
+    iter_config = configuration_table.erase(iter_config);
+  }
 #if STAGE == 2
   // clean constants
   constants_index all_constants_table(_self, scope_all_constants);
@@ -473,7 +499,8 @@ EOSIO_DISPATCH(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
         reportprof)(updateacc)(givemoderflg)(editcomm)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
-        (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(dsapprvacctl)(updtdsplname)(intallaccach)(addconfig)
+        (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(dsapprvacctl)(updtdsplname)(intallaccach)
+        (addconfig)(addusrconfig)(updateconfig)(upuserconfig)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

@@ -11,6 +11,7 @@
 #include "property.hpp"
 #include "question_container.hpp"
 #include "utils.hpp"
+#include "bounty.hpp"
 #include "property_community.hpp"
 #include "top_question.hpp"
 #include "telegram_account.hpp"
@@ -23,7 +24,7 @@
 class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
  public:
   const int version = 1;
-
+  eosio::name peeranha_token = eosio::name("peeranhatken");
   peeranha(eosio::name receiver, eosio::name code,
            eosio::datastream<const char *> ds)
       : contract(receiver, code, ds),

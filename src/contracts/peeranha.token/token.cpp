@@ -272,7 +272,7 @@ void token::setbounty(name user, asset bounty, uint64_t question_id, uint64_t ti
     });
 }
 
-void token::paybounty(name user, uint64_t question_id, uint64_t best_answer_id, bool on_delete) {
+void token::paybounty(name user, uint64_t question_id, bool on_delete) {
     require_auth(user);
     question_bounty bounty_table(_self, scope_all_bounties);
     auto iter_bounty = bounty_table.find(question_id);
@@ -282,7 +282,7 @@ void token::paybounty(name user, uint64_t question_id, uint64_t best_answer_id, 
     eosio::check(iter_question != question_table.end(), "Question not found!");
 
     auto iter_answer = binary_find(iter_question->answers.begin(),
-                                   iter_question->answers.end(), best_answer_id);
+                                   iter_question->answers.end(), iter_question->correct_answer_id);
 
     if (on_delete == true && iter_question->answers.empty() == true) {
         eosio::check(iter_question->user == user, "You can't get this bounty");

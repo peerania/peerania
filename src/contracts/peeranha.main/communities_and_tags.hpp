@@ -15,6 +15,9 @@
 #define MIN_SUGGESTED_TAG 5
 #define MAX_SUGGESTED_TAG 25
 
+#define ID_QUESTIONS_TYPE 28
+#define ANY_QUESTIONS_TYPE 2
+
 struct suggest_tag {
   std::string name;
   IpfsHash ipfs_description;
@@ -60,8 +63,6 @@ struct [[eosio::table("communities"), eosio::contract("peeranha.main")]] communi
   std::string name;
   IpfsHash ipfs_description;
   time creation_time;
-  std::vector<str_key_value> string_properties;
-  std::vector<int_key_value> integer_properties;
   uint32_t questions_asked = 0;
   uint32_t answers_given = 0;
   uint32_t correct_answers = 0;
@@ -69,6 +70,19 @@ struct [[eosio::table("communities"), eosio::contract("peeranha.main")]] communi
   uint64_t primary_key() const { return id; }
 };
 typedef eosio::multi_index<"communities"_n, communities> community_table_index;
+
+struct [[eosio::table("commbuf"), eosio::contract("peeranha.main")]] commbuf {
+  uint16_t id;
+  std::string name;
+  IpfsHash ipfs_description;
+  time creation_time;
+  uint32_t questions_asked = 0;
+  uint32_t answers_given = 0;
+  uint32_t correct_answers = 0;
+  uint32_t users_subscribed = 0;
+  uint64_t primary_key() const { return id; }
+};
+typedef eosio::multi_index<"commbuf"_n, commbuf> commbuf_table_index;
 
 struct [[eosio::table("commbuf"), eosio::contract("peeranha.main")]] commbuf {
   uint16_t id;

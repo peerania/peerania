@@ -12,7 +12,6 @@ MODERATOR_FLG_CREATE_COMMUNITY = 1 << 3
 MODERATOR_FLG_CREATE_TAG = 1 << 4
 MODERATOR_FLG_ALL = 31
 
-
 class AccountModerationTests(peeranhatest.peeranhaTest):
     def test_set_moderator_flag_non_deployer_failed(self):
         begin('Not a deploer trying to give moderator rights', True)
@@ -61,7 +60,7 @@ class AccountModerationTests(peeranhatest.peeranhaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'undefined', 'ipfs_link': 'undefined',  'community_id': 1, 'tags': [1], 'type': 0}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'undefined', 'ipfs_link': 'undefined',  'community_id': 1, 'tags': [1], 'type': 1}, alice,
                     'Register question from alice')
         AQ_id = self.table('question', 'allquestions')[0]['id']
         self.action('postanswer', {'user': 'bob', 'question_id': AQ_id, 'ipfs_link': 'undefined', 'official_answer': False},
@@ -92,6 +91,7 @@ class AccountModerationTests(peeranhatest.peeranhaTest):
         new_rating = base_rating
         new_rating['alice_rating'] += economy['QUESTION_DELETED_REWARD']
         new_rating['bob_rating'] += economy['ANSWER_DELETED_REWARD'] - economy['ANSWER_UPVOTED_REWARD'] - economy['ANSWER_UPVOTED_REWARD'] #firt answer - answer withing 15 minutes
+        print(new_rating['bob_rating'])
         new_rating['carol_rating'] += economy['COMMENT_DELETED_REWARD']
         setvar(account_e, new_rating)
         print(account_e)

@@ -13,9 +13,24 @@ def setvar(source, var, except_var=None):
         for item in source:
             setvar(item, var, except_var)
         
+# ['#ignoreorder', 
+# {'user': 'alice', 'rating': 198}, 
+# {'user': 'bob', 'rating': 188}, 
+# {'user': 'carol', 'rating': 199}, 
+# {'user': 'ted', 'rating': 200}]
+
+# [{'user': 'alice', 'rating': 198}, 
+# {'user': 'bob', 'rating': 198}, 
+# {'user': 'carol','rating': 199,}, 
+# {'user': 'ted',  'rating': 200}]
+
 
 
 def compare(expected, source, mp = {}, ignore_excess = False):
+    # print(expected)
+    # print("\n")
+    # print(source)
+    # print("+++++++++++++++++++++++")
     if isinstance(source, dict) and isinstance(expected, dict):
         if not ignore_excess and (len(expected) != len (source)):
             return False

@@ -17,7 +17,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         pupularity1 = [1, 2, 2, 1, 1, 0]
         for i in range(6):
             self.assertTrue(t[i]['questions_asked'] == pupularity1[i])
-        self.action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 4, 6], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 4, 6], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                     'Alice modify own question')
         e[1]['tags'] = [1, 4, 6]
         self.assertTrue(compare(e, self.table(
@@ -26,7 +26,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         t = self.table('tags', get_tag_scope(c[0]['id']))
         for i in range(6):
             self.assertTrue(t[i]['questions_asked'] == pupularity1[i])
-        self.action('modquestion', {'user': 'bob', 'question_id': var['bq'], 'community_id': 2, 'tags': [1, 3], 'title': 'Title bob question', 'ipfs_link': 'BQ'}, bob,
+        self.action('modquestion', {'user': 'bob', 'question_id': var['bq'], 'community_id': 2, 'tags': [1, 3], 'title': 'Title bob question', 'ipfs_link': 'BQ', 'type': 0}, bob,
                     'Bob modify own question')
         c = self.table('communities', 'allcomm')
         e[2]['community_id'] = c[1]['id']
@@ -82,7 +82,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         var = {}
         self.assertTrue(compare([{'id': '#var aq',
                                   'user': 'alice'}], self.table('question', 'allquestions'), var, True))
-        self.failed_action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 3, 2, 1], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.failed_action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 3, 2, 1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                            'Alice attempt to modify own question - set duplicate tag [1, 3, 2, 1]', 'assert')
         # self.failed_action('postquestion', {'user': 'alice', 'question_id': var['aq'],  'community_id': 1, 'tags': [], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
         #                   'Alice attempt to modify own question - set no tags', 'assert')
@@ -95,12 +95,13 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
                            'Alice attempt ask question with non-existing tag [1, 9] - 9 non-exist', 'assert')
         self.failed_action('postquestion', {'user': 'alice', 'community_id': 5, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                            'Alice attempt to ask question with non-existing community - 5', 'assert')
+        self.table('question', 'allquestions')
         self.action('postquestion', {'user': 'alice', 'community_id': 1, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                     'Alice ask question')
         var = {}
         self.assertTrue(compare([{'id': '#var aq',
                                   'user': 'alice'}], self.table('question', 'allquestions'), var, True))
-        self.failed_action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 9], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
+        self.failed_action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 9], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                            'Alice attempt to modify own question - set non-existing tag [1, 9] - 9 non-exist', 'assert')
         self.failed_action('postquestion', {'user': 'alice', 'question_id': var['aq'],  'community_id': 5, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                            'Alice attempt to modify own question - set non-existing community - 5', 'assert')
@@ -109,15 +110,15 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
     def test_create_tag_or_community_str_assert(self):
         begin('Test input string parameters limits')
         alice = self.register_alice_account(10000, 200)
-        self.failed_action('crcommunity', {'user': 'alice', 'name': ''.join(['a' for i in range(51)]), 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
+        self.failed_action('crcommunity', {'user': 'alice', 'name': ''.join(['a' for i in range(51)]), 'type': 2, 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
                            'Alice attempt to create community winth name length > 25', 'assert')
         self.failed_action('crtag', {'user': 'alice', 'community_id': 1, 'name': ''.join(['a' for i in range(31)]), 'ipfs_description': 'Alice tag description'}, alice,
                            'Alice attempt to create tag winth name length > 30', 'assert')
-        self.failed_action('crcommunity', {'user': 'alice', 'name': 'Hi? mark', 'ipfs_description': ''.join(['a' for i in range(65)]), 'suggested_tags': self.get_stub_suggested_tags()}, alice,
+        self.failed_action('crcommunity', {'user': 'alice', 'name': 'Hi? mark', 'type': 2, 'ipfs_description': ''.join(['a' for i in range(65)]), 'suggested_tags': self.get_stub_suggested_tags()}, alice,
                            'Alice attempt to create community with invalid IPFS', 'assert')
         self.failed_action('crtag', {'user': 'alice', 'community_id': 1, 'name': 'Hi? mark', 'ipfs_description': ''.join(['a' for i in range(65)])}, alice,
                            'Alice attempt to create tag with invalid IPFS', 'assert')
-        self.action('crcommunity', {'user': 'alice', 'name': ''.join(['a' for i in range(50)]), 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
+        self.action('crcommunity', {'user': 'alice', 'name': ''.join(['a' for i in range(50)]), 'type': 2, 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
                     'Alice create community winth name length 50')
         self.action('crtag', {'user': 'alice', 'community_id': 1, 'name': ''.join(['a' for i in range(30)]), 'ipfs_description': 'Alice tag description'}, alice,
                     'Alice create tag winth name length 30')
@@ -127,7 +128,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         begin('Test create community and tag')
         alice = self.register_alice_account(10000, 200)
         bob = self.register_bob_account(10000, 200)
-        self.action('crcommunity', {'user': alice, 'name': 'alice community',
+        self.action('crcommunity', {'user': alice, 'name': 'alice community', 'type': 2,
                                     'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags() }, alice, 'Alice create community')
 
         self.action('crtag', {'user': bob, 'name': 'bob tag',  'community_id': 1,
@@ -162,7 +163,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         alice = self.register_alice_account(10000, 200)
         bob = self.register_bob_account(1000, 100)
         carol = self.register_carol_account(10000)
-        self.action('crcommunity', {'user': alice, 'name': 'alice community',
+        self.action('crcommunity', {'user': alice, 'name': 'alice community', 'type': 2,
                                     'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community')
         self.action('crtag', {'user': bob, 'name': 'bob tag',  'community_id': 1,
                               'ipfs_description': 'BCM'}, bob, 'Bob create ')
@@ -197,7 +198,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
             10000, defs['ENERGY_CREATE_COMMUNITY'] - 1)
         dan = self.register_dan_account(
             10000, defs['ENERGY_CREATE_TAG'] - 1)
-        self.action('crcommunity', {'user': 'alice', 'name': 'ACM', 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
+        self.action('crcommunity', {'user': 'alice', 'name': 'ACM', 'type': 2, 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
                     'Alice create community')
         self.action('crtag', {'user': 'bob', 'community_id': 1, 'name': 'BT', 'ipfs_description': 'Bob tag description'}, bob,
                     'Bob create tag')
@@ -213,7 +214,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
             'account', 'allaccounts'), var, True))
         self.assertTrue(var['alice_energy'] == 0)
         self.assertTrue(var['bob_energy'] == 0)
-        self.failed_action('crcommunity', {'user': 'carol', 'name': 'CCM', 'ipfs_description': 'Carol community description', 'suggested_tags': self.get_stub_suggested_tags()}, carol,
+        self.failed_action('crcommunity', {'user': 'carol', 'name': 'CCM', 'type': 2, 'ipfs_description': 'Carol community description', 'suggested_tags': self.get_stub_suggested_tags()}, carol,
                            'Carol attempt to create community', 'assert')
         self.failed_action('crtag', {'user': 'dan', 'community_id': 1, 'name': 'DT', 'ipfs_description': 'Dan tag description'}, dan,
                            'Dan attempt to create tag', 'assert')
@@ -223,7 +224,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         begin('Test delete own upvote or downvote')
         alice = self.register_alice_account(10000, 200)
         bob = self.register_bob_account(10000, 200)
-        self.action('crcommunity', {'user': 'alice', 'name': 'ACM', 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
+        self.action('crcommunity', {'user': 'alice', 'name': 'ACM', 'type': 2, 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
                     'Alice create community')
         self.action('crtag', {'user': 'alice', 'community_id': 1, 'name': 'AT', 'ipfs_description': 'Alice tag description'}, alice,
                     'Alice create tag')
@@ -269,7 +270,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
     def test_upvote_own_community_or_tag(self):
         begin('Upvote own community or tag', True)
         alice = self.register_alice_account(10000, 200)
-        self.action('crcommunity', {'user': alice, 'name': 'alice community',
+        self.action('crcommunity', {'user': alice, 'name': 'alice community', 'type': 2,
                               'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community')
         self.action('crtag', {'user': alice, 'name': 'alice tag',  'community_id': 1,
                                     'ipfs_description': 'ACM'}, alice, 'Alice create tag')
@@ -286,7 +287,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         alice = self.register_alice_account(10000, 200)
         bob = self.register_bob_account(10000, 200)
         carol =  self.register_carol_account()
-        self.action('crcommunity', {'user': alice, 'name': 'alice community',
+        self.action('crcommunity', {'user': alice, 'name': 'alice community', 'type': 2,
                               'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community')
         self.action('crtag', {'user': bob, 'name': 'bob tag',  'community_id': 1,
                                     'ipfs_description': 'BCM'}, bob, 'Bob create ')
@@ -312,7 +313,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         carol =  self.register_carol_account()
         dan = self.register_dan_account()
         
-        self.action('crcommunity', {'user': alice, 'name': 'alice community',
+        self.action('crcommunity', {'user': alice, 'name': 'alice community', 'type': 2,
                               'ipfs_description': 'AC', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community')
         self.action('crtag', {'user': bob, 'name': 'bob tag',  'community_id': 1,
                                     'ipfs_description': 'BCM'}, bob, 'Bob create ')
@@ -340,7 +341,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         alice = self.register_alice_account(10000, 200)
         bob = self.register_bob_account(10000)
         carol = self.register_carol_account(10000)
-        self.action('crcommunity', {'user': 'alice', 'name': 'ACM', 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
+        self.action('crcommunity', {'user': 'alice', 'name': 'ACM', 'type': 2, 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
                     'Alice create community')
         self.action('crtag', {'user': 'alice', 'community_id': 1, 'name': 'AT', 'ipfs_description': 'Alice tag description'}, alice,
                     'Alice create tag')
@@ -392,11 +393,11 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         alice = self.register_alice_account(10000, 200)
         bob = self.register_bob_account(10000, 200)
         carol = self.register_carol_account(10000, 200)
-        self.failed_action('crcommunity', {'user': 'alice', 'name': 'ACM', 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, bob,
+        self.failed_action('crcommunity', {'user': 'alice', 'name': 'ACM', 'type': 2, 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, bob,
                            'Alice attempt to create community with bob auth', 'auth')
         self.failed_action('crtag', {'user': 'alice', 'community_id': 1, 'name': 'AT', 'ipfs_description': 'Alice tag description'}, bob,
                            'Alice attempt to create tag with bob auth', 'auth')
-        self.action('crcommunity', {'user': 'alice', 'name': 'ACM', 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
+        self.action('crcommunity', {'user': 'alice', 'name': 'ACM', 'type': 2, 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags()}, alice,
                     'Alice create community')
         self.action('crtag', {'user': 'alice', 'community_id': 1, 'name': 'AT', 'ipfs_description': 'Alice tag description'}, alice,
                     'Alice create tag')
@@ -415,9 +416,9 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
     def test_create_community_with_invalid_tag_count(self):
         begin('Attempt to create community with invalid tag count', True)
         alice = self.register_alice_account(10000, 10)
-        self.failed_action('crcommunity', {'user': 'alice', 'name': 'ACM', 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags(4)}, alice,
+        self.failed_action('crcommunity', {'user': 'alice', 'name': 'ACM', 'type': 2, 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags(4)}, alice,
                            'Alice attempt to create community with bob auth', 'assert')
-        self.failed_action('crcommunity', {'user': 'alice', 'name': 'ACM', 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags(26)}, alice,
+        self.failed_action('crcommunity', {'user': 'alice', 'name': 'ACM', 'type': 2, 'ipfs_description': 'Alice community description', 'suggested_tags': self.get_stub_suggested_tags(26)}, alice,
                            'Alice attempt to create community with bob auth', 'assert')
         end()
 

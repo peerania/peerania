@@ -13,6 +13,9 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
   assert_ipfs(ipfs_link);
   assert_title(title);
   assert_question_type(type);
+  assert_community_exist(community_id);
+  assert_community_questions_type(community_id, type);
+
   auto iter_account = find_account(user);
   update_rating(iter_account, POST_QUESTION_REWARD, [community_id](auto &account) {
     account.reduce_energy(ENERGY_POST_QUESTION, community_id);
@@ -295,9 +298,13 @@ void peeranha::modify_question(eosio::name user, uint64_t question_id,
                                uint16_t community_id,
                                const std::vector<uint32_t> &tags,
                                const std::string &title,
-                               const IpfsHash &ipfs_link) {
+                               const IpfsHash &ipfs_link,
+                               const uint8_t type) {
   assert_ipfs(ipfs_link);
   assert_title(title);
+  assert_question_type(type);
+  assert_community_exist(community_id);
+  assert_community_questions_type(community_id, type);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
   assert_allowed(*iter_account, iter_question->user, Action::MODIFY_QUESTION, community_id);
@@ -311,12 +318,14 @@ void peeranha::modify_question(eosio::name user, uint64_t question_id,
   update_tags_statistics(community_id, tags, 1);
   question_table.modify(
       iter_question, _self,
-      [&ipfs_link, &title, community_id, &tags](auto &question) {
+      [&ipfs_link, &title, community_id, &tags, type](auto &question) {
         question.ipfs_link = ipfs_link;
         question.title = title;
         question.community_id = community_id;
         question.tags = tags;
         set_property(question.properties, PROPERTY_LAST_MODIFIED, now());
+        set_property_d(question.properties, PROPERTY_QUESTION_TYPE, (int)type,
+                   QUESTION_TYPE_EXPERT);
       });
   update_rating(iter_account, 0, [](auto &account) {
     account.reduce_energy(ENERGY_MODIFY_QUESTION);

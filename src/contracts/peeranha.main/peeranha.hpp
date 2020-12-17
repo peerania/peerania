@@ -171,13 +171,10 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     ACTION dsapprvacc(eosio::name user);
 
-    ACTION dsapprvacctl(eosio::name bot_name, eosio::name user);
-
     ACTION addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id);
 
     ACTION addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar);
 
-    ACTION updtdsplname(eosio::name bot_name, uint64_t telegram_id, std::string display_name);
     //init achievements first 10k registered users
     ACTION intallaccach();
 
@@ -329,8 +326,6 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     void add_empty_telegram_account(uint64_t telegram_id, std::string display_name, IpfsHash ipfs_profile, IpfsHash ipfs_avatar);
 
     eosio::name generate_temp_telegram_account();
-
-    void update_display_name(uint64_t telegram_id, std::string display_name);
 #ifdef SUPERFLUOUS_INDEX
     void remove_user_question(eosio::name user, uint64_t question_id);
 

@@ -206,7 +206,7 @@ class TestFix(peeranhatest.peeranhaTest):
                     ted, 'Bob vote for Alice question deletion')
 
         new_alice_rating = self.table('account', 'allaccounts')[0]['rating']
-        alice_rating -= -economy['QUESTION_DELETED_REWARD']
+        alice_rating -= (QUESTION_DELETED_REWARD + economy['ANSWER_UPVOTED_REWARD'] + economy['ANSWER_UPVOTED_REWARD'])
         self.assertTrue(compare(new_alice_rating, alice_rating, ignore_excess=True))
         end()
     

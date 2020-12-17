@@ -173,6 +173,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         'question_id': question_id
         }, bob, 'add a question from another community')
         top = self.table('topquestion', 'alltopquest')
+        print(top)
         example = [{'community_id': 1, 'top_questions': ['68719476735']}]
         check_table(self, example)
         

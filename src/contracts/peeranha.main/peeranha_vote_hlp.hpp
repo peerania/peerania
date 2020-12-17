@@ -116,7 +116,7 @@ template <typename T>
 bool set_report_points_and_history(T &item, const account &user,
                                     uint16_t limit, uint16_t community_id) {
   // Do not allow vote for deletion your own item
-  assert_allowed(user, item.user, Action::REPORT_FORUM_ITEM);
+  assert_allowed(user, item.user, Action::REPORT_FORUM_ITEM, community_id);
   bool is_new;
   auto itr_history = get_history_item_iter(item.history, user.user, is_new);
   if (is_new) {

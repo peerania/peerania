@@ -92,7 +92,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     // Modify question
     ACTION modquestion(eosio::name user, uint64_t question_id,
                        uint16_t community_id, std::vector<uint32_t> tags,
-                       std::string title, IpfsHash ipfs_link, uint8_t type);
+                       std::string title, IpfsHash ipfs_link);
 
     // Modify answer
     ACTION modanswer(eosio::name user, uint64_t question_id, uint16_t answer_id,
@@ -124,7 +124,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     // Tags and communities
     ACTION crcommunity(eosio::name user, std::string name,
                        IpfsHash ipfs_description,
-                       std::vector<suggest_tag> suggested_tags, uint16_t type);
+                       std::vector<suggest_tag> suggested_tags);
 
     ACTION crtag(eosio::name user, uint16_t community_id, std::string name,
                  IpfsHash ipfs_description);
@@ -153,7 +153,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     // Action give community moderator flags
     ACTION givecommuflg(eosio::name user, int flags, uint16_t community_id);
     
-    ACTION editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_description, uint16_t type);
+    ACTION editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_description);
 
     ACTION chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating);
 
@@ -266,8 +266,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     void modify_question(eosio::name user, uint64_t question_id,
                          uint16_t community_id,
                          const std::vector<uint32_t> &tags,
-                         const std::string &title, 
-                         const IpfsHash &ipfs_link, const uint8_t type);
+                         const std::string &title, const IpfsHash &ipfs_link);
 
     void modify_answer(eosio::name user, uint64_t question_id,
                        uint16_t answer_id, const IpfsHash &ipfs_link, bool official_answer);
@@ -276,7 +275,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                         uint16_t answer_id, uint16_t comment_id,
                         const IpfsHash &ipfs_link);
 
-    void create_community(eosio::name user, const std::string &name, const uint16_t &type,
+    void create_community(eosio::name user, const std::string &name,
                           const IpfsHash &ipfs_description,
                           const std::vector<suggest_tag> &suggested_tags);
 
@@ -324,8 +323,6 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void assert_community_exist(uint16_t community_id);
 
-    void assert_community_questions_type(const uint16_t community_id, const uint8_t type);
-
     void add_empty_telegram_account(uint64_t telegram_id, std::string display_name, IpfsHash ipfs_profile, IpfsHash ipfs_avatar);
 
     eosio::name generate_temp_telegram_account();
@@ -346,7 +343,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     void give_moderator_flag(eosio::name user, int flags, uint16_t community_id);
 
-    void edit_community(eosio::name user, uint16_t community_id, const std::string &name, const IpfsHash &ipfs_description, const uint16_t &type);
+    void edit_community(eosio::name user, uint16_t community_id, const std::string &name, const IpfsHash &ipfs_description);
 
     void change_question_type(eosio::name user, uint64_t question_id, int type, bool restore_rating);
 

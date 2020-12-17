@@ -66,10 +66,11 @@ void peeranha::telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t quest
   post_answer(user, question_id, ipfs_link, buf_official_answer);
 
   user_answers_index user_answer_table(_self, user.value);
-  auto iter_user_answer = user_answer_table.begin();
+  auto iter_user_answer = user_answer_table.find(question_id);
   eosio::check(iter_user_answer != user_answer_table.end(), "Error set property answer");
+  eosio::check(iter_user_answer->question_id == question_id, std::to_string(iter_user_answer->question_id) );
 
-  auto iter_question = find_question(iter_user_answer->question_id);
+  auto iter_question = find_question(question_id);
   auto iter_account = account_table.find(user.value);
   question_table.modify(iter_question, _self,
                       [&iter_user_answer, iter_account](auto &question) {
@@ -261,6 +262,11 @@ void peeranha::dsapprvacc(eosio::name user) {
   disapprove_account(user);
 }
 
+void peeranha::dsapprvacctl(eosio::name bot_name, eosio::name user) {
+  require_auth(bot_name);
+  disapprove_account(user);
+}
+
 void peeranha::addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id) {
   require_auth(bot_name);
   add_telegram_account(user, telegram_id, false);
@@ -271,9 +277,35 @@ void peeranha::addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::str
   add_empty_telegram_account(telegram_id, display_name, ipfs_profile, ipfs_avatar);
 }
 
+void peeranha::updtdsplname(eosio::name bot_name, uint64_t telegram_id, std::string display_name) {
+  require_auth(bot_name);
+  update_display_name(telegram_id, display_name);
+}
+
 void peeranha::intallaccach() {
   require_auth(_self);
   init_users_achievements();
+}
+
+void peeranha::movecomscnd() {
+  require_auth(_self);
+  commbuf_table_index commbuf_table (_self, scope_all_communities);
+  community_table_index community_table (_self, scope_all_communities);
+  auto iter_communities = commbuf_table.begin();
+  while (iter_communities != commbuf_table.end()) {
+    community_table.emplace(
+          _self, [&iter_communities](auto &comm) {
+            comm.id = iter_communities->id;
+            comm.name = iter_communities->name;
+            comm.ipfs_description = iter_communities->ipfs_description;
+            comm.creation_time = iter_communities->creation_time;
+            comm.questions_asked = iter_communities->questions_asked;
+            comm.answers_given = iter_communities->answers_given;
+            comm.correct_answers = iter_communities->correct_answers;
+            comm.users_subscribed = iter_communities->users_subscribed;
+          });
+    iter_communities = commbuf_table.erase(iter_communities);
+  }
 }
 
 #ifdef SUPERFLUOUS_INDEX

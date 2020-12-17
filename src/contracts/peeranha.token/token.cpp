@@ -111,7 +111,7 @@ void token::sub_balance(name user, asset value) {
 
   const auto &from =
       from_acnts.get(value.symbol.code().raw(), "no balance object found");
-  eosio::check(from.balance.amount >= value.amount + getfrezboost(user), "overdrawn balance");
+  eosio::check(from.balance.amount >= value.amount + getstakedbalance(user), "overdrawn balance");
 
   from_acnts.modify(from, user, [&](auto &a) { a.balance -= value; });
 }
@@ -164,15 +164,16 @@ asset token::create_reward_pool(uint16_t period, int total_rating) {
     inflation_reward_pool *= POOL_REDUSE_COEFFICIENT;
   }
   int64_t reward_pool = int64_to_peer(total_rating * RATING_TOKEN_COEFFICIENT);
-  if (reward_pool > inflation_reward_pool) {
-    reward_pool = inflation_reward_pool;
+  if (reward_pool > inflation_reward_pool * 1000) {
+    reward_pool = inflation_reward_pool * 1000;
   }
   const int64_t remaining_user_supply =
       st->user_max_supply.amount - st->user_supply.amount;
-  if (reward_pool > remaining_user_supply) {
-    reward_pool = remaining_user_supply;
+  if (reward_pool > remaining_user_supply * 1000) {
+    reward_pool = remaining_user_supply * 1000;
   }
   auto quantity = asset(reward_pool, sym);
+  quantity.amount /= 1000;
   statstable.modify(st, _self, [&quantity](auto &s) {
     s.supply += quantity;
     s.user_supply += quantity;
@@ -195,13 +196,13 @@ void token::pickupreward(name user, const uint16_t period) {
   // it means user isn't pickup reward yet
   eosio::check(period_reward_table.find(period) == period_reward_table.end(),
                "You already pick up this reward");
-  total_rating_index total_rating_table(peeranha_main, scope_all_periods); //////// totalrating
+  total_rating_index total_rating_table(peeranha_main, scope_all_periods);
   auto iter_total_rating = total_rating_table.find(period);
   int total_rating_to_reward = iter_total_rating == total_rating_table.end()
                                    ? 0
-                                   : iter_total_rating->total_rating_to_reward / 1000;
+                                   : iter_total_rating->total_rating_to_reward;
 
-  total_reward_index total_reward_table(_self, scope_all_periods); ////////// totalreward сколько выдали 
+  total_reward_index total_reward_table(_self, scope_all_periods);
   auto iter_total_reward = total_reward_table.find(period);
   // Create reward pool
   if (iter_total_reward == total_reward_table.end()) {
@@ -212,14 +213,14 @@ void token::pickupreward(name user, const uint16_t period) {
           total_reward_item.total_reward = quantity;
         });
   }
-  period_rating_index period_rating_table(peeranha_main, user.value); /////// periodrating
+  period_rating_index period_rating_table(peeranha_main, user.value);
   auto period_rating = period_rating_table.find(period);
   eosio::check(period_rating != period_rating_table.end(),
                "No reward for you in this period");
   asset user_reward =
       get_user_reward(iter_total_reward->total_reward,
                       period_rating->rating_to_award, total_rating_to_reward);
-  user_reward.amount *= getboost(user, period) / 1000;
+  user_reward.amount *= getboost(user, period - 1);
   period_reward_table.emplace(user, [user_reward, period](auto &reward) {
     reward.period = period;
     reward.reward = user_reward;
@@ -267,7 +268,7 @@ void token::addboost(name user, asset tokens) {
   const auto &from =
       from_acnts.get(tokens.symbol.code().raw(), "no balance object found");
   eosio::check(from.balance.amount >= tokens.amount, "overdrawn balance");
-  eosio::check(tokens.amount > 0, "boost must be positive ");
+  eosio::check(tokens.amount >= 0, "boost must be positive ");
 
   asset change_boost = tokens;
   
@@ -276,9 +277,9 @@ void token::addboost(name user, asset tokens) {
   auto iter_boost = boost_table.find(next_period);
 
   if (iter_boost == boost_table.end()) {
-    change_boost = is_first_boost_user                            ////correct
-                                  ? tokens
-                                  : tokens - iter_last_boost->staked_tokens;
+    if (!is_first_boost_user)
+      change_boost = tokens - iter_last_boost->staked_tokens;
+      
     auto iter_boost = boost_table.emplace(
       _self, [next_period, tokens](auto &boost) {
         boost.staked_tokens = tokens;
@@ -361,7 +362,7 @@ void token::get_value_statistic_boost(asset &tokens, asset &max_stake, name &use
   }
 }
 
-int64_t token::getfrezboost(name user) {
+int64_t token::getstakedbalance(name user) {
   boost_index boost_table(_self, user.value);
 
   if (boost_table.begin() == boost_table.end()) {

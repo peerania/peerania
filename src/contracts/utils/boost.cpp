@@ -23,6 +23,10 @@ int64_t getboost(eosio::name user, uint16_t period = get_period(now())) {
     if (iter_last_statistics == statistics_boost_table.rend()) return 1000;
   }
 
+  if (iter_last_boost->staked_tokens.amount == 0 || iter_last_statistics->max_stake.amount == 0) {
+    return 1000;
+  }
+
   uint64_t percent = iter_last_boost->staked_tokens.amount * 3000 / iter_last_statistics->max_stake.amount + 1000;
 
   return percent;

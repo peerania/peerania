@@ -199,7 +199,7 @@ void peeranha::update_rating_base(
       rating_to_award_change = -rating_to_award;
 
     auto iter_total_rating_change = total_rating_table.find(current_period);
-    int64_t new_rating_to_award_change = rating_to_award_change * getboost(iter_account->user ,current_period);
+    int64_t new_rating_to_award_change = rating_to_award_change * getboost(iter_account->user, current_period - 1);
     if (iter_total_rating_change == total_rating_table.end()) {
       total_rating_table.emplace(
           _self, [current_period, new_rating_to_award_change](auto &total_rating) {

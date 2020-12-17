@@ -283,14 +283,14 @@ void token::paybounty(name user, uint64_t question_id, bool on_delete) {
     auto iter_question = question_table.find(question_id);
     eosio::check(iter_question != question_table.end(), "Question not found!");
 
-    auto iter_answer = binary_find(iter_question->answers.begin(),
-                                   iter_question->answers.end(), iter_question->correct_answer_id);
-
     if (on_delete && iter_question->answers.empty()) {
         eosio::check(iter_question->user == user, "You can't get this bounty");
         add_balance(user, iter_bounty->amount, user);
         bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
     } else if (on_delete == false) {
+        eosio::check(iter_question->correct_answer_id != 0, "Correct answer is not chosen!");
+        auto iter_answer = binary_find(iter_question->answers.begin(),
+                                           iter_question->answers.end(), iter_question->correct_answer_id);
         eosio::check(iter_answer->user == user, "You can't get this bounty");
         eosio::check(iter_bounty != bounty_table.end(), "Bounty not found!");
         eosio::check(iter_bounty->status == BOUNTY_STATUS_ACTIVE,

@@ -23,10 +23,15 @@ void peeranha::approve_account(eosio::name user) {
 
 void peeranha::disapprove_account(eosio::name user) { 
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
-  auto iter_telegram_account = telegram_account_table.find(user.value);
-  eosio::check(iter_telegram_account != telegram_account_table.end(), "Telegram account not found");
 
-  telegram_account_table.erase(iter_telegram_account);
+  for (auto iter_telegram_account = telegram_account_table.begin(); iter_telegram_account != telegram_account_table.end(); ++iter_telegram_account) {
+    if (iter_telegram_account->user == user && iter_telegram_account->confirmed != EMPTY_TELEGRAM_ACCOUNT) {
+      telegram_account_table.erase(iter_telegram_account);
+      return;
+    }
+  }
+  
+  eosio::check(false, "Telegram account not found");
 }
 
 void peeranha::add_telegram_account(eosio::name user, uint64_t telegram_id, bool new_account) { 
@@ -91,6 +96,26 @@ eosio::name peeranha::generate_temp_telegram_account() {
   }
   while (account_table.find(user.value) != account_table.end());
   return user;
+}
+
+void peeranha::update_display_name(uint64_t telegram_id, std::string display_name) { 
+  telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
+  auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
+
+  eosio::name item_user = eosio::name(0);
+  for(auto iter_telegram_account_user_id = telegram_account_table_user_id.begin(); iter_telegram_account_user_id != telegram_account_table_user_id.end(); ++iter_telegram_account_user_id) {  
+    if (iter_telegram_account_user_id->telegram_id == telegram_id) {
+      eosio::check(iter_telegram_account_user_id->confirmed != NOT_CONFIRMED_TELEGRAM_ACCOUNT, "Account not confirmed");
+      item_user = iter_telegram_account_user_id->user;
+    }
+  }
+  eosio::check(item_user != eosio::name(0), "Telegram account not found");
+  
+  auto iter_account = find_account(item_user);
+  account_table.modify(iter_account, _self,
+                        [display_name](auto &account) {
+                          account.display_name = display_name;
+                        });
 }
 
 eosio::name peeranha::get_telegram_action_account(uint64_t telegram_id) {
@@ -202,11 +227,11 @@ void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user)
                             rating_change_new_user -= vote_question_res.correct_answer;
                           }
                           if (get_property_d(iter_answer->properties, PROPERTY_ANSWER_15_MINUTES, -2) == 1 && question.user == new_user) {
-                            rating_change_old_user -= vote_answer_res.upvoted_reward;
+                            rating_change_old_user -= vote_answer_res.answer_15_minutes;
                             delete_achievement_answer_15_minutes --;
                           }
                           if (get_property_d(iter_answer->properties, PROPERTY_FIRST_ANSWER, -2) == 1 && question.user == new_user) {
-                            rating_change_old_user -= vote_answer_res.upvoted_reward;
+                            rating_change_old_user -= vote_answer_res.first_answer;
                             delete_achievement_first_answer --;
                           }
 

@@ -63,8 +63,6 @@ struct [[eosio::table("communities"), eosio::contract("peeranha.main")]] communi
   std::string name;
   IpfsHash ipfs_description;
   time creation_time;
-  std::vector<str_key_value> string_properties;
-  std::vector<int_key_value> integer_properties;
   uint32_t questions_asked = 0;
   uint32_t answers_given = 0;
   uint32_t correct_answers = 0;
@@ -86,20 +84,36 @@ struct [[eosio::table("commbuf"), eosio::contract("peeranha.main")]] commbuf {
 };
 typedef eosio::multi_index<"commbuf"_n, commbuf> commbuf_table_index;
 
+struct [[eosio::table("commbuf"), eosio::contract("peeranha.main")]] commbuf {
+  uint16_t id;
+  std::string name;
+  IpfsHash ipfs_description;
+  time creation_time;
+  uint32_t questions_asked = 0;
+  uint32_t answers_given = 0;
+  uint32_t correct_answers = 0;
+  uint32_t users_subscribed = 0;
+  uint64_t primary_key() const { return id; }
+};
+typedef eosio::multi_index<"commbuf"_n, commbuf> commbuf_table_index;
+
+struct [[eosio::table("commbuff"), eosio::contract("peeranha.main")]] commbuff {
+  uint16_t id;
+  std::string name;
+  IpfsHash ipfs_description;
+  time creation_time;
+  uint32_t questions_asked = 0;
+  uint32_t answers_given = 0;
+  uint32_t correct_answers = 0;
+  uint32_t users_subscribed = 0;
+  uint64_t primary_key() const { return id; }
+};
+typedef eosio::multi_index<"commbuff"_n, commbuf> commbuff_table_index;
+
 inline void assert_tag_name(const std::string name) {
   assert_readble_string(name, 2, 30, "Invalid tag name");
 }
 
 inline void assert_community_name(const std::string name) {
   assert_readble_string(name, 2, 50, "Invalid community name");
-}
-
-inline void assert_community_type(int question_type){
-  eosio::check(question_type <= ANY_QUESTIONS_TYPE, "Question type not exists");
-}
-
-inline void assert_question_type_allowed(const account &action_caller, int quesiton_type) {
-  if (quesiton_type != ANY_QUESTIONS_TYPE){
-    eosio::check(action_caller.has_moderation_flag(MODERATOR_FLG_CREATE_COMMUNITY), "User must to be moderator");
-  } else return;
 }

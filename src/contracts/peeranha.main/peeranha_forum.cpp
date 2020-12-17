@@ -188,7 +188,9 @@ void peeranha::delete_question(eosio::name user, uint64_t question_id) {
   assert_allowed(*iter_account, iter_question->user, Action::DELETE_QUESTION, iter_question->community_id);
   eosio::check(iter_question->answers.empty(),
                "You can't delete not empty question");
-  eosio::check(iter_bounty->status == BOUNTY_STATUS_PAID, "You cannot delete question until bounty is paid");
+  if (iter_bounty != bounty_table.end()) {
+    eosio::check(iter_bounty->status == BOUNTY_STATUS_PAID, "You cannot delete question until bounty is paid");
+  }
   update_community_statistics(iter_question->community_id, -1, 0, 0, 0);
   update_tags_statistics(iter_question->community_id, iter_question->tags, -1);
   delete_top_question(iter_question->community_id, question_id);

@@ -258,11 +258,13 @@ void token::inviteuser(name inviter, name invited_user) {
 
 void token::setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp) {
     require_auth(user);
+    question_bounty bounty_table(_self, scope_all_bounties);
+    auto iter_bounty = bounty_table.find(question_id);
+    eosio::check(iter_bounty == bounty_table.end(), "Bounty is already set for this question");
     eosio::check(bounty.is_valid(), "invalid quantity");
     eosio::check(bounty.amount > 0, "must transfer positive quantity");
     sub_balance(user, bounty);
 
-    question_bounty bounty_table(_self, scope_all_bounties);
     bounty_table.emplace(_self, [&](auto &a) {
         a.user = user;
         a.amount = bounty;
@@ -284,7 +286,7 @@ void token::paybounty(name user, uint64_t question_id, bool on_delete) {
     auto iter_answer = binary_find(iter_question->answers.begin(),
                                    iter_question->answers.end(), iter_question->correct_answer_id);
 
-    if (on_delete == true && iter_question->answers.empty() == true) {
+    if (on_delete && iter_question->answers.empty()) {
         eosio::check(iter_question->user == user, "You can't get this bounty");
         add_balance(user, iter_bounty->amount, user);
         bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });

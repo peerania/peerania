@@ -278,6 +278,9 @@ void token::paybounty(name user, uint64_t question_id, bool on_delete) {
     require_auth(user);
     question_bounty bounty_table(_self, scope_all_bounties);
     auto iter_bounty = bounty_table.find(question_id);
+    eosio::check(iter_bounty != bounty_table.end(), "Bounty not found!");
+    eosio::check(iter_bounty->status == BOUNTY_STATUS_ACTIVE,
+                        "You have already got your bounty");
 
     question_index question_table(peeranha_main, scope_all_questions);
     auto iter_question = question_table.find(question_id);
@@ -287,14 +290,11 @@ void token::paybounty(name user, uint64_t question_id, bool on_delete) {
         eosio::check(iter_question->user == user, "You can't get this bounty");
         add_balance(user, iter_bounty->amount, user);
         bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
-    } else if (on_delete == false) {
+    } else if (!on_delete) {
         eosio::check(iter_question->correct_answer_id != 0, "Correct answer is not chosen!");
         auto iter_answer = binary_find(iter_question->answers.begin(),
                                            iter_question->answers.end(), iter_question->correct_answer_id);
         eosio::check(iter_answer->user == user, "You can't get this bounty");
-        eosio::check(iter_bounty != bounty_table.end(), "Bounty not found!");
-        eosio::check(iter_bounty->status == BOUNTY_STATUS_ACTIVE,
-                    "You have already got your bounty");
         add_balance(user, iter_bounty->amount, user);
         bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
     }

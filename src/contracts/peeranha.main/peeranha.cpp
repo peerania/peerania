@@ -107,9 +107,9 @@ void peeranha::delcomment(eosio::name user, uint64_t question_id,
 
 void peeranha::modquestion(eosio::name user, uint64_t question_id,
                            uint16_t community_id, std::vector<uint32_t> tags,
-                           std::string title, IpfsHash ipfs_link) {
+                           std::string title, IpfsHash ipfs_link, uint8_t type) {
   require_auth(user);
-  modify_question(user, question_id, community_id, tags, title, ipfs_link);
+  modify_question(user, question_id, community_id, tags, title, ipfs_link, type);
 }
 
 void peeranha::modanswer(eosio::name user, uint64_t question_id,
@@ -152,9 +152,9 @@ void peeranha::reportforum(eosio::name user, uint64_t question_id,
 // Tags and communities
 void peeranha::crcommunity(eosio::name user, std::string name,
                            IpfsHash ipfs_description,
-                           std::vector<suggest_tag> suggested_tags) {
+                           std::vector<suggest_tag> suggested_tags, uint16_t allowed_question_type) {
   require_auth(user);
-  create_community(user, name, ipfs_description, suggested_tags);
+  create_community(user, name, allowed_question_type, ipfs_description, suggested_tags);
 }
 
 void peeranha::crtag(eosio::name user, uint16_t community_id, std::string name,
@@ -215,9 +215,9 @@ void peeranha::givecommuflg(eosio::name user, int flags, uint16_t community_id) 
   give_moderator_flag(user, flags, community_id);
 }
 
-void peeranha::editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_description) {
+void peeranha::editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_description, uint16_t allowed_question_type) {
   require_auth(user);
-  edit_community(user, community_id, name, ipfs_description);
+  edit_community(user, community_id, name, ipfs_description, allowed_question_type);
 }
 
 void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating){
@@ -261,9 +261,19 @@ void peeranha::dsapprvacc(eosio::name user) {
   disapprove_account(user);
 }
 
+void peeranha::dsapprvacctl(eosio::name bot_name, eosio::name user) {
+  require_auth(bot_name);
+  disapprove_account(user);
+} 
+
 void peeranha::addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id) {
   require_auth(bot_name);
   add_telegram_account(user, telegram_id, false);
+}
+
+void peeranha::updtdsplname(eosio::name bot_name, uint64_t telegram_id, std::string display_name) {
+  require_auth(bot_name);
+  update_display_name(telegram_id, display_name);
 }
 
 void peeranha::addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar) {
@@ -274,6 +284,27 @@ void peeranha::addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::str
 void peeranha::intallaccach() {
   require_auth(_self);
   init_users_achievements();
+}
+
+void peeranha::movecomscnd() {
+  require_auth(_self);
+  commbuf_table_index commbuf_table (_self, scope_all_communities);
+  community_table_index community_table (_self, scope_all_communities);
+  auto iter_communities = commbuf_table.begin();
+  while (iter_communities != commbuf_table.end()) {
+    community_table.emplace(
+          _self, [&iter_communities](auto &comm) {
+            comm.id = iter_communities->id;
+            comm.name = iter_communities->name;
+            comm.ipfs_description = iter_communities->ipfs_description;
+            comm.creation_time = iter_communities->creation_time;
+            comm.questions_asked = iter_communities->questions_asked;
+            comm.answers_given = iter_communities->answers_given;
+            comm.correct_answers = iter_communities->correct_answers;
+            comm.users_subscribed = iter_communities->users_subscribed;
+          });
+    iter_communities = commbuf_table.erase(iter_communities);
+  }
 }
 
 #ifdef SUPERFLUOUS_INDEX

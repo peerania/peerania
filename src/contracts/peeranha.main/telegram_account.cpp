@@ -161,7 +161,7 @@ void peeranha::move_table_usrquestions(eosio::name old_user, eosio::name new_use
         vote_question = COMMON_QUESTION_UPVOTED_REWARD;
         vote_answer_res = VoteItem::common_answer;
         break;
-      }
+    }
 
     std::for_each(iter_question->history.begin(), iter_question->history.end(), [&new_user, &rating_change, vote_question](auto hst) {
       if (hst.is_flag_set(HISTORY_UPVOTED_FLG) && hst.user == new_user) {

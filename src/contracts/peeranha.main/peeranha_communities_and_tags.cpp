@@ -414,6 +414,8 @@ void peeranha::edit_community(eosio::name user, uint16_t community_id, const std
 
   community_table_index community_table(_self, scope_all_communities);
   auto iter_community = community_table.find(community_id);
+  eosio::check(iter_community != community_table.end(), "Community not found");
+  
   community_table.modify(iter_community, _self,
                          [&](auto &community) {
                            community.name = name;

@@ -12,7 +12,6 @@ MODERATOR_FLG_CREATE_COMMUNITY = 1 << 3
 MODERATOR_FLG_CREATE_TAG = 1 << 4
 MODERATOR_FLG_ALL = 31
 
-
 class AccountModerationTests(peeranhatest.peeranhaTest):
     def test_set_moderator_flag_non_deployer_failed(self):
         begin('Not a deploer trying to give moderator rights', True)
@@ -61,7 +60,7 @@ class AccountModerationTests(peeranhatest.peeranhaTest):
         alice = self.register_alice_account()
         bob = self.register_bob_account()
         carol = self.register_carol_account()
-        self.action('postquestion', {'user': 'alice', 'title': 'undefined', 'ipfs_link': 'undefined',  'community_id': 1, 'tags': [1], 'type': 0}, alice,
+        self.action('postquestion', {'user': 'alice', 'title': 'undefined', 'ipfs_link': 'undefined',  'community_id': 1, 'tags': [1], 'type': 1}, alice,
                     'Register question from alice')
         AQ_id = self.table('question', 'allquestions')[0]['id']
         self.action('postanswer', {'user': 'bob', 'question_id': AQ_id, 'ipfs_link': 'undefined', 'official_answer': False},

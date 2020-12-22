@@ -450,6 +450,13 @@ void peeranha::resettables() {
   while (iter_telegram_account != telegram_account_table.end()) {
     iter_telegram_account = telegram_account_table.erase(iter_telegram_account);
   }
+
+  // clean combuf table
+  commbuf_table_index combuf_table(_self, scope_all_communities);
+  auto iter_combuf = combuf_table.begin();
+  while (iter_combuf != combuf_table.end()) {
+    iter_combuf = combuf_table.erase(iter_combuf);
+  }
 #if STAGE == 2
   // clean constants
   constants_index all_constants_table(_self, scope_all_constants);

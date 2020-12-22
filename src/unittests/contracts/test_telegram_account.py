@@ -1162,8 +1162,8 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
 
-    def test_move_negative_rating(self):
-        begin('move_negative_rating')
+    def test_migrate_negative_rating(self):
+        begin('Do not migrate negative rating from temporary Telegram account when link to Peeranha account')
         alice = self.register_alice_account()
         ted = self.register_ted_account()
 

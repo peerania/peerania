@@ -256,6 +256,50 @@ void token::inviteuser(name inviter, name invited_user) {
       });
 }
 
+void token::setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp) {
+    require_auth(user);
+    question_bounty bounty_table(_self, scope_all_bounties);
+    auto iter_bounty = bounty_table.find(question_id);
+    eosio::check(iter_bounty == bounty_table.end(), "Bounty is already set for this question");
+    eosio::check(bounty.is_valid(), "invalid quantity");
+    eosio::check(bounty.amount > 0, "must transfer positive quantity");
+    sub_balance(user, bounty);
+
+    bounty_table.emplace(_self, [&](auto &a) {
+        a.user = user;
+        a.amount = bounty;
+        a.question_id = question_id;
+        a.status = BOUNTY_STATUS_ACTIVE;
+        a.timestamp = timestamp;
+    });
+}
+
+void token::paybounty(name user, uint64_t question_id, bool on_delete) {
+    require_auth(user);
+    question_bounty bounty_table(_self, scope_all_bounties);
+    auto iter_bounty = bounty_table.find(question_id);
+    eosio::check(iter_bounty != bounty_table.end(), "Bounty not found!");
+    eosio::check(iter_bounty->status == BOUNTY_STATUS_ACTIVE,
+                        "You have already got your bounty");
+
+    question_index question_table(peeranha_main, scope_all_questions);
+    auto iter_question = question_table.find(question_id);
+    eosio::check(iter_question != question_table.end(), "Question not found!");
+
+    if (on_delete && iter_question->answers.empty()) {
+        eosio::check(iter_question->user == user, "You can't get this bounty");
+        add_balance(user, iter_bounty->amount, user);
+        bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
+    } else if (!on_delete) {
+        eosio::check(iter_question->correct_answer_id != 0, "Correct answer is not chosen!");
+        auto iter_answer = binary_find(iter_question->answers.begin(),
+                                           iter_question->answers.end(), iter_question->correct_answer_id);
+        eosio::check(iter_answer->user == user, "You can't get this bounty");
+        add_balance(user, iter_bounty->amount, user);
+        bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
+    }
+}
+
 void token::rewardrefer(name invited_user) {
   require_auth(invited_user);
   invited_users_index invited_users_table(_self, all_invited);
@@ -351,7 +395,8 @@ void token::resettables(std::vector<eosio::name> allaccs) {
 }  // namespace eosio
 
 EOSIO_DISPATCH(eosio::token,
-               (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)(rewardrefer)
+               (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)
+               (setbounty)(paybounty)(rewardrefer)
 #if STAGE == 1 || STAGE == 2
                    (resettables)
 #if STAGE == 2

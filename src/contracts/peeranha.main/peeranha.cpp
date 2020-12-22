@@ -34,7 +34,7 @@ void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t commu
   eosio::name user = get_telegram_action_account(telegram_id);
   post_question(user, community_id, tags, title, ipfs_link, type);
 
-  user_questions_index user_questions_table(_self, user.value); 
+  user_questions_index user_questions_table(_self, user.value);
   auto iter_user_question = user_questions_table.begin();
   eosio::check(iter_user_question != user_questions_table.end(), "Error set property question");
 

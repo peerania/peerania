@@ -407,10 +407,14 @@ void peeranha::unfollow_community(eosio::name user, uint16_t community_id) {
   });
 }
 
-void peeranha::edit_community(eosio::name user, uint16_t community_id, const std::string &name, const IpfsHash &ipfs_description, const uint16_t &type){
-  auto iter_account = find_account(user);
-  eosio::check(iter_account->has_moderation_flag(MODERATOR_FLG_CREATE_COMMUNITY), "User must to be moderator");
+void peeranha::edit_community(eosio::name user, uint16_t community_id, 
+                              const std::string &name, const IpfsHash &ipfs_description, 
+                              const uint16_t &type) {
+  assert_community_name(name);
   assert_ipfs(ipfs_description);
+
+  auto iter_account = find_account(user);
+  eosio::check(iter_account->has_moderation_flag(MODERATOR_FLG_CREATE_COMMUNITY), "User must to be moderator (FLG_CREATE_COMMUNITY)");
 
   community_table_index community_table(_self, scope_all_communities);
   auto iter_community = community_table.find(community_id);
@@ -422,4 +426,28 @@ void peeranha::edit_community(eosio::name user, uint16_t community_id, const std
                            community.ipfs_description = ipfs_description;
                            set_property(community.integer_properties, ID_QUESTIONS_TYPE, type);
                          });
+}
+
+void peeranha::edit_tag(eosio::name user, uint16_t community_id, 
+                        uint32_t tag_id, const std::string &name, 
+                        const IpfsHash &ipfs_description) {
+  assert_tag_name(name);
+  assert_community_exist(community_id);
+  assert_ipfs(ipfs_description);
+
+  auto iter_account = find_account(user);
+  bool check_moderator = iter_account->has_moderation_flag(MODERATOR_FLG_CREATE_TAG);
+  bool check_moderator_community = find_account_property_community(user, COMMUNITY_ADMIN_FLG_CREATE_TAG, community_id);
+
+  eosio::check(check_moderator || check_moderator_community, "User must to be moderator (FLG_CREATE_TAG)");
+
+  tag_table_index tag_table(_self, get_tag_scope(community_id));
+  auto iter_tag = tag_table.find(tag_id);
+  eosio::check(iter_tag != tag_table.end(), "Tag not found");
+
+  tag_table.modify(iter_tag, _self,
+                    [name, ipfs_description](auto &tag) {
+                      tag.name = name;
+                      tag.ipfs_description = ipfs_description;
+                    });
 }

@@ -155,6 +155,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     
     ACTION editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_description, uint16_t type);
 
+    ACTION edittag(eosio::name user, uint16_t community_id, uint32_t tag_id, const std::string name, const IpfsHash ipfs_description);
+
     ACTION chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating);
 
     ACTION addtotopcomm(eosio::name user, uint16_t community_id, uint64_t question_id);
@@ -347,6 +349,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     void give_moderator_flag(eosio::name user, int flags, uint16_t community_id);
 
     void edit_community(eosio::name user, uint16_t community_id, const std::string &name, const IpfsHash &ipfs_description, const uint16_t &type);
+
+    void edit_tag(eosio::name user, uint16_t community_id, uint32_t tag_id, const std::string &name, const IpfsHash &ipfs_description);
 
     void change_question_type(eosio::name user, uint64_t question_id, int type, bool restore_rating);
 

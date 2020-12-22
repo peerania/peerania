@@ -438,7 +438,6 @@ void peeranha::edit_tag(eosio::name user, uint16_t community_id,
   auto iter_account = find_account(user);
   bool check_moderator = iter_account->has_moderation_flag(MODERATOR_FLG_CREATE_TAG);
   bool check_moderator_community = find_account_property_community(user, COMMUNITY_ADMIN_FLG_CREATE_TAG, community_id);
-
   eosio::check(check_moderator || check_moderator_community, "User must to be moderator (FLG_CREATE_TAG)");
 
   tag_table_index tag_table(_self, get_tag_scope(community_id));

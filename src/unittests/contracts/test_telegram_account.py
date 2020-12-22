@@ -20,6 +20,7 @@ class Achievents(int, Enum):
     first_answer = 13
 
 COMMUNITY_ADMIN_FLG_INFINITE_IMPACT = 1 << 1        # 2
+BASIC_RATING = 200
 
 class TestTopQuestion(peeranhatest.peeranhaTest):  
     def test_add_telegram_account(self):
@@ -1158,6 +1159,30 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
 
         example_account = [{ 'user': bob, 'integer_properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]},
                             { 'user': ted, 'integer_properties': []}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
+
+    def test_move_negative_rating(self):
+        begin('move_negative_rating')
+        alice = self.register_alice_account()
+        ted = self.register_ted_account()
+
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Add empty account through telegram')
+        empty_account = self.table('account', 'allaccounts')[2]['user']
+        self.action('chnguserrt', {'user': empty_account, 'rating_change': -5},
+                            self.admin, 'decrease empty account rating')
+        
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': alice,
+            'telegram_id': 503975561
+        }, ted, 'Alice add telegram account 503975561')
+        self.action('apprvacc', {
+            'user': alice
+        }, alice, 'Alice approve telegram account, rating is not subtracted')
+        
+        example_account = [{'user': 'alice', 'rating': BASIC_RATING}, {'user': 'ted'}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
         

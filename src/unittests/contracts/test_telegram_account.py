@@ -886,6 +886,10 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
 
         self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
                         'Add empty account')
+        self.failed_action('updtdsplname', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': '', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'empty display_name')
+        self.failed_action('updtdsplname', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'qw', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        '2 symbol display_name')
         self.action('updtdsplname', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'newName', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
                         'Сhange name emty account')
 

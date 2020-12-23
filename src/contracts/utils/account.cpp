@@ -76,12 +76,13 @@ bool is_moderation_availble() {
 }
 
 bool account::has_moderation_flag(int mask) const {
-  if (is_moderation_availble()) {
+  // Moderation will be always enabled until we decide that it can be disabled. It will not be disabled automatically.
+  // if (is_moderation_availble()) {
 
     int moderator_flags =
         get_property_d(integer_properties, PROPERTY_MODERATOR_FLAGS, 0);
     return moderator_flags & mask;
-  }
+  // }
   return false;
 }
 

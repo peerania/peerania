@@ -83,7 +83,7 @@ bool account::has_moderation_flag(int mask) const {
         get_property_d(integer_properties, PROPERTY_MODERATOR_FLAGS, 0);
     return moderator_flags & mask;
   // }
-  return false;
+  //return false;
 }
 
 uint8_t account::get_status_moderation_impact(uint16_t community_id = 0) const {

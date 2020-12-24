@@ -422,6 +422,57 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
                            'Alice attempt to create community with bob auth', 'assert')
         end()
 
+    def test_edit_tag_without_rights(self):
+        begin('edit tag without rights', True)
+        alice = self.register_alice_account(10000, 10)
+        self.failed_action('edittag', {'user': 'alice', 'community_id': 1, 'tag_id': 1, 'name': 'new name', 'ipfs_description': 'new ipfs'}, alice,
+                           'Alice edit tag without rights')
+        end()
+    
+    def test_edit_tag_global_mod(self):
+        begin('edit tag global moderator', True)
+        admin = self.get_contract_deployer(self.get_default_contract())
+        alice = self.register_alice_account(20, 10)
+        self.action('givemoderflg', {
+                    'user': 'alice', 'flags': 16}, admin, 'Give moderator flags to alice (create tag)')
+        
+        self.action('edittag', {'user': 'alice', 'community_id': 1, 'tag_id': 1, 'name': 'new name', 'ipfs_description': 'new ipfs'}, alice,
+                           'Alice edit tag with global moderator rights')
+        example_tag = {'id': 1, 'name': 'new name', 'ipfs_description': 'new ipfs', 'questions_asked': 0}
+        self.assertTrue(compare(example_tag, self.table('tags', get_tag_scope(1))[0], ignore_excess=True))
+        
+        self.failed_action('edittag', {'user': 'alice', 'community_id': 5, 'tag_id': 1, 'name': 'new name', 'ipfs_description': 'new ipfs'}, alice,
+                           'Alice edit tag, wrong community id')
+        self.failed_action('edittag', {'user': 'alice', 'community_id': 1, 'tag_id': 10, 'name': 'new name', 'ipfs_description': 'new ipfs'}, alice,
+                           'Alice edit tag, wrong tag id')
+        self.failed_action('edittag', {'user': 'alice', 'community_id': 1, 'tag_id': 1, 'name': 'e', 'ipfs_description': 'new ipfs'}, alice,
+                           'Alice edit tag, wrong name tag')
+        self.failed_action('edittag', {'user': 'alice', 'community_id': 1, 'tag_id': 1, 'name': 'new name', 'ipfs_description': 'n'}, alice,
+                           'Alice edit tag, wrong name ipfs')
+        end()
+    
+    def test_edit_tag_community_mod(self):
+        begin('edit tag community moderator', True)
+        admin = self.get_contract_deployer(self.get_default_contract())
+        alice = self.register_alice_account(20, 10)
+        self.action('givecommuflg', {
+            'user': alice, 'flags': 16, 'community_id': 1}, admin, 'Give community moderator flags to alice (create tag)')
+        
+        self.action('edittag', {'user': 'alice', 'community_id': 1, 'tag_id': 1, 'name': 'new name', 'ipfs_description': 'new ipfs'}, alice,
+                           'Alice edit tag with global moderator rights')
+        example_tag = {'id': 1, 'name': 'new name', 'ipfs_description': 'new ipfs', 'questions_asked': 0};
+        self.assertTrue(compare(example_tag, self.table('tags', get_tag_scope(1))[0], ignore_excess=True))
+        
+        self.failed_action('edittag', {'user': 'alice', 'community_id': 5, 'tag_id': 1, 'name': 'new name', 'ipfs_description': 'new ipfs'}, alice,
+                           'Alice edit tag, wrong community id')
+        self.failed_action('edittag', {'user': 'alice', 'community_id': 1, 'tag_id': 10, 'name': 'new name', 'ipfs_description': 'new ipfs'}, alice,
+                           'Alice edit tag, wrong tag id')
+        self.failed_action('edittag', {'user': 'alice', 'community_id': 1, 'tag_id': 1, 'name': 'e', 'ipfs_description': 'new ipfs'}, alice,
+                           'Alice edit tag, wrong name tag')
+        self.failed_action('edittag', {'user': 'alice', 'community_id': 1, 'tag_id': 1, 'name': 'new name', 'ipfs_description': 'n'}, alice,
+                           'Alice edit tag, wrong name ipfs')
+        end()
+
     def _create_basic_hierarchy(self):
         alice = self.register_alice_account()
         bob = self.register_bob_account()

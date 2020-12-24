@@ -99,6 +99,7 @@ eosio::name peeranha::generate_temp_telegram_account() {
 }
 
 void peeranha::update_display_name(uint64_t telegram_id, std::string display_name) { 
+  assert_display_name(display_name);
   telegram_account_index telegram_account_table(_self, scope_all_telegram_accounts);
   auto telegram_account_table_user_id = telegram_account_table.get_index<"userid"_n>();
 

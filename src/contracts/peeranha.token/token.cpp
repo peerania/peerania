@@ -375,17 +375,16 @@ int64_t token::getstakedbalance(name user) {
   int64_t output_value = 0;
   if (iter_last_boost->period <= period) {
     output_value = iter_last_boost->staked_tokens.amount;
-  } else {                                                      //в текущем периоде изменили буст
+  } else {
     auto iter_buf_boost = iter_last_boost;
     
     ++iter_buf_boost;
-    // eosio::check(false, "1213213 ");///////// проверить iter_last_boost не должен измениться
-    if (iter_buf_boost == boost_table.rend()) {                 // только 1 запись о бусте
+    if (iter_buf_boost == boost_table.rend()) {                 // only 1 boost entry
       output_value =  iter_last_boost->staked_tokens.amount;
     } else {
-      if (iter_last_boost->staked_tokens.amount > iter_buf_boost->staked_tokens.amount) {  // добавили буст
+      if (iter_last_boost->staked_tokens.amount > iter_buf_boost->staked_tokens.amount) {  // add boost
         output_value =  iter_last_boost->staked_tokens.amount;
-      } else {                                                                            //уменьшили
+      } else {                                                                            // reduced boost
         output_value =  iter_buf_boost->staked_tokens.amount;
       }
     }

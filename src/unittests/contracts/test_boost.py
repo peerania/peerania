@@ -9,6 +9,43 @@ from unittest import main
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 class TestBoost(peeranhatest.peeranhaTest):  
+    def test_init_boost(self): 
+        begin('test init boost (total rating * 1000)')
+        bob = self.register_bob_account()
+    
+        
+        give_ratings(self, bob, 1)      # 0 period 
+        self.wait(4)
+
+        give_ratings(self, bob, 2)      # boost
+        self.wait(4)
+
+        give_ratings(self, bob, 3)      # 2 period
+        self.wait(4)
+
+        give_ratings(self, bob, 4)      # 2 period
+        self.wait(4)
+
+        give_ratings(self, bob, 5)      # 2 period
+        self.wait(4)
+
+        give_ratings(self, bob, 6)      # 2 period
+        self.wait(4)
+
+        give_ratings(self, bob, 7)      # 2 period
+        self.wait(4)
+
+
+        print(self.table('totalrating', 'allperiods'))
+
+        admin = self.get_contract_deployer(self.get_default_contract())
+        self.failed_action('intboost', {'period': 50},
+                    admin, ' pick up her reward for 2 preiod')
+        self.action('intboost', {'period': 5},
+                    admin, ' pick up her reward for 2 preiod')
+        print(self.table('totalrating', 'allperiods'))
+        end()
+    
     def test_get_boost_x4(self): 
         begin('get boost X4')
         bob = self.register_bob_account()
@@ -36,6 +73,7 @@ class TestBoost(peeranhatest.peeranhaTest):
         example_totalrating = [{'period': 1}, {'period': 2, 'total_rating_to_reward': 4000}] # 1 rating * 4 boost * 1000
         self.assertTrue(compare(example_totalrating, self.table('totalrating', 'allperiods'), ignore_excess=True))
         
+        print(self.table('periodreward', 'bob', contract='token'))
         example_bob_tokens = [{'period': 2, 'reward': '32.000000 PEER'}] # 8 token * 4 boost
         self.assertTrue(compare(example_bob_tokens, self.table('periodreward', 'bob', contract='token'), ignore_excess=True))
 

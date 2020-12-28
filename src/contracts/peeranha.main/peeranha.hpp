@@ -181,6 +181,8 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     //init achievements first 10k registered users
     ACTION intallaccach();
 
+    ACTION intboost(uint64_t period);     // after initialization delete
+
 #ifdef SUPERFLUOUS_INDEX
     // Delete @count@ items from superfluous index tebles
     ACTION freeindex(int count);

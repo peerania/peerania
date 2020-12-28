@@ -3,22 +3,24 @@ set -ex
 
 cleos push action peeranhamain init '{}' -p alice
 cleos push action peeranhatken create '{"issuer": "peeranhatken", "maximum_supply": "100000000.000000 PEER"}' -p peeranhatken
+# FOR TESTING
+cleos push action peeranhatken issue '{"to": "peeranhatken","quantity": "10000.000000 PEER","memo":"test"}' -p peeranhatken
 
 cleos push action peeranhamain registeracc '{"user": "alice", "display_name": "Alice", "ipfs_profile": [18, 146, 53, 121, 7, 101, 88, 171, 43, 255, 166, 154, 112, 155, 254, 238, 241, 197, 250, 5, 183, 51, 57, 127, 15, 44, 227, 202, 75, 179, 99, 224, 50], "ipfs_avatar": [18, 254, 86, 251, 60, 165, 231, 126, 138, 64, 117, 29, 190, 91, 185, 94, 90, 25, 235, 76, 6, 26, 74, 178, 119, 211, 158, 57, 68, 171, 203, 116, 79]}' -p alice
 cleos push action peeranhamain givemoderflg '{"user": "alice", "flags": "31"}' -p peeranhamain
-cleos push action peeranhamain crcommunity '{"user": "alice", "name": "Alice community 1", "ipfs_description": [18, 232, 191, 143, 42, 169, 146, 206, 75, 76, 253, 222, 38, 178, 182, 133, 163, 253, 158, 64, 235, 91, 207, 247, 157, 42, 224, 76, 110, 51, 83, 112, 155], "suggested_tags": [
+cleos push action peeranhamain crcommunity '{"user": "alice", "name": "Alice community 1", "type": 2, "ipfs_description": [18, 232, 191, 143, 42, 169, 146, 206, 75, 76, 253, 222, 38, 178, 182, 133, 163, 253, 158, 64, 235, 91, 207, 247, 157, 42, 224, 76, 110, 51, 83, 112, 155], "suggested_tags": [
     {"name": "Alice comm 1 tag 1", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]},
     {"name": "Alice comm 1 tag 2", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]},
     {"name": "Alice comm 1 tag 3", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]},
     {"name": "Alice comm 1 tag 4", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]},
     {"name": "Alice comm 1 tag 5", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]}]}' -p alice
-cleos push action peeranhamain crcommunity '{"user": "alice", "name": "Alice community 2", "ipfs_description": [18, 232, 191, 143, 42, 169, 146, 206, 75, 76, 253, 222, 38, 178, 182, 133, 163, 253, 158, 64, 235, 91, 207, 247, 157, 42, 224, 76, 110, 51, 83, 112, 155], "suggested_tags": [
+cleos push action peeranhamain crcommunity '{"user": "alice", "name": "Alice community 2", "type": 1, "ipfs_description": [18, 232, 191, 143, 42, 169, 146, 206, 75, 76, 253, 222, 38, 178, 182, 133, 163, 253, 158, 64, 235, 91, 207, 247, 157, 42, 224, 76, 110, 51, 83, 112, 155], "suggested_tags": [
     {"name": "Alice comm 2 tag 1", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]},
     {"name": "Alice comm 2 tag 2", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]},
     {"name": "Alice comm 2 tag 3", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]},
     {"name": "Alice comm 2 tag 4", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]},
     {"name": "Alice comm 2 tag 5", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]}]}' -p alice
-cleos push action peeranhamain crcommunity '{"user": "alice", "name": "Alice community 3", "ipfs_description": [18, 232, 191, 143, 42, 169, 146, 206, 75, 76, 253, 222, 38, 178, 182, 133, 163, 253, 158, 64, 235, 91, 207, 247, 157, 42, 224, 76, 110, 51, 83, 112, 155], "suggested_tags": [
+cleos push action peeranhamain crcommunity '{"user": "alice", "name": "Alice community 3", "type": 0, "ipfs_description": [18, 232, 191, 143, 42, 169, 146, 206, 75, 76, 253, 222, 38, 178, 182, 133, 163, 253, 158, 64, 235, 91, 207, 247, 157, 42, 224, 76, 110, 51, 83, 112, 155], "suggested_tags": [
     {"name": "Alice comm 3 tag 1", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]},
     {"name": "Alice comm 3 tag 2", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]},
     {"name": "Alice comm 3 tag 3", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]},
@@ -31,16 +33,21 @@ cleos push action peeranhamain registeracc '{"user": "ted", "display_name": "Ted
 cleos push action peeranhamain registeracc '{"user": "dan", "display_name": "Dan", "ipfs_profile": [18, 204, 145, 205, 162, 26, 142, 9, 125, 123, 147, 119, 230, 198, 141, 241, 176, 69, 207, 210, 138, 98, 170, 140, 242, 202, 173, 101, 72, 237, 2, 234, 60], "ipfs_avatar": [18, 254, 86, 251, 60, 165, 231, 126, 138, 64, 117, 29, 190, 91, 185, 94, 90, 25, 235, 76, 6, 26, 74, 178, 119, 211, 158, 57, 68, 171, 203, 116, 79]}' -p dan
 cleos push action peeranhamain registeracc '{"user": "frank", "display_name": "Frank", "ipfs_profile": [18, 204, 145, 205, 162, 26, 142, 9, 125, 123, 147, 119, 230, 198, 141, 241, 176, 69, 207, 210, 138, 98, 170, 140, 242, 202, 173, 101, 72, 237, 2, 234, 60], "ipfs_avatar": [18, 254, 86, 251, 60, 165, 231, 126, 138, 64, 117, 29, 190, 91, 185, 94, 90, 25, 235, 76, 6, 26, 74, 178, 119, 211, 158, 57, 68, 171, 203, 116, 79]}' -p frank
 cleos push action peeranhamain registeracc '{"user": "user1", "display_name": "Roman", "ipfs_profile": [18, 146, 53, 121, 7, 101, 88, 171, 43, 255, 166, 154, 112, 155, 254, 238, 241, 197, 250, 5, 183, 51, 57, 127, 15, 44, 227, 202, 75, 179, 99, 224, 50], "ipfs_avatar": [18, 254, 86, 251, 60, 165, 231, 126, 138, 64, 117, 29, 190, 91, 185, 94, 90, 25, 235, 76, 6, 26, 74, 178, 119, 211, 158, 57, 68, 171, 203, 116, 79]}' -p user1
+cleos push action peeranhamain givemoderflg '{"user": "bob", "flags": "63"}' -p peeranhamain
+cleos push action peeranhamain setaccrten '{"user": "carol", "rating": 1000, "energy": 200}' -p peeranhamain
 cleos push action peeranhamain setaccrten '{"user": "bob", "rating": 3500, "energy": 200}' -p peeranhamain
 cleos push action peeranhamain setaccrten '{"user": "bob", "rating": 4000, "energy": 200}' -p peeranhamain
 cleos push action peeranhamain followcomm '{"user": "user1", "community_id": "1"}' -p user1
-cleos push action peeranhamain crcommunity '{"user": "bob", "name": "JJQJQJ", "ipfs_description": [18, 232, 191, 143, 42, 169, 146, 206, 75, 76, 253, 222, 38, 178, 182, 133, 163, 253, 158, 64, 235, 91, 207, 247, 157, 42, 224, 76, 110, 51, 83, 112, 155], "suggested_tags": [
+cleos push action peeranhamain crcommunity '{"user": "bob", "name": "JJQJQJ", "type": 2, "ipfs_description": [18, 232, 191, 143, 42, 169, 146, 206, 75, 76, 253, 222, 38, 178, 182, 133, 163, 253, 158, 64, 235, 91, 207, 247, 157, 42, 224, 76, 110, 51, 83, 112, 155], "suggested_tags": [
     {"name": "TAG1", "ipfs_description": [18, 171, 34, 183, 70, 70, 148, 39, 119, 204, 125, 190, 141, 91, 238, 193, 232, 42, 72, 162, 220, 241, 71, 100, 9, 49, 83, 218, 169, 253, 201, 131, 224]},
     {"name": "TAG2", "ipfs_description": [18, 171, 34, 183, 70, 70, 148, 39, 119, 204, 125, 190, 141, 91, 238, 193, 232, 42, 72, 162, 220, 241, 71, 100, 9, 49, 83, 218, 169, 253, 201, 131, 224]},
     {"name": "TAG3", "ipfs_description": [18, 171, 34, 183, 70, 70, 148, 39, 119, 204, 125, 190, 141, 91, 238, 193, 232, 42, 72, 162, 220, 241, 71, 100, 9, 49, 83, 218, 169, 253, 201, 131, 224]},
     {"name": "TAG4", "ipfs_description": [18, 171, 34, 183, 70, 70, 148, 39, 119, 204, 125, 190, 141, 91, 238, 193, 232, 42, 72, 162, 220, 241, 71, 100, 9, 49, 83, 218, 169, 253, 201, 131, 224]},
     {"name": "TAG5", "ipfs_description": [18, 171, 34, 183, 70, 70, 148, 39, 119, 204, 125, 190, 141, 91, 238, 193, 232, 42, 72, 162, 220, 241, 71, 100, 9, 49, 83, 218, 169, 253, 201, 131, 224]}]}' -p bob
 cleos push action peeranhamain crtag '{"user": "alice", "community_id": 1, "name": "JJQJQJ", "ipfs_description": [18, 20, 251, 208, 12, 191, 42, 87, 225, 213, 253, 151, 71, 133, 244, 153, 190, 170, 200, 78, 149, 57, 12, 99, 247, 143, 58, 224, 202, 169, 106, 220, 40]}' -p alice
+# FOR TESTING
+cleos push action peeranhatken transfer '{"from":"peeranhatken","to":"sqrltest1234","quantity":"5000.000000 PEER","memo":"test"}' -p peeranhatken
+
 
 for i in {1..10}
 do

@@ -7,8 +7,10 @@
 #include <eosio/name.hpp>
 #include <string>
 #include "account.hpp"
+#include "bounty.hpp"
 #include "peeranha_types.h"
 #include "token_period.hpp"
+#include "../peeranha.main/question_container.hpp"
 
 
 namespace eosio {
@@ -51,6 +53,7 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   [[eosio::action]] void inviteuser(name inviter, name invited_user);
 
+<<<<<<< HEAD
   [[eosio::action]] void addboost(name user, asset tokens);
 
   void update_statistics_boost(asset tokens, name user);
@@ -60,6 +63,11 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
   int64_t getstakedbalance(name user);
 
   uint64_t getvalboost(name user, uint64_t period);
+=======
+  [[eosio::action]] void setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp);
+
+  [[eosio::action]] void paybounty(name user, uint64_t question_id, bool on_delete);
+>>>>>>> develop
 
   [[eosio::action]] void rewardrefer(name invited_user);
 

@@ -20,6 +20,7 @@ class Achievents(int, Enum):
     first_answer = 13
 
 COMMUNITY_ADMIN_FLG_INFINITE_IMPACT = 1 << 1        # 2
+BASIC_RATING = 200
 
 class TestTopQuestion(peeranhatest.peeranhaTest):  
     def test_add_telegram_account(self):
@@ -885,6 +886,10 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
 
         self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
                         'Add empty account')
+        self.failed_action('updtdsplname', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': '', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'empty display_name')
+        self.failed_action('updtdsplname', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'qw', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        '2 symbol display_name')
         self.action('updtdsplname', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'newName', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
                         'Сhange name emty account')
 
@@ -925,5 +930,265 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
 
+    def test_2_answer_from_1_user(self):
+        begin('empty telegram account post question and post answer -> user1 post answer -> appruve telegram account with user1')
+        bob = self.register_bob_account()
+        ted = self.register_ted_account()
+
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Add empty account through telegram')
+        
+        self.action('telpostqstn', {'bot': 'bob', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, bob,
+                        'Register telegram question')
+        id_question = self.table('question', 'allquestions')[0]['id']
+        self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': id_question, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+                        'Register telegram answer')
+        self.action('postanswer', {'user': 'bob', 'question_id': id_question, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
+                    'Register bob answer')
+
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': bob,
+            'telegram_id': 503975561
+        }, ted, 'bob  add telegram account 503975561')
+        self.action('apprvacc', {
+            'user': bob
+        }, bob, 'Bob approve telegram account')
+
+        example_answer = [{'question_id': id_question, 'answer_id': 2}]
+        self.assertTrue(compare(example_answer, self.table('usranswers', bob), ignore_excess=True))
+        end()
+
+    def test_2_answer_from_1_user_part2(self):
+        begin('user1 post question and post answer -> empty tel acc post answer -> appruve telegram account with user1')
+        bob = self.register_bob_account()
+        ted = self.register_ted_account()
+
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Add empty account through telegram')
+        
+        self.action('postquestion', {'user': 'bob', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 1}, bob,
+                    'Bob asking question')
+        id_question = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': 'bob', 'question_id': id_question, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
+                    'Register bob answer')
+        self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': id_question, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+                        'Register telegram answer')
+        
+
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': bob,
+            'telegram_id': 503975561
+        }, ted, 'bob  add telegram account 503975561')
+        self.action('apprvacc', {
+            'user': bob
+        }, bob, 'Bob approve telegram account')
+
+        example_answer = [{'question_id': id_question, 'answer_id': 1}]
+        self.assertTrue(compare(example_answer, self.table('usranswers', bob), ignore_excess=True))
+        end()
+    
+    def test_take_away_rating_for_first_answer(self):
+        begin('user1 post question and post answer -> empty tel acc post answer -> appruve telegram account with user1')
+        bob = self.register_bob_account()
+        ted = self.register_ted_account()
+
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Add empty account through telegram')
+        
+        self.action('telpostqstn', {'bot': 'bob', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, bob,
+                        'Register telegram question')
+        id_question = self.table('question', 'allquestions')[0]['id']
+        self.action('postanswer', {'user': 'bob', 'question_id': id_question, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
+                    'Register bob answer')
+
+        example_account = [{'user': bob, 'rating': 210}, #first answer + 15 min
+                            {'rating': 200},
+                            {'rating': 10}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': bob,
+            'telegram_id': 503975561
+        }, ted, 'bob  add telegram account 503975561')
+        self.action('apprvacc', {
+            'user': bob
+        }, bob, 'Bob approve telegram account')
+
+        example_account = [{'user': bob, 'rating': 200},
+                            {'rating': 200},]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
+
+    def test_transfer_properties_telegram_account(self):
+        begin('transfer properties of Telegram account on merge (first answer + 15 minutes)')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        ted = self.register_ted_account()
+
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Add empty account through telegram')
+        name_empty_account = self.table('account', 'allaccounts')[3]['user']
+        
+        for w in range(5):
+            self.register_question_action(alice, 'Alice question ' + str(68719476735 - w))
+            question_id = self.table('question', 'allquestions')[0]['id']
+            self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+                            'Register telegram answer')
+
+        example_account = [{'user': alice, 'integer_properties': []},
+                            { 'user': bob, 'integer_properties': []},
+                            { 'user': ted, 'integer_properties': []},
+                            { 'user': name_empty_account, 'integer_properties': [{'key': 15, 'value': 1}, {'key': 12, 'value': 5}, {'key': 13, 'value': 5}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': bob,
+            'telegram_id': 503975561
+        }, ted, 'bob  add telegram account 503975561')
+        self.action('apprvacc', {
+            'user': bob
+        }, bob, 'Bob approve telegram account')
+
+        example_account = [{'user': alice, 'integer_properties': []},
+                            { 'user': bob, 'integer_properties': [ {'key': 13, 'value': 5}, {'key': 12, 'value': 5}]},
+                            { 'user': ted, 'integer_properties': []}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
+
+    def test_transfer_properties_telegram_account_2(self):
+        begin('keep account property on merge (first answer + 15 minutes)')
+        alice = self.register_alice_account()
+        bob = self.register_bob_account()
+        ted = self.register_ted_account()
+
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Add empty account through telegram')
+        name_empty_account = self.table('account', 'allaccounts')[3]['user']
+        
+        for w in range(5):
+            self.register_question_action(alice, 'Alice question ' + str(68719476735 - w))
+            question_id = self.table('question', 'allquestions')[0]['id']
+            self.action('postanswer', {'user': 'bob', 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
+                    'Register bob answer')
+
+        example_account = [{'user': alice, 'integer_properties': []},
+                            { 'user': bob, 'integer_properties': [{'key': 12, 'value': 5}, {'key': 13, 'value': 5}]},
+                            { 'user': ted, 'integer_properties': []},
+                            { 'user': name_empty_account, 'integer_properties': [{'key': 15, 'value': 1}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': bob,
+            'telegram_id': 503975561
+        }, ted, 'bob  add telegram account 503975561')
+        self.action('apprvacc', {
+            'user': bob
+        }, bob, 'Bob approve telegram account')
+
+        example_account = [{'user': alice, 'integer_properties': []},
+                            { 'user': bob, 'integer_properties': [{'key': 12, 'value': 5}, {'key': 13, 'value': 5}]},
+                            { 'user': ted, 'integer_properties': []}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
+    
+    def test_take_away_properties_telegram_account_3(self):
+        begin('take away properties telegram account on merge')
+        bob = self.register_bob_account()
+        ted = self.register_ted_account()
+
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Add empty account through telegram')
+        name_empty_account = self.table('account', 'allaccounts')[2]['user']
+        
+        for w in range(5):
+            self.register_question_action(bob, 'Alice question ' + str(68719476735 - w))
+            question_id = self.table('question', 'allquestions')[0]['id']
+            self.action('telpostansw', {'bot': 'ted', 'telegram_id': 503975561, 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': 0}, ted,
+                            'Register telegram answer')
+
+        example_account = [{ 'user': bob, 'integer_properties': []},
+                            { 'user': ted, 'integer_properties': []},
+                            { 'user': name_empty_account, 'integer_properties': [{'key': 15, 'value': 1}, {'key': 12, 'value': 5}, {'key': 13, 'value': 5}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': bob,
+            'telegram_id': 503975561
+        }, ted, 'bob  add telegram account 503975561')
+        self.action('apprvacc', {
+            'user': bob
+        }, bob, 'Bob approve telegram account')
+
+        example_account = [{ 'user': bob, 'integer_properties': [{'key': 13, 'value': 0}, {'key': 12, 'value': 0}]},
+                            { 'user': ted, 'integer_properties': []}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
+
+    def test_take_away_properties_telegram_account_4(self):
+        begin('take away properties account on merge')
+        bob = self.register_bob_account()
+        ted = self.register_ted_account()
+
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Add empty account through telegram')
+        name_empty_account = self.table('account', 'allaccounts')[2]['user']
+        
+        for w in range(5):
+            self.action('telpostqstn', {'bot': 'bob', 'telegram_id': 503975561, 'title': 'telegram', 'ipfs_link': 'undefined', 'community_id': 1, 'tags': [1], 'type': 0}, bob,
+                        'Register telegram question')
+            question_id = self.table('question', 'allquestions')[0]['id']
+            self.action('postanswer', {'user': 'bob', 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
+                    'Register bob answer')
+            self.wait(1)
+
+        example_account = [{ 'user': bob, 'integer_properties': [{'key': 12, 'value': 5}, {'key': 13, 'value': 5}]},
+                            { 'user': ted, 'integer_properties': []},
+                            { 'user': name_empty_account, 'integer_properties': [{'key': 15, 'value': 1}]}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': bob,
+            'telegram_id': 503975561
+        }, ted, 'bob  add telegram account 503975561')
+        self.action('apprvacc', {
+            'user': bob
+        }, bob, 'Bob approve telegram account')
+
+        example_account = [{ 'user': bob, 'integer_properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]},
+                            { 'user': ted, 'integer_properties': []}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
+
+    def test_migrate_negative_rating(self):
+        begin('Do not migrate negative rating from temporary Telegram account when link to Peeranha account')
+        alice = self.register_alice_account()
+        ted = self.register_ted_account()
+
+        self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
+                        'Add empty account through telegram')
+        empty_account = self.table('account', 'allaccounts')[2]['user']
+        self.action('chnguserrt', {'user': empty_account, 'rating_change': -5},
+                            self.admin, 'decrease empty account rating')
+        
+        self.action('addtelacc', {
+            'bot_name': ted,
+            'user': alice,
+            'telegram_id': 503975561
+        }, ted, 'Alice add telegram account 503975561')
+        self.action('apprvacc', {
+            'user': alice
+        }, alice, 'Alice approve telegram account, rating is not subtracted')
+        
+        example_account = [{'user': 'alice', 'rating': BASIC_RATING}, {'user': 'ted'}]
+        self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
+        end()
+        
 if __name__ == '__main__':
     main()

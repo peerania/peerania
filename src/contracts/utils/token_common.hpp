@@ -65,3 +65,18 @@ struct [[
 
 typedef eosio::multi_index<"totalrating"_n, totalrating> total_rating_index;
 const uint64_t scope_all_periods = eosio::name("allperiods").value;
+
+struct [[
+  eosio::table("totalratingg"), eosio::contract("peeranha.main")
+]] totalratingg {
+  uint16_t period;
+  uint32_t total_rating_to_reward;      // total_rating_to_reward / 1000
+  uint64_t primary_key() const {
+    // implicit cast
+    return period;
+  };
+  EOSLIB_SERIALIZE(totalratingg, (period)(total_rating_to_reward))
+};
+
+typedef eosio::multi_index<"totalratingg"_n, totalratingg> total_ratingg_index;
+//const uint64_t scope_all_periods = eosio::name("allperiods").value;

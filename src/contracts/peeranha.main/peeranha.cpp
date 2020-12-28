@@ -290,9 +290,16 @@ void peeranha::intallaccach() {
 void peeranha::intboost(uint64_t period) {
   require_auth(_self);
   auto iter_total_rating = total_rating_table.find(period);
+  total_ratingg_index total_rating_table_2(_self, scope_all_periods);
+
   eosio::check(iter_total_rating != total_rating_table.end(), "Wrong period");
 
   while (iter_total_rating != total_rating_table.begin()) {
+    total_rating_table_2.emplace(_self, [&iter_total_rating](auto &total_rating) {
+      total_rating.period = iter_total_rating->period;
+      total_rating.total_rating_to_reward = iter_total_rating->total_rating_to_reward;
+    });
+
     total_rating_table.modify(iter_total_rating, _self,
                               [](auto &total_rating) {
                                 total_rating.total_rating_to_reward *= 1000;
@@ -304,6 +311,10 @@ void peeranha::intboost(uint64_t period) {
                               [](auto &total_rating) {
                                 total_rating.total_rating_to_reward *= 1000;
                               });
+  total_rating_table_2.emplace(_self, [&iter_total_rating](auto &total_rating) {
+      total_rating.period = iter_total_rating->period;
+      total_rating.total_rating_to_reward = iter_total_rating->total_rating_to_reward;
+    });
 }
 
 #ifdef SUPERFLUOUS_INDEX

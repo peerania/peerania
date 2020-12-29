@@ -258,7 +258,6 @@ void token::inviteuser(name inviter, name invited_user) {
       });
 }
 
-<<<<<<< HEAD
 void token::addboost(name user, asset tokens) {
   require_auth(user);
   boost_index boost_table(_self, user.value);
@@ -403,7 +402,8 @@ uint64_t token::getvalboost(name user, uint64_t period) { ///???
 
   auto iter_last_boost = boost_table.find(period);
   return iter_last_boost->staked_tokens.amount;
-=======
+}
+
 void token::setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp) {
     require_auth(user);
     question_bounty bounty_table(_self, scope_all_bounties);
@@ -446,7 +446,6 @@ void token::paybounty(name user, uint64_t question_id, bool on_delete) {
         add_balance(user, iter_bounty->amount, user);
         bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
     }
->>>>>>> develop
 }
 
 void token::rewardrefer(name invited_user) {
@@ -556,13 +555,9 @@ void token::resettables(std::vector<eosio::name> allaccs) {
 }  // namespace eosio
 
 EOSIO_DISPATCH(eosio::token,
-<<<<<<< HEAD
                (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)(rewardrefer)
-               (addboost)
-=======
-               (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)
-               (setbounty)(paybounty)(rewardrefer)
->>>>>>> develop
+               (addboost)(setbounty)(paybounty)
+
 #if STAGE == 1 || STAGE == 2
                    (resettables)
 #if STAGE == 2

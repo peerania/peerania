@@ -291,7 +291,6 @@ void peeranha::intallaccach() {
   init_users_achievements();
 }
 
-<<<<<<< HEAD
 void peeranha::intboost(uint64_t period) {
   require_auth(_self);
   auto iter_total_rating = total_rating_table.find(period);
@@ -321,7 +320,8 @@ void peeranha::intboost(uint64_t period) {
                               [](auto &total_rating) {
                                 total_rating.total_rating_to_reward *= 1000;
                               });
-=======
+}
+
 void peeranha::movecomscnd() {
   require_auth(_self);
   commbuf_table_index commbuf_table (_self, scope_all_communities);
@@ -341,7 +341,6 @@ void peeranha::movecomscnd() {
           });
     iter_communities = commbuf_table.erase(iter_communities);
   }
->>>>>>> develop
 }
 
 #ifdef SUPERFLUOUS_INDEX
@@ -532,11 +531,7 @@ EOSIO_DISPATCH(
         reportprof)(updateacc)(givemoderflg)(editcomm)(edittag)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
         (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(dsapprvacctl)(updtdsplname)(intallaccach)
-<<<<<<< HEAD
-        (intboost)
-=======
-        (movecomscnd)
->>>>>>> develop
+        (movecomscnd)(intboost)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

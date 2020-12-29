@@ -9,6 +9,7 @@
 #include "account.hpp"
 #include "peeranha_types.h"
 #include "token_period.hpp"
+#include "../peeranha.main/question_container.hpp"
 
 
 namespace eosio {
@@ -52,6 +53,10 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
   [[eosio::action]] void inviteuser(name inviter, name invited_user);
 
   [[eosio::action]] void rewardrefer(name invited_user);
+
+  [[eosio::action]] void addhotquestn(name user, uint64_t question_id, int hours);
+
+  [[eosio::action]] void delhotquestn(name user, uint64_t question_id);
 
   [[eosio::action]] void payforcpu(){};
 
@@ -124,11 +129,29 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
   };
   typedef eosio::multi_index<"invited"_n, invited_users> invited_users_index;
 
+struct [[eosio::table("promquestion"), eosio::contract("peeranha.main"), eosio::contract("peeranha.token")]] promoted_questions {
+  uint64_t question_id;
+  time start_time;
+  time ends_time;
+
+  uint64_t primary_key() const { return question_id; }
+};
+typedef eosio::multi_index<"promquestion"_n, promoted_questions> promoted_questions_index;
+
+// struct [[eosio::table("promquestion"), eosio::contract("peeranha.main"), eosio::contract("peeranha.token")]] token_awards {
+//   asset sum_token;
+
+//   uint64_t primary_key() const { return question_id; }
+// };
+// typedef eosio::multi_index<"promquestion"_n, promoted_questions> promoted_questions_index;
+// const uint64_t scope_all_top_questions = eosio::name("alltopquest").value;
+
   typedef eosio::multi_index<"accounts"_n, account> accounts;
   typedef eosio::multi_index<"stat"_n, currency_stats> stats;
 
   void sub_balance(name user, asset value);
   void add_balance(name user, asset value, name ram_payer);
+  void return_promoted_tokens(promoted_questions_index::const_iterator &iter_promoted_questions, name user);
 
   asset create_reward_pool(uint16_t period, int total_rating);
   asset get_user_reward(asset total_reward, int rating_to_reward,

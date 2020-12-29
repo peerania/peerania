@@ -10,6 +10,7 @@
 #define RATING_TOKEN_COEFFICIENT 7
 
 #define REFERAL_REWARD 5
+#define ONE_HOUR 3600
 #elif STAGE == 2
 #define INFLATION_PERIOD 2  // 2 secs
 #define START_POOL 40
@@ -17,6 +18,7 @@
 #define RATING_TOKEN_COEFFICIENT 8
 
 #define REFERAL_REWARD 10
+#define ONE_HOUR 4
 #else
 #define INFLATION_PERIOD 52 //52 periods(52 weeks)
 #define START_POOL 100000
@@ -24,8 +26,10 @@
 #define RATING_TOKEN_COEFFICIENT 10
 
 #define REFERAL_REWARD 200 // The referal program reward
+#define ONE_HOUR 3600
 #endif
 
+#define TOKEN_PROMOTED_QUESTION 2
 #define USER_SHARES 60
 
 #define REFERAL_SPLIT_COEFFICIENT 50  // The percentage passing to inviter

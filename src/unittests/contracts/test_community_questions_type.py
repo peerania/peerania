@@ -8,7 +8,7 @@ MODERATOR_FLG_ALL = 31
 defs = load_defines('./src/contracts/peeranha.main/economy.h')
 
 
-class CommunityQuestionsTyeTest(peeranhatest.peeranhaTest):
+class CommunityQuestionsTypeTest(peeranhatest.peeranhaTest):
 
     def test_ask_and_modify_questions(self):
         begin("Testing work of asking and modifying questionst in community with general/expert/any type")

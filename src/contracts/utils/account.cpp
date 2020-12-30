@@ -27,6 +27,7 @@ void account::update() {
       rating += periods_have_passed * BAN_RATING_INCREMENT_PER_PERIOD;
       if (rating > 0) rating = 1;
     } else {
+      rating += 1;
       energy = get_status_energy();
     }
     last_update_period = current_period;

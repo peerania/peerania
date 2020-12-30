@@ -155,11 +155,11 @@ void peeranha::move_table_statistic(eosio::name old_user, eosio::name new_user) 
 
                           int32_t sum_first_answer = get_property_d(iter_old_account->integer_properties, PROPERTY_FIRST_ANSWER, 0);
                           sum_first_answer += get_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, 0);
-                          set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer);
+                          set_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer, 0);
 
                           int32_t sum_answer_15_minutes = get_property_d(iter_old_account->integer_properties, PROPERTY_ANSWER_15_MINUTES, 0);
                           sum_answer_15_minutes += get_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, 0);
-                          set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes);
+                          set_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes, 0);
                        });
   global_stat_index global_stat_table(_self, scope_all_stat);
   global_stat_table.modify(
@@ -217,10 +217,10 @@ void peeranha::move_table_usrquestions(eosio::name old_user, eosio::name new_use
   }
   update_rating(new_user, rating_change, [delete_first_answer, delete_answer_15_minutes](auto &account) {
     int32_t first_answer = get_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, 0);
-    set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, first_answer - delete_first_answer);
+    set_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, first_answer - delete_first_answer, 0);
 
     int32_t answer_15_minutes = get_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, 0);
-    set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, answer_15_minutes - delete_answer_15_minutes);
+    set_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, answer_15_minutes - delete_answer_15_minutes, 0);
   });
 }
 
@@ -283,10 +283,10 @@ void peeranha::move_table_usranswers(eosio::name old_user, eosio::name new_user)
 
   update_rating(old_user, rating_change_old_user, [delete_first_answer, delete_answer_15_minutes](auto &account) {
     int32_t first_answer = get_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, 0);
-    set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, first_answer - delete_first_answer);
+    set_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, first_answer - delete_first_answer, 0);
 
     int32_t answer_15_minutes = get_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, 0);
-    set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, answer_15_minutes - delete_answer_15_minutes);
+    set_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, answer_15_minutes - delete_answer_15_minutes, 0);
   });
 
   update_rating(new_user, rating_change_new_user);

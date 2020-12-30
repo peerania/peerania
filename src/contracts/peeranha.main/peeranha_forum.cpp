@@ -90,7 +90,7 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
 
     int32_t sum_answer_15_minutes = get_property_d(iter_account->integer_properties, PROPERTY_ANSWER_15_MINUTES, 0) + 1;
     update_rating(iter_account, [sum_answer_15_minutes](auto &account) {
-      set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes);
+      set_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes, 0);
     });
     update_achievement(iter_account->user, ANSWER_15_MINUTES, sum_answer_15_minutes);
   }
@@ -103,7 +103,7 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
 
     int32_t sum_first_answer = get_property_d(iter_account->integer_properties, PROPERTY_FIRST_ANSWER, 0) + 1;;
     update_rating(iter_account, [&sum_first_answer](auto &account) {
-      set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer);
+      set_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer, 0);
     });
     update_achievement(iter_account->user, FIRST_ANSWER, sum_first_answer);
   }
@@ -266,11 +266,11 @@ void peeranha::delete_answer(eosio::name user, uint64_t question_id,
                   account.answers_given -= 1;
                   if (within_15_minutes) {
                     int32_t sum_answer_15_minutes = get_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, 1) - 1;
-                    set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes);
+                    set_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes, 0);
                   }
                   if (first_answer) {
                     int32_t sum_first_answer = get_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, 1) - 1;
-                    set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer);
+                    set_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer, 0);
                   }
                 });
 }

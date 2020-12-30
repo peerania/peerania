@@ -138,13 +138,14 @@ struct [[eosio::table("promquestion"), eosio::contract("peeranha.main"), eosio::
 };
 typedef eosio::multi_index<"promquestion"_n, promoted_questions> promoted_questions_index;
 
-// struct [[eosio::table("promquestion"), eosio::contract("peeranha.main"), eosio::contract("peeranha.token")]] token_awards {
-//   asset sum_token;
+struct [[eosio::table("tokenawards"), eosio::contract("peeranha.main"), eosio::contract("peeranha.token")]] token_awards {
+  asset sum_token;
+  uint64_t period;
 
-//   uint64_t primary_key() const { return question_id; }
-// };
-// typedef eosio::multi_index<"promquestion"_n, promoted_questions> promoted_questions_index;
-// const uint64_t scope_all_top_questions = eosio::name("alltopquest").value;
+  uint64_t primary_key() const { return period; }
+};
+typedef eosio::multi_index<"tokenawards"_n, token_awards> token_awards_index;
+const uint64_t scope_all_token_awards = eosio::name("allawards").value;
 
   typedef eosio::multi_index<"accounts"_n, account> accounts;
   typedef eosio::multi_index<"stat"_n, currency_stats> stats;

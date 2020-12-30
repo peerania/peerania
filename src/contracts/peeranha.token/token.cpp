@@ -325,6 +325,23 @@ void token::addhotquestn(name user, uint64_t question_id, int hours) {
   sub_balance(user, quantity);
   //add_balance(peerMain, quantity, _self);
 
+  token_awards_index token_awards_table(_self, scope_all_token_awards);
+  uint64_t period = get_period(now());
+  auto iter_token_awards = token_awards_table.find(period);
+
+   if (iter_token_awards == token_awards_table.end()) {
+    token_awards_table.emplace(
+      _self, [quantity, period](auto &token_awards) {
+        token_awards.sum_token = quantity;
+        token_awards.period = period;
+      });
+  } else {
+    token_awards_table.modify(
+      iter_token_awards, _self, [quantity](auto &token_awards) {
+        token_awards.sum_token += quantity;
+      });
+  }
+
   if (iter_promoted_questions == promoted_questions_table.end()) {
     promoted_questions_table.emplace(
       _self, [&](auto &promoted_question) {

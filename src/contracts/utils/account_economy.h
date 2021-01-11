@@ -32,8 +32,8 @@
 #define TIME_15_MINUTES 900  // 15 minutes
 #endif
 
-#define MULTIPLICATION_TOTAL_RATING 1000 // value for boost
-#define MAX_MULTIPLICATION_TOTAL_RATING 1000 // value for boost
+#define MULTIPLICATION_TOTAL_RATING 1000     // value for boost
+#define MAX_MULTIPLICATION_TOTAL_RATING 3000 //
 
 #define STATUS0(X) \
   case 0 ... 99:   \

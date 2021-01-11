@@ -32,6 +32,8 @@
 #define TIME_15_MINUTES 900  // 15 minutes
 #endif
 
+#define MULTIPLICATION_TOTAL_RATING 1000     // value for boost
+#define MAX_MULTIPLICATION_TOTAL_RATING 3000 //
 
 #define STATUS0(X) \
   case 0 ... 99:   \
@@ -65,6 +67,10 @@
 
 #define BAN_RATING_INCREMENT_PER_PERIOD 6
 #define MAX_FREEZE_PERIOD_MULTIPLIER 6
+
+#define BOUNTY_STATUS_ACTIVE 1
+#define BOUNTY_STATUS_PAID 2
+#define BOUNTY_STATUS_PENDING 3
 
 #if STAGE == 1 
 // Account period

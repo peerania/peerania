@@ -141,9 +141,9 @@ class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
                               'ipfs_description': 'AT', 'community_id': 1}, alice, 'Alice create tag')
         self.failed_action('crtag', {'user': bob, 'name': 'bob tag', 'ipfs_description': 'BT',
                                      'community_id': 1}, bob, 'Bob attempt to create tag', 'assert')
-        self.action('crcommunity', {'user': carol, 'name': 'alice community',
+        self.action('crcommunity', {'user': carol, 'name': 'alice community', 'type': 2,
                                     'ipfs_description': 'ACM', 'suggested_tags': self.get_stub_suggested_tags()}, carol, 'Carol create community')
-        self.failed_action('crcommunity', {'user': dan, 'name': 'bob community',
+        self.failed_action('crcommunity', {'user': dan, 'name': 'bob community', 'type': 2,
                                            'ipfs_description': 'BCM', 'suggested_tags': self.get_stub_suggested_tags()}, dan, 'Dan attempt to create community', 'assert')
         end()
 
@@ -152,7 +152,7 @@ class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
         ted = self.register_ted_account(30000, defs['ENERGY_CREATE_TAG'] + defs['ENERGY_CREATE_COMMUNITY'])
         self.action('crtag', {'user': ted, 'community_id': 1,
                               'name': 'ted tag', 'ipfs_description': 'TT'}, ted, 'Ted create tag')
-        self.action('crcommunity', {'user': ted, 'name': 'ted community',
+        self.action('crcommunity', {'user': ted, 'name': 'ted community', 'type': 2,
                                     'ipfs_description': 'TCM', 'suggested_tags': self.get_stub_suggested_tags()}, ted, 'Ted create community')
         c = self.table('crcommtb', 'allcomm')
         t = self.table('crtagtb', get_tag_scope(1))
@@ -179,7 +179,7 @@ class ForumRatingRewardsTests(peeranhatest.peeranhaTest):
         ted = self.register_ted_account(30000, defs['ENERGY_CREATE_TAG'] + defs['ENERGY_CREATE_COMMUNITY'])
         self.action('crtag', {'user': ted, 'community_id': 1,
                               'name': 'ted tag', 'ipfs_description': 'TT'}, ted, 'Ted create tag')
-        self.action('crcommunity', {'user': ted, 'name': 'ted community',
+        self.action('crcommunity', {'user': ted, 'name': 'ted community', 'type': 2,
                                     'ipfs_description': 'TCM', 'suggested_tags': self.get_stub_suggested_tags()}, ted, 'Ted create community')
         c = self.table('crcommtb', 'allcomm')
         t = self.table('crtagtb', get_tag_scope(1))

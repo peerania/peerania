@@ -34,7 +34,7 @@ void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t commu
   eosio::name user = get_telegram_action_account(telegram_id);
   post_question(user, community_id, tags, title, ipfs_link, type);
 
-  user_questions_index user_questions_table(_self, user.value); 
+  user_questions_index user_questions_table(_self, user.value);
   auto iter_user_question = user_questions_table.begin();
   eosio::check(iter_user_question != user_questions_table.end(), "Error set property question");
 
@@ -66,11 +66,10 @@ void peeranha::telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t quest
   post_answer(user, question_id, ipfs_link, buf_official_answer);
 
   user_answers_index user_answer_table(_self, user.value);
-  auto iter_user_answer = user_answer_table.find(question_id);
+  auto iter_user_answer = user_answer_table.begin();
   eosio::check(iter_user_answer != user_answer_table.end(), "Error set property answer");
-  eosio::check(iter_user_answer->question_id == question_id, std::to_string(iter_user_answer->question_id) );
 
-  auto iter_question = find_question(question_id);
+  auto iter_question = find_question(iter_user_answer->question_id);
   auto iter_account = account_table.find(user.value);
   question_table.modify(iter_question, _self,
                       [&iter_user_answer, iter_account](auto &question) {
@@ -108,9 +107,9 @@ void peeranha::delcomment(eosio::name user, uint64_t question_id,
 
 void peeranha::modquestion(eosio::name user, uint64_t question_id,
                            uint16_t community_id, std::vector<uint32_t> tags,
-                           std::string title, IpfsHash ipfs_link) {
+                           std::string title, IpfsHash ipfs_link, uint8_t type) {
   require_auth(user);
-  modify_question(user, question_id, community_id, tags, title, ipfs_link);
+  modify_question(user, question_id, community_id, tags, title, ipfs_link, type);
 }
 
 void peeranha::modanswer(eosio::name user, uint64_t question_id,
@@ -153,9 +152,9 @@ void peeranha::reportforum(eosio::name user, uint64_t question_id,
 // Tags and communities
 void peeranha::crcommunity(eosio::name user, std::string name,
                            IpfsHash ipfs_description,
-                           std::vector<suggest_tag> suggested_tags) {
+                           std::vector<suggest_tag> suggested_tags, uint16_t allowed_question_type) {
   require_auth(user);
-  create_community(user, name, ipfs_description, suggested_tags);
+  create_community(user, name, allowed_question_type, ipfs_description, suggested_tags);
 }
 
 void peeranha::crtag(eosio::name user, uint16_t community_id, std::string name,
@@ -216,9 +215,14 @@ void peeranha::givecommuflg(eosio::name user, int flags, uint16_t community_id) 
   give_moderator_flag(user, flags, community_id);
 }
 
-void peeranha::editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_description) {
+void peeranha::editcomm(eosio::name user, uint16_t community_id, std::string name, IpfsHash ipfs_description, uint16_t allowed_question_type) {
   require_auth(user);
-  edit_community(user, community_id, name, ipfs_description);
+  edit_community(user, community_id, name, ipfs_description, allowed_question_type);
+}
+
+void peeranha::edittag(eosio::name user, uint16_t community_id, uint32_t tag_id, const std::string name, const IpfsHash ipfs_description) {
+  require_auth(user);
+  edit_tag(user, community_id, tag_id, name, ipfs_description);
 }
 
 void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating){
@@ -265,16 +269,11 @@ void peeranha::dsapprvacc(eosio::name user) {
 void peeranha::dsapprvacctl(eosio::name bot_name, eosio::name user) {
   require_auth(bot_name);
   disapprove_account(user);
-}
+} 
 
 void peeranha::addtelacc(eosio::name bot_name, eosio::name user, uint64_t telegram_id) {
   require_auth(bot_name);
   add_telegram_account(user, telegram_id, false);
-}
-
-void peeranha::addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar) {
-  require_auth(bot_name);
-  add_empty_telegram_account(telegram_id, display_name, ipfs_profile, ipfs_avatar);
 }
 
 void peeranha::updtdsplname(eosio::name bot_name, uint64_t telegram_id, std::string display_name) {
@@ -282,9 +281,66 @@ void peeranha::updtdsplname(eosio::name bot_name, uint64_t telegram_id, std::str
   update_display_name(telegram_id, display_name);
 }
 
+void peeranha::addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar) {
+  require_auth(bot_name);
+  add_empty_telegram_account(telegram_id, display_name, ipfs_profile, ipfs_avatar);
+}
+
 void peeranha::intallaccach() {
   require_auth(_self);
   init_users_achievements();
+}
+
+void peeranha::intboost(uint64_t period) {
+  require_auth(_self);
+  auto iter_total_rating = total_rating_table.find(period);
+  total_ratingg_index total_rating_table_2(_self, scope_all_periods);
+
+  eosio::check(iter_total_rating != total_rating_table.end(), "Wrong period");
+
+  while (iter_total_rating != total_rating_table.begin()) {
+    total_rating_table_2.emplace(_self, [&iter_total_rating](auto &total_rating) {
+      total_rating.period = iter_total_rating->period;
+      total_rating.total_rating_to_reward = iter_total_rating->total_rating_to_reward;
+    });
+
+    total_rating_table.modify(iter_total_rating, _self,
+                              [](auto &total_rating) {
+                                total_rating.total_rating_to_reward *= MULTIPLICATION_TOTAL_RATING;
+                              });
+    iter_total_rating--;
+  }
+
+  total_rating_table_2.emplace(_self, [&iter_total_rating](auto &total_rating) {
+      total_rating.period = iter_total_rating->period;
+      total_rating.total_rating_to_reward = iter_total_rating->total_rating_to_reward;
+    });
+
+  total_rating_table.modify(iter_total_rating, _self,
+                              [](auto &total_rating) {
+                                total_rating.total_rating_to_reward *= MULTIPLICATION_TOTAL_RATING;
+                              });
+}
+
+void peeranha::movecomscnd() {
+  require_auth(_self);
+  commbuf_table_index commbuf_table (_self, scope_all_communities);
+  community_table_index community_table (_self, scope_all_communities);
+  auto iter_communities = commbuf_table.begin();
+  while (iter_communities != commbuf_table.end()) {
+    community_table.emplace(
+          _self, [&iter_communities](auto &comm) {
+            comm.id = iter_communities->id;
+            comm.name = iter_communities->name;
+            comm.ipfs_description = iter_communities->ipfs_description;
+            comm.creation_time = iter_communities->creation_time;
+            comm.questions_asked = iter_communities->questions_asked;
+            comm.answers_given = iter_communities->answers_given;
+            comm.correct_answers = iter_communities->correct_answers;
+            comm.users_subscribed = iter_communities->users_subscribed;
+          });
+    iter_communities = commbuf_table.erase(iter_communities);
+  }
 }
 
 #ifdef SUPERFLUOUS_INDEX
@@ -430,6 +486,13 @@ void peeranha::resettables() {
   while (iter_telegram_account != telegram_account_table.end()) {
     iter_telegram_account = telegram_account_table.erase(iter_telegram_account);
   }
+
+  // clean combuf table
+  commbuf_table_index combuf_table(_self, scope_all_communities);
+  auto iter_combuf = combuf_table.begin();
+  while (iter_combuf != combuf_table.end()) {
+    iter_combuf = combuf_table.erase(iter_combuf);
+  }
 #if STAGE == 2
   // clean constants
   constants_index all_constants_table(_self, scope_all_constants);
@@ -465,9 +528,10 @@ EOSIO_DISPATCH(
         delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(modcomment)(
         upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
-        reportprof)(updateacc)(givemoderflg)(editcomm)(chgqsttype)
+        reportprof)(updateacc)(givemoderflg)(editcomm)(edittag)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
         (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(dsapprvacctl)(updtdsplname)(intallaccach)
+        (movecomscnd)(intboost)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

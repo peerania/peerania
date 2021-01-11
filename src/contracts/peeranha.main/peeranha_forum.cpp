@@ -9,10 +9,14 @@ question_index::const_iterator peeranha::find_question(uint64_t question_id) {
 void peeranha::post_question(eosio::name user, uint16_t community_id,
                              const std::vector<uint32_t> tags,
                              const std::string &title,
-                             const IpfsHash &ipfs_link, const uint8_t type) {
+                             const IpfsHash &ipfs_link,
+                             const uint8_t type) {
   assert_ipfs(ipfs_link);
   assert_title(title);
   assert_question_type(type);
+  assert_community_exist(community_id);
+  assert_community_questions_type(community_id, type);
+
   auto iter_account = find_account(user);
   update_rating(iter_account, POST_QUESTION_REWARD, [community_id](auto &account) {
     account.reduce_energy(ENERGY_POST_QUESTION, community_id);
@@ -86,7 +90,7 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
 
     int32_t sum_answer_15_minutes = get_property_d(iter_account->integer_properties, PROPERTY_ANSWER_15_MINUTES, 0) + 1;
     update_rating(iter_account, [sum_answer_15_minutes](auto &account) {
-      set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes);
+      set_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes, 0);
     });
     update_achievement(iter_account->user, ANSWER_15_MINUTES, sum_answer_15_minutes);
   }
@@ -99,7 +103,7 @@ void peeranha::post_answer(eosio::name user, uint64_t question_id,
 
     int32_t sum_first_answer = get_property_d(iter_account->integer_properties, PROPERTY_FIRST_ANSWER, 0) + 1;;
     update_rating(iter_account, [&sum_first_answer](auto &account) {
-      set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer);
+      set_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer, 0);
     });
     update_achievement(iter_account->user, FIRST_ANSWER, sum_first_answer);
   }
@@ -181,9 +185,15 @@ void peeranha::post_comment(eosio::name user, uint64_t question_id,
 void peeranha::delete_question(eosio::name user, uint64_t question_id) {
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
+  question_bounty bounty_table(peeranha_token, scope_all_bounties);
+  auto iter_bounty = bounty_table.find(question_id);
+
   assert_allowed(*iter_account, iter_question->user, Action::DELETE_QUESTION, iter_question->community_id);
   eosio::check(iter_question->answers.empty(),
                "You can't delete not empty question");
+  if (iter_bounty != bounty_table.end()) {
+    eosio::check(iter_bounty->status == BOUNTY_STATUS_PAID, "You cannot delete question until bounty is paid");
+  }
   update_community_statistics(iter_question->community_id, -1, 0, 0, 0);
   update_tags_statistics(iter_question->community_id, iter_question->tags, -1);
   delete_top_question(iter_question->community_id, question_id);
@@ -256,11 +266,11 @@ void peeranha::delete_answer(eosio::name user, uint64_t question_id,
                   account.answers_given -= 1;
                   if (within_15_minutes) {
                     int32_t sum_answer_15_minutes = get_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, 1) - 1;
-                    set_property(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes);
+                    set_property_d(account.integer_properties, PROPERTY_ANSWER_15_MINUTES, sum_answer_15_minutes, 0);
                   }
                   if (first_answer) {
                     int32_t sum_first_answer = get_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, 1) - 1;
-                    set_property(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer);
+                    set_property_d(account.integer_properties, PROPERTY_FIRST_ANSWER, sum_first_answer, 0);
                   }
                 });
 }
@@ -295,9 +305,13 @@ void peeranha::modify_question(eosio::name user, uint64_t question_id,
                                uint16_t community_id,
                                const std::vector<uint32_t> &tags,
                                const std::string &title,
-                               const IpfsHash &ipfs_link) {
+                               const IpfsHash &ipfs_link,
+                               const uint8_t type) {
   assert_ipfs(ipfs_link);
   assert_title(title);
+  assert_question_type(type);
+  assert_community_exist(community_id);
+  assert_community_questions_type(community_id, type);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
   assert_allowed(*iter_account, iter_question->user, Action::MODIFY_QUESTION, community_id);
@@ -311,12 +325,14 @@ void peeranha::modify_question(eosio::name user, uint64_t question_id,
   update_tags_statistics(community_id, tags, 1);
   question_table.modify(
       iter_question, _self,
-      [&ipfs_link, &title, community_id, &tags](auto &question) {
+      [&ipfs_link, &title, community_id, &tags, type](auto &question) {
         question.ipfs_link = ipfs_link;
         question.title = title;
         question.community_id = community_id;
         question.tags = tags;
         set_property(question.properties, PROPERTY_LAST_MODIFIED, now());
+        set_property_d(question.properties, PROPERTY_QUESTION_TYPE, (int)type,
+                   QUESTION_TYPE_EXPERT);
       });
   update_rating(iter_account, 0, [](auto &account) {
     account.reduce_energy(ENERGY_MODIFY_QUESTION);

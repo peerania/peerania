@@ -12,7 +12,7 @@ def setvar(source, var, except_var=None):
     if isinstance(source, list):
         for item in source:
             setvar(item, var, except_var)
-        
+
 
 
 def compare(expected, source, mp = {}, ignore_excess = False):

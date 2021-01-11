@@ -291,6 +291,37 @@ void peeranha::intallaccach() {
   init_users_achievements();
 }
 
+void peeranha::intboost(uint64_t period) {
+  require_auth(_self);
+  auto iter_total_rating = total_rating_table.find(period);
+  total_ratingg_index total_rating_table_2(_self, scope_all_periods);
+
+  eosio::check(iter_total_rating != total_rating_table.end(), "Wrong period");
+
+  while (iter_total_rating != total_rating_table.begin()) {
+    total_rating_table_2.emplace(_self, [&iter_total_rating](auto &total_rating) {
+      total_rating.period = iter_total_rating->period;
+      total_rating.total_rating_to_reward = iter_total_rating->total_rating_to_reward;
+    });
+
+    total_rating_table.modify(iter_total_rating, _self,
+                              [](auto &total_rating) {
+                                total_rating.total_rating_to_reward *= MULTIPLICATION_TOTAL_RATING;
+                              });
+    iter_total_rating--;
+  }
+
+  total_rating_table_2.emplace(_self, [&iter_total_rating](auto &total_rating) {
+      total_rating.period = iter_total_rating->period;
+      total_rating.total_rating_to_reward = iter_total_rating->total_rating_to_reward;
+    });
+
+  total_rating_table.modify(iter_total_rating, _self,
+                              [](auto &total_rating) {
+                                total_rating.total_rating_to_reward *= MULTIPLICATION_TOTAL_RATING;
+                              });
+}
+
 void peeranha::movecomscnd() {
   require_auth(_self);
   commbuf_table_index commbuf_table (_self, scope_all_communities);
@@ -500,7 +531,7 @@ EOSIO_DISPATCH(
         reportprof)(updateacc)(givemoderflg)(editcomm)(edittag)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
         (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(dsapprvacctl)(updtdsplname)(intallaccach)
-        (movecomscnd)
+        (movecomscnd)(intboost)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

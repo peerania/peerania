@@ -53,6 +53,16 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   [[eosio::action]] void inviteuser(name inviter, name invited_user);
 
+  [[eosio::action]] void addboost(name user, asset tokens);
+
+  void update_statistics_boost(asset tokens, name user);
+  
+  void get_value_statistic_boost(asset &new_tokens, asset &max_stake, name &user_max_stake, name user);
+
+  int64_t getstakedbalance(name user);
+
+  uint64_t getvalboost(name user, uint64_t period);
+
   [[eosio::action]] void setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp);
 
   [[eosio::action]] void paybounty(name user, uint64_t question_id, bool on_delete);

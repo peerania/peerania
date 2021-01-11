@@ -306,7 +306,7 @@ void peeranha::intboost(uint64_t period) {
 
     total_rating_table.modify(iter_total_rating, _self,
                               [](auto &total_rating) {
-                                total_rating.total_rating_to_reward *= 1000;
+                                total_rating.total_rating_to_reward *= MULTIPLICATION_TOTAL_RATING;
                               });
     iter_total_rating--;
   }
@@ -318,7 +318,7 @@ void peeranha::intboost(uint64_t period) {
 
   total_rating_table.modify(iter_total_rating, _self,
                               [](auto &total_rating) {
-                                total_rating.total_rating_to_reward *= 1000;
+                                total_rating.total_rating_to_reward *= MULTIPLICATION_TOTAL_RATING;
                               });
 }
 

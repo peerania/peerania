@@ -55,7 +55,7 @@ struct [[
   eosio::table("totalrating"), eosio::contract("peeranha.main")
 ]] totalrating {
   uint16_t period;
-  uint32_t total_rating_to_reward;      // total_rating_to_reward / 1000
+  uint32_t total_rating_to_reward;      // total_rating_to_reward / MULTIPLICATION_TOTAL_RATING
   uint64_t primary_key() const {
     // implicit cast
     return period;
@@ -70,7 +70,7 @@ struct [[
   eosio::table("totalratingg"), eosio::contract("peeranha.main")
 ]] totalratingg {
   uint16_t period;
-  uint32_t total_rating_to_reward;      // total_rating_to_reward / 1000
+  uint32_t total_rating_to_reward;      // total_rating_to_reward / MULTIPLICATION_TOTAL_RATING
   uint64_t primary_key() const {
     // implicit cast
     return period;

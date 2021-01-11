@@ -164,16 +164,16 @@ asset token::create_reward_pool(uint16_t period, int total_rating) {
     inflation_reward_pool *= POOL_REDUSE_COEFFICIENT;
   }
   int64_t reward_pool = int64_to_peer(total_rating * RATING_TOKEN_COEFFICIENT);
-  if (reward_pool > inflation_reward_pool * 1000) {
-    reward_pool = inflation_reward_pool * 1000;
+  if (reward_pool > inflation_reward_pool * MULTIPLICATION_TOTAL_RATING) {
+    reward_pool = inflation_reward_pool * MULTIPLICATION_TOTAL_RATING;
   }
   const int64_t remaining_user_supply =
       st->user_max_supply.amount - st->user_supply.amount;
-  if (reward_pool > remaining_user_supply * 1000) {
-    reward_pool = remaining_user_supply * 1000;
+  if (reward_pool > remaining_user_supply * MULTIPLICATION_TOTAL_RATING) {
+    reward_pool = remaining_user_supply * MULTIPLICATION_TOTAL_RATING;
   }
   auto quantity = asset(reward_pool, sym);
-  quantity.amount /= 1000;
+  quantity.amount /= MULTIPLICATION_TOTAL_RATING;
   statstable.modify(st, _self, [&quantity](auto &s) {
     s.supply += quantity;
     s.user_supply += quantity;

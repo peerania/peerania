@@ -212,7 +212,7 @@ void peeranha::update_rating_base(
             // rating transaction on this week); Test 2 guarantees the value of
             // rating_to_award_change >= 0;
             total_rating.period = current_period;
-            total_rating.total_rating_to_reward = new_rating_to_award_change;    // total_rating_to_reward / 1000
+            total_rating.total_rating_to_reward = new_rating_to_award_change;    // total_rating_to_reward / MULTIPLICATION_TOTAL_RATING
           });
     } else {
       total_rating_table.modify(iter_total_rating_change, _self,
@@ -224,7 +224,7 @@ void peeranha::update_rating_base(
                                   // Test 2 guarantee that summ of all
                                   // ratnig_to_award_change >= 0
                                   total_rating.total_rating_to_reward +=
-                                      new_rating_to_award_change;               // total_rating_to_reward / 1000
+                                      new_rating_to_award_change;               // total_rating_to_reward / MULTIPLICATION_TOTAL_RATING
                                 });
     }
   }

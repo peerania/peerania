@@ -1125,7 +1125,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'user': bob
         }, bob, 'Bob approve telegram account')
 
-        example_account = [{ 'user': bob, 'integer_properties': [{'key': 13, 'value': 0}, {'key': 12, 'value': 0}]},
+        example_account = [{ 'user': bob, 'integer_properties': []},  # clear properties key 12/13 (value = 0)
                             { 'user': ted, 'integer_properties': []}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
@@ -1161,7 +1161,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'user': bob
         }, bob, 'Bob approve telegram account')
 
-        example_account = [{ 'user': bob, 'integer_properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]},
+        example_account = [{ 'user': bob, 'integer_properties': []}, # clear properties key 12/13 (value = 0)
                             { 'user': ted, 'integer_properties': []}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()

@@ -128,8 +128,12 @@ void peeranha::give_moderator_flag(eosio::name user, int flags, uint16_t communi
             key_value.value =  flags;
             property_community.properties.push_back(key_value);
           }
-          else{
-            iter_community->value =  flags; 
+          else {
+            if (!flags) {
+              property_community.properties.erase(iter_community);
+            } else {
+              iter_community->value = flags;
+            }
           }
         });
   }

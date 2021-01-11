@@ -21,47 +21,89 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         bob = self.register_bob_account()
 
         self.failed_action('givecommuflg', {
-        'user': alice,
-        'flags': COMMUNITY_ADMIN_FLG_INFINITE_IMPACT,
-        'community_id': 666
+            'user': alice,
+            'flags': COMMUNITY_ADMIN_FLG_INFINITE_IMPACT,
+            'community_id': 666
         }, admin, 'add a flag in wrong community')
 
         self.action('givecommuflg', {
-        'user': alice,
-        'flags': COMMUNITY_ADMIN_FLG_INFINITE_IMPACT,
-        'community_id': 1
+            'user': alice,
+            'flags': COMMUNITY_ADMIN_FLG_INFINITE_IMPACT,
+            'community_id': 1
         }, admin, 'add a flag COMMUNITY_ADMIN_FLG_INFINITE_IMPACT')
-        table = self.table('propertycomm', 'allprprtcomm')
         example = [{'user': 'alice', 'properties': [{'community': 1, 'value': 2}]}]
-        self.assertTrue(compare(example, table, ignore_excess=True))
+        self.assertTrue(compare(example, self.table('propertycomm', 'allprprtcomm'), ignore_excess=True))
 
         self.action('givecommuflg', {
-        'user': alice,
-        'flags': COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS,
-        'community_id': 1
+            'user': alice,
+            'flags': COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS,
+            'community_id': 1
         }, admin, 'alice add a flag COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS')
-        table = self.table('propertycomm', 'allprprtcomm')
         example = [{'user': 'alice', 'properties': [{'community': 1, 'value': 32}]}]
-        self.assertTrue(compare(example, table, ignore_excess=True))
+        self.assertTrue(compare(example, self.table('propertycomm', 'allprprtcomm'), ignore_excess=True))
 
         self.action('givecommuflg', {
-        'user': alice,
-        'flags': COMMUNITY_ADMIN_FLG_INFINITE_ENERGY,
-        'community_id': 2
+            'user': alice,
+            'flags': COMMUNITY_ADMIN_FLG_INFINITE_ENERGY,
+            'community_id': 2
         }, admin, 'alice add a flag COMMUNITY_ADMIN_FLG_CREATE_COMMUNITY')
-        table = self.table('propertycomm', 'allprprtcomm')
         example = [{'user': 'alice', 'properties': [{'community': 1, 'value': 32}, {'community': 2, 'value': 1}]}]
-        
-        self.assertTrue(compare(example, table, ignore_excess=True))
+        self.assertTrue(compare(example, self.table('propertycomm', 'allprprtcomm'), ignore_excess=True))
 
         self.action('givecommuflg', {
-        'user': bob,
-        'flags': COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS,
-        'community_id': 1
+            'user': bob,
+            'flags': COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS,
+            'community_id': 1
         }, admin, 'bob add a flag COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS')
-        table = self.table('propertycomm', 'allprprtcomm')
         example = [{'user': 'alice', 'properties': [{'community': 1, 'value': 32}, {'community': 2, 'value': 1}]}, {'user': 'bob', 'properties': [{'community': 1, 'value': 32}]}]
-        self.assertTrue(compare(example, table, ignore_excess=True))
+        self.assertTrue(compare(example, self.table('propertycomm', 'allprprtcomm'), ignore_excess=True))
+        end()
+    
+    def test_pick_up_flag(self):
+        begin('Test pick up flag')
+        admin = self.get_contract_deployer(self.get_default_contract())
+        alice = self.register_alice_account()
+        
+        self.action('givecommuflg', {
+            'user': alice,
+            'flags': COMMUNITY_ADMIN_FLG_INFINITE_IMPACT,
+            'community_id': 1
+        }, admin, 'add a flag COMMUNITY_ADMIN_FLG_INFINITE_IMPACT')
+        example = [{'user': 'alice', 'properties': [{'community': 1, 'value': 2}]}]
+        self.assertTrue(compare(example, self.table('propertycomm', 'allprprtcomm'), ignore_excess=True))
+
+        self.action('givecommuflg', {
+            'user': alice,
+            'flags': 0,
+            'community_id': 1
+        }, admin, 'pick_up flag for community 1')
+        example = [{'user': 'alice', 'properties': []}]
+        self.assertTrue(compare(example, self.table('propertycomm', 'allprprtcomm'), ignore_excess=True))
+
+        self.wait(2)
+        self.action('givecommuflg', {
+            'user': alice,
+            'flags': 5,
+            'community_id': 1
+        }, admin, 'add a flag 5 for community 1')
+        example = [{'user': 'alice', 'properties': [{'community': 1, 'value': 5}]}]
+        self.assertTrue(compare(example, self.table('propertycomm', 'allprprtcomm'), ignore_excess=True))
+
+        self.action('givecommuflg', {
+            'user': alice,
+            'flags': 10,
+            'community_id': 2
+        }, admin, 'add a flag 10 for community 2')
+        example = [{'user': 'alice', 'properties': [{'community': 1, 'value': 5}, {'community': 2, 'value': 10}]}]
+        self.assertTrue(compare(example, self.table('propertycomm', 'allprprtcomm'), ignore_excess=True))
+
+        self.action('givecommuflg', {
+            'user': alice,
+            'flags': 0,
+            'community_id': 2
+        }, admin, 'pick_up flag for community 1')
+        example = [{'user': 'alice', 'properties': [{'community': 1, 'value': 5}]}]
+        self.assertTrue(compare(example, self.table('propertycomm', 'allprprtcomm'), ignore_excess=True))
         end()
 
     def test_add_flag_ignore_rating_create_tag(self):
@@ -73,9 +115,9 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
                               'ipfs_description': 'undefined', 'community_id': 1}, alice, 'Alice create tag, Alice don t have rating')
         self.wait(1)
         self.action('givecommuflg', {
-        'user': alice,
-        'flags': COMMUNITY_ADMIN_FLG_IGNORE_RATING,
-        'community_id': 1
+            'user': alice,
+            'flags': COMMUNITY_ADMIN_FLG_IGNORE_RATING,
+            'community_id': 1
         }, admin, 'add a flag COMMUNITY_ADMIN_FLG_IGNORE_RATING')
         self.action('crtag', {'user': alice, 'name': 'Alice create tag',
                               'ipfs_description': 'undefined', 'community_id': 1}, alice, 'Alice create tag, with flag ignore rating')
@@ -89,9 +131,9 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         self.wait(1)
 
         self.action('givecommuflg', {
-        'user': bob,
-        'flags': COMMUNITY_ADMIN_FLG_IGNORE_RATING,
-        'community_id': 1
+            'user': bob,
+            'flags': COMMUNITY_ADMIN_FLG_IGNORE_RATING,
+            'community_id': 1
         }, admin, 'add a flag COMMUNITY_ADMIN_FLG_IGNORE_RATING')
         self.action('vtcrtag', {'user': bob, 'community_id': 1,
                                 'tag_id': t[0]['id']}, bob, 'Bob vote create tag, with flag ignore rating')
@@ -111,7 +153,6 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         self.action('postanswer', {'user': str(alice), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': False}, alice,
                     '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'answer without flag "official_answer", variable official_answer = False'))
 
-
         self.failed_action('upvote', {
                     'user': 'bob', 'question_id': question_id, 'answer_id': 0}, bob, 'bob upvote Alice question without rating')
         self.failed_action('upvote', {
@@ -122,9 +163,9 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
                     'user': 'bob', 'question_id': question_id, 'answer_id': 0}, bob, 'bob downvote Alice answer without rating')
 
         self.action('givecommuflg', {
-        'user': bob,
-        'flags': COMMUNITY_ADMIN_FLG_IGNORE_RATING,
-        'community_id': 1
+            'user': bob,
+            'flags': COMMUNITY_ADMIN_FLG_IGNORE_RATING,
+            'community_id': 1
         }, admin, 'add a flag COMMUNITY_ADMIN_FLG_IGNORE_RATING')
 
         self.wait(2)
@@ -145,9 +186,9 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         alice = self.register_alice_account()
 
         self.action('givecommuflg', {
-        'user': alice,
-        'flags': COMMUNITY_ADMIN_FLG_INFINITE_ENERGY,
-        'community_id': 1
+            'user': alice,
+            'flags': COMMUNITY_ADMIN_FLG_INFINITE_ENERGY,
+            'community_id': 1
         }, admin, 'alice add a flag COMMUNITY_ADMIN_FLG_INFINITE_ENERGY')
 
         self._register_question_action(alice, 'Alice question 1', 'q1')
@@ -181,9 +222,9 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
                     'user': 'alice', 'question_id': question_id, 'type': 0, 'restore_rating': True}, alice, "Change question type to expert, don't have permission")  
 
         self.action('givecommuflg', {
-        'user': alice,
-        'flags': COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS,
-        'community_id': 1
+            'user': alice,
+            'flags': COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS,
+            'community_id': 1
         }, admin, 'add a flag COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS')
 
         self.action('chgqsttype', {
@@ -201,26 +242,24 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         old_table = self.table('tags', get_tag_scope(1))
         self.action('crtag', {'user': alice, 'name': 'Alice create tag',
                               'ipfs_description': 'undefined', 'community_id': 1}, alice, 'Alice create tag, Alice don t have permission')
-        table = self.table('tags', get_tag_scope(1))
-        self.assertTrue(compare(old_table, table, ignore_excess=True))
+        self.assertTrue(compare(old_table, self.table('tags', get_tag_scope(1)), ignore_excess=True))
 
         self.action('givecommuflg', {
-        'user': alice,
-        'flags': COMMUNITY_ADMIN_FLG_CREATE_TAG,
-        'community_id': 1
+            'user': alice,
+            'flags': COMMUNITY_ADMIN_FLG_CREATE_TAG,
+            'community_id': 1
         }, admin, 'add a flag COMMUNITY_ADMIN_FLG_CREATE_TAG')
         
         self.wait(1)
         self.action('crtag', {'user': alice, 'name': 'Alice create tag',
                               'ipfs_description': 'undefined', 'community_id': 1}, alice, 'Alice create tag')
-        table = self.table('tags', get_tag_scope(1))
         example = {
             'id': 7, 
             'name': 'Alice create tag', 
             'ipfs_description': 'undefined', 
             'questions_asked': 0
         }
-        self.assertTrue(compare(example, table[6], ignore_excess=True))
+        self.assertTrue(compare(example, self.table('tags', get_tag_scope(1))[6], ignore_excess=True))
         end()
 
     def test_official_answer(self):
@@ -238,9 +277,9 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example, answers, ignore_excess=True))
 
         self.action('givecommuflg', {
-        'user': alice,
-        'flags': COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER,
-        'community_id': 1
+            'user': alice,
+            'flags': COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER,
+            'community_id': 1
         }, admin, 'add a flag COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER')
 
         self.action('postanswer', {'user': str(alice), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': True}, alice,
@@ -269,9 +308,9 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
 
 
         self.action('givecommuflg', {
-        'user': alice,
-        'flags': COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER,
-        'community_id': 1
+            'user': alice,
+            'flags': COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER,
+            'community_id': 1
         }, admin, 'add a flag COMMUNITY_ADMIN_FLG_OFFICIAL_ANSWER')
 
         self.action('postanswer', {'user': str(alice), 'question_id': question_id, 'ipfs_link': 'undefined123', 'official_answer': False}, alice,

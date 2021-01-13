@@ -23,7 +23,7 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
     account.questions_asked += 1;
   });
   assert_allowed(*iter_account, user, Action::POST_QUESTION, community_id);
-  uint64_t question_id = get_reversive_pk(question_table, MAX_QUESTION_ID);
+  uint64_t question_id = get_configuration(CONFIGURATION_KEY_QUESTION);
   // sort - unique
   for (int i = 0; i < tags.size(); ++i)
     for (int j = i + 1; j < tags.size(); ++j)
@@ -45,6 +45,7 @@ void peeranha::post_question(eosio::name user, uint16_t community_id,
     usr_question.question_id = question_id;
   });
 #endif
+  update_configuration(CONFIGURATION_KEY_QUESTION, question_id -1);
   update_community_statistics(community_id, 1, 0, 0, 0);
   update_tags_statistics(community_id, tags, 1);
   update_achievement(iter_account->user, QUESTION, iter_account->questions_asked);

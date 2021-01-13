@@ -18,6 +18,7 @@
 #include "achievements.hpp"
 #include "account_achievements.hpp"
 #include "squeezed_achievement.hpp"
+#include "configuration.hpp"
 
 #include "token_common.hpp"
 
@@ -181,6 +182,15 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     ACTION addemptelacc(eosio::name bot_name, uint64_t telegram_id, std::string display_name, const IpfsHash ipfs_profile, const IpfsHash ipfs_avatar);
 
     ACTION updtdsplname(eosio::name bot_name, uint64_t telegram_id, std::string display_name);
+
+    ACTION addconfig(uint64_t key, uint64_t value);
+
+    ACTION addusrconfig(uint64_t key, eosio::name user);
+
+    ACTION updateconfig(uint64_t key, uint64_t value);
+
+    ACTION upuserconfig(uint64_t key, eosio::name user);
+    
     //init achievements first 10k registered users
     ACTION intallaccach();
 
@@ -396,4 +406,10 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     void decrement_achievement_count(uint32_t id_achievement);
 
     void init_users_achievements();
+
+    void add_configuration(uint64_t key, uint64_t value);
+
+    uint64_t get_configuration(uint64_t key);
+
+    void update_configuration(uint64_t key, uint64_t value);
 };

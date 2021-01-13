@@ -44,8 +44,8 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
                     ted, 'Ted vote for Alice question deletion')
         
         example_account = [{'user': 'alice', 'integer_properties': []}, 
-                            {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]},
-                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 63}, {'key': 12, 'value': 0}, {'key': 13, 'value': 0}]}]
+                            {'user': 'bob', 'integer_properties': []},  # clear properties key 12/13 (value = 0)
+                            {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 63}]}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
 
@@ -71,7 +71,7 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
                     ted, 'Ted vote for Alice question deletion')
         
         example_account = [{'user': 'alice', 'integer_properties': []}, 
-                            {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]},
+                            {'user': 'bob', 'integer_properties': []}, # clear properties key 12/13 (value = 0)
                             {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 63}]}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
@@ -97,7 +97,7 @@ class TestWithin15Minutes(peeranhatest.peeranhaTest):
         self.action('delanswer', {'user': 'bob', 'question_id': id_question, 'answer_id': 1}, bob, 'Delete Alice answer to Carol question')
         
         example_account = [{'user': 'alice', 'integer_properties': []}, 
-                            {'user': 'bob', 'integer_properties': [{'key': 12, 'value': 0}, {'key': 13, 'value': 0}]},
+                            {'user': 'bob', 'integer_properties': []}, # clear properties key 12/13 (value = 0)
                             {'user': 'ted', 'integer_properties': [{'key': 48, 'value': 63}]}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()

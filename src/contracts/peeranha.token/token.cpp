@@ -111,7 +111,7 @@ void token::sub_balance(name user, asset value) {
 
   const auto &from =
       from_acnts.get(value.symbol.code().raw(), "no balance object found");
-  eosio::check(from.balance.amount >= value.amount, "overdrawn balance");
+  eosio::check(from.balance.amount >= value.amount + getstakedbalance(user), "overdrawn balance");
 
   from_acnts.modify(from, user, [&](auto &a) { a.balance -= value; });
 }
@@ -164,15 +164,16 @@ asset token::create_reward_pool(uint16_t period, int total_rating) {
     inflation_reward_pool *= POOL_REDUSE_COEFFICIENT;
   }
   int64_t reward_pool = int64_to_peer(total_rating * RATING_TOKEN_COEFFICIENT);
-  if (reward_pool > inflation_reward_pool) {
-    reward_pool = inflation_reward_pool;
+  if (reward_pool > inflation_reward_pool * MULTIPLICATION_TOTAL_RATING) {
+    reward_pool = inflation_reward_pool * MULTIPLICATION_TOTAL_RATING;
   }
   const int64_t remaining_user_supply =
       st->user_max_supply.amount - st->user_supply.amount;
-  if (reward_pool > remaining_user_supply) {
-    reward_pool = remaining_user_supply;
+  if (reward_pool > remaining_user_supply * MULTIPLICATION_TOTAL_RATING) {
+    reward_pool = remaining_user_supply * MULTIPLICATION_TOTAL_RATING;
   }
   auto quantity = asset(reward_pool, sym);
+  quantity.amount /= MULTIPLICATION_TOTAL_RATING;
   statstable.modify(st, _self, [&quantity](auto &s) {
     s.supply += quantity;
     s.user_supply += quantity;
@@ -219,6 +220,7 @@ void token::pickupreward(name user, const uint16_t period) {
   asset user_reward =
       get_user_reward(iter_total_reward->total_reward,
                       period_rating->rating_to_award, total_rating_to_reward);
+  user_reward.amount *= getboost(user, period - 1);
   period_reward_table.emplace(user, [user_reward, period](auto &reward) {
     reward.period = period;
     reward.reward = user_reward;
@@ -254,6 +256,196 @@ void token::inviteuser(name inviter, name invited_user) {
         inviter_invited_user.invited_user = invited_user;
         inviter_invited_user.common_reward.symbol = sym;
       });
+}
+
+void token::addboost(name user, asset tokens) {
+  require_auth(user);
+  boost_index boost_table(_self, user.value);
+  const uint16_t next_period = get_period(now()) + 1;
+  auto iter_last_boost = boost_table.rbegin();
+
+  accounts from_acnts(_self, user.value);
+  const auto &from =
+      from_acnts.get(tokens.symbol.code().raw(), "no balance object found");
+  eosio::check(from.balance.amount >= tokens.amount, "overdrawn balance");
+  eosio::check(tokens.amount >= 0, "boost must be positive ");
+
+  asset change_boost = tokens;
+  
+  const bool is_first_boost_user = boost_table.rend() == boost_table.rbegin();
+
+  auto iter_boost = boost_table.find(next_period);
+
+  if (iter_boost == boost_table.end()) {
+    if (!is_first_boost_user)
+      change_boost = tokens - iter_last_boost->staked_tokens;
+      
+    auto iter_boost = boost_table.emplace(
+      _self, [next_period, tokens](auto &boost) {
+        boost.staked_tokens = tokens;
+        boost.period = next_period;
+      });
+  } else {
+    change_boost -= iter_boost->staked_tokens;
+    boost_table.modify(
+      iter_boost, _self, [tokens](auto &boost) {
+        boost.staked_tokens = tokens;
+      });
+  }
+  update_statistics_boost(change_boost, user);
+}
+
+void token::update_statistics_boost(asset tokens, name user) {
+  statistics_boost_index statistics_boost_table(_self, scope_all_boost);
+  const uint16_t next_period = get_period(now()) + 1;
+  auto iter_last_statistics = statistics_boost_table.rbegin();
+
+  const bool is_first_transaction = iter_last_statistics == statistics_boost_table.rend();
+  if (is_first_transaction || iter_last_statistics->period != next_period) {
+    asset new_tokens;
+    asset max_stake;
+    name user_max_stake;
+    if (is_first_transaction) {
+      new_tokens = tokens;
+      max_stake = tokens;
+      user_max_stake = user;
+    } else {
+      new_tokens = iter_last_statistics->sum_tokens + tokens;
+      max_stake = iter_last_statistics->max_stake;
+      user_max_stake = iter_last_statistics->user_max_stake;
+
+      get_value_statistic_boost(tokens, max_stake, user_max_stake, user);
+    }
+    statistics_boost_table.emplace(
+      _self, [new_tokens, next_period, max_stake, user_max_stake](auto &stat_boost) {
+        stat_boost.sum_tokens = new_tokens;
+        stat_boost.max_stake = max_stake;
+        stat_boost.user_max_stake = user_max_stake;
+        stat_boost.period = next_period;
+      });
+  } else {
+    auto iter_total_rating_change = statistics_boost_table.find(next_period);
+    asset max_stake = iter_total_rating_change->max_stake;
+    name user_max_stake = iter_total_rating_change->user_max_stake;
+
+    get_value_statistic_boost(tokens, max_stake, user_max_stake, user);
+ 
+    statistics_boost_table.modify(
+      iter_total_rating_change, _self, [tokens, max_stake, user_max_stake](auto &stat_boost) {
+        stat_boost.sum_tokens += tokens;
+        stat_boost.max_stake = max_stake;
+        stat_boost.user_max_stake = user_max_stake;
+      });
+  }
+}
+
+void token::get_value_statistic_boost(asset &tokens, asset &max_stake, name &user_max_stake, name user) {
+  if (tokens.amount > 0) {
+    boost_index boost_table(_self, user.value);
+    auto iter_last_boost = boost_table.rbegin();
+    if (iter_last_boost->staked_tokens.amount > max_stake.amount) {
+    max_stake = iter_last_boost->staked_tokens;
+      user_max_stake = user;
+    }
+  } else if (tokens.amount < 0 && user_max_stake == user) {
+    const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+    max_stake = asset{0, sym};
+    account_index account_table(peeranha_main, scope_all_accounts);
+    for (auto iter_account = account_table.begin(); iter_account != account_table.end(); ++iter_account) {
+      boost_index boost_table(_self, iter_account->user.value);
+      auto iter_last_boost = boost_table.rbegin();
+      if (boost_table.begin() != boost_table.end() && iter_last_boost->staked_tokens.amount > max_stake.amount) {
+        max_stake = iter_last_boost->staked_tokens;
+        user_max_stake = iter_account->user;
+      }
+    }
+  }
+}
+
+int64_t token::getstakedbalance(name user) {
+  boost_index boost_table(_self, user.value);
+
+  if (boost_table.begin() == boost_table.end()) {
+    return 0;
+  }
+
+  auto iter_last_boost = boost_table.rbegin();
+  uint16_t period = get_period(now());
+
+  int64_t output_value = 0;
+  if (iter_last_boost->period <= period) {
+    output_value = iter_last_boost->staked_tokens.amount;
+  } else {
+    auto iter_buf_boost = iter_last_boost;
+    
+    ++iter_buf_boost;
+    if (iter_buf_boost == boost_table.rend()) {                 // only 1 boost entry
+      output_value =  iter_last_boost->staked_tokens.amount;
+    } else {
+      if (iter_last_boost->staked_tokens.amount > iter_buf_boost->staked_tokens.amount) {  // add boost
+        output_value =  iter_last_boost->staked_tokens.amount;
+      } else {                                                                            // reduced boost
+        output_value =  iter_buf_boost->staked_tokens.amount;
+      }
+    }
+  }
+  
+  return output_value;
+}
+
+uint64_t token::getvalboost(name user, uint64_t period) { ///???
+  boost_index boost_table(_self, user.value);
+
+  if (boost_table.begin() == boost_table.end()) {
+    return 0;
+  }
+
+  auto iter_last_boost = boost_table.find(period);
+  return iter_last_boost->staked_tokens.amount;
+}
+
+void token::setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp) {
+    require_auth(user);
+    question_bounty bounty_table(_self, scope_all_bounties);
+    auto iter_bounty = bounty_table.find(question_id);
+    eosio::check(iter_bounty == bounty_table.end(), "Bounty is already set for this question");
+    eosio::check(bounty.is_valid(), "invalid quantity");
+    eosio::check(bounty.amount > 0, "must transfer positive quantity");
+    sub_balance(user, bounty);
+
+    bounty_table.emplace(_self, [&](auto &a) {
+        a.user = user;
+        a.amount = bounty;
+        a.question_id = question_id;
+        a.status = BOUNTY_STATUS_ACTIVE;
+        a.timestamp = timestamp;
+    });
+}
+
+void token::paybounty(name user, uint64_t question_id, bool on_delete) {
+    require_auth(user);
+    question_bounty bounty_table(_self, scope_all_bounties);
+    auto iter_bounty = bounty_table.find(question_id);
+    eosio::check(iter_bounty != bounty_table.end(), "Bounty not found!");
+    eosio::check(iter_bounty->status == BOUNTY_STATUS_ACTIVE,
+                        "You have already got your bounty");
+
+    question_index question_table(peeranha_main, scope_all_questions);
+    auto iter_question = question_table.find(question_id);
+    eosio::check(iter_question != question_table.end(), "Question not found!");
+
+    if (on_delete && iter_question->answers.empty()) {
+        eosio::check(iter_question->user == user, "You can't get this bounty");
+        add_balance(user, iter_bounty->amount, user);
+        bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
+    } else if (!on_delete) {
+        eosio::check(iter_question->correct_answer_id != 0, "Correct answer is not chosen!");
+        auto iter_answer = binary_find(iter_question->answers.begin(),
+                                           iter_question->answers.end(), iter_question->correct_answer_id);
+        eosio::check(iter_answer->user == user, "You can't get this bounty");
+        add_balance(user, iter_bounty->amount, user);
+        bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
+    }
 }
 
 void token::rewardrefer(name invited_user) {
@@ -319,6 +511,12 @@ void token::resettables(std::vector<eosio::name> allaccs) {
     while (iter_period_reward != period_reward_table.end()) {
       iter_period_reward = period_reward_table.erase(iter_period_reward);
     }
+
+    boost_index boost_table(_self, iter_acc->value);
+    auto iter_boost = boost_table.begin();
+    while (iter_boost != boost_table.end()) {
+      iter_boost = boost_table.erase(iter_boost);
+    }
   }
 
   const symbol sym = symbol("PEER", TOKEN_PRECISION);
@@ -331,6 +529,12 @@ void token::resettables(std::vector<eosio::name> allaccs) {
   auto iter_total_reward = total_reward_table.begin();
   while (iter_total_reward != total_reward_table.end()) {
     iter_total_reward = total_reward_table.erase(iter_total_reward);
+  }
+
+  statistics_boost_index statistics_boost_table(_self, scope_all_boost);
+  auto iter_statistics_boost = statistics_boost_table.begin();
+  while (iter_statistics_boost != statistics_boost_table.end()) {
+    iter_statistics_boost = statistics_boost_table.erase(iter_statistics_boost);
   }
 
   invited_users_index invited_users_table(_self, all_invited);
@@ -352,6 +556,8 @@ void token::resettables(std::vector<eosio::name> allaccs) {
 
 EOSIO_DISPATCH(eosio::token,
                (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)(rewardrefer)
+               (addboost)(setbounty)(paybounty)
+
 #if STAGE == 1 || STAGE == 2
                    (resettables)
 #if STAGE == 2

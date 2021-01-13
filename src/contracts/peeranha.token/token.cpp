@@ -220,7 +220,9 @@ void token::pickupreward(name user, const uint16_t period) {
   asset user_reward =
       get_user_reward(iter_total_reward->total_reward,
                       period_rating->rating_to_award, total_rating_to_reward);
-  user_reward.amount *= getboost(user, period - 1);
+  int64_t boost = getboost(user, period - 1);
+  user_reward.amount *= boost;
+  user_reward += get_award(period_rating->rating_to_award * boost, total_rating_to_reward, period);
   period_reward_table.emplace(user, [user_reward, period](auto &reward) {
     reward.period = period;
     reward.reward = user_reward;
@@ -404,6 +406,21 @@ uint64_t token::getvalboost(name user, uint64_t period) { ///???
   return iter_last_boost->staked_tokens.amount;
 }
 
+asset token::get_award(uint64_t rating_to_award, uint32_t total_rating_to_reward, uint64_t period) {
+  token_awards_index token_awards_table(_self, scope_all_token_awards);
+  const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+  auto iter_token_awards_table = token_awards_table.find(period);
+
+  if (iter_token_awards_table == token_awards_table.end()) {
+    return asset{0, sym};
+  }
+
+  uint64_t part_award = rating_to_award * 100 / total_rating_to_reward;
+  auto quantity = iter_token_awards_table->sum_token * part_award / 100;
+  sub_balance(_self, quantity);
+  return quantity;
+}
+
 void token::setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp) {
     require_auth(user);
     question_bounty bounty_table(_self, scope_all_bounties);
@@ -515,7 +532,8 @@ void token::addhotquestn(name user, uint64_t question_id, int hours) {
   const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
   auto quantity = asset(int64_to_peer(hours * TOKEN_PROMOTED_QUESTION), sym);
   sub_balance(user, quantity);
-  //add_balance(peerMain, quantity, _self);
+  add_balance(_self, quantity / 2, _self);
+  //add_balance(другой акк, quantity / 2, _self);
 
   token_awards_index token_awards_table(_self, scope_all_token_awards);
   uint64_t period = get_period(now());
@@ -524,13 +542,13 @@ void token::addhotquestn(name user, uint64_t question_id, int hours) {
    if (iter_token_awards == token_awards_table.end()) {
     token_awards_table.emplace(
       _self, [quantity, period](auto &token_awards) {
-        token_awards.sum_token = quantity;
+        token_awards.sum_token = quantity / 2;
         token_awards.period = period;
       });
   } else {
     token_awards_table.modify(
       iter_token_awards, _self, [quantity](auto &token_awards) {
-        token_awards.sum_token += quantity;
+        token_awards.sum_token += quantity / 2;
       });
   }
 

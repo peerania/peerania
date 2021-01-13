@@ -63,6 +63,8 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   uint64_t getvalboost(name user, uint64_t period);
 
+  asset get_award(uint64_t rating_to_award, uint32_t total_rating_to_reward, uint64_t period);
+
   [[eosio::action]] void setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp);
 
   [[eosio::action]] void paybounty(name user, uint64_t question_id, bool on_delete);
@@ -144,7 +146,7 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
   };
   typedef eosio::multi_index<"invited"_n, invited_users> invited_users_index;
 
-struct [[eosio::table("promquestion"), eosio::contract("peeranha.main"), eosio::contract("peeranha.token")]] promoted_questions {
+struct [[eosio::table("promquestion"), eosio::contract("peeranha.token")]] promoted_questions {
   uint64_t question_id;
   time start_time;
   time ends_time;
@@ -153,7 +155,7 @@ struct [[eosio::table("promquestion"), eosio::contract("peeranha.main"), eosio::
 };
 typedef eosio::multi_index<"promquestion"_n, promoted_questions> promoted_questions_index;
 
-struct [[eosio::table("tokenawards"), eosio::contract("peeranha.main"), eosio::contract("peeranha.token")]] token_awards {
+struct [[eosio::table("tokenawards"), eosio::contract("peeranha.token")]] token_awards {
   asset sum_token;
   uint64_t period;
 

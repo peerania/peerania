@@ -439,7 +439,27 @@ void token::setbounty(name user, asset bounty, uint64_t question_id, uint64_t ti
     });
 }
 
-void token::paybounty(name user, uint64_t question_id, bool on_delete) {
+void token::editbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp) {
+    require_auth(user);
+    question_bounty bounty_table(_self, scope_all_bounties);
+    auto iter_bounty = bounty_table.find(question_id);
+    eosio::check(iter_bounty != bounty_table.end(), "Bounty not found!");
+    eosio::check(iter_bounty->status == BOUNTY_STATUS_ACTIVE,
+                            "Bounty have already been paid");
+    question_index question_table(peeranha_main, scope_all_questions);
+    auto iter_question = question_table.find(question_id);
+    eosio::check(iter_question != question_table.end(), "Question not found!");
+    eosio::check(iter_question->user == user, "You cannot modify this bounty");
+    eosio::check(iter_bounty->amount < bounty, "New amount cannot be less than previous");
+    asset diff_bounty = bounty - iter_bounty->amount;
+    sub_balance(user, diff_bounty);
+    bounty_table.modify(iter_bounty, _self, [&](auto &a) {
+        a.amount = bounty;
+        a.timestamp = timestamp;
+    });
+}
+
+void token::paybounty(name user, uint64_t question_id, uint8_t on_delete) {
     require_auth(user);
     question_bounty bounty_table(_self, scope_all_bounties);
     auto iter_bounty = bounty_table.find(question_id);
@@ -451,11 +471,11 @@ void token::paybounty(name user, uint64_t question_id, bool on_delete) {
     auto iter_question = question_table.find(question_id);
     eosio::check(iter_question != question_table.end(), "Question not found!");
 
-    if (on_delete && iter_question->answers.empty()) {
+    if (on_delete == 1 && iter_question->answers.empty()) {
         eosio::check(iter_question->user == user, "You can't get this bounty");
         add_balance(user, iter_bounty->amount, user);
         bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
-    } else if (!on_delete) {
+    } else if (on_delete == 0) {
         eosio::check(iter_question->correct_answer_id != 0, "Correct answer is not chosen!");
         auto iter_answer = binary_find(iter_question->answers.begin(),
                                            iter_question->answers.end(), iter_question->correct_answer_id);
@@ -660,7 +680,7 @@ void token::resettables(std::vector<eosio::name> allaccs) {
 
 EOSIO_DISPATCH(eosio::token,
                (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)(rewardrefer)
-               (addboost)(setbounty)(paybounty)(addhotquestn)(delhotquestn)
+               (addboost)(setbounty)(editbounty)(paybounty)(addhotquestn)(delhotquestn)
 
 #if STAGE == 1 || STAGE == 2
                    (resettables)

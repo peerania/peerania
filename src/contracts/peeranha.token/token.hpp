@@ -67,7 +67,9 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   [[eosio::action]] void setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp);
 
-  [[eosio::action]] void paybounty(name user, uint64_t question_id, bool on_delete);
+  [[eosio::action]] void editbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp);
+
+  [[eosio::action]] void paybounty(name user, uint64_t question_id, uint8_t on_delete);
 
   [[eosio::action]] void rewardrefer(name invited_user);
 

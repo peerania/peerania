@@ -673,7 +673,7 @@ void token::resettables(std::vector<eosio::name> allaccs) {
     iter_token_awards = token_awards_table.erase(iter_token_awards);
   }
 
-  community_table_index community_table(_self, scope_all_communities);
+  community_table_index community_table(peeranha_main, scope_all_communities);
   auto iter_community = community_table.begin();
   while (iter_community != community_table.end()) {
     promoted_questions_index promoted_questions_table(_self, iter_community->id);

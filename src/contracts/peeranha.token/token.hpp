@@ -11,6 +11,7 @@
 #include "peeranha_types.h"
 #include "token_period.hpp"
 #include "../peeranha.main/question_container.hpp"
+#include "../peeranha.main/communities_and_tags.hpp"
 
 
 namespace eosio {

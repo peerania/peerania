@@ -459,7 +459,7 @@ void peeranha::resettables() {
     iter_create_community = create_community_table.erase(iter_create_community);
   }
 
-  // clean create community table
+  // clean property community table
   property_community_index property_community_table(_self, scope_all_property_community);
   auto iter_user = property_community_table.begin();
   while (iter_user != property_community_table.end()) {

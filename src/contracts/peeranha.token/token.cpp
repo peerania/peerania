@@ -415,8 +415,8 @@ asset token::get_award(uint64_t rating_to_award, uint32_t total_rating_to_reward
     return asset{0, sym};
   }
 
-  uint64_t part_award = rating_to_award * 100 / total_rating_to_reward;
-  auto quantity = iter_token_awards_table->sum_token * part_award / 100;
+  uint64_t part_award = rating_to_award * 100 * 1000 / total_rating_to_reward;
+  asset quantity = iter_token_awards_table->sum_token * part_award / (100 * 1000);
   sub_balance(_self, quantity);
   return quantity;
 }
@@ -666,6 +666,24 @@ void token::resettables(std::vector<eosio::name> allaccs) {
   while (iter_invited_user != invited_users_table.end()) {
     iter_invited_user = invited_users_table.erase(iter_invited_user);
   }
+
+  token_awards_index token_awards_table(_self, scope_all_token_awards);
+  auto iter_token_awards = token_awards_table.begin();
+  while (iter_token_awards != token_awards_table.end()) {
+    iter_token_awards = token_awards_table.erase(iter_token_awards);
+  }
+
+  community_table_index community_table(_self, scope_all_communities);
+  auto iter_community = community_table.begin();
+  while (iter_community != community_table.end()) {
+    promoted_questions_index promoted_questions_table(_self, iter_community->id);
+    auto iter_promoted_questions = promoted_questions_table.begin();
+    while (iter_promoted_questions != promoted_questions_table.end()) {
+      iter_promoted_questions = promoted_questions_table.erase(iter_promoted_questions);
+    }
+    ++iter_community;
+  }
+
 #if STAGE == 2
   auto dbginfl_table = dbginfl_index(_self, _self.value);
   auto iter_dbginf_table = dbginfl_table.begin();

@@ -49,7 +49,16 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   [[eosio::action]] void close(name user, const symbol &symbol);
 
+  // pickup reward for all users all periods
+  [[eosio::action]] void pickupallrew();
+
+  // pickup reward for all users last periods
+  [[eosio::action]] void pickuprew(name user);
+
+  // pickup reward for 1 user 1 period
   [[eosio::action]] void pickupreward(name user, const uint16_t period);
+
+  void pick_up_reward(name user, const uint16_t period);
 
   [[eosio::action]] void inviteuser(name inviter, name invited_user);
 

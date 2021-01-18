@@ -46,7 +46,7 @@ void token::issue(name to, asset quantity, string memo) {
                    st.funding_max_supply.amount - st.funding_supply.amount,
                "quantity exceeds available supply");
 
-  statstable.modify(st, same_payer, [&quantity](auto &s) {
+  statstable.modify(st, _self, [&quantity](auto &s) {
     s.supply += quantity;
     s.funding_supply += quantity;
   });
@@ -77,7 +77,7 @@ void token::retire(asset quantity, string memo) {
   eosio::check(quantity.symbol == st.supply.symbol,
                "symbol precision mismatch");
 
-  statstable.modify(st, same_payer,
+  statstable.modify(st, _self,
                     [&](auto &s) { s.funding_supply -= quantity; });
 
   sub_balance(st.issuer, quantity);
@@ -113,16 +113,16 @@ void token::sub_balance(name user, asset value) {
       from_acnts.get(value.symbol.code().raw(), "no balance object found");
   eosio::check(from.balance.amount >= value.amount + getstakedbalance(user), "overdrawn balance");
 
-  from_acnts.modify(from, user, [&](auto &a) { a.balance -= value; });
+  from_acnts.modify(from, _self, [&](auto &a) { a.balance -= value; });
 }
 
 void token::add_balance(name user, asset value, name ram_payer) {
   accounts to_acnts(_self, user.value);
   auto to = to_acnts.find(value.symbol.code().raw());
   if (to == to_acnts.end()) {
-    to_acnts.emplace(ram_payer, [&](auto &a) { a.balance = value; });
+    to_acnts.emplace(_self, [&](auto &a) { a.balance = value; });   // // спросить на митинге!!!! user -> _self
   } else {
-    to_acnts.modify(to, same_payer, [&](auto &a) { a.balance += value; });
+    to_acnts.modify(to, _self, [&](auto &a) { a.balance += value; });
   }
 }
 
@@ -138,7 +138,7 @@ void token::open(name user, const symbol &symbol, name ram_payer) {
   accounts acnts(_self, user.value);
   auto it = acnts.find(sym_code_raw);
   if (it == acnts.end()) {
-    acnts.emplace(ram_payer, [&](auto &a) { a.balance = asset{0, symbol}; });
+    acnts.emplace(_self, [&](auto &a) { a.balance = asset{0, symbol}; });
   }
 }
 
@@ -186,8 +186,52 @@ asset token::get_user_reward(asset total_reward, int rating_to_reward,
   return total_reward * rating_to_reward / total_rating;
 }
 
-void token::pickupreward(name user, const uint16_t period) {
+void token::pickupallrew() {              //one launch
+  require_auth(_self);
+  account_index account_table(peeranha_main, scope_all_accounts);
+  auto iter_account = account_table.begin();
+  while (iter_account != account_table.end()) {
+    period_rating_index period_rating_table(peeranha_main, iter_account->user.value);
+    period_reward_index period_reward_table(_self, iter_account->user.value);
+    
+    auto period_rating = period_rating_table.begin();
+    while (period_rating != period_rating_table.end()) {
+      bool period_reward  = period_reward_table.find(period_rating->period) == period_reward_table.end();
+      bool end_period = get_period(now()) > period_rating->period;
+      bool rating_to_award  = period_rating->rating_to_award > 0;      // for unittest
+      if (period_reward && end_period && rating_to_award) {
+        pick_up_reward(iter_account->user, period_rating->period);
+      }
+      ++period_rating;
+    }
+    ++iter_account;
+  }
+}
+
+void token::pickuprew(name user) {
   require_auth(user);
+  account_index account_table(peeranha_main, scope_all_accounts);
+  auto iter_account = account_table.begin();
+  while (iter_account != account_table.end()) {
+    period_rating_index period_rating_table(peeranha_main, iter_account->user.value);
+    period_reward_index period_reward_table(_self, iter_account->user.value);
+    
+    auto period_rating = period_rating_table.rbegin();
+    while (period_rating != period_rating_table.rend()) {
+      if (period_reward_table.find(period_rating->period) != period_reward_table.end()) {
+        break;
+      }
+
+      if (get_period(now()) > period_rating->period) {
+        pick_up_reward(iter_account->user, period_rating->period);
+      }
+      ++period_rating;
+    }
+    ++iter_account;
+  }
+}
+
+void token::pick_up_reward(name user, const uint16_t period) {
   time current_time = now();
   eosio::check(get_period(current_time) > period, "This period isn't ended yet!");
 
@@ -221,11 +265,16 @@ void token::pickupreward(name user, const uint16_t period) {
       get_user_reward(iter_total_reward->total_reward,
                       period_rating->rating_to_award, total_rating_to_reward);
   user_reward.amount *= getboost(user, period - 1);
-  period_reward_table.emplace(user, [user_reward, period](auto &reward) {
+  period_reward_table.emplace(_self, [user_reward, period](auto &reward) {    // спросить на митинге!!!! user -> _self
     reward.period = period;
     reward.reward = user_reward;
   });
   add_balance(user, user_reward, user);
+}
+
+void token::pickupreward(name user, const uint16_t period) {
+  require_auth(user);
+  pick_up_reward(user, period);
 }
 
 void token::inviteuser(name inviter, name invited_user) {
@@ -575,7 +624,7 @@ void token::resettables(std::vector<eosio::name> allaccs) {
 }  // namespace eosio
 
 EOSIO_DISPATCH(eosio::token,
-               (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)(rewardrefer)
+               (create)(issue)(transfer)(open)(close)(retire)(pickupallrew)(pickuprew)(pickupreward)(inviteuser)(rewardrefer)
                (addboost)(setbounty)(editbounty)(paybounty)
 
 #if STAGE == 1 || STAGE == 2

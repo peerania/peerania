@@ -415,8 +415,8 @@ asset token::get_award(uint64_t rating_to_award, uint32_t total_rating_to_reward
     return asset{0, sym};
   }
 
-  uint64_t part_award = rating_to_award * 100 * 1000 / total_rating_to_reward;
-  asset quantity = iter_token_awards_table->sum_token * part_award / (100 * 1000);
+  uint64_t part_award = rating_to_award * 100 * 1000 / total_rating_to_reward;        // 1000 - for accuracy
+  asset quantity = iter_token_awards_table->sum_token * part_award / (100 * 1000);    // 1000 - for accuracy
   sub_balance(_self, quantity);
   return quantity;
 }

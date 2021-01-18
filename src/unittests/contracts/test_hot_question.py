@@ -18,7 +18,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                     'Bob asking question')
         question_id = self.table('question', 'allquestions')[0]['id']
         self.failed_action('addhotquestn', {'user': 'alice', 'question_id': question_id, 'hours': 1.4}, alice,
-                    'Bob asking question', contract='token')
+                    'Mark question as promoted (wrong hours)', contract='token')
     
     def test_wrong_question_id(self):
         begin('Test wrong question id')
@@ -26,7 +26,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
 
         give_tokens(self, 'alice', '20.000000 PEER')
         self.failed_action('addhotquestn', {'user': 'alice', 'question_id': 666, 'hours': 1}, alice,
-                    'Bob asking question', contract='token')
+                    'Mark question as promoted (wrong question id)', contract='token')
 
     def test_zero_token(self):
         begin('Test zero token')
@@ -36,7 +36,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                     'Bob asking question')
         question_id = self.table('question', 'allquestions')[0]['id']
         self.failed_action('addhotquestn', {'user': 'alice', 'question_id': question_id, 'hours': 1}, alice,
-                    'Bob asking question', contract='token')
+                    'Mark question as promoted (zero token)', contract='token')
     
     def test_wrong_user(self):
         begin('Test alice post question, bob add to hot question')
@@ -48,7 +48,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                     'Bob asking question')
         question_id = self.table('question', 'allquestions')[0]['id']
         self.failed_action('addhotquestn', {'user': 'bob', 'question_id': question_id, 'hours': 1}, bob,
-                    'Bob asking question', contract='token')
+                    'Mark question as promoted (alice post question bob add to hot question)', contract='token')
 
     def test_add_promoted_question(self):
         begin('test add promoted question')
@@ -60,10 +60,50 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         question_id = self.table('question', 'allquestions')[0]['id']
 
         self.action('addhotquestn', {'user': 'alice', 'question_id': question_id, 'hours': 1}, alice,
-                    'Bob asking question', contract='token')
+                    'Mark question as promoted', contract='token')
 
         example_promoted_question = [{'question_id': question_id}]
         self.assertTrue(compare(example_promoted_question, self.table('promquestion', 1, contract='token'), ignore_excess=True))
+        end()
+
+    def test_add_promoted_question_again(self):
+        begin('test add promoted question again (question already mark as promoted)')
+        alice = self.register_alice_account()
+
+        give_tokens(self, 'alice', '40.000000 PEER')
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 1}, alice,
+                    'Bob asking question')
+        question_id = self.table('question', 'allquestions')[0]['id']
+
+        self.action('addhotquestn', {'user': 'alice', 'question_id': question_id, 'hours': 2}, alice,
+                    'Mark question as promoted', contract='token')
+
+        example_promoted_question = [{'question_id': question_id}]
+        print(self.table('promquestion', 1, contract='token'))
+        self.assertTrue(compare(example_promoted_question, self.table('promquestion', 1, contract='token'), ignore_excess=True))
+
+        self.failed_action('addhotquestn', {'user': 'alice', 'question_id': question_id, 'hours': 1}, alice,
+                    'Mark question as promoted, again', contract='token')
+        end()
+
+    def test_add_promoted_question_again2(self):
+        begin('test add promoted question again (was question mark as promoted)')
+        alice = self.register_alice_account()
+
+        give_tokens(self, 'alice', '40.000000 PEER')
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 1}, alice,
+                    'Bob asking question')
+        question_id = self.table('question', 'allquestions')[0]['id']
+
+        self.action('addhotquestn', {'user': 'alice', 'question_id': question_id, 'hours': 1}, alice,
+                    'Mark question as promoted', contract='token')
+        self.wait(5)
+        example_promoted_question = [{'question_id': question_id}]
+        print(self.table('promquestion', 1, contract='token'))
+        self.assertTrue(compare(example_promoted_question, self.table('promquestion', 1, contract='token'), ignore_excess=True))
+
+        self.action('addhotquestn', {'user': 'alice', 'question_id': question_id, 'hours': 1}, alice,
+                    'Mark question as promoted', contract='token')
         end()
     
     def test_auto_delete_promoted_question(self):
@@ -76,7 +116,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         question_id = self.table('question', 'allquestions')[0]['id']
 
         self.action('addhotquestn', {'user': 'alice', 'question_id': question_id, 'hours': 1}, alice,
-                    'Bob asking question', contract='token')
+                    'Mark first question as promoted', contract='token')
 
         example_promoted_question = [{'question_id': question_id}]
         self.assertTrue(compare(example_promoted_question, self.table('promquestion', 1, contract='token'), ignore_excess=True))
@@ -86,7 +126,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                     'Bob asking question')
         question_id = self.table('question', 'allquestions')[0]['id']
         self.action('addhotquestn', {'user': 'alice', 'question_id': question_id, 'hours': 1}, alice,
-                    'Bob asking question', contract='token')
+                    'Mark second question as promoted (delete first promoted question(promoted table))', contract='token')
         example_promoted_question = [{'question_id': question_id}]
         self.assertTrue(compare(example_promoted_question, self.table('promquestion', 1, contract='token'), ignore_excess=True))
         end()
@@ -110,7 +150,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         question_id = self.table('question', 'allquestions')[0]['id']
 
         self.action('addhotquestn', {'user': 'bob', 'question_id': question_id, 'hours': 1}, bob,
-                    'Bob asking question', contract='token')
+                    'Mark question as promoted', contract='token')
 
         give_ratings(self, bob, 2)      # 4 period
         self.wait(4)      
@@ -119,6 +159,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                     bob, bob + ' pick up her reward for 3 preiod', contract='token')
 
         example_reward = [{'period': 3, 'reward': '17.000000 PEER'}]    # 16 + 1(promoted)
+        print(self.table('periodreward', 'bob', contract='token'))
         self.assertTrue(compare(example_reward, self.table('periodreward', 'bob', contract='token'), ignore_excess=True))
         end()
 
@@ -145,7 +186,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         question_id = self.table('question', 'allquestions')[0]['id']
 
         self.action('addhotquestn', {'user': 'alice', 'question_id': question_id, 'hours': 1}, alice,
-                    'Bob asking question', contract='token')
+                    'Mark question as promoted', contract='token')
 
         give_ratings(self, alice, 2)
         give_ratings(self, bob, 1)      # 4 period 
@@ -155,6 +196,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                     bob, bob + ' pick up her reward for 3 preiod', contract='token')
 
         example_reward = [{'period': 3, 'reward': '8.333330 PEER'}]    # 8 + 0.333330(promoted)
+        print(self.table('periodreward', 'bob', contract='token'))
         self.assertTrue(compare(example_reward, self.table('periodreward', 'bob', contract='token'), ignore_excess=True))
         end()
 
@@ -203,13 +245,13 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                     'Bob asking question')
         question_id = self.table('question', 'allquestions')[0]['id']
         self.action('addhotquestn', {'user': 'alice', 'question_id': question_id, 'hours': 1}, alice,
-                    'Bob asking question', contract='token')
+                    'Mark first question as promoted', contract='token')
 
         self.action('postquestion', {'user': 'alice', 'title': 'Title alice question2', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 1}, alice,
                     'Bob asking question')
         question_id = self.table('question', 'allquestions')[0]['id']
         self.action('addhotquestn', {'user': 'alice', 'question_id': question_id, 'hours': 1}, alice,
-                    'Bob asking question', contract='token')
+                    'Mark second question as promoted', contract='token')
 
         give_ratings(self, alice, 2)
         give_ratings(self, bob, 2)      # 4 period 
@@ -240,7 +282,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                     'Bob asking question')
         question_id = self.table('question', 'allquestions')[0]['id']
         self.action('addhotquestn', {'user': 'bob', 'question_id': question_id, 'hours': 3}, bob,
-                    'Bob asking question', contract='token')
+                    'Mark question as promoted at 2 hours', contract='token')
 
         give_ratings(self, bob, 2)      # 4 period 
         self.wait(4)      
@@ -249,6 +291,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                     bob, bob + ' pick up her reward for 3 preiod', contract='token')
 
         example_reward = [{'period': 3, 'reward': '19.000000 PEER'}]    # 16 + 1(promoted) * 3
+        print(self.table('periodreward', 'bob', contract='token'))
         self.assertTrue(compare(example_reward, self.table('periodreward', 'bob', contract='token'), ignore_excess=True))
         end()
 
@@ -262,7 +305,7 @@ def give_tokens(self, user, tokens):
 def give_ratings(self, user, rating):
     begin('to give rating ')
     self.action('chnguserrt', {'user': user, 'rating_change': rating},
-                            self.admin, 'Update alice rating')
+                            self.admin, 'Update rating')
 
 
 if __name__ == '__main__':

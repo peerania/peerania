@@ -535,19 +535,12 @@ void token::rewardrefer(name invited_user) {
 
 void token::addhotquestn(name user, uint64_t question_id, int hours) {
   require_auth(user);
-
   question_index question_table(peeranha_main, scope_all_questions);
   auto iter_question = question_table.find(question_id);
   
   eosio::check(iter_question->user == user, "Wrong user transaction");
   eosio::check(iter_question != question_table.end(), "Question not found");
-  
-  promoted_questions_index promoted_questions_table(_self, iter_question->community_id);
-
   eosio::check(hours > 0, "Hours must be positive");
-  
-  auto iter_promoted_questions = promoted_questions_table.find(question_id);
-  time time_now = now();
 
   const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
   auto quantity = asset(int64_to_peer(hours * TOKEN_PROMOTED_QUESTION), sym);
@@ -572,24 +565,25 @@ void token::addhotquestn(name user, uint64_t question_id, int hours) {
       });
   }
 
-  if (iter_promoted_questions == promoted_questions_table.end()) {
-    promoted_questions_table.emplace(
-      _self, [&](auto &promoted_question) {
-        promoted_question.question_id = question_id;
-        promoted_question.start_time = time_now;
-        promoted_question.ends_time = time_now + hours * ONE_HOUR;
-      });
-  }
-
+  time time_now = now();
+  promoted_questions_index promoted_questions_table(_self, iter_question->community_id);
   auto iter_clear = promoted_questions_table.begin();
   while (iter_clear != promoted_questions_table.end()) {
     if (iter_clear->ends_time < time_now) {
-      //return_promoted_tokens(iter_clear, user);
       iter_clear = promoted_questions_table.erase(iter_clear); 
     } else {
       ++iter_clear;
     }
   }
+
+  auto iter_promoted_questions = promoted_questions_table.find(question_id);
+  eosio::check(iter_promoted_questions == promoted_questions_table.end(), "This question is already marked as promoted");
+  promoted_questions_table.emplace(
+    _self, [&](auto &promoted_question) {
+      promoted_question.question_id = question_id;
+      promoted_question.start_time = time_now;
+      promoted_question.ends_time = time_now + hours * ONE_HOUR;
+    }); 
 }
 
 void token::delhotquestn(name user, uint64_t question_id) {

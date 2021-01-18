@@ -607,9 +607,20 @@ void token::return_promoted_tokens(promoted_questions_index::const_iterator &ite
     uint64_t return_token = (now() - iter_promoted_questions->ends_time) / ONE_HOUR;
     if (return_token) {
       const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
-      auto quantity = asset(int64_to_peer(return_token), sym);
-      //sub_balance(peerMain, quantity);
+      auto quantity = asset(int64_to_peer(return_token), sym) / 2;
+      sub_balance(_self, quantity);
+      //sub_balance(другой акк, quantity);
       add_balance(user, quantity, _self);
+
+      token_awards_index token_awards_table(_self, scope_all_token_awards);
+      uint64_t period = get_period(iter_promoted_questions->start_time);
+      auto iter_token_awards = token_awards_table.find(period);
+      eosio::check(iter_token_awards != token_awards_table.end(), "No promoted entry found");
+
+      token_awards_table.modify(
+        iter_token_awards, _self, [quantity](auto &token_awards) {
+          token_awards.sum_token -= quantity;
+      });
     }
   }
 }

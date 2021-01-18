@@ -588,10 +588,8 @@ void token::addhotquestn(name user, uint64_t question_id, int hours) {
 
 void token::delhotquestn(name user, uint64_t question_id) {
   require_auth(user);
-
   question_index question_table(peeranha_main, scope_all_questions);
   auto iter_question = question_table.find(question_id);
-  
   eosio::check(iter_question != question_table.end(), "Question not found");
 
   promoted_questions_index promoted_questions_table(_self, iter_question->community_id); 

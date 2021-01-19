@@ -217,11 +217,10 @@ void token::pickupreward(name user, const uint16_t period) {
   auto period_rating = period_rating_table.find(period);
   eosio::check(period_rating != period_rating_table.end(),
                "No reward for you in this period");
+  int64_t boost = getboost(user, period - 1);
   asset user_reward =
       get_user_reward(iter_total_reward->total_reward,
-                      period_rating->rating_to_award, total_rating_to_reward);
-  int64_t boost = getboost(user, period - 1);
-  user_reward.amount *= boost;
+                      period_rating->rating_to_award * boost, total_rating_to_reward);
   user_reward += get_award(period_rating->rating_to_award * boost, total_rating_to_reward, period);
   period_reward_table.emplace(user, [user_reward, period](auto &reward) {
     reward.period = period;

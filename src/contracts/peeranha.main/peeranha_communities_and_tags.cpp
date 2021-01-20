@@ -281,7 +281,7 @@ void peeranha::vote_create_tag(eosio::name user, uint16_t community_id,
       update_achievement(iter_create_tag->upvotes[i], VOTE_TAG, 1);
     }
     update_achievement(iter_create_tag->creator, VOTE_TAG, 1);
-
+    
     create_tag_table.erase(iter_create_tag);
     eosio::check(iter_create_tag != create_tag_table.end(),
                  "Address not erased properly");

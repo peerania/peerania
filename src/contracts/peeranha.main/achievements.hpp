@@ -69,10 +69,13 @@ enum Achievements { QUESTION_BRONZE = 1,
                     FIRST_ANSWER_BRONZE = 60,
                     FIRST_ANSWER_SILVER,
                     FIRST_ANSWER_GOLD,
+
+                    CREATE_COMMUNITY_VOTE = 70,
+                    CREATE_TAG_VOTE,
                   };
 
 enum Type_achievement { LIMITED_EDITION = 0, COMMON };
-enum Group_achievement { QUESTION = 0, ANSWER, CORRECT_ANSWER, REGISTERED, RATING, ANSWER_15_MINUTES, FIRST_ANSWER};
+enum Group_achievement { QUESTION = 0, ANSWER, CORRECT_ANSWER, REGISTERED, RATING, ANSWER_15_MINUTES, FIRST_ANSWER, VOTE_COMMUNITY, VOTE_TAG};
 
 struct achievement {
   achievement(uint32_t community_id, uint64_t limit, uint64_t lower_bound, Type_achievement type, Group_achievement group) :
@@ -128,6 +131,9 @@ struct achievement {
     { FIRST_ANSWER_BRONZE,          achievement(0, COMMON_VALUE, TEST_BRONZE_FIRST_ANSWER, LIMITED_EDITION, FIRST_ANSWER) },
     { FIRST_ANSWER_SILVER,          achievement(0, COMMON_VALUE, TEST_SILVER_FIRST_ANSWER, LIMITED_EDITION, FIRST_ANSWER) },
     { FIRST_ANSWER_GOLD,            achievement(0, COMMON_VALUE, TEST_GOLD_FIRST_ANSWER, LIMITED_EDITION, FIRST_ANSWER) },
+
+    { CREATE_COMMUNITY_VOTE,        achievement(0, COMMON_VALUE, 1, COMMON, VOTE_COMMUNITY) },
+    { CREATE_TAG_VOTE,              achievement(0, COMMON_VALUE, 1, COMMON, VOTE_TAG) },
   };
 
 #else
@@ -167,5 +173,8 @@ std::map<uint32_t, achievement> achievements = {
     { FIRST_ANSWER_BRONZE,          achievement(0, COMMON_VALUE, 10, LIMITED_EDITION, FIRST_ANSWER) },
     { FIRST_ANSWER_SILVER,          achievement(0, COMMON_VALUE, 25, LIMITED_EDITION, FIRST_ANSWER) },
     { FIRST_ANSWER_GOLD,            achievement(0, COMMON_VALUE, 50, LIMITED_EDITION, FIRST_ANSWER) },
+
+    { CREATE_COMMUNITY_VOTE,        achievement(0, COMMON_VALUE, 1, COMMON, VOTE_COMMUNITY) },
+    { CREATE_TAG_VOTE,              achievement(0, COMMON_VALUE, 1, COMMON, VOTE_TAG) },
   };
 #endif

@@ -65,7 +65,6 @@ class TestAchievents(peeranhatest.peeranhaTest):
                                 {'id': 40, 'count': 1}]
         self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
         end()
-
     
     def test_post_answer(self):
         begin('test post answer (bronze, silver, gold) ahievements')
@@ -324,19 +323,19 @@ class TestAchievents(peeranhatest.peeranhaTest):
         bob = self.register_bob_account()
         ted = self.register_ted_account()
 
-        self.register_question_action(alice, 'Alice question ' + str(68719476735));
+        self.register_question_action(alice, 'Alice question ' + str(68719476735))
         question_id = self.table('question', 'allquestions')[0]['id']
         self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
                     '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'Register Alice answer'))
         self.action('downvote', {'user': 'ted', 'question_id': question_id, 'answer_id': 1}, ted, 'ted downvote for Alice question->Bob answer rating')
         
-        self.register_question_action(alice, 'Alice question ' + str(68719476734));
+        self.register_question_action(alice, 'Alice question ' + str(68719476734))
         question_id = self.table('question', 'allquestions')[0]['id']
         self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
                     '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'Register Alice answer'))
         self.action('downvote', {'user': 'ted', 'question_id': question_id, 'answer_id': 1}, ted, 'ted downvote for Alice question->Bob answer rating')
         
-        self.register_question_action(alice, 'Alice question ' + str(68719476733));
+        self.register_question_action(alice, 'Alice question ' + str(68719476733))
         question_id = self.table('question', 'allquestions')[0]['id']
         self.action('postanswer', {'user': str(bob), 'question_id': question_id, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
                     '{} answer to question with id={}: "{}"'.format(str(alice), question_id, 'Register Alice answer'))
@@ -368,13 +367,13 @@ class TestAchievents(peeranhatest.peeranhaTest):
         bob = self.register_bob_account()
         ted = self.register_ted_account()   
 
-        self.register_question_action(alice, 'Alice question ' + str(68719476735));
+        self.register_question_action(alice, 'Alice question ' + str(68719476735))
         question_id_1 = self.table('question', 'allquestions')[0]['id']
         self.action('postanswer', {'user': str(bob), 'question_id': question_id_1, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
                     '{} answer to question with id={}: "{}"'.format(str(alice), question_id_1, 'Register Alice answer'))
         self.action('downvote', {'user': 'ted', 'question_id': question_id_1, 'answer_id': 1}, ted, 'ted downvote for Alice question->Bob answer rating')
         
-        self.register_question_action(alice, 'Alice question ' + str(68719476734));
+        self.register_question_action(alice, 'Alice question ' + str(68719476734))
         question_id_2 = self.table('question', 'allquestions')[0]['id']
         self.action('postanswer', {'user': str(bob), 'question_id': question_id_2, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
                     '{} answer to question with id={}: "{}"'.format(str(alice), question_id_2, 'Register Alice answer'))
@@ -401,7 +400,7 @@ class TestAchievents(peeranhatest.peeranhaTest):
                                 {'id': 60, 'count': 1}]
         self.assertTrue(compare(example_achievement, self.table('achieve', 'allachieve'), ignore_excess=True))
 
-        self.register_question_action(alice, 'Alice question ' + str(68719476733));
+        self.register_question_action(alice, 'Alice question ' + str(68719476733))
         question_id_3 = self.table('question', 'allquestions')[0]['id']
         self.action('postanswer', {'user': str(bob), 'question_id': question_id_3, 'ipfs_link': 'undefined', 'official_answer': False}, bob,
                     '{} answer to question with id={}: "{}"'.format(str(alice), question_id_3, 'Register Alice answer'))
@@ -518,6 +517,73 @@ class TestAchievents(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example_ted, self.table('accachieve', 'ted'), ignore_excess=True))
         end()
 
+    def test_vote_create_community(self):
+        begin('test vote create community')
+        alice = self.register_alice_account(500, 200)
+        carol = self.register_carol_account(500, 200)
+        bob = self.register_bob_account(500, 200)
+        ted = self.register_ted_account(500, 200) 
+        frank = self.register_frank_account(500, 200)   
+
+        self.action('crcommunity', {'user': alice, 'name': 'alice community1', 'type': 2,
+                                    'ipfs_description': 'ACM1', 'suggested_tags': self.get_stub_suggested_tags()}, alice, 'Alice create community with EXPERT type')
+        comm_id = self.table('crcommtb', 'allcomm')
+        self.action('vtcrcomm', {
+                    'user': carol, 'community_id': comm_id[0]['id']}, carol, 'Carol vote create community')
+        self.action('vtcrcomm', {
+                    'user': bob, 'community_id': comm_id[0]['id']}, bob, 'bob vote create community')
+        self.action('vtcrcomm', {
+                    'user': ted, 'community_id': comm_id[0]['id']}, ted, 'ted vote create community')
+        self.action('vtcrcomm', {
+                    'user': frank, 'community_id': comm_id[0]['id']}, frank, 'frank vote create community')
+
+        example_achive = [{'achievements_id': 30}, 
+                        {'achievements_id': 40}, 
+                        {'achievements_id': 70}]
+        self.assertTrue(compare(example_achive, self.table('accachieve', 'carol'), ignore_excess=True))     # 
+        self.assertTrue(compare(example_achive, self.table('accachieve', 'bob'), ignore_excess=True))       # vote_create_community
+        self.assertTrue(compare(example_achive, self.table('accachieve', 'ted'), ignore_excess=True))       # 
+        self.assertTrue(compare(example_achive, self.table('accachieve', 'frank'), ignore_excess=True))     # 
+        example_achive = [{'user': 'alice', 'achievements_id': 30}, 
+                        {'user': 'alice', 'achievements_id': 31}, 
+                        {'user': 'alice', 'achievements_id': 32}, 
+                        {'user': 'alice', 'achievements_id': 40}, 
+                        {'user': 'alice', 'achievements_id': 41}, 
+                        {'user': 'alice', 'achievements_id': 42}, 
+                        {'user': 'alice', 'achievements_id': 70}]
+        self.assertTrue(compare(example_achive, self.table('accachieve', 'alice'), ignore_excess=True))     #  author community
+        end()
+
+    def test_vote_create_tag(self):
+        begin('test vote create tag')
+        alice = self.register_alice_account()
+        carol = self.register_carol_account()
+        bob = self.register_bob_account()
+        ted = self.register_ted_account() 
+
+        self.action('crtag', {'user': alice, 'name': 'alice tag',
+                              'ipfs_description': 'AT', 'community_id': 1}, alice, 'Alice create tag')
+        tag_id = self.table('crtagtb', get_tag_scope(1))
+        self.action('vtcrtag', {'user': carol, 'community_id': 1,
+                                'tag_id': tag_id[0]['id']}, carol, 'Carol vote create tag')
+        self.action('vtcrtag', {'user': bob, 'community_id': 1,
+                                'tag_id': tag_id[0]['id']}, bob, 'Bob vote create tag')
+        self.action('vtcrtag', {'user': ted, 'community_id': 1,
+                                'tag_id': tag_id[0]['id']}, ted, 'Ted vote create tag')
+
+        example_achive = [{'achievements_id': 30}, 
+                        {'achievements_id': 40}, 
+                        {'achievements_id': 71}]
+        self.assertTrue(compare(example_achive, self.table('accachieve', 'carol'), ignore_excess=True))     # 
+        self.assertTrue(compare(example_achive, self.table('accachieve', 'bob'), ignore_excess=True))       # vote_create_tag
+        self.assertTrue(compare(example_achive, self.table('accachieve', 'ted'), ignore_excess=True))       # 
+        example_achive = [{'user': 'alice', 'achievements_id': 30}, 
+                        {'user': 'alice', 'achievements_id': 31},
+                        {'user': 'alice', 'achievements_id': 40}, 
+                        {'user': 'alice', 'achievements_id': 41}, 
+                        {'user': 'alice', 'achievements_id': 71}]
+        self.assertTrue(compare(example_achive, self.table('accachieve', 'alice'), ignore_excess=True))     # author tag
+        end()
 
     # def test_limit_achievement(self):
     #     begin('test limit question ask (limit 2)')
@@ -535,6 +601,15 @@ class TestAchievents(peeranhatest.peeranhaTest):
     #     table_achieve = self.table('achieve', 'allachieve')
     #     self.assertTrue(compare(example, table_achieve, ignore_excess=True))
     #     end()
+
+    def get_stub_suggested_tags(self):
+        tags = []
+        for i in range(0, 10):
+            tags.append({
+                'name': f'Tag {i}',
+                'ipfs_description': f'IPFS of tag {i}'
+            })
+        return tags
 
     def _give_moderator_flag(self, acc, flg):
         admin = self.get_contract_deployer(self.get_default_contract())

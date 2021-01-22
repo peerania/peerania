@@ -103,7 +103,7 @@ void token::transfer(name from, name to, asset quantity, string memo) {
   auto payer = has_auth(to) ? to : from;
 
   sub_balance(from, quantity);
-  add_balance(to, quantity, payer);
+  add_balance(to, quantity, _self);
 }
 
 void token::sub_balance(name user, asset value) {
@@ -113,7 +113,7 @@ void token::sub_balance(name user, asset value) {
       from_acnts.get(value.symbol.code().raw(), "no balance object found");
   eosio::check(from.balance.amount >= value.amount + getstakedbalance(user), "overdrawn balance");
 
-  from_acnts.modify(from, user, [&](auto &a) { a.balance -= value; });
+  from_acnts.modify(from, _self, [&](auto &a) { a.balance -= value; });
 }
 
 void token::add_balance(name user, asset value, name ram_payer) {
@@ -122,7 +122,7 @@ void token::add_balance(name user, asset value, name ram_payer) {
   if (to == to_acnts.end()) {
     to_acnts.emplace(ram_payer, [&](auto &a) { a.balance = value; });
   } else {
-    to_acnts.modify(to, same_payer, [&](auto &a) { a.balance += value; });
+    to_acnts.modify(to, _self, [&](auto &a) { a.balance += value; });
   }
 }
 
@@ -221,12 +221,16 @@ void token::pickupreward(name user, const uint16_t period) {
   asset user_reward =
       get_user_reward(iter_total_reward->total_reward,
                       period_rating->rating_to_award * boost, total_rating_to_reward);
-  user_reward += get_award(period_rating->rating_to_award * boost, total_rating_to_reward, period);
+  auto prom_quantity = get_award(period_rating->rating_to_award * boost, total_rating_to_reward, period);
+  if (prom_quantity.amount) {
+    sub_balance(user_prom_leave, prom_quantity);
+    user_reward += prom_quantity;
+  }
   period_reward_table.emplace(user, [user_reward, period](auto &reward) {
     reward.period = period;
     reward.reward = user_reward;
   });
-  add_balance(user, user_reward, user);
+  add_balance(user, user_reward, _self);
 }
 
 void token::inviteuser(name inviter, name invited_user) {
@@ -416,7 +420,6 @@ asset token::get_award(uint64_t rating_to_award, uint32_t total_rating_to_reward
 
   uint64_t part_award = rating_to_award * 100 * 1000 / total_rating_to_reward;        // 1000 - for accuracy
   asset quantity = iter_token_awards_table->sum_token * part_award / (100 * 1000);    // 1000 - for accuracy
-  sub_balance(_self, quantity);
   return quantity;
 }
 
@@ -472,14 +475,14 @@ void token::paybounty(name user, uint64_t question_id, uint8_t on_delete) {
 
     if (on_delete == 1 && iter_question->answers.empty()) {
         eosio::check(iter_question->user == user, "You can't get this bounty");
-        add_balance(user, iter_bounty->amount, user);
+        add_balance(user, iter_bounty->amount, _self);
         bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
     } else if (on_delete == 0) {
         eosio::check(iter_question->correct_answer_id != 0, "Correct answer is not chosen!");
         auto iter_answer = binary_find(iter_question->answers.begin(),
                                            iter_question->answers.end(), iter_question->correct_answer_id);
         eosio::check(iter_answer->user == user, "You can't get this bounty");
-        add_balance(user, iter_bounty->amount, user);
+        add_balance(user, iter_bounty->amount, _self);
         bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
     }
 }
@@ -544,8 +547,8 @@ void token::addhotquestn(name user, uint64_t question_id, int hours) {
   const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
   auto quantity = asset(int64_to_peer(hours * TOKEN_PROMOTED_QUESTION), sym);
   sub_balance(user, quantity);
-  add_balance(_self, quantity / 2, _self);
-  //add_balance(другой акк, quantity / 2, _self);
+  add_balance(user_prom_leave, quantity / 2, _self);
+  add_balance(user_prom_stay, quantity / 2, _self);
 
   token_awards_index token_awards_table(_self, scope_all_token_awards);
   uint64_t period = get_period(now());
@@ -605,9 +608,9 @@ void token::return_promoted_tokens(promoted_questions_index::const_iterator &ite
     if (return_token) {
       const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
       auto quantity = asset(int64_to_peer(return_token), sym) / 2;
-      sub_balance(_self, quantity);
+      //sub_balance(_self, quantity);
       //sub_balance(другой акк, quantity);
-      add_balance(user, quantity, _self);
+      //add_balance(user, quantity, _self);
 
       token_awards_index token_awards_table(_self, scope_all_token_awards);
       uint64_t period = get_period(iter_promoted_questions->start_time);

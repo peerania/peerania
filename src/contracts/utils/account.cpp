@@ -27,7 +27,14 @@ void account::update() {
       rating += periods_have_passed * BAN_RATING_INCREMENT_PER_PERIOD;
       if (rating > 0) rating = 1;
     } else {
-      rating += 1;
+      int32_t change_rating = get_property_d(integer_properties, PROPERTY_RATING_CHANGE, 0);
+      if (change_rating == 0){
+        uint16_t rating_period_passed = current_period - get_property_d(integer_properties, PROPERTY_LAST_RATING_UPDATE_PERIOD, 0);
+        if (rating_period_passed > 0){
+          rating += 1;
+          set_property(integer_properties, PROPERTY_LAST_RATING_UPDATE_PERIOD, current_period);
+        }
+      }
       energy = get_status_energy();
     }
     last_update_period = current_period;

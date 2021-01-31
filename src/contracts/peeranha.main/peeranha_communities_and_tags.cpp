@@ -414,9 +414,7 @@ void peeranha::edit_community(eosio::name user, uint16_t community_id,
   assert_ipfs(ipfs_description);
 
   auto iter_account = find_account(user);
-
-  eosio::check(iter_account->has_moderation_flag(MODERATOR_FLG_CREATE_COMMUNITY) || 
-  find_account_property_community(user, MODERATION_IMPACT_INFINITE, community_id), "User must to be moderator (FLG_CREATE_COMMUNITY or MODERATION_FLG)");
+  eosio::check(iter_account->has_moderation_flag(MODERATOR_FLG_CREATE_COMMUNITY), "User must to be moderator (FLG_CREATE_COMMUNITY)");
 
   community_table_index community_table(_self, scope_all_communities);
   auto iter_community = community_table.find(community_id);

@@ -1201,7 +1201,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         end()
 
     def test_migrate_negative_rating(self):
-        begin('Do not migrate negative rating from temporary Telegram account when link to Peeranha account')
+        begin('Migrate negative rating from temporary Telegram account when link to Peeranha account')
         alice = self.register_alice_account()
         ted = self.register_ted_account()
         add_telegram_comfig(self)
@@ -1221,7 +1221,8 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'user': alice
         }, alice, 'Alice approve telegram account, rating is not subtracted')
         
-        example_account = [{'user': 'alice', 'rating': BASIC_RATING}, {'user': 'ted'}]
+        example_account = [{'user': 'alice', 'rating': BASIC_RATING - 5}, {'user': 'ted'}]
+        print(self.table('account', 'allaccounts'))
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
     

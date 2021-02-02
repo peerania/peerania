@@ -32,6 +32,8 @@ void peeranha::telpostqstn(eosio::name bot, uint64_t telegram_id, uint16_t commu
                             std::vector<uint32_t> tags, std::string title,
                             IpfsHash ipfs_link, const uint8_t type) {
   require_auth(bot);
+  eosio::check(get_configuration(CONFIGURATION_KEY_TELEGRAM) == bot.value, "Wrong bot account");
+
   eosio::name user = get_telegram_action_account(telegram_id);
   post_question(user, community_id, tags, title, ipfs_link, type);
 
@@ -61,6 +63,7 @@ void peeranha::postanswer(eosio::name user, uint64_t question_id,
 void peeranha::telpostansw(eosio::name bot, uint64_t telegram_id, uint64_t question_id,
                           IpfsHash ipfs_link, uint8_t official_answer) {
   require_auth(bot);
+  eosio::check(get_configuration(CONFIGURATION_KEY_TELEGRAM) == bot.value, "Wrong bot account");
 
   bool buf_official_answer = official_answer;
   eosio::name user = get_telegram_action_account(telegram_id);
@@ -459,7 +462,7 @@ void peeranha::resettables() {
     iter_create_community = create_community_table.erase(iter_create_community);
   }
 
-  // clean create community table
+  // clean property community table
   property_community_index property_community_table(_self, scope_all_property_community);
   auto iter_user = property_community_table.begin();
   while (iter_user != property_community_table.end()) {

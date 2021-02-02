@@ -48,7 +48,7 @@ cleos push action peeranhamain crtag '{"user": "alice", "community_id": 1, "name
 # FOR TESTING
 cleos push action peeranhatken transfer '{"from":"peeranhatken","to":"sqrltest1234","quantity":"5000.000000 PEER","memo":"test"}' -p peeranhatken
 
-
+cleos push action peeranhamain addconfig '{"key":"1", "value":"68719476735"}' -p peeranhamain
 for i in {1..10}
 do
     cleos push action peeranhamain chnguserrt '{"user": "alice", "rating_change": '$(( 5*$i ))'}' -p peeranhamain

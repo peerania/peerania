@@ -415,6 +415,7 @@ asset token::get_award(uint64_t rating_to_award, uint32_t total_rating_to_reward
   auto iter_token_awards_table = token_awards_table.find(period);
 
   if (iter_token_awards_table == token_awards_table.end()) {
+    const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
     return asset{0, sym};
   }
 

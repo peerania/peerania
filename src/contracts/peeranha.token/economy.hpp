@@ -6,7 +6,7 @@
 #if STAGE == 1
 #define INFLATION_PERIOD 12 //12 periods (1)
 #define START_POOL 350
-#define POOL_REDUSE_COEFFICIENT 0.95f
+#define POOL_REDUSE_COEFFICIENT 95
 #define RATING_TOKEN_COEFFICIENT 7
 
 #define REFERAL_REWARD 5
@@ -16,7 +16,7 @@ eosio::name user_prom_leave = eosio::name("peeranhatken");
 #elif STAGE == 2
 #define INFLATION_PERIOD 2  // 2 secs
 #define START_POOL 40
-#define POOL_REDUSE_COEFFICIENT 0.5f
+#define POOL_REDUSE_COEFFICIENT 50
 #define RATING_TOKEN_COEFFICIENT 8
 
 #define REFERAL_REWARD 10
@@ -26,7 +26,7 @@ eosio::name user_prom_leave = eosio::name("dan");
 #else
 #define INFLATION_PERIOD 52 //52 periods(52 weeks)
 #define START_POOL 100000
-#define POOL_REDUSE_COEFFICIENT 0.9f
+#define POOL_REDUSE_COEFFICIENT 90
 #define RATING_TOKEN_COEFFICIENT 10
 
 #define REFERAL_REWARD 200 // The referal program reward

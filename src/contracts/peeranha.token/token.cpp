@@ -162,6 +162,7 @@ asset token::create_reward_pool(uint16_t period, int total_rating) {
   for (int inflation_period = 0; inflation_period < period / INFLATION_PERIOD;
        ++inflation_period) {
     inflation_reward_pool *= POOL_REDUSE_COEFFICIENT;
+    inflation_reward_pool /= 100;
   }
   int64_t reward_pool = int64_to_peer(total_rating * RATING_TOKEN_COEFFICIENT);
   if (reward_pool > inflation_reward_pool * MULTIPLICATION_TOTAL_RATING) {

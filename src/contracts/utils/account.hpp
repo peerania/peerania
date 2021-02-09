@@ -10,7 +10,7 @@
 #include "property_community.hpp"
 #include "boost.hpp"
 
-#define PROPERTY_RATING_CHANGE 17
+#define RATING_FOR_LOGIN 1
 #define PROPERTY_LAST_RATING_UPDATE_PERIOD 18
 
 struct report {

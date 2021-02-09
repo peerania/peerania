@@ -98,7 +98,7 @@ void peeranha::update_account(eosio::name user) {
   auto last_reward_period = get_property_d(iter_account->integer_properties, PROPERTY_LAST_RATING_UPDATE_PERIOD, 0);
   uint16_t reward_period_passed = current_period - last_reward_period;
   if (reward_period_passed > 0){
-    update_rating_base(iter_account, 1, [current_period](auto &acc) {
+    update_rating_base(iter_account, RATING_FOR_LOGIN, [current_period](auto &acc) {
         set_property(acc.integer_properties, PROPERTY_LAST_RATING_UPDATE_PERIOD, current_period);
     }, true, false);
   }

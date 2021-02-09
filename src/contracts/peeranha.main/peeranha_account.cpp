@@ -269,7 +269,7 @@ void peeranha::update_rating_base(
   }
   account_table.modify(iter_account, _self,
                        [rating_to_award_change, new_rating, hasLambda,
-                         account_modifying_lambda](auto &account) {
+                        account_modifying_lambda](auto &account) {
                          // Real value of paid out rating for this week is
                          // paid_out_rating - rating_to_award Proof
                          // paid_out_rating on week_{n-1} <= paid_out_rating on

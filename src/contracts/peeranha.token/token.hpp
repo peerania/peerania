@@ -11,6 +11,7 @@
 #include "peeranha_types.h"
 #include "token_period.hpp"
 #include "../peeranha.main/question_container.hpp"
+#include "../peeranha.main/communities_and_tags.hpp"
 
 
 namespace eosio {
@@ -63,6 +64,8 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   uint64_t getvalboost(name user, uint64_t period);
 
+  asset get_award(uint64_t rating_to_award, uint32_t total_rating_to_reward, uint64_t period);
+
   [[eosio::action]] void setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp);
 
   [[eosio::action]] void editbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp);
@@ -70,6 +73,10 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
   [[eosio::action]] void paybounty(name user, uint64_t question_id, uint8_t on_delete);
 
   [[eosio::action]] void rewardrefer(name invited_user);
+
+  [[eosio::action]] void addhotquestn(name user, uint64_t question_id, int hours);
+
+  [[eosio::action]] void delhotquestn(name user, uint64_t question_id);
 
   [[eosio::action]] void payforcpu(){};
 
@@ -142,11 +149,30 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
   };
   typedef eosio::multi_index<"invited"_n, invited_users> invited_users_index;
 
+struct [[eosio::table("promquestion"), eosio::contract("peeranha.token")]] promoted_questions {
+  uint64_t question_id;
+  time start_time;
+  time ends_time;
+
+  uint64_t primary_key() const { return question_id; }
+};
+typedef eosio::multi_index<"promquestion"_n, promoted_questions> promoted_questions_index;
+
+struct [[eosio::table("tokenawards"), eosio::contract("peeranha.token")]] token_awards {
+  asset sum_token;
+  uint64_t period;
+
+  uint64_t primary_key() const { return period; }
+};
+typedef eosio::multi_index<"tokenawards"_n, token_awards> token_awards_index;
+const uint64_t scope_all_token_awards = eosio::name("allawards").value;
+
   typedef eosio::multi_index<"accounts"_n, account> accounts;
   typedef eosio::multi_index<"stat"_n, currency_stats> stats;
 
   void sub_balance(name user, asset value);
   void add_balance(name user, asset value, name ram_payer);
+  void return_promoted_tokens(promoted_questions_index::const_iterator &iter_promoted_questions, name user);
 
   asset create_reward_pool(uint16_t period, int total_rating);
   asset get_user_reward(asset total_reward, int rating_to_reward,

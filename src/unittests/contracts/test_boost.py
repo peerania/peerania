@@ -78,9 +78,10 @@ class TestBoost(peeranhatest.peeranhaTest):
         
         print(self.table('periodreward', 'bob', contract='token'))
         example_bob_tokens = [{'period': 2, 'reward': '32.000000 PEER'}] # 8 token * 4 boost
+        print(self.table('periodreward', 'bob', contract='token'))
         self.assertTrue(compare(example_bob_tokens, self.table('periodreward', 'bob', contract='token'), ignore_excess=True))
 
-        example_user_rating = [{'period': 0}, {'period': 1}, {'period': 2, 'rating': 203, 'rating_to_award': 1}]
+        example_user_rating = [{'period': 0}, {'period': 1}, {'period': 2, 'rating': 204, 'rating_to_award': 1}]
         self.assertTrue(compare(example_user_rating, self.table('periodrating', 'bob'), ignore_excess=True))
 
         example_total_reward = [{'period': 2, 'total_reward': '32.000000 PEER'}] # 8 token * 4 boost
@@ -116,7 +117,7 @@ class TestBoost(peeranhatest.peeranhaTest):
         example_bob_tokens = [{'period': 2, 'reward': '20.000000 PEER'}] # 8 token * 2 boost
         self.assertTrue(compare(example_bob_tokens, self.table('periodreward', 'bob', contract='token'), ignore_excess=True))
 
-        example_user_rating = [{'period': 0}, {'period': 1}, {'period': 2, 'rating': 203, 'rating_to_award': 1}]
+        example_user_rating = [{'period': 0}, {'period': 1}, {'period': 2, 'rating': 204, 'rating_to_award': 1}]
         self.assertTrue(compare(example_user_rating, self.table('periodrating', 'bob'), ignore_excess=True))
 
         example_total_reward = [{'period': 2, 'total_reward': '20.000000 PEER'}] # 8 token * 2 boost
@@ -152,7 +153,7 @@ class TestBoost(peeranhatest.peeranhaTest):
         example_bob_tokens = [{'period': 2, 'reward': '10.400000 PEER'}] # 8 token * 1.3 boost
         self.assertTrue(compare(example_bob_tokens, self.table('periodreward', 'bob', contract='token'), ignore_excess=True))
 
-        example_user_rating = [{'period': 0}, {'period': 1}, {'period': 2, 'rating': 203, 'rating_to_award': 1}]
+        example_user_rating = [{'period': 0}, {'period': 1}, {'period': 2, 'rating': 204, 'rating_to_award': 1}]
         self.assertTrue(compare(example_user_rating, self.table('periodrating', 'bob'), ignore_excess=True))
 
         example_total_reward = [{'period': 2, 'total_reward': '10.400000 PEER'}] # 8 token * 1,3 boost
@@ -212,9 +213,11 @@ class TestBoost(peeranhatest.peeranhaTest):
         self.assertTrue(compare(example_totalrating, self.table('totalrating', 'allperiods'), ignore_excess=True))
         
         example_bob_tokens = [{'period': 2, 'reward': '8.000000 PEER'}] # 8 token
+        print(self.table('periodreward', 'bob', contract='token'))
         self.assertTrue(compare(example_bob_tokens, self.table('periodreward', 'bob', contract='token'), ignore_excess=True))
 
-        example_user_rating = [{'period': 0}, {'period': 1}, {'period': 2, 'rating': 203, 'rating_to_award': 1}]
+        example_user_rating = [{'period': 0}, {'period': 1}, {'period': 2, 'rating': 204, 'rating_to_award': 1}]
+        print(self.table('periodrating', 'bob'))
         self.assertTrue(compare(example_user_rating, self.table('periodrating', 'bob'), ignore_excess=True))
 
         example_total_reward = [{'period': 2, 'total_reward': '8.000000 PEER'}] # 8 token

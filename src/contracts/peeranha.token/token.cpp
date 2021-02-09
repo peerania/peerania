@@ -103,7 +103,7 @@ void token::transfer(name from, name to, asset quantity, string memo) {
   auto payer = has_auth(to) ? to : from;
 
   sub_balance(from, quantity);
-  add_balance(to, quantity, payer);
+  add_balance(to, quantity, _self);
 }
 
 void token::sub_balance(name user, asset value) {
@@ -113,7 +113,7 @@ void token::sub_balance(name user, asset value) {
       from_acnts.get(value.symbol.code().raw(), "no balance object found");
   eosio::check(from.balance.amount >= value.amount + getstakedbalance(user), "overdrawn balance");
 
-  from_acnts.modify(from, user, [&](auto &a) { a.balance -= value; });
+  from_acnts.modify(from, _self, [&](auto &a) { a.balance -= value; });
 }
 
 void token::add_balance(name user, asset value, name ram_payer) {
@@ -122,7 +122,7 @@ void token::add_balance(name user, asset value, name ram_payer) {
   if (to == to_acnts.end()) {
     to_acnts.emplace(ram_payer, [&](auto &a) { a.balance = value; });
   } else {
-    to_acnts.modify(to, same_payer, [&](auto &a) { a.balance += value; });
+    to_acnts.modify(to, _self, [&](auto &a) { a.balance += value; });
   }
 }
 
@@ -217,15 +217,20 @@ void token::pickupreward(name user, const uint16_t period) {
   auto period_rating = period_rating_table.find(period);
   eosio::check(period_rating != period_rating_table.end(),
                "No reward for you in this period");
+  int64_t boost = getboost(user, period - 1);
   asset user_reward =
       get_user_reward(iter_total_reward->total_reward,
-                      period_rating->rating_to_award, total_rating_to_reward);
-  user_reward.amount *= getboost(user, period - 1);
+                      period_rating->rating_to_award * boost, total_rating_to_reward);
+  auto prom_quantity = get_award(period_rating->rating_to_award * boost, total_rating_to_reward, period);
+  if (prom_quantity.amount) {
+    sub_balance(user_prom_leave, prom_quantity);
+    user_reward += prom_quantity;
+  }
   period_reward_table.emplace(user, [user_reward, period](auto &reward) {
     reward.period = period;
     reward.reward = user_reward;
   });
-  add_balance(user, user_reward, user);
+  add_balance(user, user_reward, _self);
 }
 
 void token::inviteuser(name inviter, name invited_user) {
@@ -404,6 +409,21 @@ uint64_t token::getvalboost(name user, uint64_t period) { ///???
   return iter_last_boost->staked_tokens.amount;
 }
 
+asset token::get_award(uint64_t rating_to_award, uint32_t total_rating_to_reward, uint64_t period) {
+  token_awards_index token_awards_table(_self, scope_all_token_awards);
+  const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+  auto iter_token_awards_table = token_awards_table.find(period);
+
+  if (iter_token_awards_table == token_awards_table.end()) {
+    const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+    return asset{0, sym};
+  }
+
+  uint64_t part_award = rating_to_award * 100 * 1000 / total_rating_to_reward;        // 1000 - for accuracy
+  asset quantity = iter_token_awards_table->sum_token * part_award / (100 * 1000);    // 1000 - for accuracy
+  return quantity;
+}
+
 void token::setbounty(name user, asset bounty, uint64_t question_id, uint64_t timestamp) {
     require_auth(user);
     question_bounty bounty_table(_self, scope_all_bounties);
@@ -456,14 +476,14 @@ void token::paybounty(name user, uint64_t question_id, uint8_t on_delete) {
 
     if (on_delete == 1 && iter_question->answers.empty()) {
         eosio::check(iter_question->user == user, "You can't get this bounty");
-        add_balance(user, iter_bounty->amount, user);
+        add_balance(user, iter_bounty->amount, _self);
         bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
     } else if (on_delete == 0) {
         eosio::check(iter_question->correct_answer_id != 0, "Correct answer is not chosen!");
         auto iter_answer = binary_find(iter_question->answers.begin(),
                                            iter_question->answers.end(), iter_question->correct_answer_id);
         eosio::check(iter_answer->user == user, "You can't get this bounty");
-        add_balance(user, iter_bounty->amount, user);
+        add_balance(user, iter_bounty->amount, _self);
         bounty_table.modify(iter_bounty, _self, [&](auto &a) { a.status = BOUNTY_STATUS_PAID; });
     }
 }
@@ -516,6 +536,96 @@ void token::rewardrefer(name invited_user) {
   add_balance(invited_user, quantity - inviter_supply, _self);
 }
 
+void token::addhotquestn(name user, uint64_t question_id, int hours) {
+  require_auth(user);
+  question_index question_table(peeranha_main, scope_all_questions);
+  auto iter_question = question_table.find(question_id);
+  
+  eosio::check(iter_question->user == user, "Wrong user transaction");
+  eosio::check(iter_question != question_table.end(), "Question not found");
+  eosio::check(hours > 0, "Hours must be positive");
+
+  const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+  auto quantity = asset(int64_to_peer(hours * TOKEN_PROMOTED_QUESTION), sym);
+  sub_balance(user, quantity);
+  add_balance(user_prom_leave, quantity / 2, _self);
+  add_balance(user_prom_stay, quantity / 2, _self);
+
+  token_awards_index token_awards_table(_self, scope_all_token_awards);
+  uint64_t period = get_period(now());
+  auto iter_token_awards = token_awards_table.find(period);
+
+   if (iter_token_awards == token_awards_table.end()) {
+    token_awards_table.emplace(
+      _self, [quantity, period](auto &token_awards) {
+        token_awards.sum_token = quantity / 2;
+        token_awards.period = period;
+      });
+  } else {
+    token_awards_table.modify(
+      iter_token_awards, _self, [quantity](auto &token_awards) {
+        token_awards.sum_token += quantity / 2;
+      });
+  }
+
+  time time_now = now();
+  promoted_questions_index promoted_questions_table(_self, iter_question->community_id);
+  auto iter_clear = promoted_questions_table.begin();
+  while (iter_clear != promoted_questions_table.end()) {
+    if (iter_clear->ends_time < time_now) {
+      iter_clear = promoted_questions_table.erase(iter_clear); 
+    } else {
+      ++iter_clear;
+    }
+  }
+
+  auto iter_promoted_questions = promoted_questions_table.find(question_id);
+  eosio::check(iter_promoted_questions == promoted_questions_table.end(), "This question is already marked as promoted");
+  promoted_questions_table.emplace(
+    _self, [&](auto &promoted_question) {
+      promoted_question.question_id = question_id;
+      promoted_question.start_time = time_now;
+      promoted_question.ends_time = time_now + hours * ONE_HOUR;
+    }); 
+}
+
+void token::delhotquestn(name user, uint64_t question_id) {
+  require_auth(user);
+  question_index question_table(peeranha_main, scope_all_questions);
+  auto iter_question = question_table.find(question_id);
+  eosio::check(iter_question != question_table.end(), "Question not found");
+
+  promoted_questions_index promoted_questions_table(_self, iter_question->community_id); 
+  auto iter_promoted_questions = promoted_questions_table.find(iter_question->id);
+  eosio::check(iter_promoted_questions != promoted_questions_table.end(), "Hop question not found");
+
+  return_promoted_tokens(iter_promoted_questions, iter_question->user);
+  promoted_questions_table.erase(iter_promoted_questions);
+}
+
+void token::return_promoted_tokens(promoted_questions_index::const_iterator &iter_promoted_questions, name user) {
+  if (iter_promoted_questions->ends_time < now()) {
+    uint64_t return_token = (now() - iter_promoted_questions->ends_time) / ONE_HOUR;
+    if (return_token) {
+      const symbol sym = symbol(peeranha_asset_symbol, TOKEN_PRECISION);
+      auto quantity = asset(int64_to_peer(return_token), sym) / 2;
+      //sub_balance(_self, quantity);
+      //sub_balance(другой акк, quantity);
+      //add_balance(user, quantity, _self);
+
+      token_awards_index token_awards_table(_self, scope_all_token_awards);
+      uint64_t period = get_period(iter_promoted_questions->start_time);
+      auto iter_token_awards = token_awards_table.find(period);
+      eosio::check(iter_token_awards != token_awards_table.end(), "No promoted entry found");
+
+      token_awards_table.modify(
+        iter_token_awards, _self, [quantity](auto &token_awards) {
+          token_awards.sum_token -= quantity;
+      });
+    }
+  }
+}
+
 #if STAGE == 1 || STAGE == 2
 
 void token::resettables(std::vector<eosio::name> allaccs) {
@@ -562,6 +672,24 @@ void token::resettables(std::vector<eosio::name> allaccs) {
   while (iter_invited_user != invited_users_table.end()) {
     iter_invited_user = invited_users_table.erase(iter_invited_user);
   }
+
+  token_awards_index token_awards_table(_self, scope_all_token_awards);
+  auto iter_token_awards = token_awards_table.begin();
+  while (iter_token_awards != token_awards_table.end()) {
+    iter_token_awards = token_awards_table.erase(iter_token_awards);
+  }
+
+  community_table_index community_table(peeranha_main, scope_all_communities);
+  auto iter_community = community_table.begin();
+  while (iter_community != community_table.end()) {
+    promoted_questions_index promoted_questions_table(_self, iter_community->id);
+    auto iter_promoted_questions = promoted_questions_table.begin();
+    while (iter_promoted_questions != promoted_questions_table.end()) {
+      iter_promoted_questions = promoted_questions_table.erase(iter_promoted_questions);
+    }
+    ++iter_community;
+  }
+
 #if STAGE == 2
   auto dbginfl_table = dbginfl_index(_self, _self.value);
   auto iter_dbginf_table = dbginfl_table.begin();
@@ -576,7 +704,7 @@ void token::resettables(std::vector<eosio::name> allaccs) {
 
 EOSIO_DISPATCH(eosio::token,
                (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)(rewardrefer)
-               (addboost)(setbounty)(editbounty)(paybounty)
+               (addboost)(setbounty)(editbounty)(paybounty)(addhotquestn)(delhotquestn)
 
 #if STAGE == 1 || STAGE == 2
                    (resettables)

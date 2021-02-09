@@ -27,6 +27,8 @@ class peeranhaTest(EOSTest):
                 [{'name': f'Community {i+1} tag {j+1}', 'ipfs_description': 'undefined'} for j in range(6)]}, admin, f'Create community {i+1}', suppress_output=True)
         self.action('setaccrten', {'user': admin, 'rating': -1, 'energy': -1}, admin, 'Delete admin account', suppress_output=True)
         self.admin = admin
+        self.action('addconfig', {'key': 1, 'value': '68719476735'}, admin,
+                    'Add configuration for post question')
 
     def tearDown(self):
         self.action('resettables', {'allaccs': ['alice', 'bob', 'carol', 'ted', 'dan', 'frank']}, self.get_contract_deployer(

@@ -90,16 +90,12 @@ void peeranha::report_profile(eosio::name user, eosio::name user_to_report) {
 
 void peeranha::update_account(eosio::name user) {
   auto iter_account = find_account(user);
-
   time current_time = now();
-  uint16_t current_period =
-      (current_time - iter_account->registration_time) / ACCOUNT_STAT_RESET_PERIOD;
-  
-  auto last_reward_period = get_property_d(iter_account->integer_properties, PROPERTY_LAST_RATING_UPDATE_PERIOD, 0);
-  uint16_t reward_period_passed = current_period - last_reward_period;
-  if (reward_period_passed > 0){
-    update_rating_base(iter_account, RATING_FOR_LOGIN, [current_period](auto &acc) {
-        set_property(acc.integer_properties, PROPERTY_LAST_RATING_UPDATE_PERIOD, current_period);
+  auto last_reward_time = get_property_d(iter_account->integer_properties, PROPERTY_LAST_RATING_UPDATE_PERIOD, 0);
+  uint16_t reward_time_passed = current_time - last_reward_time;
+  if (reward_time_passed >= ACCOUNT_STAT_RESET_PERIOD){
+    update_rating_base(iter_account, RATING_FOR_LOGIN, [current_time](auto &acc) {
+        set_property(acc.integer_properties, PROPERTY_LAST_RATING_UPDATE_PERIOD, current_time);
     }, true, false);
   }
 

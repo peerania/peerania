@@ -41,7 +41,7 @@ class TestRatingUpdate(peeranhatest.peeranhaTest):
         alice_rating = self.table('account', 'allaccounts')[0]['rating']
         self.assertTrue(alice_rating == rating)
 
-        self.wait(2)
+        self.wait(1)
         #wrong period checking
         self.action('updateacc', {'user': 'alice'},
                             alice, 'Update alice rating in less than 3 days')
@@ -51,9 +51,10 @@ class TestRatingUpdate(peeranhatest.peeranhaTest):
         alice_rating = self.table('account', 'allaccounts')[0]['rating']
         self.assertTrue(alice_rating == rating)
         
-        self.wait(1)
+        self.wait(2)
         self.action('updateacc', {'user': 'alice'},
                             alice, 'Update alice rating in 3 days')
+
         print(self.table('account', 'allaccounts')[0]['rating'])
         print(self.table('account', 'allaccounts')[0])
 

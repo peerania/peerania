@@ -63,7 +63,6 @@ void peeranha::report_profile(eosio::name user, eosio::name user_to_report) {
     account.reduce_energy(ENERGY_REPORT_PROFILE);
   });
   update_rating(iter_user_to_report, [&](auto &account) {
-    set_property(account.integer_properties, PROPERTY_RATING_CHANGE, 0);
     account.update();
     eosio::check(!account.is_frozen, "Profile is already frozen");
     uint16_t total_report_points = 0;
@@ -91,10 +90,21 @@ void peeranha::report_profile(eosio::name user, eosio::name user_to_report) {
 
 void peeranha::update_account(eosio::name user) {
   auto iter_account = find_account(user);
-  update_rating_base(iter_account, 0, [](auto &acc) { 
-    set_property(acc.integer_properties, PROPERTY_RATING_CHANGE, 0);
-    acc.update(); 
+
+  time current_time = now();
+  uint16_t current_period =
+      (current_time - iter_account->registration_time) / ACCOUNT_STAT_RESET_PERIOD;
+  
+  auto last_reward_period = get_property_d(iter_account->integer_properties, PROPERTY_LAST_RATING_UPDATE_PERIOD, 0);
+  uint16_t reward_period_passed = current_period - last_reward_period;
+  if (reward_period_passed > 0){
+    update_rating_base(iter_account, 1, [current_period](auto &acc) {
+        set_property(acc.integer_properties, PROPERTY_LAST_RATING_UPDATE_PERIOD, current_period);
     }, true, false);
+  }
+
+  update_rating_base(iter_account, 0, [](auto &acc) { acc.update(); }, true,
+                     false);
 }
 
 void peeranha::give_moderator_flag(eosio::name user, int flags) {
@@ -150,7 +160,6 @@ void peeranha::update_rating_base(
     if (hasLambda)
       account_table.modify(
           iter_account, _self, [account_modifying_lambda](auto &account) {
-            set_property(account.integer_properties, PROPERTY_RATING_CHANGE, 0);
             account.update();
             auto const rating_before = account.rating;
             account_modifying_lambda(account);
@@ -260,14 +269,13 @@ void peeranha::update_rating_base(
   }
   account_table.modify(iter_account, _self,
                        [rating_to_award_change, new_rating, hasLambda,
-                        account_modifying_lambda, rating_change](auto &account) {
+                         account_modifying_lambda](auto &account) {
                          // Real value of paid out rating for this week is
                          // paid_out_rating - rating_to_award Proof
                          // paid_out_rating on week_{n-1} <= paid_out_rating on
                          // week_{n} for any n Each week
                          account.pay_out_rating += rating_to_award_change;
                          account.rating = new_rating;
-                         set_property(account.integer_properties, PROPERTY_RATING_CHANGE, rating_change);
                          account.update();
 
                          auto const rating_before = account.rating;
@@ -294,7 +302,6 @@ void peeranha::update_rating(
     const std::function<void(account &)> account_modifying_lambda) {
   account_table.modify(iter_account, _self,
                        [account_modifying_lambda](auto &account) {
-                         set_property(account.integer_properties, PROPERTY_RATING_CHANGE, 0);    
                          account.update();
                          auto const rating_before = account.rating;
                          account_modifying_lambda(account);

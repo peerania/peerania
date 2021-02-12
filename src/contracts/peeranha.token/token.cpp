@@ -589,6 +589,35 @@ void token::addhotquestn(name user, uint64_t question_id, int hours) {
     }); 
 }
 
+void token::chngpromcomm(name user, uint64_t question_id, uint64_t old_community_id) {
+  require_auth(user);
+  promoted_questions_index promoted_questions_table(_self, old_community_id);
+  auto iter_promoted_questions = promoted_questions_table.find(question_id);
+  eosio::check(iter_promoted_questions != promoted_questions_table.end(), "Promoted questions not found");
+
+  if (iter_promoted_questions->ends_time < now()) {
+    promoted_questions_table.erase(iter_promoted_questions);
+    return;
+  }
+
+  question_index question_table(peeranha_main, scope_all_questions);
+  auto iter_question = question_table.find(question_id);
+  eosio::check(iter_question != question_table.end(), "Question not found (promoted)");
+  eosio::check(user == iter_question->user, "Wrong user to change community for promoted question");
+
+  promoted_questions_index new_promoted_questions_table(_self, iter_question->community_id);
+  auto iter_new_promoted_questions = new_promoted_questions_table.find(question_id);
+  eosio::check(iter_new_promoted_questions == new_promoted_questions_table.end(), "Promoted questions is already added");
+  
+  new_promoted_questions_table.emplace(
+    _self, [iter_promoted_questions](auto &promoted_question) {
+      promoted_question.question_id = iter_promoted_questions->question_id;
+      promoted_question.start_time = iter_promoted_questions->start_time;
+      promoted_question.ends_time = iter_promoted_questions->ends_time;
+    });
+  promoted_questions_table.erase(iter_promoted_questions);
+}
+
 void token::delhotquestn(name user, uint64_t question_id) {
   require_auth(user);
   question_index question_table(peeranha_main, scope_all_questions);
@@ -704,7 +733,7 @@ void token::resettables(std::vector<eosio::name> allaccs) {
 
 EOSIO_DISPATCH(eosio::token,
                (create)(issue)(transfer)(open)(close)(retire)(pickupreward)(inviteuser)(rewardrefer)
-               (addboost)(setbounty)(editbounty)(paybounty)(addhotquestn)(delhotquestn)
+               (addboost)(setbounty)(editbounty)(paybounty)(addhotquestn)(chngpromcomm)(delhotquestn)
 
 #if STAGE == 1 || STAGE == 2
                    (resettables)

@@ -76,6 +76,8 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
 
   [[eosio::action]] void addhotquestn(name user, uint64_t question_id, int hours);
 
+  [[eosio::action]] void chngpromcomm(name user, uint64_t question_id, uint64_t old_community_id);
+
   [[eosio::action]] void delhotquestn(name user, uint64_t question_id);
 
   [[eosio::action]] void payforcpu(){};

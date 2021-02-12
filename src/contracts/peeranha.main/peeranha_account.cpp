@@ -90,6 +90,15 @@ void peeranha::report_profile(eosio::name user, eosio::name user_to_report) {
 
 void peeranha::update_account(eosio::name user) {
   auto iter_account = find_account(user);
+  time current_time = now();
+  auto last_reward_time = get_property_d(iter_account->integer_properties, PROPERTY_LAST_RATING_UPDATE_TIME, 0);
+  uint16_t reward_time_passed = current_time - last_reward_time;
+  if (reward_time_passed >= ACCOUNT_STAT_RESET_PERIOD){
+    update_rating_base(iter_account, RATING_FOR_LOGIN, [current_time](auto &acc) {
+        set_property(acc.integer_properties, PROPERTY_LAST_RATING_UPDATE_TIME, current_time);
+    }, true, false);
+  }
+
   update_rating_base(iter_account, 0, [](auto &acc) { acc.update(); }, true,
                      false);
 }

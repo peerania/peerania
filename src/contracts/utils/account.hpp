@@ -10,6 +10,9 @@
 #include "property_community.hpp"
 #include "boost.hpp"
 
+#define RATING_FOR_LOGIN 1
+#define PROPERTY_LAST_RATING_UPDATE_TIME 18
+
 struct report {
   eosio::name user;
   time report_time;

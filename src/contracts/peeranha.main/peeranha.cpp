@@ -111,9 +111,9 @@ void peeranha::delcomment(eosio::name user, uint64_t question_id,
 
 void peeranha::modquestion(eosio::name user, uint64_t question_id,
                            uint16_t community_id, std::vector<uint32_t> tags,
-                           std::string title, IpfsHash ipfs_link, uint8_t type) {
+                           std::string title, IpfsHash ipfs_link, uint8_t type, bool restore_rating) {
   require_auth(user);
-  modify_question(user, question_id, community_id, tags, title, ipfs_link, type);
+  modify_question(user, question_id, community_id, tags, title, ipfs_link, type, restore_rating);
 }
 
 void peeranha::modanswer(eosio::name user, uint64_t question_id,
@@ -229,10 +229,6 @@ void peeranha::edittag(eosio::name user, uint16_t community_id, uint32_t tag_id,
   edit_tag(user, community_id, tag_id, name, ipfs_description);
 }
 
-void peeranha::chgqsttype(eosio::name user, uint64_t question_id, int type, bool restore_rating){
-   require_auth(user);
-   change_question_type(user, question_id, type, restore_rating);
-}
 
 void peeranha::addtotopcomm(eosio::name user, uint16_t community_id, uint64_t question_id){
   require_auth(user);
@@ -564,7 +560,7 @@ EOSIO_DISPATCH(
         delquestion)(delanswer)(delcomment)(modanswer)(modquestion)(modcomment)(
         upvote)(downvote)(mrkascorrect)(reportforum)(crtag)(crcommunity)(
         vtcrtag)(vtcrcomm)(vtdeltag)(vtdelcomm)(followcomm)(unfollowcomm)(
-        reportprof)(updateacc)(givemoderflg)(editcomm)(edittag)(chgqsttype)
+        reportprof)(updateacc)(givemoderflg)(editcomm)(edittag)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
         (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(dsapprvacctl)(updtdsplname)(intallaccach)
         (movecomscnd)(intboost)(addconfig)(addusrconfig)(updateconfig)(upuserconfig)

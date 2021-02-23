@@ -307,7 +307,8 @@ void peeranha::modify_question(eosio::name user, uint64_t question_id,
                                const std::vector<uint32_t> &tags,
                                const std::string &title,
                                const IpfsHash &ipfs_link,
-                               const uint8_t type) {
+                               const uint8_t type,
+                               bool restore_rating) {
   assert_ipfs(ipfs_link);
   assert_title(title);
   assert_question_type(type);
@@ -315,7 +316,80 @@ void peeranha::modify_question(eosio::name user, uint64_t question_id,
   assert_community_questions_type(community_id, type);
   auto iter_account = find_account(user);
   auto iter_question = find_question(question_id);
-  assert_allowed(*iter_account, iter_question->user, Action::MODIFY_QUESTION, community_id);
+
+  bool global_moderator_flag = iter_account->has_moderation_flag(MODERATOR_FLG_CHANGE_QUESTION_STATUS);
+  bool community_moderator_flag = find_account_property_community(user, COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS, community_id);
+
+  uint8_t iter_question_type = get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
+                              QUESTION_TYPE_EXPERT);
+
+  if (iter_question_type != type){
+    eosio::check(global_moderator_flag || community_moderator_flag,
+        "You don't have permission to change qustion status");
+    if (restore_rating){
+      std::map<uint64_t, int> rating_change;
+
+      question_table.modify(
+      iter_question, _self,
+      [restore_rating, type, &rating_change](auto &question) {
+        int question_owner_rating_change = 0;
+        for_each(question.history.begin(), question.history.end(),
+                 [&question_owner_rating_change](auto history_item) {
+                   if (history_item.is_flag_set(HISTORY_UPVOTED_FLG)) {
+                     question_owner_rating_change +=
+                         COMMON_QUESTION_UPVOTED_REWARD -
+                         QUESTION_UPVOTED_REWARD;
+                   }
+                 });
+        rating_change[question.user.value] = question_owner_rating_change;
+
+        for_each(question.answers.begin(), question.answers.end(),
+                 [&rating_change, &question,
+                  question_owner_rating_change](auto answer_item) {
+                   int answer_owner_rating_change = 0;
+                   if (answer_item.user == question.user) {
+                     answer_owner_rating_change = question_owner_rating_change;
+                   } else if (question.correct_answer_id == answer_item.id) {
+                     answer_owner_rating_change =
+                         COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD -
+                         ANSWER_ACCEPTED_AS_CORRECT_REWARD;
+                     rating_change[question.user.value] +=
+                         ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD -
+                         ACCEPT_ANSWER_AS_CORRECT_REWARD;
+                   }
+                   if(get_property_d(answer_item.properties, PROPERTY_ANSWER_15_MINUTES, -1) == 1) {
+                      answer_owner_rating_change += VoteItem::common_answer.first_answer - VoteItem::answer.first_answer;
+                   }
+                   if(get_property_d(answer_item.properties, PROPERTY_FIRST_ANSWER, -1) == 1) {
+                      answer_owner_rating_change += VoteItem::common_answer.answer_15_minutes - VoteItem::answer.answer_15_minutes;
+                   }
+
+                   for_each(
+                       answer_item.history.begin(), answer_item.history.end(),
+                       [&answer_owner_rating_change](auto history_item) {
+                         if (history_item.is_flag_set(HISTORY_UPVOTED_FLG)) {
+                           answer_owner_rating_change +=
+                               COMMON_ANSWER_UPVOTED_REWARD -
+                               ANSWER_UPVOTED_REWARD;
+                         }
+                       });
+                   rating_change[answer_item.user.value] =
+                       answer_owner_rating_change;
+                 });
+      });
+      for (std::pair<uint64_t, int> user_rating_change : rating_change) {
+        if (type == QUESTION_TYPE_GENERAL)
+          update_rating(eosio::name(user_rating_change.first),
+                    user_rating_change.second);
+        else
+          update_rating(eosio::name(user_rating_change.first),
+                    -user_rating_change.second);
+      }
+    }
+  } else {
+    assert_allowed(*iter_account, iter_question->user, Action::MODIFY_QUESTION, community_id);
+  }
+  
   for (int i = 0; i < tags.size(); ++i)
     for (int j = i + 1; j < tags.size(); ++j)
       if (tags[i] == tags[j]) eosio::check(false, "Duplicate tag");
@@ -513,85 +587,4 @@ void peeranha::mark_answer_as_correct(eosio::name user, uint64_t question_id,
   question_table.modify(iter_question, _self, [answer_id](auto &question) {
     question.correct_answer_id = answer_id;
   });
-}
-
-void peeranha::change_question_type(eosio::name user, uint64_t question_id,
-                                    int type, bool restore_rating) {
-  assert_question_type(type);
-  auto iter_moderator = find_account(user);
-  auto iter_question = find_question(question_id);
-  auto community_id = iter_question->community_id;
-  bool global_moderator_flag = iter_moderator->has_moderation_flag(MODERATOR_FLG_CHANGE_QUESTION_STATUS);
-  bool community_moderator_flag = find_account_property_community(user, COMMUNITY_ADMIN_FLG_CHANGE_QUESTION_STATUS, community_id);
-  eosio::check(global_moderator_flag || community_moderator_flag,
-        "You don't have permission to change qustion status");
-
-  eosio::check(get_property_d(iter_question->properties, PROPERTY_QUESTION_TYPE,
-                              QUESTION_TYPE_EXPERT) != type,
-               "The question already has this type");
-  std::map<uint64_t, int> rating_change;
-
-  question_table.modify(
-      iter_question, _self,
-      [restore_rating, type, &rating_change](auto &question) {
-        set_property_d(question.properties, PROPERTY_QUESTION_TYPE, type,
-                       QUESTION_TYPE_EXPERT);
-        if (!restore_rating) return;
-        // TODO: Rewrite with switch case set var from and to
-
-        // Claculate rating of switch from expert -> general
-        // If reverse switch, just invert calculated rating
-        int question_owner_rating_change = 0;
-        for_each(question.history.begin(), question.history.end(),
-                 [&question_owner_rating_change](auto history_item) {
-                   if (history_item.is_flag_set(HISTORY_UPVOTED_FLG)) {
-                     question_owner_rating_change +=
-                         COMMON_QUESTION_UPVOTED_REWARD -
-                         QUESTION_UPVOTED_REWARD;
-                   }
-                 });
-        rating_change[question.user.value] = question_owner_rating_change;
-
-        for_each(question.answers.begin(), question.answers.end(),
-                 [&rating_change, &question,
-                  question_owner_rating_change](auto answer_item) {
-                   int answer_owner_rating_change = 0;
-                   if (answer_item.user == question.user) {
-                     answer_owner_rating_change = question_owner_rating_change;
-                   } else if (question.correct_answer_id == answer_item.id) {
-                     answer_owner_rating_change =
-                         COMMON_ANSWER_ACCEPTED_AS_CORRECT_REWARD -
-                         ANSWER_ACCEPTED_AS_CORRECT_REWARD;
-                     rating_change[question.user.value] +=
-                         ACCEPT_COMMON_ANSWER_AS_CORRECT_REWARD -
-                         ACCEPT_ANSWER_AS_CORRECT_REWARD;
-                   }
-                   if(get_property_d(answer_item.properties, PROPERTY_ANSWER_15_MINUTES, -1) == 1) {
-                      answer_owner_rating_change += VoteItem::common_answer.first_answer - VoteItem::answer.first_answer;
-                   }
-                   if(get_property_d(answer_item.properties, PROPERTY_FIRST_ANSWER, -1) == 1) {
-                      answer_owner_rating_change += VoteItem::common_answer.answer_15_minutes - VoteItem::answer.answer_15_minutes;
-                   }
-
-                   for_each(
-                       answer_item.history.begin(), answer_item.history.end(),
-                       [&answer_owner_rating_change](auto history_item) {
-                         if (history_item.is_flag_set(HISTORY_UPVOTED_FLG)) {
-                           answer_owner_rating_change +=
-                               COMMON_ANSWER_UPVOTED_REWARD -
-                               ANSWER_UPVOTED_REWARD;
-                         }
-                       });
-                   rating_change[answer_item.user.value] =
-                       answer_owner_rating_change;
-                 });
-      });
-  for (std::pair<uint64_t, int> user_rating_change : rating_change) {
-    if (type == QUESTION_TYPE_GENERAL)
-      update_rating(eosio::name(user_rating_change.first),
-                    user_rating_change.second);
-    else
-      update_rating(eosio::name(user_rating_change.first),
-                    -user_rating_change.second);
-  }
 }

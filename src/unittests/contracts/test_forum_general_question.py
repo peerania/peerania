@@ -43,13 +43,10 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
         admin = self.get_contract_deployer(self.get_default_contract())
         self.action('givemoderflg', {
                     'user': 'dan', 'flags': 32}, admin, "Give moderator flags to dan")   
-        print(self.table('account', 'allaccounts')[1]['rating'])
         self.action('modquestion', {'user': 'dan', 'question_id': self.var['aq'], 'community_id': 1, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 1, "restore_rating": True}, dan,
                     'Dan modify alice question type')
-        print(self.table('account', 'allaccounts')[1]['rating'])
         self.action('modquestion', {'user': 'dan', 'question_id': self.var['aq'], 'community_id': 1, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0, "restore_rating": True}, dan,
                     'Dan modify alice question type')
-        print(self.table('account', 'allaccounts')[1]['rating'])
         end()
 
     def test_change_question_type_to_expert(self):
@@ -90,8 +87,8 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
         admin = self.get_contract_deployer(self.get_default_contract())
         self.action('givemoderflg', {
                     'user': 'dan', 'flags': 32}, admin, "Give moderator flags to dan")
-        self.action('chgqsttype', {
-                    'user': 'dan', 'question_id': self.var['aq'], 'type': 0, 'restore_rating': True}, dan, "Change question type to expert")
+        self.action('modquestion', {'user': 'dan', 'question_id': self.var['aq'], 'community_id': 1, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0, "restore_rating": True}, dan,
+                    'Change question type to expert')
         self._verify_acc()
         end()
 
@@ -133,8 +130,8 @@ class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
         admin = self.get_contract_deployer(self.get_default_contract())
         self.action('givemoderflg', {
                     'user': 'dan', 'flags': 32}, admin, "Give moderator flags to dan")
-        self.action('chgqsttype', {
-                    'user': 'dan', 'question_id': self.var['aq'], 'type': 1, 'restore_rating': False}, dan, "Change question type to general")
+        self.action('modquestion', {'user': 'dan', 'question_id': self.var['aq'], 'community_id': 1, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 1, "restore_rating": True}, dan,
+                    'Change question type to general')
         self._verify_acc()
         end()
 

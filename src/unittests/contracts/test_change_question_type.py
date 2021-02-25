@@ -15,8 +15,8 @@ COMMON_ANSWER_DOWNVOTED_REWARD = -4
 EXPERT_ANSWER_DOWNVOTED_REWARD = -12
 
 class RatingRewardsTestsGeneralQuestion(peeranhatest.peeranhaTest):
-    def test_change_question_type_to_general(self):
-        begin("foo")
+    def test_change_question_type(self):
+        begin("Test change question type")
         (alice, bob, carol, dan) = self._create_basic_hierarchy(0)
         self.action('mrkascorrect', {
             'user': 'alice', 'question_id': self.var['aq'], 'answer_id': self.var['aq_ba']}, alice, "Alice mark Bob answer as correct")

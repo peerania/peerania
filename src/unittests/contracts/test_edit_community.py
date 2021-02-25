@@ -4,7 +4,7 @@ from peeranhatest import *
 from jsonutils import *
 from unittest import main
 
-MODERATION_IMPACT_INFINITE = 255
+ALL_COMMUNITY_ADMIN_FLG = 255
 PROPERTY_MODERATOR_FLAGS = 48
 MODERATOR_FLG_ALL = 31
 
@@ -33,9 +33,9 @@ class TestEditCommunity(peeranhatest.peeranhaTest):
 
         self.action('givecommuflg', {
             'user': alice,
-            'flags': MODERATION_IMPACT_INFINITE,
+            'flags': ALL_COMMUNITY_ADMIN_FLG,
             'community_id': 4
-        }, admin, 'add a flag MODERATION_IMPACT_INFINITE')
+        }, admin, 'add a flag ALL_COMMUNITY_ADMIN_FLG')
 
         self.action('editcomm', {'user': alice, 'community_id': 4, 'name': 'alice community1', 'tags': [1], 'title': 'Title alice question2', 'ipfs_description': 'ACM1', 'type': 2}, alice,
                            'Alice edit community with community admin permission')

@@ -17,7 +17,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         pupularity1 = [1, 2, 2, 1, 1, 0]
         for i in range(6):
             self.assertTrue(t[i]['questions_asked'] == pupularity1[i])
-        self.action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 4, 6], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
+        self.action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 4, 6], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                     'Alice modify own question')
         e[1]['tags'] = [1, 4, 6]
         self.assertTrue(compare(e, self.table(
@@ -26,7 +26,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         t = self.table('tags', get_tag_scope(c[0]['id']))
         for i in range(6):
             self.assertTrue(t[i]['questions_asked'] == pupularity1[i])
-        self.action('modquestion', {'user': 'bob', 'question_id': var['bq'], 'community_id': 2, 'tags': [1, 3], 'title': 'Title bob question', 'ipfs_link': 'BQ', 'type': 0}, bob,
+        self.action('modquestion', {'user': 'bob', 'question_id': var['bq'], 'community_id': 2, 'tags': [1, 3], 'title': 'Title bob question', 'ipfs_link': 'BQ'}, bob,
                     'Bob modify own question')
         c = self.table('communities', 'allcomm')
         e[2]['community_id'] = c[1]['id']
@@ -82,7 +82,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         var = {}
         self.assertTrue(compare([{'id': '#var aq',
                                   'user': 'alice'}], self.table('question', 'allquestions'), var, True))
-        self.failed_action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 3, 2, 1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
+        self.failed_action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 3, 2, 1], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                            'Alice attempt to modify own question - set duplicate tag [1, 3, 2, 1]', 'assert')
         # self.failed_action('postquestion', {'user': 'alice', 'question_id': var['aq'],  'community_id': 1, 'tags': [], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
         #                   'Alice attempt to modify own question - set no tags', 'assert')
@@ -101,7 +101,7 @@ class TagsAndCommunitiesTests(peeranhatest.peeranhaTest):
         var = {}
         self.assertTrue(compare([{'id': '#var aq',
                                   'user': 'alice'}], self.table('question', 'allquestions'), var, True))
-        self.failed_action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 9], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
+        self.failed_action('modquestion', {'user': 'alice', 'question_id': var['aq'], 'community_id': 1, 'tags': [1, 9], 'title': 'Title alice question', 'ipfs_link': 'AQ'}, alice,
                            'Alice attempt to modify own question - set non-existing tag [1, 9] - 9 non-exist', 'assert')
         self.failed_action('postquestion', {'user': 'alice', 'question_id': var['aq'],  'community_id': 5, 'tags': [1], 'title': 'Title alice question', 'ipfs_link': 'AQ', 'type': 0}, alice,
                            'Alice attempt to modify own question - set non-existing community - 5', 'assert')

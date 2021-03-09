@@ -36,10 +36,10 @@ class CommunityQuestionsTypeTest(peeranhatest.peeranhaTest):
                            'Alice ask GENERAL question in ANY_TYPE community')
         # AQ_id = self.table('question', 'allquestions')[0]['id']
         questions = self.table('question', 'allquestions')
-        self.failed_action('modquestion', {'user': alice, 'question_id': questions[2]['id'], 'title': 'Title alice question1', 'ipfs_link': 'AQ2', 'community_id': 5, 'tags':[1], 'type': 0}, alice,
-                            'Alice attempt to modify question type in community with only GENERAL questions', 'assert')
-        self.failed_action('modquestion', {'user': alice, 'question_id': questions[3]['id'], 'title': 'Title alice question1', 'ipfs_link': 'AQ1', 'community_id': 4, 'tags':[1], 'type': 1}, alice,
-                            'Alice attempt to modify question type in community with only EXPERT questions', 'assert')
+        self.action('modquestion', {'user': alice, 'question_id': questions[2]['id'], 'title': 'Title alice question1', 'ipfs_link': 'AQ2', 'community_id': 5, 'tags':[1]}, alice,
+                            'Alice attempt to modify question type in community with only GENERAL questions')
+        self.action('modquestion', {'user': alice, 'question_id': questions[3]['id'], 'title': 'Title alice question1', 'ipfs_link': 'AQ1', 'community_id': 4, 'tags':[1]}, alice,
+                            'Alice attempt to modify question type in community with only EXPERT questions')
         end()
 
     def test_change_community_questions_type(self):

@@ -77,7 +77,7 @@ class TestPropertyCommunity(peeranhatest.peeranhaTest):
             'flags': 0,
             'community_id': 1
         }, admin, 'pick_up flag for community 1')
-        example = [{'user': 'alice', 'properties': []}]
+        example = []
         self.assertTrue(compare(example, self.table('propertycomm', 'allprprtcomm'), ignore_excess=True))
 
         self.wait(2)

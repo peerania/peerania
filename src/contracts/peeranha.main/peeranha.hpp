@@ -94,7 +94,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     // Modify question
     ACTION modquestion(eosio::name user, uint64_t question_id,
                        uint16_t community_id, std::vector<uint32_t> tags,
-                       std::string title, IpfsHash ipfs_link, uint8_t type);
+                       std::string title, IpfsHash ipfs_link);
 
     // Modify answer
     ACTION modanswer(eosio::name user, uint64_t question_id, uint16_t answer_id,
@@ -282,7 +282,7 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
                          uint16_t community_id,
                          const std::vector<uint32_t> &tags,
                          const std::string &title, 
-                         const IpfsHash &ipfs_link, const uint8_t type);
+                         const IpfsHash &ipfs_link);
 
     void modify_answer(eosio::name user, uint64_t question_id,
                        uint16_t answer_id, const IpfsHash &ipfs_link, bool official_answer);

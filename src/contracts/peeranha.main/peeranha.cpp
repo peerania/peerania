@@ -111,9 +111,9 @@ void peeranha::delcomment(eosio::name user, uint64_t question_id,
 
 void peeranha::modquestion(eosio::name user, uint64_t question_id,
                            uint16_t community_id, std::vector<uint32_t> tags,
-                           std::string title, IpfsHash ipfs_link, uint8_t type) {
+                           std::string title, IpfsHash ipfs_link) {
   require_auth(user);
-  modify_question(user, question_id, community_id, tags, title, ipfs_link, type);
+  modify_question(user, question_id, community_id, tags, title, ipfs_link);
 }
 
 void peeranha::modanswer(eosio::name user, uint64_t question_id,

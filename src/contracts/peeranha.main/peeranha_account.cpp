@@ -126,8 +126,7 @@ void peeranha::give_moderator_flag(eosio::name user, int flags, uint16_t communi
       key_value.value =  flags;
       property_community.properties.push_back(key_value);
     });
-  }
-  else {
+  } else {
     property_community_table.modify(
         iter_user, _self, [flags, community_id](auto &property_community) {
           auto iter_community = linear_find(property_community.properties.begin(), property_community.properties.end(), community_id);
@@ -139,12 +138,15 @@ void peeranha::give_moderator_flag(eosio::name user, int flags, uint16_t communi
           }
           else {
             if (!flags) {
-              property_community.properties.erase(iter_community);
+              property_community.properties.erase(iter_community);         
             } else {
               iter_community->value = flags;
             }
           }
         });
+    if (iter_user->properties.begin() == iter_user->properties.end()) {
+      property_community_table.erase(iter_user);
+    }
   }
 }
 

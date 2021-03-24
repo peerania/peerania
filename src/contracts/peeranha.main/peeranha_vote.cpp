@@ -273,9 +273,10 @@ void peeranha::report_forum_item(eosio::name user, uint64_t question_id,
       remove_user_answer(answer->user, iter_question->id);
 #endif
     }
+    delete_top_question(iter_question->community_id, iter_question->id);
     question_table.erase(iter_question);
     eosio::check(iter_question != question_table.end(),
-                 "Address not erased properly");
+                 "Address not erased properly");              
   }
   // user_rating_change = 0 also means that item_user was not found
   if (item_user.value != 0) {

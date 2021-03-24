@@ -4,6 +4,7 @@ from jsonutils import *
 from unittest import main
 
 COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION = 1 << 6
+limit_question = 101
 
 class TestTopQuestion(peeranhatest.peeranhaTest):  
     def test_add_to_top_community(self):
@@ -81,8 +82,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         example = [{'user': 'alice', 'properties': [{'community': 1, 'value': 255}]}]
         self.assertTrue(compare(example, table, ignore_excess=True))
 
-        max_size = 101
-        for w in range(max_size):
+        for w in range(limit_question):
             self.register_question_action(alice, 'Alice question ' + str(68719476735 - w))
 
             question_id = self.table('question', 'allquestions')[0]['id']
@@ -93,7 +93,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
                 'question_id': question_id
                 }, alice, 'add community 1, question ' + str(community_id))
 
-        self.register_question_action(alice, 'Alice question ' + str(68719476735 - max_size -1))
+        self.register_question_action(alice, 'Alice question ' + str(68719476735 - limit_question -1))
         question_id = self.table('question', 'allquestions')[0]['id']
         community_id = self.table('question', 'allquestions')[0]['community_id']
         self.failed_action('addtotopcomm', {
@@ -160,28 +160,58 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         bob = self.register_bob_account()
 
         self.action('givecommuflg', {
-        'user': bob,
-        'flags': COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION,
-        'community_id': 1
+            'user': bob,
+            'flags': COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION,
+            'community_id': 1
         }, admin, 'add a flag COMMUNITY_ADMIN_FLG_CHANGE_TOP_QUESTION')
 
         e = [self.register_question_action(bob, 'Alice question 1', 'q1')]
         question_id = self.table('question', 'allquestions')[0]['id']
         self.action('addtotopcomm', {
-        'user': bob,
-        'community_id': 1,
-        'question_id': question_id
+            'user': bob,
+            'community_id': 1,
+            'question_id': question_id
         }, bob, 'add a question from another community')
-        top = self.table('topquestion', 'alltopquest')
-        example = [{'community_id': 1, 'top_questions': ['68719476735']}]
+        example = [{'community_id': 1, 'top_questions': [question_id]}]
         check_table(self, example)
-        
 
         t = self.table('question', 'allquestions')
         var = {}
         self.assertTrue(compare(e, t, var, True))
         self.action('delquestion', {
                     'user': 'bob', 'question_id': var['q1']}, bob, 'Delete Alice question')
+
+        example = [{'community_id': 1, 'top_questions': []}]
+        check_table(self, example)
+        end()
+
+    def test_moderator_delete_top_question(self):
+        begin('test moderator delete top question')
+        admin = self.get_contract_deployer(self.get_default_contract())
+        bob = self.register_bob_account()
+        alice = self.register_alice_account()
+
+        self.action('givecommuflg', {
+            'user': alice,
+            'flags': 255,
+            'community_id': 1
+        }, admin, 'add a all community flag')
+
+        e = [self.register_question_action(bob, 'Alice question 1', 'q1')]
+        question_id = self.table('question', 'allquestions')[0]['id']
+        self.action('addtotopcomm', {
+            'user': alice,
+            'community_id': 1,
+            'question_id': question_id
+        }, alice, 'add a top question')
+        example = [{'community_id': 1, 'top_questions': [question_id]}]
+        check_table(self, example)
+
+        t = self.table('question', 'allquestions')
+        var = {}
+        self.assertTrue(compare(e, t, var, True))
+        self.action('reportforum', {'user': 'alice', 'question_id': question_id, 'answer_id': 0, 'comment_id': 0},
+                    alice, 'Alice delete bob question')
 
         example = [{'community_id': 1, 'top_questions': []}]
         check_table(self, example)

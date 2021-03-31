@@ -84,6 +84,12 @@ bool account::has_moderation_flag(int mask) const {
   //return false;
 }
 
+bool account::has_invited_blogger_flag() const {
+  int invited_blogger_flag = 
+    get_property_d(integer_properties, PROPERTY_INVITED_BLOGGER, 0);
+  return invited_blogger_flag == 1;
+}
+
 uint8_t account::get_status_moderation_impact(uint16_t community_id = 0) const {
   if (has_moderation_flag(MODERATOR_FLG_INFINITE_IMPACT))
     return MODERATION_IMPACT_INFINITE;

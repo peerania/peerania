@@ -63,7 +63,8 @@ void peeranha::create_community(
   eosio::check(suggested_tags.size() >= MIN_SUGGESTED_TAG &&
                    suggested_tags.size() <= MAX_SUGGESTED_TAG,
                "Invalid tag count");
-  if (iter_account->has_moderation_flag(MODERATOR_FLG_CREATE_COMMUNITY)) {
+  if (iter_account->has_moderation_flag(MODERATOR_FLG_CREATE_COMMUNITY)
+          || iter_account->has_invited_blogger_flag()) {
     // Directly create new community with tags
     community_table_index community_table(_self, scope_all_communities);
     uint16_t community_pk = get_direct_pk(community_table, MAX_COMMUNITY_ID);
@@ -97,6 +98,9 @@ void peeranha::create_community(
     global_stat_table.modify(
         --global_stat_table.end(), _self,
         [](auto &global_stat) { global_stat.communities_count += 1; });
+    if (iter_account->has_invited_blogger_flag()){
+      givecommuflg(user, ALL_COMMUNITY_ADMIN_FLG, community_pk);
+    }
     return;
     // End
   }

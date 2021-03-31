@@ -412,4 +412,6 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     uint64_t get_configuration(uint64_t key);
 
     void update_configuration(uint64_t key, uint64_t value);
+
+    void invite_blogger(eosio::name user);
 };

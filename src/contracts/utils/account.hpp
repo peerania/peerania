@@ -54,6 +54,7 @@ struct [[ eosio::table("account"), eosio::contract("peeranha.main") ]] account {
   uint16_t get_status_energy() const;
   uint8_t  get_status_moderation_impact(uint16_t community_id) const;
   bool has_moderation_flag(int mask) const;  
+  bool has_invited_blogger_flag() const;
   
   uint64_t primary_key() const { return user.value; }
   uint64_t rating_rkey() const { return (1ULL << 32) - rating; }

@@ -628,21 +628,24 @@ void token::return_promoted_tokens(promoted_questions_index::const_iterator &ite
 
 #if STAGE == 1 || STAGE == 2
 
-void token::resettables(std::vector<eosio::name> allaccs) {
+void token::resettables() {
   require_auth(_self);
-  for (auto iter_acc = allaccs.begin(); iter_acc != allaccs.end(); iter_acc++) {
-    accounts to_acnts(_self, iter_acc->value);
+  account_index account_table(peeranha_main, scope_all_accounts);
+
+  for (auto iter_acc = account_table.begin(); iter_acc != account_table.end(); iter_acc++) {
+    accounts to_acnts(_self, iter_acc->user.value);
     auto iter_to_acnts = to_acnts.begin();
     while (iter_to_acnts != to_acnts.end()) {
       iter_to_acnts = to_acnts.erase(iter_to_acnts);
     }
-    period_reward_index period_reward_table(_self, iter_acc->value);
+    
+    period_reward_index period_reward_table(_self, iter_acc->user.value);
     auto iter_period_reward = period_reward_table.begin();
     while (iter_period_reward != period_reward_table.end()) {
       iter_period_reward = period_reward_table.erase(iter_period_reward);
     }
 
-    boost_index boost_table(_self, iter_acc->value);
+    boost_index boost_table(_self, iter_acc->user.value);
     auto iter_boost = boost_table.begin();
     while (iter_boost != boost_table.end()) {
       iter_boost = boost_table.erase(iter_boost);
@@ -688,6 +691,12 @@ void token::resettables(std::vector<eosio::name> allaccs) {
       iter_promoted_questions = promoted_questions_table.erase(iter_promoted_questions);
     }
     ++iter_community;
+  }
+
+  question_bounty bounty_table(_self, scope_all_bounties);
+  auto iter_bounty = bounty_table.begin();
+  while (iter_bounty != bounty_table.end()) {
+    iter_bounty = bounty_table.erase(iter_bounty);
   }
 
 #if STAGE == 2

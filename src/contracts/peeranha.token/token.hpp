@@ -95,7 +95,7 @@ class[[eosio::contract("peeranha.token")]] token : public contract {
   }
 
 #if STAGE == 1 || STAGE == 2
-  [[eosio::action]] void resettables(std::vector<eosio::name> allaccs);
+  [[eosio::action]] void resettables();
 
 #if STAGE == 2
   [[eosio::action("mapcrrwpool")]] void mapcrrwpool(

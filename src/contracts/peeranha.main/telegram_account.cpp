@@ -144,10 +144,8 @@ void peeranha::move_table_statistic(eosio::name old_user, eosio::name new_user) 
 
   account_table.modify(iter_new_account, _self,
                        [&iter_old_account](auto &account) {
-                          if(iter_old_account->rating  >= RATING_ON_CREATE) {
-                            account.rating += iter_old_account->rating - RATING_ON_CREATE;
-                            account.pay_out_rating += iter_old_account->pay_out_rating - RATING_ON_CREATE;
-                          }
+                          account.rating += iter_old_account->rating - RATING_ON_CREATE;
+                          account.pay_out_rating += iter_old_account->pay_out_rating - RATING_ON_CREATE;
                           account.report_power += iter_old_account->report_power;
                           account.questions_asked += iter_old_account->questions_asked;
                           account.answers_given += iter_old_account->answers_given;

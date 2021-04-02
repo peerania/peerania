@@ -59,7 +59,9 @@ void peeranha::create_community(
   assert_community_name(name);
   assert_community_type(allowed_question_type);
   assert_ipfs(ipfs_description);
-  assert_question_type_allowed(*iter_account, allowed_question_type);
+  if (iter_account->has_invited_blogger_flag()){
+    eosio::check(allowed_question_type == QUESTION_TYPE_GENERAL, "Question type must to be general");
+  } else assert_question_type_allowed(*iter_account, allowed_question_type);
   eosio::check(suggested_tags.size() >= MIN_SUGGESTED_TAG &&
                    suggested_tags.size() <= MAX_SUGGESTED_TAG,
                "Invalid tag count");
@@ -99,7 +101,7 @@ void peeranha::create_community(
         --global_stat_table.end(), _self,
         [](auto &global_stat) { global_stat.communities_count += 1; });
     if (iter_account->has_invited_blogger_flag()){
-      givecommuflg(user, ALL_COMMUNITY_ADMIN_FLG, community_pk);
+      give_moderator_flag(user, ALL_COMMUNITY_ADMIN_FLG, community_pk);
     }
     return;
     // End

@@ -320,6 +320,11 @@ void peeranha::intallaccach() {
   init_users_achievements();
 }
 
+void peeranha::invtblogger(eosio::name user) {
+  require_auth(_self);
+  invite_blogger(user);
+}
+
 void peeranha::intboost(uint64_t period) {
   require_auth(_self);
   auto iter_total_rating = total_rating_table.find(period);
@@ -567,7 +572,7 @@ EOSIO_DISPATCH(
         reportprof)(updateacc)(givemoderflg)(editcomm)(edittag)(chgqsttype)
         (addtotopcomm)(remfrmtopcom)(upquestion)(downquestion)(movequestion)(givecommuflg)
         (apprvacc)(dsapprvacc)(addtelacc)(addemptelacc)(dsapprvacctl)(updtdsplname)(intallaccach)
-        (movecomscnd)(intboost)(addconfig)(addusrconfig)(updateconfig)(upuserconfig)
+        (invtblogger)(movecomscnd)(intboost)(addconfig)(addusrconfig)(updateconfig)(upuserconfig)
 
 #ifdef SUPERFLUOUS_INDEX
         (freeindex)

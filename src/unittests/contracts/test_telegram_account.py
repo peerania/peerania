@@ -4,21 +4,6 @@ from jsonutils import *
 from unittest import main
 from enum import Enum
 
-class Achievents(int, Enum): 
-    questions_asked = 1, 
-    answers_given = 2, 
-    correct_answers = 3, 
-    first_10k_registered = 4, 
-    stranger = 5, 
-    newbie = 6, 
-    junior = 7, 
-    resident = 8, 
-    senior = 9, 
-    hero = 10, 
-    superhero = 11,
-    answer_15_minutes = 12,
-    first_answer = 13
-
 COMMUNITY_ADMIN_FLG_INFINITE_IMPACT = 1 << 1        # 2
 BASIC_RATING = 200
 CONFIGURATION_KEY_TELEGRAM = 2
@@ -1201,15 +1186,16 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         end()
 
     def test_migrate_negative_rating(self):
-        begin('Do not migrate negative rating from temporary Telegram account when link to Peeranha account')
+        begin('Migrate negative rating from temporary Telegram account when link to Peeranha account')
         alice = self.register_alice_account()
         ted = self.register_ted_account()
         add_telegram_comfig(self)
+        rating_change = -5
 
         self.action('addemptelacc', {'bot_name': 'ted', 'telegram_id': 503975561, 'display_name': 'testNAme', 'ipfs_profile': 'qwe', 'ipfs_avatar': 'rty'}, ted,
                         'Add empty account through telegram')
         empty_account = self.table('account', 'allaccounts')[2]['user']
-        self.action('chnguserrt', {'user': empty_account, 'rating_change': -5},
+        self.action('chnguserrt', {'user': empty_account, 'rating_change': rating_change},
                             self.admin, 'decrease empty account rating')
         
         self.action('addtelacc', {
@@ -1221,7 +1207,7 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
             'user': alice
         }, alice, 'Alice approve telegram account, rating is not subtracted')
         
-        example_account = [{'user': 'alice', 'rating': BASIC_RATING}, {'user': 'ted'}]
+        example_account = [{'user': 'alice', 'rating': BASIC_RATING - rating_change}, {'user': 'ted'}]
         self.assertTrue(compare(example_account, self.table('account', 'allaccounts'), ignore_excess=True))
         end()
     

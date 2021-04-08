@@ -325,3 +325,11 @@ account_index::const_iterator peeranha::find_account(eosio::name user) {
   eosio::check(iter_user != account_table.end(), "Account not registered");
   return iter_user;
 }
+
+void peeranha::invite_blogger(eosio::name user) {
+  auto iter_account = find_account(user);
+
+  update_rating_base(iter_account, 0, [](auto &acc){
+      set_property(acc.integer_properties, PROPERTY_INVITED_BLOGGER, 1);
+  }, true, true);
+}

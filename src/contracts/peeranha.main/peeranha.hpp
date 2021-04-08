@@ -183,6 +183,9 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
 
     ACTION updtdsplname(eosio::name bot_name, uint64_t telegram_id, std::string display_name);
 
+    //allow blogger create community - by invitation
+    ACTION invtblogger(eosio::name user);
+
     ACTION addconfig(uint64_t key, uint64_t value);
 
     ACTION addusrconfig(uint64_t key, eosio::name user);
@@ -412,4 +415,6 @@ class[[eosio::contract("peeranha.main")]] peeranha : public eosio::contract {
     uint64_t get_configuration(uint64_t key);
 
     void update_configuration(uint64_t key, uint64_t value);
+
+    void invite_blogger(eosio::name user);
 };

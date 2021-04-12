@@ -222,6 +222,11 @@ void peeranha::vote_create_community(eosio::name user, uint32_t community_id) {
         tag.questions_asked = 0;
       });
     }
+    for (int i = 0; i < iter_create_community->upvotes.size(); i++) {
+      update_achievement(iter_create_community->upvotes[i], VOTE_COMMUNITY, 1);
+    }
+    update_achievement(iter_create_community->creator, VOTE_COMMUNITY, 1);
+
     update_rating(iter_create_community->creator, COMMUNITY_CREATED_REWARD);
     create_community_table.erase(iter_create_community);
     eosio::check(iter_create_community != create_community_table.end(),
@@ -278,6 +283,11 @@ void peeranha::vote_create_tag(eosio::name user, uint16_t community_id,
       tag.questions_asked = 0;
     });
     update_rating(iter_create_tag->creator, TAG_CREATED_REWARD);
+    for (int i = 0; i < iter_create_tag->upvotes.size(); i++) {
+      update_achievement(iter_create_tag->upvotes[i], VOTE_TAG, 1);
+    }
+    update_achievement(iter_create_tag->creator, VOTE_TAG, 1);
+    
     create_tag_table.erase(iter_create_tag);
     eosio::check(iter_create_tag != create_tag_table.end(),
                  "Address not erased properly");

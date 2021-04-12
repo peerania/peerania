@@ -101,5 +101,5 @@ inline void assert_community_type(int question_type){
 inline void assert_question_type_allowed(const account &action_caller, int quesiton_type) {
   if (quesiton_type != ANY_QUESTIONS_TYPE){
     eosio::check(action_caller.has_moderation_flag(MODERATOR_FLG_CREATE_COMMUNITY), "User must to be moderator");
-  } else return;
+  }
 }

@@ -139,6 +139,16 @@ def get_tag_scope(community_id):
 def time_sec():
     return round(time())
 
+def give_tokens(self, user, tokens):
+    begin('to give tokens ')
+    self.action('issue', {'to': user, 'quantity': tokens, 'memo': "13" },
+                    'peeranhatken', 'Create token PEER', contract='token', suppress_output=True)
+
+def give_ratings(self, user, rating):
+    begin('to give rating ')
+    self.action('chnguserrt', {'user': user, 'rating_change': rating},
+                            self.admin, 'Update rating')
+
 def get_moderation_impact(rating):
     if rating < 99:
         return 0

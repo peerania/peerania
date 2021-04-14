@@ -13,13 +13,13 @@ struct [[
     eosio::asset amount;
     uint64_t question_id;
     uint8_t status;
-    uint64_t timestamp;
+    uint64_t end_timestamp;
 
     uint64_t primary_key() const { return question_id; }
 
     EOSLIB_SERIALIZE(
               bounty,
-              (user)(amount)(question_id)(status)(timestamp))
+              (user)(amount)(question_id)(status)(end_timestamp))
 };
 
-  typedef eosio::multi_index<"bounty"_n, bounty> question_bounty;
+  typedef eosio::multi_index<"bounty"_n, bounty> bounty_index;

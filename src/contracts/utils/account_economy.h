@@ -70,9 +70,12 @@
 #define BAN_RATING_INCREMENT_PER_PERIOD 6
 #define MAX_FREEZE_PERIOD_MULTIPLIER 6
 
-#define BOUNTY_STATUS_ACTIVE 1
-#define BOUNTY_STATUS_PAID 2
-#define BOUNTY_STATUS_PENDING 3
+enum Bounty_status { 
+  ACTIVE = 1, 
+  PAID, 
+  PENDING, 
+  DELETED 
+};
 
 #if STAGE == 1 
 // Account period

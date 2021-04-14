@@ -8,9 +8,31 @@ from unittest import main
 # # # START_POOL 40 -> START_POOL 10000
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-class TestTopQuestion(peeranhatest.peeranhaTest):  
+class TestTopQuestion(peeranhatest.peeranhaTest):
+    def test_add_promoted_question(self):
+        begin('test add promoted question')
+        alice = self.register_alice_account()
+        self.register_frank_account()
+        self.register_dan_account()
+        self.assertTrue(compare([], self.table('accounts', 'frank', contract='token'), ignore_excess=True))
+        self.assertTrue(compare([], self.table('accounts', 'dan', contract='token'), ignore_excess=True))
+
+        give_tokens(self, 'alice', '20.000000 PEER')
+        self.action('postquestion', {'user': 'alice', 'title': 'Title alice question', 'ipfs_link': 'AQ', 'community_id': 1, 'tags': [1], 'type': 1}, alice,
+                    'Bob asking question')
+        question_id = self.table('question', 'allquestions')[0]['id']
+
+        self.action('addhotquestn', {'user': 'alice', 'question_id': question_id, 'hours': 1}, alice,
+                    'Mark question as promoted', contract='token')
+
+        example_promoted_question = [{'question_id': question_id}]
+        self.assertTrue(compare(example_promoted_question, self.table('promquestion', 1, contract='token'), ignore_excess=True))
+        self.assertTrue(compare([{'balance': '1.000000 PEER'}], self.table('accounts', 'dan', contract='token'), ignore_excess=True))
+        self.assertTrue(compare([{'balance': '1.000000 PEER'}], self.table('accounts', 'frank', contract='token'), ignore_excess=True))
+        end()
+
     def test_wrong_hours(self):
-        begin('Test test wrong hours')
+        begin('Test wrong hours')
         alice = self.register_alice_account()
 
         give_tokens(self, 'alice', '20.000000 PEER')
@@ -334,19 +356,6 @@ class TestTopQuestion(peeranhatest.peeranhaTest):
         self.assertTrue(compare([{'balance': '2.000000 PEER'}], self.table('accounts', 'frank', contract='token'), ignore_excess=True))
         self.assertTrue(compare([{'balance': '0.000000 PEER'}], self.table('accounts', 'dan', contract='token'), ignore_excess=True))
         end()
-
-    
-
-def give_tokens(self, user, tokens):
-    begin('to give tokens ')
-    self.action('issue', {'to': user, 'quantity': tokens, 'memo': "13" },
-                    'peeranhatken', 'Create token PEER', contract='token', suppress_output=True)
-
-def give_ratings(self, user, rating):
-    begin('to give rating ')
-    self.action('chnguserrt', {'user': user, 'rating_change': rating},
-                            self.admin, 'Update rating')
-
 
 if __name__ == '__main__':
     main()
